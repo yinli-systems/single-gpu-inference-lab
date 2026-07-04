@@ -216,6 +216,20 @@ That command does not reinstate the historical serving claim by itself; the
 native-equivalent semantic parity, repeated runs, raw samples, and provenance.
 These commands are not advertised as hardware-portable defaults.
 
+For an L20 vLLM server-path smoke of the GEMM epilogue hook:
+
+```bash
+PYTHONPATH=src python scripts/smoke_vllm_l20_gemm_epilogue_server.py \
+  --python /path/to/vllm-venv/bin/python \
+  --vllm-source /path/to/vllm-checkout \
+  --model /path/to/Qwen2.5-0.5B-snapshot \
+  --output-dir /tmp/single-gpu-inference-lab/vllm-gemm-smoke
+```
+
+This smoke starts an OpenAI-compatible vLLM server, sends one
+`/v1/completions` request, and requires every GEMM epilogue trace event to
+return a sampled token without full logits and match the baseline argmax.
+
 ## Claim Policy
 
 - Name the hardware, model, workload, baseline, and artifact for every
