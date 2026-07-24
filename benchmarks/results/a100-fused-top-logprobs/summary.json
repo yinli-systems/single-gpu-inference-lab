@@ -1,0 +1,177 @@
+{
+  "schema_version": 2,
+  "result_type": "a100_steady_state_top_logprobs_microbenchmark",
+  "evidence_status": "controlled_revalidation",
+  "performance_comparable_within_protocol": true,
+  "collection": {
+    "generated_at_utc_start": "2026-07-24T17:46:05.274974+00:00",
+    "generated_at_utc_end": "2026-07-24T17:46:36.803554+00:00",
+    "independent_processes_per_shape": 3,
+    "distinct_seeds_per_shape": [
+      113,
+      114,
+      115
+    ],
+    "trials_per_process": 5,
+    "measured_rounds_per_provider_per_trial": 30,
+    "warmup_rounds_per_provider_per_trial": 5,
+    "total_paired_trials_per_shape": 15
+  },
+  "hardware": {
+    "gpu": "NVIDIA A100-SXM4-80GB",
+    "compute_capability": [
+      8,
+      0
+    ],
+    "gpu_identity_sha256": "8003b1aa1301e9da9605093a6d0fbc898ad3f1b872d2ad087ef6c1ff9fb8cd8a",
+    "total_memory_bytes": 85095874560,
+    "driver": "570.195.03"
+  },
+  "software": {
+    "python": "3.12.3",
+    "torch": "2.8.0+cu128",
+    "torch_cuda_runtime": "12.8",
+    "triton": "3.4.0"
+  },
+  "provenance": {
+    "repo_commit": "5f43f31d9a21d4a69106acbff131665b928560db",
+    "all_runs_clean": true,
+    "benchmark_script_sha256": "9d33376ec4b869266e0f37e06ebfe496cfb248dbc29a551a641f13cef5bdc8e2",
+    "kernel_source_sha256": "54732dff708e884902f49f8b3e2fa1db71a729eef2ed688260fe0351a3352eb1"
+  },
+  "shape": {
+    "vocab": 151936,
+    "top_n": 5,
+    "temperature": 0.8,
+    "dtype": "float16"
+  },
+  "timing_protocol": {
+    "clock_policy": "steady-state-gemm",
+    "precondition": {
+      "operation": "torch.mm",
+      "shape": [
+        8192,
+        8192
+      ],
+      "dtype": "float16",
+      "repeats_per_provider_sample": 1,
+      "same_cuda_stream": true,
+      "included_in_cuda_event_interval": false
+    },
+    "provider_order": "all six permutations, position-balanced within each six-round cycle",
+    "cross_round_carryover": "controlled by the identical per-provider GEMM",
+    "events_allocated_before_measurement": true,
+    "synchronization": "once after all recorded events in each trial",
+    "speedup_aggregation": "paired baseline/fused trial medians across all 15 trials"
+  },
+  "comparator_contract": {
+    "triton": "caller-owned output and workspace tensors",
+    "pytorch": "eager composed baseline including GPU kernels and full-vocabulary FP32 temporary materialization",
+    "timing_excludes": "host launch and allocator latency",
+    "claim_boundary": "CUDA-event operator microbenchmark; not host latency or serving throughput"
+  },
+  "rows": [
+    {
+      "batch": 1,
+      "raw_files": [
+        "controlled-v2/b1-r1.json",
+        "controlled-v2/b1-r2.json",
+        "controlled-v2/b1-r3.json"
+      ],
+      "triton_top_logprobs_preallocated": {
+        "median_of_process_medians_ms": 0.02139200083911419,
+        "min_process_median_ms": 0.021215999498963356,
+        "max_process_median_ms": 0.021503999829292297
+      },
+      "torch_logsoftmax_then_topk": {
+        "median_of_process_medians_ms": 0.1863039955496788,
+        "min_process_median_ms": 0.18614400178194046,
+        "max_process_median_ms": 0.18849600106477737
+      },
+      "torch_logsumexp_then_topk": {
+        "median_of_process_medians_ms": 0.17750400304794312,
+        "min_process_median_ms": 0.17739199846982956,
+        "max_process_median_ms": 0.1804479956626892
+      },
+      "paired_speedup_vs_torch_logsoftmax_then_topk": {
+        "median": 8.781297131854753,
+        "min": 8.657992556689933,
+        "max": 8.868401523283671,
+        "all_15_trials_faster": true
+      },
+      "paired_speedup_vs_torch_logsumexp_then_topk": {
+        "median": 8.391368912535366,
+        "min": 8.272930997572553,
+        "max": 8.4670167416843,
+        "all_15_trials_faster": true
+      },
+      "correctness": {
+        "all_processes_tie_aware_match": true,
+        "max_abs_logprob_error": 4.76837158203125e-07
+      }
+    },
+    {
+      "batch": 4,
+      "raw_files": [
+        "controlled-v2/b4-r1.json",
+        "controlled-v2/b4-r2.json",
+        "controlled-v2/b4-r3.json"
+      ],
+      "triton_top_logprobs_preallocated": {
+        "median_of_process_medians_ms": 0.023871999233961105,
+        "min_process_median_ms": 0.023823999799787998,
+        "max_process_median_ms": 0.02396799996495247
+      },
+      "torch_logsoftmax_then_topk": {
+        "median_of_process_medians_ms": 0.22444800287485123,
+        "min_process_median_ms": 0.2239520028233528,
+        "max_process_median_ms": 0.22568000108003616
+      },
+      "torch_logsumexp_then_topk": {
+        "median_of_process_medians_ms": 0.22144000232219696,
+        "min_process_median_ms": 0.22009599953889847,
+        "max_process_median_ms": 0.22259199619293213
+      },
+      "paired_speedup_vs_torch_logsoftmax_then_topk": {
+        "median": 9.445114070654284,
+        "min": 9.3184546637348,
+        "max": 9.693420719368545,
+        "all_15_trials_faster": true
+      },
+      "paired_speedup_vs_torch_logsumexp_then_topk": {
+        "median": 9.28977645302695,
+        "min": 9.149900474979955,
+        "max": 9.556578801950048,
+        "all_15_trials_faster": true
+      },
+      "correctness": {
+        "all_processes_tie_aware_match": true,
+        "max_abs_logprob_error": 4.76837158203125e-07
+      }
+    }
+  ],
+  "historical_artifact": {
+    "status": "retained_for_provenance_not_used_for_current_headline",
+    "reason": "The original command did not record or control the A100 DVFS regime.",
+    "files": [
+      {
+        "path": "b1.json",
+        "sha256": "80aebd93c03779d15b840d994e7b9f970a5d11389f9bf3a340e2da9055d0f95d"
+      },
+      {
+        "path": "b4.json",
+        "sha256": "a8bfc08afc25d8ca40224c4bebf800cd484b83a0a1b2a5196e272accd9588a89"
+      }
+    ]
+  },
+  "claim": {
+    "paired_speedup_range": "8.39x-9.45x",
+    "scope": "A100 steady-state GEMM-conditioned operator microbenchmark",
+    "not_claimed": [
+      "idle-call latency",
+      "host latency",
+      "vLLM serving speedup",
+      "L20 performance"
+    ]
+  }
+}

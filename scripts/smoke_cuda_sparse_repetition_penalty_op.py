@@ -8,6 +8,8 @@ from pathlib import Path
 import torch
 from torch.utils.cpp_extension import load
 
+from l20_stack.cuda_build import configure_torch_cuda_arch_list
+
 
 def reference(
     logits: torch.Tensor,
@@ -31,13 +33,14 @@ def main() -> None:
     root = Path(__file__).resolve().parents[1]
     build = Path("/tmp/l20-sparse-repetition-penalty-op-smoke")
     build.mkdir(parents=True, exist_ok=True)
+    configure_torch_cuda_arch_list()
     extension = load(
         "l20_sparse_repetition_penalty_cuda",
         [
             root / "integrations/vllm/cuda/l20_sparse_repetition_penalty.cpp",
             root / "integrations/vllm/cuda/l20_sparse_repetition_penalty.cu",
         ],
-        extra_cuda_cflags=["-O3", "-gencode=arch=compute_89,code=sm_89"],
+        extra_cuda_cflags=["-O3"],
         build_directory=build,
     )
     torch.ops.load_library(extension.__file__)

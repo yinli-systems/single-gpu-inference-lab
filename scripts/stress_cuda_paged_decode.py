@@ -10,6 +10,8 @@ from pathlib import Path
 import torch
 from torch.utils.cpp_extension import load
 
+from l20_stack.cuda_build import configure_torch_cuda_arch_list
+
 
 def main():
     parser = argparse.ArgumentParser()
@@ -20,13 +22,14 @@ def main():
     root = Path(__file__).resolve().parents[1]
     build = Path("/tmp/l20-paged-stress")
     build.mkdir(parents=True, exist_ok=True)
+    configure_torch_cuda_arch_list()
     extension = load(
         "l20_paged_decode_cuda",
         [
             root / "integrations/vllm/cuda/l20_paged_decode.cpp",
             root / "integrations/vllm/cuda/l20_paged_decode.cu",
         ],
-        extra_cuda_cflags=["-O3", "-gencode=arch=compute_89,code=sm_89"],
+        extra_cuda_cflags=["-O3"],
         build_directory=build,
     )
     import flashinfer
