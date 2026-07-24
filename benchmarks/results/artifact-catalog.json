@@ -1,6 +1,6 @@
 {
   "category_counts": {
-    "active": 4,
+    "active": 5,
     "analysis": 1,
     "negative": 2,
     "other": 6,
@@ -448,6 +448,18 @@
       "has_evidence_status_json": false,
       "has_readme": true,
       "has_summary_json": true,
+      "path": "benchmarks/results/l20-vllm-gemm-epilogue-server-smoke",
+      "reference": "l20-vllm-gemm-epilogue-server-smoke/",
+      "status": "Active P0 server smoke",
+      "summary": "Starts a real vLLM OpenAI server on L20 and proves 8/8 greedy decode events return sampled tokens from the GEMM epilogue path without full logits, matching baseline argmax correctness."
+    },
+    {
+      "category": "active",
+      "compact_file_count": 2,
+      "has_campaign_summary_json": false,
+      "has_evidence_status_json": false,
+      "has_readme": true,
+      "has_summary_json": true,
       "path": "benchmarks/results/l20-serving-optimization-ceiling",
       "reference": "l20-serving-optimization-ceiling/",
       "status": "Active analysis",
@@ -538,7 +550,7 @@
       "summary": "Custom three-way serving path evidence; not yet a broad win."
     }
   ],
-  "entry_count": 44,
+  "entry_count": 45,
   "index_path": "benchmarks/results/README.md",
   "result_root": "benchmarks/results",
   "schema_version": 1
