@@ -1,4 +1,7 @@
+import hashlib
 import importlib.util
+import json
+import statistics
 from pathlib import Path
 
 import pytest
@@ -248,3 +251,152 @@ def test_top_logprobs_schema_records_provenance_and_clock_policy():
         '"timing_excludes": "host launch and allocator latency"',
     ):
         assert marker in source
+
+
+def test_checked_in_top_logprobs_revalidation_matches_raw_trials():
+    artifact_root = Path("benchmarks/results/a100-fused-top-logprobs")
+    summary = json.loads((artifact_root / "summary.json").read_text(encoding="utf-8"))
+
+    assert summary["schema_version"] == 2
+    assert summary["evidence_status"] == "controlled_revalidation"
+    assert summary["collection"]["independent_processes_per_shape"] == 3
+    assert summary["collection"]["distinct_seeds_per_shape"] == [113, 114, 115]
+    assert summary["collection"]["total_paired_trials_per_shape"] == 15
+    assert summary["provenance"]["all_runs_clean"] is True
+    assert summary["timing_protocol"]["clock_policy"] == "steady-state-gemm"
+    assert summary["timing_protocol"]["precondition"] == {
+        "operation": "torch.mm",
+        "shape": [8192, 8192],
+        "dtype": "float16",
+        "repeats_per_provider_sample": 1,
+        "same_cuda_stream": True,
+        "included_in_cuda_event_interval": False,
+    }
+
+    for source_key, source_path in (
+        ("benchmark_script_sha256", Path("scripts/benchmark_l20_top_logprobs.py")),
+        ("kernel_source_sha256", Path("src/l20_stack/ops/triton_sampling.py")),
+    ):
+        actual_hash = hashlib.sha256(source_path.read_bytes()).hexdigest()
+        assert summary["provenance"][source_key] == actual_hash
+
+    for row in summary["rows"]:
+        payloads = [
+            json.loads((artifact_root / relative).read_text(encoding="utf-8"))
+            for relative in row["raw_files"]
+        ]
+        assert len(payloads) == 3
+        assert {
+            payload["timing_policy"]["provider_order"]["seed"]
+            for payload in payloads
+        } == {113, 114, 115}
+        for payload in payloads:
+            assert payload["schema_version"] == 2
+            assert payload["shape"]["batch"] == row["batch"]
+            assert payload["provenance"]["commit"] == summary["provenance"]["repo_commit"]
+            assert payload["provenance"]["dirty"] is False
+            assert payload["timing_policy"]["trials"] == 5
+            assert (
+                payload["timing_policy"]["measured_rounds_per_provider_per_trial"]
+                == 30
+            )
+            assert payload["timing_policy"]["clock"]["policy"] == "steady-state-gemm"
+            assert payload["correctness"]["tie_aware_match"] is True
+            assert payload["shape"] == {
+                "batch": row["batch"],
+                "dtype": "float16",
+                "temperature": 0.8,
+                "top_n": 5,
+                "vocab": 151936,
+            }
+            assert payload["environment"]["python"] == summary["software"]["python"]
+            assert payload["environment"]["torch"] == summary["software"]["torch"]
+            assert (
+                payload["environment"]["torch_cuda_runtime"]
+                == summary["software"]["torch_cuda_runtime"]
+            )
+            assert payload["environment"]["triton"] == summary["software"]["triton"]
+            assert payload["environment"]["gpu"]["compute_capability"] == [8, 0]
+            assert (
+                payload["provenance"]["benchmark_script_sha256"]
+                == summary["provenance"]["benchmark_script_sha256"]
+            )
+            assert (
+                payload["provenance"]["kernel_source_sha256"]
+                == summary["provenance"]["kernel_source_sha256"]
+            )
+            assert payload["provenance"]["publication_normalization"] == (
+                "GPU UUID hashed; executable and output paths normalized"
+            )
+            serialized = json.dumps(payload)
+            assert "/root/" not in serialized
+            assert "/tmp/codex-toplogprobs" not in serialized
+            assert "a977cc53-eb3f-6730-ca10-7e9ac7e40ba1" not in serialized
+
+        provider_pairs = (
+            (
+                "triton_top_logprobs_preallocated",
+                "triton_top_logprobs_preallocated",
+            ),
+            ("torch_logsoftmax_then_topk", "torch_logsoftmax_then_topk"),
+            ("torch_logsumexp_then_topk", "torch_logsumexp_then_topk"),
+        )
+        for summary_key, raw_key in provider_pairs:
+            process_medians = [
+                payload["providers"][raw_key]["median_ms"] for payload in payloads
+            ]
+            aggregate = row[summary_key]
+            assert aggregate["median_of_process_medians_ms"] == pytest.approx(
+                statistics.median(process_medians)
+            )
+            assert aggregate["min_process_median_ms"] == pytest.approx(
+                min(process_medians)
+            )
+            assert aggregate["max_process_median_ms"] == pytest.approx(
+                max(process_medians)
+            )
+
+        for summary_key, raw_key in (
+            (
+                "paired_speedup_vs_torch_logsoftmax_then_topk",
+                "vs_torch_logsoftmax_then_topk",
+            ),
+            (
+                "paired_speedup_vs_torch_logsumexp_then_topk",
+                "vs_torch_logsumexp_then_topk",
+            ),
+        ):
+            paired_trials = [
+                value
+                for payload in payloads
+                for value in payload["paired_speedups"][raw_key][
+                    "paired_trial_values"
+                ]
+            ]
+            aggregate = row[summary_key]
+            assert len(paired_trials) == 15
+            assert aggregate["median"] == pytest.approx(
+                statistics.median(paired_trials)
+            )
+            assert aggregate["min"] == pytest.approx(min(paired_trials))
+            assert aggregate["max"] == pytest.approx(max(paired_trials))
+            assert aggregate["all_15_trials_faster"] is all(
+                value > 1.0 for value in paired_trials
+            )
+
+    for historical in summary["historical_artifact"]["files"]:
+        actual_hash = hashlib.sha256(
+            (artifact_root / historical["path"]).read_bytes()
+        ).hexdigest()
+        assert historical["sha256"] == actual_hash
+
+    public_claims = {
+        Path("README.md"): "8.39x–9.45x",
+        Path("docs/reviewer-guide.md"): "8.39x–9.45x",
+        Path("docs/experiment-status.md"): "8.39x-9.45x",
+        Path("benchmarks/results/README.md"): "8.39x-9.45x",
+        artifact_root / "README.md": "8.39x–9.45x",
+    }
+    for path, claim in public_claims.items():
+        assert claim in path.read_text(encoding="utf-8")
+    assert summary["claim"]["paired_speedup_range"] == "8.39x-9.45x"

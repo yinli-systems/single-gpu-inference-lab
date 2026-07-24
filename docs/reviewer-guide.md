@@ -10,7 +10,7 @@ The current public evidence is intentionally narrow:
 
 | Operator | Code | Evidence | Current claim |
 | --- | --- | --- | --- |
-| Fused top-logprobs | [Triton implementation](../src/l20_stack/ops/triton_sampling.py) | [A100 artifact](../benchmarks/results/a100-fused-top-logprobs/README.md) | 8.04x–9.17x preallocated microbenchmark speedup versus composed PyTorch baselines; matching token IDs and at most `4.768e-7` error |
+| Fused top-logprobs | [Triton implementation](../src/l20_stack/ops/triton_sampling.py) | [A100 artifact](../benchmarks/results/a100-fused-top-logprobs/README.md) | 8.39x–9.45x paired median speedup in a repeated, steady-state GEMM-conditioned A100 operator protocol; 3 distinct seeds per shape across 6 timing runs pass tie-aware correctness with at most `4.768e-7` error |
 | Sparse repetition penalty | [CUDA kernel](../integrations/vllm/cuda/l20_sparse_repetition_penalty.cu) and [PyTorch registration](../integrations/vllm/cuda/l20_sparse_repetition_penalty.cpp) | [L20 artifact](../benchmarks/results/l20-sparse-repetition-penalty/README.md) | 39/39 correct benchmark cases; 1.26x median and 4.09x best isolated speedup; 0/39 measured policy regressions |
 | Residual RMSNorm | [Triton implementation](../src/l20_stack/ops/triton_rmsnorm.py) | [L20 artifact](../benchmarks/results/l20-residual-rmsnorm-v3/README.md) | 24/24 shapes correct; custom in-place path fastest on 14/24 shapes; best 2.412x |
 
@@ -83,7 +83,10 @@ Review questions:
 
 The [top-logprobs artifact](../benchmarks/results/a100-fused-top-logprobs/README.md)
 is unaffected by the top-p correction because it performs normalized top-N
-selection, not nucleus sampling.
+selection, not nucleus sampling. Its benchmark also records the exact
+driver/toolchain, clean commit, source hashes, clock-conditioning protocol, raw
+per-trial samples, and comparator boundary. The historical unconditioned files
+remain for provenance but are not used for the current headline.
 
 ## Reproduction Pass
 

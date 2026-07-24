@@ -211,7 +211,8 @@ def test_top_logprobs_benchmark_tracks_fused_logprob_boundary():
     assert "Fused top-logprobs selection" in readme
     assert "a100-fused-top-logprobs" in status
     assert "a100-fused-top-logprobs" in results_index
-    assert "not a serving ITL claim" in artifact
+    assert "steady-state GEMM-conditioned" in artifact
+    assert "not a host-latency or serving-speed" in artifact
 
 
 def test_serving_optimization_ceiling_tracks_next_target():

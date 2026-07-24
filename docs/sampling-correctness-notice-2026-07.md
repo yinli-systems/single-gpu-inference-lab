@@ -83,7 +83,9 @@ their performance deltas are not current evidence:
 - `benchmarks/results/a100-vllm-combined-sampling-logprobs-matrix/`
 
 The fused top-logprobs-only microbenchmark in
-`benchmarks/results/a100-fused-top-logprobs/` is unaffected.
+`benchmarks/results/a100-fused-top-logprobs/` is unaffected by the top-p
+semantic correction. Its performance evidence was separately revalidated with
+an explicit A100 clock-conditioning protocol and documented provenance.
 
 ## Revalidation Gate
 

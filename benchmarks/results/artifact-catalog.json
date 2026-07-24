@@ -287,15 +287,15 @@
     },
     {
       "category": "positive",
-      "compact_file_count": 1,
+      "compact_file_count": 2,
       "has_campaign_summary_json": false,
       "has_evidence_status_json": false,
       "has_readme": true,
-      "has_summary_json": false,
+      "has_summary_json": true,
       "path": "benchmarks/results/a100-fused-top-logprobs",
       "reference": "a100-fused-top-logprobs/",
-      "status": "A100 positive micro result",
-      "summary": "Validates the dedicated top-logprobs primitive that avoids full log-softmax materialization, with 8.04x-9.17x microbenchmark wins versus PyTorch top-logprob baselines."
+      "status": "Controlled A100 positive micro result",
+      "summary": "Three clean processes and distinct seeds per shape validate the dedicated top-logprobs primitive with 8.39x-9.45x paired median speedup in a steady-state GEMM-conditioned operator protocol; the original clock-uncontrolled files are retained only for provenance."
     },
     {
       "category": "path_proof",
