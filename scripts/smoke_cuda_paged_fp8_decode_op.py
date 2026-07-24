@@ -9,6 +9,8 @@ from pathlib import Path
 import torch
 from torch.utils.cpp_extension import load
 
+from l20_stack.cuda_build import configure_torch_cuda_arch_list
+
 
 def quantize_fp8_e4m3(tensor: torch.Tensor) -> tuple[torch.Tensor, float]:
     finfo = torch.finfo(torch.float8_e4m3fn)
@@ -57,13 +59,14 @@ def main() -> None:
     root = Path(__file__).resolve().parents[1]
     build = Path("/tmp/l20-paged-fp8-op-smoke")
     build.mkdir(parents=True, exist_ok=True)
+    configure_torch_cuda_arch_list()
     extension = load(
         "l20_paged_decode_cuda",
         [
             root / "integrations/vllm/cuda/l20_paged_decode.cpp",
             root / "integrations/vllm/cuda/l20_paged_decode.cu",
         ],
-        extra_cuda_cflags=["-O3", "-gencode=arch=compute_89,code=sm_89"],
+        extra_cuda_cflags=["-O3"],
         build_directory=build,
     )
     torch.ops.load_library(extension.__file__)

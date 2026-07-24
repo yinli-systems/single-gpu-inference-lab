@@ -178,6 +178,33 @@ direct standalone CUDA reproduction is:
 scripts/run_l20_sparse_repetition_penalty.sh
 ```
 
+CUDA extension reproduction requires the kernel dependencies, including the
+Ninja backend used by `torch.utils.cpp_extension.load`:
+
+```bash
+python -m pip install -e ".[dev,kernels]"
+```
+
+PyTorch extension build, smoke, stress, and benchmark entry points use
+`TORCH_CUDA_ARCH_LIST` and default it to `8.9`, preserving the L20/SM89 target.
+To compile and run the same operator sources on an A100 for portability and
+correctness checks, set the native PyTorch override explicitly:
+
+```bash
+TORCH_CUDA_ARCH_LIST=8.0 PYTHONPATH=src \
+  python scripts/smoke_cuda_sparse_repetition_penalty_op.py
+
+TORCH_CUDA_ARCH_LIST=8.0 PYTHONPATH=src \
+  python scripts/smoke_cuda_paged_decode_op.py
+```
+
+`CUDA_ARCH=80` is also accepted as a single-architecture compatibility alias
+when `TORCH_CUDA_ARCH_LIST` is unset.
+
+The architecture override only changes the nvcc code-generation target.
+L20-specific runtime gates and dispatch policy remain unchanged, and A100
+measurements must not be presented as reproductions of L20 performance claims.
+
 The corrected sampler can be remeasured with:
 
 ```bash

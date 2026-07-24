@@ -6,7 +6,7 @@ def test_cuda_prototype_is_l20_specialized_and_checked():
     benchmark = Path("scripts/benchmark_cuda_paged_decode.py").read_text()
     assert "threadIdx.x" in source
     assert "C10_CUDA_KERNEL_LAUNCH_CHECK" in source
-    assert "code=sm_89" in benchmark
+    assert "configure_torch_cuda_arch_list()" in benchmark
     assert "torch.allclose" in benchmark
     assert "paged_decode_partial_kernel" in source
     assert "paged_decode_fp8_e4m3_partial_kernel" in source
