@@ -17,6 +17,8 @@ Environment:
   MAX_CONCURRENCY        Defaults to 8.
   REPETITION_PENALTY     Defaults to 1.1.
   LOGITS_PROCESSORS_FLAG Defaults to --logits-processors.
+  TORCH_CUDA_ARCH_LIST   PyTorch CUDA targets. Defaults to 8.9.
+  CUDA_ARCH              Single-target alias when the native variable is unset.
 EOF
   exit 2
 fi
@@ -75,17 +77,20 @@ import shutil
 import sys
 from torch.utils.cpp_extension import load
 
+from l20_stack.cuda_build import configure_torch_cuda_arch_list
+
 repo = Path(sys.argv[1])
 build = Path(sys.argv[2])
 library = Path(sys.argv[3])
 build.mkdir(parents=True, exist_ok=True)
+configure_torch_cuda_arch_list()
 extension = load(
     "l20_sparse_repetition_penalty_cuda",
     [
         repo / "integrations/vllm/cuda/l20_sparse_repetition_penalty.cpp",
         repo / "integrations/vllm/cuda/l20_sparse_repetition_penalty.cu",
     ],
-    extra_cuda_cflags=["-O3", "-gencode=arch=compute_89,code=sm_89"],
+    extra_cuda_cflags=["-O3"],
     build_directory=build,
 )
 shutil.copy2(extension.__file__, library)

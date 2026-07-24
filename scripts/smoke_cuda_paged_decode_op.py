@@ -9,6 +9,8 @@ from pathlib import Path
 import torch
 from torch.utils.cpp_extension import load
 
+from l20_stack.cuda_build import configure_torch_cuda_arch_list
+
 
 def reference(query, key_cache, value_cache, table, seq_lens):
     scale = query.shape[-1] ** -0.5
@@ -37,13 +39,14 @@ def main() -> None:
     root = Path(__file__).resolve().parents[1]
     build = Path("/tmp/l20-paged-op-smoke")
     build.mkdir(parents=True, exist_ok=True)
+    configure_torch_cuda_arch_list()
     extension = load(
         "l20_paged_decode_cuda",
         [
             root / "integrations/vllm/cuda/l20_paged_decode.cpp",
             root / "integrations/vllm/cuda/l20_paged_decode.cu",
         ],
-        extra_cuda_cflags=["-O3", "-gencode=arch=compute_89,code=sm_89"],
+        extra_cuda_cflags=["-O3"],
         build_directory=build,
     )
     torch.ops.load_library(extension.__file__)

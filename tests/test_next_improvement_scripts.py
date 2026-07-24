@@ -211,7 +211,8 @@ def test_top_logprobs_benchmark_tracks_fused_logprob_boundary():
     assert "Fused top-logprobs selection" in readme
     assert "a100-fused-top-logprobs" in status
     assert "a100-fused-top-logprobs" in results_index
-    assert "not a serving ITL claim" in artifact
+    assert "steady-state GEMM-conditioned" in artifact
+    assert "not a host-latency or serving-speed" in artifact
 
 
 def test_serving_optimization_ceiling_tracks_next_target():
@@ -254,8 +255,8 @@ def test_serving_optimization_ceiling_tracks_next_target():
     assert "standalone sampling kernels" in report
     assert "GPUModelRunner.sample" in scout_report
     assert "First Safe Gate" in scout_report
-    assert "benchmarks/results/l20-serving-optimization-ceiling/README.md" in readme
-    assert "benchmarks/results/l20-vllm-logits-boundary-scout/README.md" in readme
+    assert "benchmarks/results/l20-serving-optimization-ceiling/" in readme
+    assert "benchmarks/results/l20-vllm-logits-boundary-scout/" in readme
     assert "install_l20_logits_boundary_trace.py" in readme
     assert "summarize_l20_logits_boundary_trace.py" in readme
     assert "run_vllm_l20_logits_boundary_trace_campaign.sh" in readme
