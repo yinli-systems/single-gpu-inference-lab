@@ -65,6 +65,31 @@ class DocLinksAndCatalogTest(unittest.TestCase):
         self.assertEqual(by_reference["example-zero-regressions/"]["category"], "other")
         self.assertEqual(by_reference["example-positive-summary/"]["category"], "positive")
         self.assertEqual(payload["category_counts"]["positive"], 2)
+        self.assertEqual(payload["schema_version"], 2)
+        self.assertEqual(len(by_reference["example-positive/"]["compact_content_sha256"]), 64)
+
+    def test_artifact_catalog_digest_changes_with_compact_evidence(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir) / "benchmarks" / "results"
+            result = root / "example"
+            result.mkdir(parents=True)
+            readme = result / "README.md"
+            readme.write_text("# initial evidence\n", encoding="utf-8")
+            index = root / "README.md"
+            index.write_text(
+                "| Result directory | Status | Why it matters |\n"
+                "| --- | --- | --- |\n"
+                "| `example/` | Smoke | path proof |\n",
+                encoding="utf-8",
+            )
+            before = build_artifact_catalog(index, result_root=root)
+            readme.write_text("# revised evidence\n", encoding="utf-8")
+            after = build_artifact_catalog(index, result_root=root)
+
+        self.assertNotEqual(
+            before.entries[0].compact_content_sha256,
+            after.entries[0].compact_content_sha256,
+        )
 
     def test_cli_doc_links_and_artifact_catalog_emit_json(self):
         out = StringIO()
