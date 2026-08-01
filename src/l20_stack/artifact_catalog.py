@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 import re
 from dataclasses import asdict, dataclass
@@ -25,6 +26,7 @@ class ArtifactCatalogEntry:
     has_campaign_summary_json: bool
     has_evidence_status_json: bool
     compact_file_count: int
+    compact_content_sha256: str
 
     def to_dict(self) -> dict[str, object]:
         return asdict(self)
@@ -39,7 +41,7 @@ class ArtifactCatalog:
 
     def to_dict(self) -> dict[str, object]:
         return {
-            "schema_version": 1,
+            "schema_version": 2,
             "index_path": self.index_path,
             "result_root": self.result_root,
             "entry_count": len(self.entries),
@@ -108,6 +110,7 @@ def _build_entry(
         has_campaign_summary_json="campaign-summary.json" in names,
         has_evidence_status_json="evidence-status.json" in names,
         compact_file_count=len(compact_files),
+        compact_content_sha256=_compact_content_sha256(path, compact_files),
     )
 
 
@@ -122,18 +125,36 @@ def _compact_files(path: Path) -> tuple[Path, ...]:
     if not path.exists():
         return ()
     return tuple(
-        file
-        for file in path.rglob("*")
-        if file.is_file()
-        and file.name
-        in {
-            "README.md",
-            "summary.json",
-            "campaign-summary.json",
-            "evidence-status.json",
-            "run-config.json",
-        }
+        sorted(
+            (
+                file
+                for file in path.rglob("*")
+                if file.is_file()
+                and file.name
+                in {
+                    "README.md",
+                    "summary.json",
+                    "campaign-summary.json",
+                    "evidence-status.json",
+                    "run-config.json",
+                }
+            ),
+            key=lambda file: file.relative_to(path).as_posix(),
+        )
     )
+
+
+def _compact_content_sha256(path: Path, files: tuple[Path, ...]) -> str:
+    """Hash both relative paths and bytes for the catalog's compact evidence set."""
+    digest = hashlib.sha256()
+    for file in files:
+        relative_path = file.relative_to(path).as_posix().encode("utf-8")
+        payload = file.read_bytes()
+        digest.update(len(relative_path).to_bytes(8, "big"))
+        digest.update(relative_path)
+        digest.update(len(payload).to_bytes(8, "big"))
+        digest.update(payload)
+    return digest.hexdigest()
 
 
 def _category(status: str, summary: str) -> str:

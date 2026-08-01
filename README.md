@@ -133,6 +133,12 @@ flowchart LR
 
 The curated catalog is in the [result index](benchmarks/results/README.md) and
 [machine-readable catalog](benchmarks/results/artifact-catalog.json).
+Catalog schema v2 records a SHA-256 aggregate over each indexed directory's
+compact claim-bearing files (`README.md`, summary, campaign summary,
+evidence-status, and run-config files). CI regenerates the catalog and requires
+it to match byte-for-byte, so changing compact evidence without updating the
+reviewed catalog fails the build. This digest does not claim to cover large raw
+traces, profiler databases, or external model weights.
 
 ## Further Review Entry Points
 
@@ -246,6 +252,28 @@ return a sampled token without full logits and match the baseline argmax.
 
 See the [hardware policy](docs/hardware-scope.md) and
 [compact systems thesis](docs/where-optimizations-stop-mattering.md).
+
+## What CI Proves
+
+- CPU-safe behavior, integration contracts, source-level guards, and synthetic
+  fixtures pass on the hosted Linux runner.
+- Local Markdown references and the checked-in compact evidence catalog are
+  internally consistent.
+- The catalog digest detects content changes in the compact evidence files it
+  covers.
+- CI does **not** reproduce CUDA compilation, L20/A100 measurements, vLLM
+  serving, Apple M4 results, model downloads, or external API behavior.
+
+## Improvement Priorities
+
+1. Rerun the corrected sampler triangle on an L20 with native-equivalent
+   semantics before restoring any serving-performance claim.
+2. Measure the current GEMM-epilogue candidate in repeated no-trace L20 serving
+   runs; the existing server smoke is a path/correctness proof only.
+3. Add per-file manifests for raw GPU traces stored outside git and bind them to
+   the compact catalog without committing oversized profiler databases.
+4. Keep upstream vLLM compatibility explicit through pinned revision probes and
+   fail-closed installer tests as APIs move.
 
 ## Repository Map
 
