@@ -8,6 +8,11 @@ Measures the *whole* per-step path a model runner pays for the sampling mask:
     D2H  bitmap + counts
     CPU  np.unpackbits(full vocab) -> np.nonzero -> CSR (token_ids, offsets)
 
+  upstream_main (vLLM main after #54901, 0.29.1+):
+    GPU  _compact_sampling_mask_kernel -> [B, max_top_k] int32 ids + counts AND the bitmap
+    D2H  ids + counts + bitmap (the bitmap is the overflow fallback)
+    CPU  per-row Python loop slicing ids (unpackbits only for overflowed rows)
+
   compact (this repository ``support_pack_out``):
     GPU  _support_pack_kernel -> [B, K] int32 ids + counts (+ logz, sampled logprob)
     D2H  ids + counts
@@ -19,10 +24,10 @@ sync, because that stage runs on the host critical path in vLLM's async
 output pipeline. Inputs are top-k-masked random logits (finite only inside
 each row's top-k), which is the only regime the upstream feature supports.
 
-The upstream kernel is copied verbatim from vLLM v0.29.0
-(vllm/v1/worker/gpu/sample/output.py) so the comparison runs in one process
-without a vLLM install; the copy is byte-compared against the pinned source
-hash recorded in the output when ``--vllm-source`` is given.
+The upstream kernels and ``tolists`` logic are copied verbatim from vLLM
+v0.29.0 and from main after #54901 (vllm/v1/worker/gpu/sample/output.py) so
+the comparison runs in one process without a vLLM install; the v0.29.0 source
+hash is recorded in the output when ``--vllm-source`` is given.
 """
 
 from __future__ import annotations
@@ -88,6 +93,73 @@ def _pack_sampling_mask_kernel(
         )
 
     tl.store(counts_ptr + req_idx, count)
+
+
+# ---- verbatim copy of upstream vLLM main (after #54901) _compact_sampling_mask_kernel ----
+@triton.jit
+def _compact_sampling_mask_kernel(
+    logits_ptr,
+    logits_row_stride,
+    logits_col_stride,
+    num_sampled_tokens_ptr,
+    token_ids_ptr,
+    token_ids_row_stride,
+    packed_mask_ptr,
+    packed_mask_row_stride,
+    counts_ptr,
+    vocab_size,
+    max_num_kept,
+    BLOCK_SIZE: tl.constexpr,
+):
+    req_idx = tl.program_id(0)
+    is_active = tl.load(num_sampled_tokens_ptr + req_idx) > 0
+    count = tl.zeros((), dtype=tl.int32)
+
+    for start_idx in range(0, vocab_size, BLOCK_SIZE):
+        offsets = start_idx + tl.arange(0, BLOCK_SIZE)
+        logits = tl.load(
+            logits_ptr + req_idx * logits_row_stride + offsets * logits_col_stride,
+            mask=offsets < vocab_size,
+            other=-float("inf"),
+        )
+        keep = (logits > -float("inf")) & (logits < float("inf")) & is_active
+        keep_i32 = keep.to(tl.int32)
+        pos = count + tl.cumsum(keep_i32, axis=0) - keep_i32
+        tl.store(
+            token_ids_ptr + req_idx * token_ids_row_stride + pos,
+            offsets.to(tl.int32),
+            mask=keep & (pos < max_num_kept),
+        )
+        count += tl.sum(keep_i32)
+
+        bits = tl.reshape(keep_i32, (BLOCK_SIZE // 8, 8)) << tl.arange(0, 8)[None, :]
+        byte_offsets = start_idx // 8 + tl.arange(0, BLOCK_SIZE // 8)
+        tl.store(
+            packed_mask_ptr + req_idx * packed_mask_row_stride + byte_offsets,
+            tl.sum(bits, axis=1).to(tl.uint8),
+            mask=byte_offsets < tl.cdiv(vocab_size, 8),
+        )
+
+    tl.store(counts_ptr + req_idx, count)
+
+
+def upstream_main_tolists(ids_cpu, packed_cpu, counts_cpu, vocab_size):
+    # verbatim logic of SamplingMaskTensors.tolists on main (after #54901)
+    counts = counts_cpu.numpy()
+    token_ids = ids_cpu.numpy()
+    packed_mask = packed_cpu.numpy()
+    width = token_ids.shape[1]
+
+    def support(row: int) -> np.ndarray:
+        if counts[row] <= width:
+            return token_ids[row, : counts[row]]
+        bits = np.unpackbits(packed_mask[row], count=vocab_size, bitorder="little")
+        return np.flatnonzero(bits).astype(np.int32, copy=False)
+
+    supports = [support(row) for row in range(len(counts))]
+    offsets = np.zeros(len(supports) + 1, dtype=np.int64)
+    np.cumsum([len(s) for s in supports], out=offsets[1:])
+    return np.concatenate(supports), offsets
 
 
 def upstream_pack(logits, num_sampled):
@@ -175,6 +247,25 @@ def main():
         pin_counts_u = torch.empty_like(counts_u, device="cpu", pin_memory=True)
         pin_ids = torch.empty_like(ids, device="cpu", pin_memory=True)
         pin_counts_c = torch.empty_like(counts_c, device="cpu", pin_memory=True)
+        # main path: ids sized by max top_k (not rounded), plus the bitmap
+        ids_m = torch.empty((batch, args.top_k), dtype=torch.int32, device=device)
+        packed_m = torch.empty_like(packed)
+        counts_m = torch.empty(batch, dtype=torch.int32, device=device)
+        pin_ids_m = torch.empty_like(ids_m, device="cpu", pin_memory=True)
+        pin_packed_m = torch.empty_like(packed_m, device="cpu", pin_memory=True)
+        pin_counts_m = torch.empty_like(counts_m, device="cpu", pin_memory=True)
+
+        def um_gpu():
+            _compact_sampling_mask_kernel[(batch,)](
+                logits, logits.stride(0), logits.stride(1), num_sampled, ids_m, ids_m.stride(0),
+                packed_m, packed_m.stride(0), counts_m, args.vocab, args.top_k, BLOCK_SIZE=8192,
+            )
+
+        def um_host():
+            pin_ids_m.copy_(ids_m, non_blocking=True); pin_packed_m.copy_(packed_m, non_blocking=True)
+            pin_counts_m.copy_(counts_m, non_blocking=True)
+            torch.cuda.synchronize()
+            return upstream_main_tolists(pin_ids_m, pin_packed_m, pin_counts_m, args.vocab)
 
         def up_gpu():
             _pack_sampling_mask_kernel[(batch,)](
@@ -199,9 +290,10 @@ def main():
             return compact_tolists(pin_ids, pin_counts_c, ns_np, K)
 
         # warmup + equivalence
-        up_gpu(); cp_gpu(); torch.cuda.synchronize()
-        a = up_host(); b = cp_host()
+        up_gpu(); cp_gpu(); um_gpu(); torch.cuda.synchronize()
+        a = up_host(); b = cp_host(); c = um_host()
         assert np.array_equal(a[0], b[0]) and np.array_equal(a[1], b[1]), "CSR mismatch"
+        assert np.array_equal(a[0], c[0]) and np.array_equal(a[1], c[1]), "CSR mismatch (main)"
         assert int(ovf.max()) == 0
         ref_logz = torch.logsumexp(logits, dim=1)
         assert torch.allclose(logz, ref_logz, atol=1e-4)
@@ -209,11 +301,13 @@ def main():
 
         trial_rows = []
         for t in range(args.trials):
-            order = ["upstream", "compact"] if t % 2 == 0 else ["compact", "upstream"]
+            order = ["upstream", "upstream_main", "compact"]
+            if t % 2 == 1:
+                order = order[::-1]
+            fns = {"upstream": (up_gpu, up_host), "upstream_main": (um_gpu, um_host), "compact": (cp_gpu, cp_host)}
             r = {}
             for name in order:
-                g = up_gpu if name == "upstream" else cp_gpu
-                h = up_host if name == "upstream" else cp_host
+                g, h = fns[name]
                 gpu_ms = time_gpu(g, args.rounds)
                 host_ms = []
                 for _ in range(args.rounds):
@@ -222,22 +316,28 @@ def main():
                 r[name] = {"gpu_ms_median": statistics.median(gpu_ms), "host_ms_median": statistics.median(host_ms)}
             trial_rows.append(r)
         agg = {}
-        for name in ("upstream", "compact"):
+        for name in ("upstream", "upstream_main", "compact"):
             agg[name] = {
                 "gpu_ms": statistics.median(x[name]["gpu_ms_median"] for x in trial_rows),
                 "host_ms": statistics.median(x[name]["host_ms_median"] for x in trial_rows),
             }
             agg[name]["total_ms"] = agg[name]["gpu_ms"] + agg[name]["host_ms"]
-        agg["bytes_d2h"] = {"upstream": batch * ((args.vocab + 7) // 8 + 4), "compact": batch * (K * 4 + 4)}
+        agg["bytes_d2h"] = {
+            "upstream": batch * ((args.vocab + 7) // 8 + 4),
+            "upstream_main": batch * ((args.vocab + 7) // 8 + args.top_k * 4 + 4),
+            "compact": batch * (K * 4 + 4),
+        }
         agg["speedup_total"] = agg["upstream"]["total_ms"] / agg["compact"]["total_ms"]
         agg["speedup_host"] = agg["upstream"]["host_ms"] / agg["compact"]["host_ms"]
         agg["speedup_gpu"] = agg["upstream"]["gpu_ms"] / agg["compact"]["gpu_ms"]
+        agg["speedup_total_vs_main"] = agg["upstream_main"]["total_ms"] / agg["compact"]["total_ms"]
         row = {"batch": batch, "vocab": args.vocab, "top_k": args.top_k, "max_support": K, "trials": trial_rows, **agg}
         rows.append(row)
         print(
-            f"B={batch:4d} upstream gpu {agg['upstream']['gpu_ms']:.3f} host {agg['upstream']['host_ms']:.3f} | "
+            f"B={batch:4d} v0.29.0 gpu {agg['upstream']['gpu_ms']:.3f} host {agg['upstream']['host_ms']:.3f} | "
+            f"main gpu {agg['upstream_main']['gpu_ms']:.3f} host {agg['upstream_main']['host_ms']:.3f} | "
             f"compact gpu {agg['compact']['gpu_ms']:.3f} host {agg['compact']['host_ms']:.3f} | "
-            f"total x{agg['speedup_total']:.2f} host x{agg['speedup_host']:.2f} gpu x{agg['speedup_gpu']:.2f}",
+            f"total x{agg['speedup_total']:.2f} vs main x{agg['speedup_total_vs_main']:.2f}",
             flush=True,
         )
 
@@ -249,6 +349,7 @@ def main():
         pass
     prov["kernel_source_sha256"] = hashlib.sha256((REPO_ROOT / "src/l20_stack/ops/triton_support_pack.py").read_bytes()).hexdigest()
     prov["upstream_copy_of"] = UPSTREAM_SOURCE
+    prov["upstream_main_copy_of"] = "vllm/v1/worker/gpu/sample/output.py@main after #54901 (e30bf70c)"
     if args.vllm_source:
         prov["upstream_output_py_sha256"] = hashlib.sha256((args.vllm_source / "vllm/v1/worker/gpu/sample/output.py").read_bytes()).hexdigest()
     out = {

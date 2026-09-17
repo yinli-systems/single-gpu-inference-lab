@@ -452,6 +452,12 @@ def main() -> None:
         "native_fi_off": [],
         # native engine in processed-logprobs mode without the mask
         "native_processed": ["--logprobs-mode", "processed_logprobs"],
+        # token-in/token-out server without a tokenizer: removes per-token
+        # logprob detokenization on the API side
+        "native_skip_tokenizer": ["--skip-tokenizer-init"],
+        "mask_upstream_skip_tokenizer": [
+            "--return-sampling-mask", "--logprobs-mode", "processed_logprobs", "--skip-tokenizer-init",
+        ],
     }
     server_env = {
         "native_fi_off": {"VLLM_USE_FLASHINFER_SAMPLER": "0"},
