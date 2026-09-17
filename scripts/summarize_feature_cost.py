@@ -44,6 +44,9 @@ def condition_rows(run: dict) -> list[dict]:
             "mask_max_size": rounds[0]["mask_max_size"],
             "body_bytes": rounds[0]["body_bytes_total"],
             "tokens_per_chunk": rounds[0].get("tokens_per_chunk"),
+            "itl_ms_median": statistics.median(r["itl_ms"]["median"] for r in rounds),
+            "itl_ms_mean": statistics.median(r["itl_ms"]["mean"] for r in rounds),
+            "ttft_ms_median": statistics.median(r["ttft_ms"]["median"] for r in rounds),
             "flashinfer_sampler_selected": run["servers"][server]
             .get("log_markers", {})
             .get("flashinfer_sampler_selected"),
@@ -55,16 +58,27 @@ def condition_rows(run: dict) -> list[dict]:
 
 
 def md_table(rows: list[dict], with_itl: bool) -> str:
-    head = "| Server | Request | tok/s (median, min–max) | vs native/gen | e2e median | e2e p99 | mask mean size | FlashInfer sampler |"
-    sep = "| --- | --- | ---: | ---: | ---: | ---: | ---: | --- |"
+    if with_itl:
+        head = "| Server | Request | tok/s (median, min–max) | vs native/gen | ITL median | ITL mean | tokens/chunk | e2e median | FlashInfer sampler |"
+        sep = "| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | --- |"
+    else:
+        head = "| Server | Request | tok/s (median, min–max) | vs native/gen | e2e median | e2e p99 | mask mean size | FlashInfer sampler |"
+        sep = "| --- | --- | ---: | ---: | ---: | ---: | ---: | --- |"
     out = [head, sep]
     for r in rows:
         mask = f"{r['mask_mean_size']:.1f}" if r["mask_mean_size"] else "—"
         fi = {True: "yes", False: "no", None: "?"}[r["flashinfer_sampler_selected"]]
-        out.append(
-            f"| `{r['server']}` | `{r['request']}` | {r['tok_per_s_median']:,.0f} ({r['tok_per_s_min']:,.0f}–{r['tok_per_s_max']:,.0f}) "
-            f"| {r.get('tok_per_s_vs_native_gen', float('nan')):.3f}x | {r['e2e_ms_median']:,.0f} ms | {r['e2e_ms_p99_median']:,.0f} ms | {mask} | {fi} |"
-        )
+        tps = f"{r['tok_per_s_median']:,.0f} ({r['tok_per_s_min']:,.0f}–{r['tok_per_s_max']:,.0f})"
+        rel = f"{r.get('tok_per_s_vs_native_gen', float('nan')):.3f}x"
+        if with_itl:
+            out.append(
+                f"| `{r['server']}` | `{r['request']}` | {tps} | {rel} | {r['itl_ms_median']:.2f} ms | {r['itl_ms_mean']:.2f} ms "
+                f"| {r['tokens_per_chunk']:.2f} | {r['e2e_ms_median']:,.0f} ms | {fi} |"
+            )
+        else:
+            out.append(
+                f"| `{r['server']}` | `{r['request']}` | {tps} | {rel} | {r['e2e_ms_median']:,.0f} ms | {r['e2e_ms_p99_median']:,.0f} ms | {mask} | {fi} |"
+            )
     return "\n".join(out)
 
 
