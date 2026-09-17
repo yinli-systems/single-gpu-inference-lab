@@ -383,6 +383,30 @@ class Server:
         return False
 
 
+_CLK = os.sysconf("SC_CLK_TCK") if hasattr(os, "sysconf") else 100
+
+
+def _proc_cpu_seconds(pid: int) -> float | None:
+    try:
+        with open(f"/proc/{pid}/stat") as fh:
+            parts = fh.read().rsplit(")", 1)[1].split()
+        return (int(parts[11]) + int(parts[12])) / _CLK
+    except (FileNotFoundError, IndexError, ValueError):
+        return None
+
+
+def _server_pids(api_pid: int) -> dict[str, int | None]:
+    """API server pid plus the EngineCore child (found by process name)."""
+    core = None
+    try:
+        out = subprocess.check_output(["pgrep", "-f", "VLLM::EngineCore"], text=True)
+        pids = [int(x) for x in out.split()]
+        core = pids[0] if pids else None
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        pass
+    return {"api": api_pid, "core": core}
+
+
 def nvidia_smi() -> dict[str, Any]:
     exe = shutil.which("nvidia-smi")
     if not exe:
@@ -559,6 +583,9 @@ def main() -> None:
                 if r % 2 == 1:
                     order = order[::-1]
                 for rc in order:
+                    pids = _server_pids(server.proc.pid)
+                    cpu_before = {k: _proc_cpu_seconds(v) for k, v in pids.items() if v}
+                    wall_before = time.perf_counter()
                     result = asyncio.run(
                         run_round(
                             server.base_url,
@@ -573,6 +600,16 @@ def main() -> None:
                             collect_outputs=(r == 0 and args.api == "generate"),
                         )
                     )
+                    wall = time.perf_counter() - wall_before
+                    cpu_after = {k: _proc_cpu_seconds(v) for k, v in pids.items() if v}
+                    result["server_cpu"] = {
+                        k: {
+                            "cpu_s": round(cpu_after[k] - cpu_before[k], 3),
+                            "utilization": round((cpu_after[k] - cpu_before[k]) / wall, 3),
+                        }
+                        for k in cpu_before
+                        if cpu_before.get(k) is not None and cpu_after.get(k) is not None
+                    }
                     outputs = result.pop("outputs", None)
                     if outputs is not None:
                         dump = args.output.with_suffix("") / f"outputs-{server_name}-{rc}-r0.json"
@@ -583,7 +620,10 @@ def main() -> None:
                     print(
                         f"[{server_name}/{rc} r{r}] {result['output_tokens_per_s']:.0f} tok/s "
                         f"ITL med {result['itl_ms']['median']:.2f} ms  e2e med {result['e2e_ms']['median']:.0f} ms "
-                        f"tok/chunk {result['tokens_per_chunk']:.2f} mask_entries={result['mask_entries_total']} mask_mean={result['mask_mean_size']}",
+                        f"tok/chunk {result['tokens_per_chunk']:.2f} mask_mean={result['mask_mean_size']} "
+                        f"cpu api {result['server_cpu'].get('api', {}).get('utilization', float('nan')):.2f} "
+                        f"core {result['server_cpu'].get('core', {}).get('utilization', float('nan')):.2f} "
+                        f"bytes/req {result['body_bytes_total'] / max(result['requests'], 1):.0f}",
                         flush=True,
                     )
             # capture sampler selection evidence from the server log

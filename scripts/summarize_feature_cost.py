@@ -47,6 +47,15 @@ def condition_rows(run: dict) -> list[dict]:
             "itl_ms_median": statistics.median(r["itl_ms"]["median"] for r in rounds),
             "itl_ms_mean": statistics.median(r["itl_ms"]["mean"] for r in rounds),
             "ttft_ms_median": statistics.median(r["ttft_ms"]["median"] for r in rounds),
+            "tok_per_s_stdev": statistics.pstdev(tps) if len(tps) > 1 else 0.0,
+            "bytes_per_request": rounds[0]["body_bytes_total"] / max(rounds[0]["requests"], 1),
+            "api_cpu_util_median": statistics.median(
+                r.get("server_cpu", {}).get("api", {}).get("utilization", float("nan")) for r in rounds
+            ),
+            "core_cpu_util_median": statistics.median(
+                r.get("server_cpu", {}).get("core", {}).get("utilization", float("nan")) for r in rounds
+            ),
+            "concurrency": run["workload"]["concurrency"],
             "flashinfer_sampler_selected": run["servers"][server]
             .get("log_markers", {})
             .get("flashinfer_sampler_selected"),
@@ -62,8 +71,8 @@ def md_table(rows: list[dict], with_itl: bool) -> str:
         head = "| Server | Request | tok/s (median, min–max) | vs native/gen | ITL median | ITL mean | tokens/chunk | e2e median | FlashInfer sampler |"
         sep = "| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | --- |"
     else:
-        head = "| Server | Request | tok/s (median, min–max) | vs native/gen | e2e median | e2e p99 | mask mean size | FlashInfer sampler |"
-        sep = "| --- | --- | ---: | ---: | ---: | ---: | ---: | --- |"
+        head = "| Server | Request | tok/s (median, min–max) | vs native/gen | e2e p50 | e2e p99 | API CPU | core CPU | bytes/req | mask mean |"
+        sep = "| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |"
     out = [head, sep]
     for r in rows:
         mask = f"{r['mask_mean_size']:.1f}" if r["mask_mean_size"] else "—"
@@ -77,7 +86,8 @@ def md_table(rows: list[dict], with_itl: bool) -> str:
             )
         else:
             out.append(
-                f"| `{r['server']}` | `{r['request']}` | {tps} | {rel} | {r['e2e_ms_median']:,.0f} ms | {r['e2e_ms_p99_median']:,.0f} ms | {mask} | {fi} |"
+                f"| `{r['server']}` | `{r['request']}` | {tps} | {rel} | {r['e2e_ms_median']:,.0f} ms | {r['e2e_ms_p99_median']:,.0f} ms "
+                f"| {r['api_cpu_util_median']:.2f} | {r['core_cpu_util_median']:.2f} | {r['bytes_per_request']:,.0f} | {mask} |"
             )
     return "\n".join(out)
 
