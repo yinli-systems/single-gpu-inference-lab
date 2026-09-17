@@ -1,3 +1,75 @@
+diff --git a/tests/v1/test_outputs.py b/tests/v1/test_outputs.py
+index b6e120e..1216588 100644
+--- a/tests/v1/test_outputs.py
++++ b/tests/v1/test_outputs.py
+@@ -3,6 +3,7 @@
+ from unittest import TestCase
+ 
+ import numpy as np
++import pytest
+ import torch
+ 
+ from vllm.platforms import current_platform
+@@ -133,6 +134,59 @@ def test_sampling_mask_matches_processed_top_k_top_p_support():
+     assert result.to_nested_list() == [expected_token_ids]
+ 
+ 
++def test_sampling_mask_tensors_compact_tolist():
++    tensors = SamplingMaskTensors(
++        packed_mask=None,
++        counts=torch.tensor([2, 0, 1], dtype=torch.int32),
++        vocab_size=8,
++        token_ids=torch.tensor([[3, 5, 0, 0], [0, 0, 0, 0], [7, 0, 0, 0]], dtype=torch.int32),
++        overflow=torch.tensor([0, 0, 0], dtype=torch.int32),
++        max_support=4,
++    )
++
++    result = tensors.tolists(np.array([1, 0, 1]))
++
++    assert result.token_ids.tolist() == [3, 5, 7]
++    assert result.offsets.tolist() == [0, 2, 3]
++    assert result.cu_num_generated_tokens == [0, 1, 1, 2]
++
++
++def test_sampling_mask_compact_matches_bitpacked_layout():
++    torch.manual_seed(0)
++    batch, vocab, top_k = 16, 4096, 13
++    logits = torch.randn(batch, vocab, device=DEVICE_TYPE)
++    processed = apply_top_k_top_p(
++        logits,
++        k=torch.full((batch,), top_k, device=DEVICE_TYPE),
++        p=torch.full((batch,), 0.9, device=DEVICE_TYPE),
++    )
++    num_sampled = torch.ones(batch, dtype=torch.int32, device=DEVICE_TYPE)
++    num_sampled[5] = 0
++    num_sampled_np = num_sampled.cpu().numpy()
++
++    bitpacked = SamplingMaskTensors.from_logits(processed, num_sampled)
++    compact = SamplingMaskTensors.from_logits(processed, num_sampled, max_support=16)
++    assert compact.packed_mask is None and compact.token_ids is not None
++
++    expected = bitpacked.tolists(num_sampled_np)
++    actual = compact.to_cpu_nonblocking().tolists(num_sampled_np)
++
++    assert actual.token_ids.tolist() == expected.token_ids.tolist()
++    assert actual.offsets.tolist() == expected.offsets.tolist()
++    assert actual.cu_num_generated_tokens == expected.cu_num_generated_tokens
++    assert all(len(row) <= top_k for row in actual.to_nested_list())
++
++
++def test_sampling_mask_compact_overflow_raises():
++    logits = torch.zeros(1, 64, device=DEVICE_TYPE)  # every token survives
++    num_sampled = torch.ones(1, dtype=torch.int32, device=DEVICE_TYPE)
++    tensors = SamplingMaskTensors.from_logits(logits, num_sampled, max_support=32)
++    assert tensors.counts.tolist() == [64]
++    assert tensors.overflow.tolist() == [1]
++    with pytest.raises(RuntimeError, match="exceeded max_support"):
++        tensors.tolists(np.array([1]))
++
++
+ class TestLogprobsLists(TestCase):
+     def setUp(self):
+         self.logprobsLists = LogprobsLists(
 diff --git a/vllm/envs.py b/vllm/envs.py
 index 786864b..203db5b 100755
 --- a/vllm/envs.py

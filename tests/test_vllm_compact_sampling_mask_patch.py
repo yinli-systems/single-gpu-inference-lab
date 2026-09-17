@@ -16,10 +16,23 @@ def test_patch_is_scoped_and_documents_its_contract():
     text = PATCH.read_text()
     files = [line.split()[-1][2:] for line in text.splitlines() if line.startswith("+++ b/")]
     assert files == [
+        "tests/v1/test_outputs.py",
         "vllm/envs.py",
         "vllm/v1/worker/gpu/sample/output.py",
         "vllm/v1/worker/gpu/sample/sampler.py",
     ]
+    # the installer must strip the tests section for wheel installs
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location(
+        "installer", Path("integrations/vllm/install_compact_sampling_mask.py")
+    )
+    installer = importlib.util.module_from_spec(spec)
+    assert spec.loader is not None
+    spec.loader.exec_module(installer)
+    pkg = installer.package_only(text)
+    assert "tests/v1/test_outputs.py" not in pkg
+    assert pkg.count("diff --git ") == 3
     for marker in (
         "_pack_compact_support_kernel",
         "VLLM_SAMPLING_MASK_COMPACT",
