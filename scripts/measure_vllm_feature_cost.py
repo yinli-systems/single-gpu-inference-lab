@@ -444,6 +444,9 @@ def main() -> None:
         # same flags; selected by env on a vLLM carrying the compact-mask patch
         "mask_compact": ["--return-sampling-mask", "--logprobs-mode", "processed_logprobs"],
         "mask_bitmap": ["--return-sampling-mask", "--logprobs-mode", "processed_logprobs"],
+        # same flags on a vLLM that carries upstream #54901 (0.29.1+): the
+        # engine's own compact layout, no env needed
+        "mask_upstream": ["--return-sampling-mask", "--logprobs-mode", "processed_logprobs"],
         # native engine with the FlashInfer sampler disabled: isolates the cost
         # of the top-k/top-p + Gumbel fallback that the mask server also uses
         "native_fi_off": [],
