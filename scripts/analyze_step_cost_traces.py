@@ -82,21 +82,48 @@ def main():
     yc = np.concatenate([cells[k][1] for k in cells if is_calib[k]])
     w, *_ = np.linalg.lstsq(Xc, yc, rcond=None)
     resid_c = yc - Xc @ w
+    # tokens-only competitor: no KV-read term (columns 0,1,3,5 = 1, gen_reqs, ctx_tokens, ctx_reqs)
+    TOK = [0, 1, 3, 5]
+    w_tok, *_ = np.linalg.lstsq(Xc[:, TOK], yc, rcond=None)
+
+    # Per-cell: prefill-step cost by KV-depth bucket, and held-out error of both models
+    print("\n## Prefill-step cost by KV-read depth (steps containing a prefill chunk)\n")
+    print("| cell | KV bucket | steps | chunk tokens (median) | actual step p50 | p95 | tokens-only pred p50 | +KV pred p50 |")
+    print("| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |")
+    buckets = [(0, 4096), (4096, 8192), (8192, 16384), (16384, 24576), (24576, 1 << 30)]
+    kv_rows = []
+    for k, (X, y, meta, cell) in cells.items():
+        pre = meta[:, 0] > 0
+        for lo, hi in buckets:
+            sel = pre & (meta[:, 1] >= lo) & (meta[:, 1] < hi)
+            if sel.sum() < 5:
+                continue
+            p_tok = X[sel][:, TOK] @ w_tok
+            p_kv = X[sel] @ w
+            kv_rows.append({"cell": k, "kv_lo": lo, "kv_hi": min(hi, 1 << 20), "steps": int(sel.sum()),
+                            "chunk_median": float(np.median(meta[sel, 0])), "actual_p50": pct(y[sel], .5), "actual_p95": pct(y[sel], .95),
+                            "tokens_only_pred_p50": pct(p_tok, .5), "kv_pred_p50": pct(p_kv, .5)})
+            print(f"| {k} | {lo//1024}k–{min(hi,1<<20)//1024}k | {int(sel.sum())} | {np.median(meta[sel,0]):.0f} | {pct(y[sel],.5):.1f} | {pct(y[sel],.95):.1f} | {pct(p_tok,.5):.1f} | {pct(p_kv,.5):.1f} |")
+    report_kv = kv_rows
     # residual quantile learned on calibration, used by the risk-calibrated rule
     q_alpha = pct(resid_c, 1 - args.alpha)
 
     deadlines = [float(d) for d in args.deadlines_ms.split(",")]
-    report = {"weights": w.tolist(), "calibration_cells": [k for k in cells if is_calib[k]],
+    report = {"weights": w.tolist(), "weights_tokens_only": w_tok.tolist(), "kv_depth_table": report_kv,
+              "calibration_cells": [k for k in cells if is_calib[k]],
               "calibration_residual": {"p50": pct(resid_c, .5), "p90": pct(resid_c, .9), "p95": pct(resid_c, .95), "p99": pct(resid_c, .99), "n": int(len(yc))},
               "alpha": args.alpha, "q_alpha_ms": q_alpha, "cells": {}}
     print(f"fit on {len(yc)} steps; weights {np.round(w, 3).tolist()}; calib residual p50/p95/p99 = "
           f"{pct(resid_c,.5):.2f}/{pct(resid_c,.95):.2f}/{pct(resid_c,.99):.2f} ms; q_{1-args.alpha:.2f} = {q_alpha:.2f} ms")
-    print("| cell | calib? | steps | prefill steps | actual p50 | resid p50 | resid p95 | resid p99 | " + " | ".join(f"miss@{int(d)}ms point / risk" for d in deadlines) + " |")
-    print("| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | " + " | ".join("---:" for _ in deadlines) + " |")
+    print("\n## Residuals on prefill steps (fit on calibration cells) and deadline miss rates\n")
+    print("| cell | calib? | prefill steps | actual p50 | tokens-only resid p50 / p95 | +KV resid p50 / p95 | " + " | ".join(f"miss@{int(d)}ms point / risk" for d in deadlines) + " |")
+    print("| --- | --- | ---: | ---: | ---: | ---: | " + " | ".join("---:" for _ in deadlines) + " |")
     for k, (X, y, meta, cell) in cells.items():
         pred = X @ w
         resid = y - pred
         pre = meta[:, 0] > 0  # steps that include prefill work
+        resid_tok = (y - X[:, TOK] @ w_tok)[pre]
+        resid_kv = resid[pre]
         row = {**cell, "calibration": is_calib[k], "steps": int(len(y)), "prefill_steps": int(pre.sum()),
                "actual_p50_ms": pct(y, .5), "actual_p99_ms": pct(y, .99),
                "residual": {"p50": pct(resid, .5), "p90": pct(resid, .9), "p95": pct(resid, .95), "p99": pct(resid, .99)},
@@ -114,7 +141,8 @@ def main():
                                           "risk_miss_rate": miss_risk}
             cols.append(f"{miss_point*100:5.1f}% / {miss_risk*100:5.1f}%" if len(yp) else "—")
         report["cells"][k] = row
-        print(f"| {k} | {'yes' if is_calib[k] else 'no'} | {len(y)} | {int(pre.sum())} | {pct(y,.5):.1f} | {pct(resid,.5):+.1f} | {pct(resid,.95):+.1f} | {pct(resid,.99):+.1f} | " + " | ".join(cols) + " |")
+        row["residual_prefill_steps"] = {"tokens_only": {"p50": pct(resid_tok, .5), "p95": pct(resid_tok, .95)}, "with_kv": {"p50": pct(resid_kv, .5), "p95": pct(resid_kv, .95)}}
+        print(f"| {k} | {'yes' if is_calib[k] else 'no'} | {int(pre.sum())} | {pct(y[pre],.5):.1f} | {pct(resid_tok,.5):+.1f} / {pct(resid_tok,.95):+.1f} | {pct(resid_kv,.5):+.1f} / {pct(resid_kv,.95):+.1f} | " + " | ".join(cols) + " |")
     args.output.write_text(json.dumps(report, indent=2) + "\n")
 
 
