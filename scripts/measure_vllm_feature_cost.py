@@ -126,6 +126,8 @@ async def one_generate_request(
         "mask_mean_size": statistics.fmean(mask_sizes) if mask_sizes else None,
         "mask_max_size": max(mask_sizes) if mask_sizes else None,
         "body_bytes": len(raw),
+        "token_ids": list(choice["token_ids"]),
+        "sampling_mask": mask,
     }
 
 
@@ -224,6 +226,7 @@ async def run_round(
     logprobs: int | None,
     seed: int,
     prompt_token_ids: list[list[int]] | None = None,
+    collect_outputs: bool = False,
 ) -> dict[str, Any]:
     generate_api = prompt_token_ids is not None
     url = f"{base_url}/inference/v1/generate" if generate_api else f"{base_url}/v1/completions"
@@ -294,6 +297,12 @@ async def run_round(
         else None,
         "mask_max_size": max([r["mask_max_size"] or 0 for r in results]),
         "body_bytes_total": sum(r["body_bytes"] for r in results),
+        "outputs": [
+            {"token_ids": r.get("token_ids"), "sampling_mask": r.get("sampling_mask")}
+            for r in results
+        ]
+        if collect_outputs
+        else None,
     }
 
 
@@ -509,8 +518,15 @@ def main() -> None:
                             logprobs=request_logprobs[rc],
                             seed=args.seed,
                             prompt_token_ids=prompt_ids,
+                            collect_outputs=(r == 0 and args.api == "generate"),
                         )
                     )
+                    outputs = result.pop("outputs", None)
+                    if outputs is not None:
+                        dump = args.output.with_suffix("") / f"outputs-{server_name}-{rc}-r0.json"
+                        dump.parent.mkdir(parents=True, exist_ok=True)
+                        dump.write_text(json.dumps(outputs))
+                        result["outputs_file"] = str(dump)
                     entry["rounds"].append({"round": r, "request_condition": rc, **result})
                     print(
                         f"[{server_name}/{rc} r{r}] {result['output_tokens_per_s']:.0f} tok/s "
