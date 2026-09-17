@@ -411,6 +411,13 @@ def main() -> None:
     parser.add_argument("--request-conditions", default="gen,logprobs")
     parser.add_argument("--extra-server-args", default="", help="appended to every vllm serve")
     parser.add_argument(
+        "--server-env",
+        action="append",
+        default=[],
+        metavar="KEY=VALUE",
+        help="environment variable set for every server (e.g. VLLM_BATCH_INVARIANT=1)",
+    )
+    parser.add_argument(
         "--api",
         choices=("generate", "completions"),
         default="generate",
@@ -483,11 +490,13 @@ def main() -> None:
     for server_name in args.server_conditions.split(","):
         flags = server_flags[server_name] + extra
         env_backup = dict(os.environ)
+        shared_env = dict(kv.split("=", 1) for kv in args.server_env)
+        os.environ.update(shared_env)
         os.environ.update(server_env.get(server_name, {}))
         log_path = args.output.with_suffix("") / f"server-{server_name}.log"
         entry: dict[str, Any] = {
             "flags": flags,
-            "env": server_env.get(server_name, {}),
+            "env": {**shared_env, **server_env.get(server_name, {})},
             "log": str(log_path),
             "rounds": [],
         }
