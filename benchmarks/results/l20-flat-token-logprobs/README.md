@@ -165,11 +165,37 @@ Reading it:
 - `flat_logprobs` alone (engine knob, object response) never helps on this endpoint, at any
   concurrency or model: the objects are rebuilt from it.
 
+## PR 2: sampled-logprobs-only transport (`raw/pr2/`, `vllm-main-sampled-logprobs-transport.patch`)
+
+The transport ladder in [`../l20-logprob-engine-decomposition/`](../l20-logprob-engine-decomposition/README.md)
+put the whole remaining cost in the per-request `LogprobsLists` path that starts at the scheduler's
+`slice_request`. PR 2 adds `SamplingParams.sampled_logprobs_only` (requires `logprobs == 0`): the
+scheduler emits `EngineCoreOutput.new_sampled_logprobs`, one float per new token read from column 0
+of the step's logprobs array, the output processor keeps a float list (no `Logprob` entries, no
+detokenisation, no `FlatLogprobs`), and `/inference/v1/generate` sets the flag for
+`return_token_logprobs` when `logprobs == 0`. Same workload, vLLM 0.29.0 + #54901 + PR 1 + PR 2:
+
+| Model / conc | Server | `gen` | `logprobs=0` objects | PR 1 (flat response) | **PR 1 + PR 2** |
+| --- | --- | ---: | ---: | ---: | ---: |
+| 0.5B / 64 | native | 18,592 | 13,495 (0.73x) | 16,337 (0.88x) | **17,868 (0.96x)** |
+| 0.5B / 256 | native | 23,038 | 15,451 (0.67x) | 19,065 (0.83x) | **21,846 (0.95x)** |
+| 0.5B / 64 | `--return-sampling-mask` | 16,452 | 11,106 | 13,686 | **15,453 (0.94x of mask gen)** |
+| 0.5B / 256 | `--return-sampling-mask` | 20,313 | 13,088 | 16,410 | **19,132 (0.94x of mask gen)** |
+| 4B / 64 | native | 3,524 | 3,351 (0.95x) | 3,498 | **3,503 (0.99x)** |
+| 4B / 64 | `--return-sampling-mask` | 3,442 | 3,320 | 3,419 | **3,443 (1.00x of mask gen)** |
+
+(PR 1 columns from the sweep above; 3 interleaved rounds each.) With PR 2 the API server's CPU
+with logprobs is back at the `gen` level (0.39 vs 0.37 of a core at c256) and the engine core is
+at parity. Exactness on the new transport: 16/16 seeded sequences identical to the object path
+under `VLLM_BATCH_INVARIANT=1`, max abs diff 0.0 (`raw/pr2/exactness-batch-invariant.json`).
+Unit tests (column selection, processor accumulation and cumulative logprob, parameter
+validation) and the 7 endpoint tests pass on the installed server; `cargo check --tests` passes
+for the engine-core client and server crates with the mirrored protocol field.
+
 ## Status
 
-Exact, small, opt-in, composes with #54901. Prepared as an upstream PR (branch
-`flat-token-logprobs` on the user's vLLM fork); submission waits on the submitter's DCO sign-off
-and line-by-line review, which vLLM's contributing policy requires of the human author. No claim
+PR 1 is upstream as [vllm-project/vllm#57442](https://github.com/vllm-project/vllm/pull/57442).
+PR 2 is on the fork branch `sampled-logprobs-transport` (stacked on PR 1), not yet opened. No claim
 about other endpoints (the OpenAI `/v1/completions` route keeps its schema) or about streaming.
 
 ## Files
