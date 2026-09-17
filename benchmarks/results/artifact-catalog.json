@@ -3,9 +3,9 @@
     "active": 5,
     "analysis": 1,
     "negative": 2,
-    "other": 7,
+    "other": 8,
     "path_proof": 13,
-    "positive": 8,
+    "positive": 7,
     "superseded": 12
   },
   "entries": [
@@ -310,7 +310,7 @@
       "summary": "Post-fix remeasurement of the top-logprobs primitive after the all-masked-tile NaN fix (commit `8a987d2`): three clean processes and distinct seeds per shape, 7.33x-8.25x paired median speedup in the same steady-state GEMM-conditioned operator protocol, 4.77e-7 max logprob error. The A100 artifact describes the pre-fix source and was not remeasured."
     },
     {
-      "category": "positive",
+      "category": "other",
       "compact_file_count": 1,
       "has_campaign_summary_json": false,
       "has_evidence_status_json": false,
@@ -318,7 +318,7 @@
       "has_summary_json": false,
       "path": "benchmarks/results/l20-support-pack-path",
       "reference": "l20-support-pack-path/",
-      "status": "Controlled L20 positive path result",
+      "status": "Replication of upstream #54901 (0.29.0 baseline)",
       "summary": "Whole-path microbenchmark of vLLM v0.29.0's bitmap sampling-mask output versus compact support packing: identical CSR output, 39x-457x faster per step at batch 8-256 because the host no longer unpacks the full vocabulary."
     },
     {
@@ -330,7 +330,7 @@
       "has_summary_json": true,
       "path": "benchmarks/results/l20-vllm-sampling-mask-ab",
       "reference": "l20-vllm-sampling-mask-ab/",
-      "status": "Controlled L20 serving A/B",
+      "status": "Replication of upstream #54901 on L20",
       "summary": "vLLM 0.29.0 with `--return-sampling-mask`: the shipped bitmap layout caps both a 0.5B and a 4B model at ~1.6K tok/s; the compact-mask patch restores 0.77x (0.5B) and 0.97x (4B) of native throughput with identical tokens under batch-invariant mode."
     },
     {

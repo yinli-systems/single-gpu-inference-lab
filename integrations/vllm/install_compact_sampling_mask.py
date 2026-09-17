@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""Apply or revert the compact sampling-mask patch on an installed vLLM.
+"""Apply or revert the compact sampling-mask patch on an installed vLLM v0.29.0.
 
-The patch is a plain ``git diff`` against vLLM v0.29.0, kept upstream-shaped
-so it can be submitted as-is. This installer only locates the installed
-package, checks the version, and shells out to ``patch``.
+Superseded upstream: vllm-project/vllm#54901 (merged 2026-09-04, shipped in
+0.29.1) landed the same top_k-bounded compact layout. This patch exists as an
+independent implementation for 0.29.0 and must not be applied to 0.29.1+,
+where the engine already carries the fix; the version guard enforces that.
 
     python integrations/vllm/install_compact_sampling_mask.py            # apply
     python integrations/vllm/install_compact_sampling_mask.py --revert   # revert
