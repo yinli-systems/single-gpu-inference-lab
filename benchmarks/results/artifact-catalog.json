@@ -4,7 +4,7 @@
     "analysis": 1,
     "negative": 4,
     "other": 10,
-    "path_proof": 13,
+    "path_proof": 14,
     "positive": 8,
     "superseded": 12
   },
@@ -359,7 +359,7 @@
     },
     {
       "category": "positive",
-      "compact_file_count": 3,
+      "compact_file_count": 4,
       "has_campaign_summary_json": false,
       "has_evidence_status_json": false,
       "has_readme": true,
@@ -392,6 +392,18 @@
       "reference": "l20-prefill-interference/",
       "status": "Reproducer (L20)",
       "summary": "8 decoders (13 ms/token undisturbed) under two injected 32k prefills on Qwen3-4B: every fixed token budget from 64 to 8192 fails a 25 ms ITL SLO; step cost is nonlinear in chunk size and small chunks cost 3.5x in TTFT. Motivates a wall-clock-budgeted prefill controller."
+    },
+    {
+      "category": "path_proof",
+      "compact_file_count": 1,
+      "has_campaign_summary_json": false,
+      "has_evidence_status_json": false,
+      "has_readme": true,
+      "has_summary_json": false,
+      "path": "benchmarks/results/l20-step-cost-shift",
+      "reference": "l20-step-cost-shift/",
+      "status": "Phase-0 result (L20)",
+      "summary": "Per-iteration traces across context/batch/budget: a 512-token chunk costs 51 -> 136 ms as its KV depth grows 0 -> 32k; a point step-time predictor fitted at 4-8k is 56% false-safe at 32k (bias, not variance); online refit with a KV-read term removes the bias (+18 -> +0.1 ms) and an online residual quantile removes the tail (24% -> 0% false-safe) at halved prefill admission. Kill criterion for risk-calibrated scheduling not met."
     },
     {
       "category": "path_proof",
@@ -646,7 +658,7 @@
       "summary": "Custom three-way serving path evidence; not yet a broad win."
     }
   ],
-  "entry_count": 53,
+  "entry_count": 54,
   "index_path": "benchmarks/results/README.md",
   "result_root": "benchmarks/results",
   "schema_version": 1

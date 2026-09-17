@@ -105,18 +105,23 @@ def main():
                             "tokens_only_pred_p50": pct(p_tok, .5), "kv_pred_p50": pct(p_kv, .5)})
             print(f"| {k} | {lo//1024}k–{min(hi,1<<20)//1024}k | {int(sel.sum())} | {np.median(meta[sel,0]):.0f} | {pct(y[sel],.5):.1f} | {pct(y[sel],.95):.1f} | {pct(p_tok,.5):.1f} | {pct(p_kv,.5):.1f} |")
     report_kv = kv_rows
-    # residual quantile learned on calibration, used by the risk-calibrated rule
-    q_alpha = pct(resid_c, 1 - args.alpha)
+    # residual quantile learned on calibration *prefill* steps (decode-only
+    # steps have near-zero residual and would hide the risk), used by the
+    # risk-calibrated rule; the tokens-only model gets its own margin.
+    pre_c = np.concatenate([cells[k][2][:, 0] > 0 for k in cells if is_calib[k]])
+    q_alpha = pct(resid_c[pre_c], 1 - args.alpha)
+    q_alpha_tok = pct((yc - Xc[:, TOK] @ w_tok)[pre_c], 1 - args.alpha)
 
     deadlines = [float(d) for d in args.deadlines_ms.split(",")]
     report = {"weights": w.tolist(), "weights_tokens_only": w_tok.tolist(), "kv_depth_table": report_kv,
               "calibration_cells": [k for k in cells if is_calib[k]],
               "calibration_residual": {"p50": pct(resid_c, .5), "p90": pct(resid_c, .9), "p95": pct(resid_c, .95), "p99": pct(resid_c, .99), "n": int(len(yc))},
               "alpha": args.alpha, "q_alpha_ms": q_alpha, "cells": {}}
-    print(f"fit on {len(yc)} steps; weights {np.round(w, 3).tolist()}; calib residual p50/p95/p99 = "
-          f"{pct(resid_c,.5):.2f}/{pct(resid_c,.95):.2f}/{pct(resid_c,.99):.2f} ms; q_{1-args.alpha:.2f} = {q_alpha:.2f} ms")
+    print(f"fit on {len(yc)} steps ({int(pre_c.sum())} with prefill); weights {np.round(w, 3).tolist()}; "
+          f"calib prefill-step residual q_{1-args.alpha:.2f}: +KV {q_alpha:.2f} ms, tokens-only {q_alpha_tok:.2f} ms")
+    report["q_alpha_tokens_only_ms"] = q_alpha_tok
     print("\n## Residuals on prefill steps (fit on calibration cells) and deadline miss rates\n")
-    print("| cell | calib? | prefill steps | actual p50 | tokens-only resid p50 / p95 | +KV resid p50 / p95 | " + " | ".join(f"miss@{int(d)}ms point / risk" for d in deadlines) + " |")
+    print("| cell | calib? | prefill steps | actual p50 | tokens-only resid p50 / p95 | +KV resid p50 / p95 | " + " | ".join(f"@{int(d)}ms: tok / tok+q / kv / kv+q (safe%)" for d in deadlines) + " |")
     print("| --- | --- | ---: | ---: | ---: | ---: | " + " | ".join("---:" for _ in deadlines) + " |")
     for k, (X, y, meta, cell) in cells.items():
         pred = X @ w
@@ -129,17 +134,24 @@ def main():
                "residual": {"p50": pct(resid, .5), "p90": pct(resid, .9), "p95": pct(resid, .95), "p99": pct(resid, .99)},
                "deadline": {}}
         cols = []
+        pred_tok = X[:, TOK] @ w_tok
         for d in deadlines:
-            yp, pp = y[pre], pred[pre]
-            safe_point = pp <= d
-            safe_risk = (pp + q_alpha) <= d
-            miss_point = float(np.mean(yp[safe_point] > d)) if safe_point.any() else float("nan")
-            miss_risk = float(np.mean(yp[safe_risk] > d)) if safe_risk.any() else float("nan")
-            row["deadline"][str(int(d))] = {"point_safe_frac": float(safe_point.mean()) if len(yp) else float("nan"),
-                                          "point_miss_rate": miss_point,
-                                          "risk_safe_frac": float(safe_risk.mean()) if len(yp) else float("nan"),
-                                          "risk_miss_rate": miss_risk}
-            cols.append(f"{miss_point*100:5.1f}% / {miss_risk*100:5.1f}%" if len(yp) else "—")
+            yp = y[pre]
+            variants = {
+                "tokens_only": pred_tok[pre],
+                "tokens_only_risk": pred_tok[pre] + q_alpha_tok,
+                "with_kv": pred[pre],
+                "with_kv_risk": pred[pre] + q_alpha,
+            }
+            entry = {}
+            parts = []
+            for name, pv in variants.items():
+                safe = pv <= d
+                miss = float(np.mean(yp[safe] > d)) if safe.any() else float("nan")
+                entry[name] = {"safe_frac": float(safe.mean()) if len(yp) else float("nan"), "miss_rate": miss}
+                parts.append(f"{miss*100:.0f}%({safe.mean()*100:.0f})" if safe.any() else "—")
+            row["deadline"][str(int(d))] = entry
+            cols.append(" / ".join(parts))
         report["cells"][k] = row
         row["residual_prefill_steps"] = {"tokens_only": {"p50": pct(resid_tok, .5), "p95": pct(resid_tok, .95)}, "with_kv": {"p50": pct(resid_kv, .5), "p95": pct(resid_kv, .95)}}
         print(f"| {k} | {'yes' if is_calib[k] else 'no'} | {int(pre.sum())} | {pct(y[pre],.5):.1f} | {pct(resid_tok,.5):+.1f} / {pct(resid_tok,.95):+.1f} | {pct(resid_kv,.5):+.1f} / {pct(resid_kv,.95):+.1f} | " + " | ".join(cols) + " |")
