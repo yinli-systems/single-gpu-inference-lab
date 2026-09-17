@@ -86,6 +86,30 @@ Tables are generated into [`tables.md`](tables.md) from the raw files; the headl
 | `mask_compact` | `gen` | 14,882 | 3.56 ms | 3.97 ms | 1.01 |
 | `mask_compact` | `logprobs` | 12,117 | 26.07 ms | 28.02 ms | 5.54 |
 
+### Post-#54901 baseline: vLLM 0.29.0 + upstream #54901 backported (`mask_upstream`)
+
+Upstream's own compact layout, applied to the installed 0.29.0 (the PR diff applies cleanly;
+package files only, its 5 mask unit tests pass). Same workload and protocol.
+
+| Model / API | Server | Request | tok/s | vs native/gen | ITL median |
+| --- | --- | --- | ---: | ---: | ---: |
+| 0.5B generate | `native` | `gen` | 18,628 | 1.000x | — |
+| 0.5B generate | `native` | `logprobs` | 13,290 | 0.713x | — |
+| 0.5B generate | `mask_upstream` | `gen` | 15,994 | **0.859x** | — |
+| 0.5B generate | `mask_upstream` | `logprobs` | 10,919 | 0.586x | — |
+| 4B generate | `native` | `gen` | 3,534 | 1.000x | — |
+| 4B generate | `mask_upstream` | `gen` | 3,488 | **0.987x** | — |
+| 4B generate | `mask_upstream` | `logprobs` | 3,244 | 0.918x | — |
+| 0.5B streaming | `native` | `gen` | 18,065 | 1.000x | 3.22 ms |
+| 0.5B streaming | `mask_upstream` | `gen` | 16,649 | 0.922x | 3.40 ms |
+
+Upstream's GB200 claim ("within 2–3% of no-mask" on a 100B-class model; 0.79–0.93x on a 1.5B)
+replicates on the L20: 0.99x on the 4B model and 0.86–0.92x on the 0.5B model. Upstream's
+layout also beats this repository's 0.29.0 patch end-to-end (0.86x vs 0.77x on 0.5B `gen`),
+because #54901's follow-up commits also trimmed the frontend response path. With the mask
+solved upstream, the largest remaining feature cost on small models is `logprobs=1`
+(0.71x native, 0.59x with the mask), which the decomposition below places on the API server.
+
 ### Decomposition on the native engine (0.5B, generate API)
 
 | Server | `gen` tok/s | `logprobs` tok/s |
@@ -145,5 +169,6 @@ themselves diverge between any two servers after a few dozen tokens
 
 - `raw/qwen25-05b-generate.json`, `raw/qwen3-4b-generate.json`, `raw/qwen25-05b-completions.json` — main campaign (commit `6d0bbc2`).
 - `raw/qwen25-05b-decomp-generate.json`, `raw/qwen25-05b-bi-generate.json`, `raw/qwen25-05b-bi-equivalence-*.json`, `raw/qwen25-05b-bi-bitmap-{a,b}.json`, `raw/bitmap-a-vs-b.json` — commit `ef2eaa4`.
+- `raw/upstream54901-*.json` — commit `290cab5`, vLLM 0.29.0 + #54901.
 - `raw/*equivalence*.json` — comparer output; `summary.json` — aggregate with raw-file hashes; `tables.md` — generated tables.
 - Server logs for every condition are kept on the measurement host (`~/inference/results/campaign*-*/`), not checked in.
