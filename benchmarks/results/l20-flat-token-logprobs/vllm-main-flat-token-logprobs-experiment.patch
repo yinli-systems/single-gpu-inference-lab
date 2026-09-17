@@ -1,0 +1,68 @@
+diff --git a/vllm/entrypoints/scale_out/token_in_token_out/protocol.py b/vllm/entrypoints/scale_out/token_in_token_out/protocol.py
+index be8130e3..a65b79fc 100644
+--- a/vllm/entrypoints/scale_out/token_in_token_out/protocol.py
++++ b/vllm/entrypoints/scale_out/token_in_token_out/protocol.py
+@@ -323,6 +323,10 @@ class GenerateRequest(BaseModel):
+ class GenerateResponseChoice(BaseModel):
+     index: int
+     logprobs: ChatCompletionLogProbs | None = None
++    # Experiment (VLLM_GENERATE_FLAT_TOKEN_LOGPROBS=1): the sampled token's
++    # logprob per generated position as a flat float list, emitted instead of
++    # ``logprobs`` when the request set ``flat_logprobs`` and ``logprobs=0``.
++    token_logprobs: list[float] | None = None
+     # per OpenAI spec this is the default
+     finish_reason: str | None = "stop"
+     token_ids: list[int] | None = None
+diff --git a/vllm/entrypoints/scale_out/token_in_token_out/serving.py b/vllm/entrypoints/scale_out/token_in_token_out/serving.py
+index a8a2804a..b476139a 100644
+--- a/vllm/entrypoints/scale_out/token_in_token_out/serving.py
++++ b/vllm/entrypoints/scale_out/token_in_token_out/serving.py
+@@ -33,7 +33,7 @@ from vllm.entrypoints.serve.utils.request_logger import RequestLogger
+ from vllm.exceptions import GenerationError
+ from vllm.inputs import EngineInput, TokensPrompt, mm_input
+ from vllm.logger import init_logger
+-from vllm.logprobs import Logprob
++from vllm.logprobs import FlatLogprobs, Logprob
+ from vllm.multimodal.inputs import (
+     MultiModalKwargsItems,
+     PlaceholderRange,
+@@ -56,6 +56,12 @@ from .protocol import (
+     GenerateStreamResponse,
+ )
+ 
++import os as _os
++
++# Experiment switch: emit a flat per-token sampled logprob array on the
++# generate endpoint instead of OpenAI-style per-token objects.
++_FLAT_TOKEN_LOGPROBS = _os.environ.get("VLLM_GENERATE_FLAT_TOKEN_LOGPROBS", "0") == "1"
++
+ logger = init_logger(__name__)
+ 
+ 
+@@ -310,7 +316,17 @@ class ServingTokens(GenerateBaseServing):
+             out_logprobs = output.logprobs
+ 
+             # This is top_logprobs in completions API
+-            if sampling_params.logprobs is not None:
++            token_logprobs = None
++            if (
++                _FLAT_TOKEN_LOGPROBS
++                and sampling_params.logprobs == 0
++                and isinstance(out_logprobs, FlatLogprobs)
++            ):
++                # Sampled token is the first entry of every position.
++                flat = out_logprobs.logprobs
++                token_logprobs = [flat[i] for i in out_logprobs.start_indices]
++                logprobs = None
++            elif sampling_params.logprobs is not None:
+                 assert out_logprobs is not None, "Did not output logprobs"
+                 logprobs = self._create_tokens_logprobs(
+                     token_ids=token_ids,
+@@ -333,6 +349,7 @@ class ServingTokens(GenerateBaseServing):
+             choice_data = GenerateResponseChoice(
+                 index=output.index,
+                 logprobs=logprobs,
++                token_logprobs=token_logprobs,
+                 finish_reason=output.finish_reason if output.finish_reason else "stop",
+                 token_ids=as_list(output.token_ids),
+                 routed_experts=routed_experts_b64,
