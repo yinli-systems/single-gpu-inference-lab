@@ -39,15 +39,37 @@ or fused logprob kernel is not a serving improvement on this stack and is not pu
 remaining per-token CPU (0.73 → 0.39 of a core, back to the `gen` level) — **but throughput does not
 move**, because the API server is no longer the limiter.
 
-## 3. What is left, and where
+## 3. Transport ladder: it is the per-request slicing, not the D2H
 
-With objects gone (PR 1) and kernels and detokenisation ruled out, the 0.5B gap that remains
-(19.5K vs 23.3K at conc 256, ~16%; ~1% on 4B) sits on the **engine-core process**, which is pinned
-at ~1.0 core with or without logprobs: `LogprobsTensors.tolists()` (three `.cpu().numpy()` arrays
-per step), msgpack encoding of `LogprobsLists`, and the scheduler's per-request slicing of those
-lists every step. That is the "sampled-score-only transport" target: one float per token, one
-array per step, no token-id or rank arrays for requests that only asked for the sampled score. Its
-upper bound is ~16% on a CPU-bound 0.5B host and ~1% on a GPU-bound 4B; it has not been built.
+`vllm-main-exp-transport-ladder.patch` adds two more switches. `VLLM_EXP_SKIP_LOGPROB_SLICING=1`
+keeps the async D2H and `LogprobsTensors.tolists()` but makes the scheduler skip
+`logprobs.slice_request(...)` for every request (so nothing per-request is built, encoded, or
+processed downstream). `VLLM_EXP_DROP_LOGPROBS_AFTER_D2H=1` additionally skips `tolists()`. The
+endpoint tolerates the missing values (empty `token_logprobs`) under the experiment.
+`raw/transport-ladder-*.json`, Qwen2.5-0.5B, `return_token_logprobs` requests:
+
+| Concurrency | `gen` | PR 1 full path | + skip per-request slicing | + drop after D2H |
+| ---: | ---: | ---: | ---: | ---: |
+| 64 | 18,609 ± 330 | 16,337 ± 300 (0.88x) | **17,925 ± 280 (0.96x)** | 17,946 (0.96x) |
+| 256 | 22,448 ± 480 | 19,065 ± 160 (0.85x) | **22,431 ± 60 (1.00x)** | 22,147 (0.99x) |
+
+With slicing skipped, API-server CPU falls to the `gen` level (0.29–0.37 of a core) and the
+engine core is no faster or slower than `gen`. So the remaining sampled-token logprob cost is
+**entirely** in the per-request path that starts at `slice_request`: one `LogprobsLists` (three
+numpy arrays) per request per step, its msgpack encoding into `EngineCoreOutput`, and the output
+processor's per-token work on the API side. The D2H copy and `tolists()` are free at this scale.
+
+Upper bound for a sampled-score-only transport (one float per generated token, no token-id or rank
+arrays, no per-token objects): **+15 points at concurrency 256, +8 at 64** on the 0.5B model.
+
+## 4. What is left, and where
+
+With objects gone (PR 1), kernels and detokenisation ruled out, and section 3 locating the rest
+in the per-request `LogprobsLists` path, the sampled-score-only transport is the next change: for
+requests that asked only for the sampled token's logprob, the scheduler should hand the output
+processor one float per generated token instead of a three-array `LogprobsLists`, and the output
+processor should keep a float list instead of a `FlatLogprobs`. Measured upper bound +15 points
+(0.5B, c256), +8 (c64); ~1% on the GPU-bound 4B.
 
 Separately, skipping logprob detokenisation on `/inference/v1/generate` is a throughput-neutral
 CPU saving (~0.35 core on this host) that only matters where the API server is the bottleneck
