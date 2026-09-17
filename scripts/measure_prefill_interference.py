@@ -195,6 +195,12 @@ def main() -> None:
     ap.add_argument("--seed", type=int, default=113)
     ap.add_argument("--vocab-size", type=int, default=151_000, help="random token id range for synthetic prompts")
     ap.add_argument("--output", type=Path, required=True)
+    ap.add_argument(
+        "--trace-dir",
+        type=Path,
+        help="if set, start servers with --enable-logging-iteration-details and "
+        "VLLM_EXP_ITER_TRACE=<trace-dir>/<condition>.jsonl (needs the experiment patch)",
+    )
     args = ap.parse_args()
 
     rng = random.Random(args.seed)
@@ -214,6 +220,10 @@ def main() -> None:
     args.extra_server_args_list = args.extra_server_args.split() if args.extra_server_args else []
     for budget in [int(b) for b in args.chunk_budgets.split(",")]:
         flags = ["--max-num-batched-tokens", str(budget), "--no-enable-prefix-caching", *args.extra_server_args_list]
+        if args.trace_dir is not None:
+            args.trace_dir.mkdir(parents=True, exist_ok=True)
+            flags += ["--enable-logging-iteration-details"]
+            os.environ["VLLM_EXP_ITER_TRACE"] = str(args.trace_dir / f"{args.output.stem}-chunk{budget}.jsonl")
         log_path = args.output.with_suffix("") / f"server-chunk{budget}.log"
         # Server expects these attribute names
         args.served_model_name = args.served_model_name
