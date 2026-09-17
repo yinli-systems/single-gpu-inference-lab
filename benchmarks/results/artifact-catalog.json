@@ -2,7 +2,7 @@
   "category_counts": {
     "active": 5,
     "analysis": 1,
-    "negative": 2,
+    "negative": 3,
     "other": 9,
     "path_proof": 13,
     "positive": 7,
@@ -346,6 +346,18 @@
       "summary": "With the mask solved upstream, `logprobs=1` costs 0.71x native on a 0.5B model: ~40 us/token of API-server CPU building per-token logprob objects, not detokenization (`--skip-tokenizer-init` changes nothing) and not the kernel; points at a flat output contract."
     },
     {
+      "category": "negative",
+      "compact_file_count": 2,
+      "has_campaign_summary_json": false,
+      "has_evidence_status_json": false,
+      "has_readme": true,
+      "has_summary_json": true,
+      "path": "benchmarks/results/l20-mask-bitmap-removal-upper-bound",
+      "reference": "l20-mask-bitmap-removal-upper-bound/",
+      "status": "Negative result (L20)",
+      "summary": "Removing #54901's residual bitmap production and D2H entirely changes serving throughput by nothing measurable on 0.5B or 4B at concurrency 64/256; a conditional-fallback design is not pursued."
+    },
+    {
       "category": "path_proof",
       "compact_file_count": 3,
       "has_campaign_summary_json": false,
@@ -598,7 +610,7 @@
       "summary": "Custom three-way serving path evidence; not yet a broad win."
     }
   ],
-  "entry_count": 49,
+  "entry_count": 50,
   "index_path": "benchmarks/results/README.md",
   "result_root": "benchmarks/results",
   "schema_version": 1
