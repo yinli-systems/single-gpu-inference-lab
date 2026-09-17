@@ -23,6 +23,14 @@ SUPPORTED_VERSIONS = {"0.29.0"}
 MARKER = "_pack_compact_support_kernel"
 
 
+def package_only(patch_text: str, prefix: str = "vllm/") -> str:
+    """Keep only the per-file sections of a git diff that touch ``prefix``."""
+
+    sections = patch_text.split("diff --git ")
+    kept = [sec for sec in sections[1:] if sec.startswith(f"a/{prefix}")]
+    return "".join("diff --git " + sec for sec in kept)
+
+
 def site_root() -> Path:
     spec = importlib.util.find_spec("vllm")
     if spec is None or spec.origin is None:
@@ -66,8 +74,9 @@ def main() -> int:
     cmd = ["patch", "-p1", "--forward", "--no-backup-if-mismatch"]
     if args.revert:
         cmd.append("--reverse")
-    with PATCH.open("rb") as fh:
-        proc = subprocess.run(cmd, cwd=root, stdin=fh)
+    # The checked-in patch is the full upstream change, tests included; an
+    # installed wheel has no tests/ tree, so apply only the package files.
+    proc = subprocess.run(cmd, cwd=root, input=package_only(PATCH.read_text()), text=True)
     if proc.returncode != 0:
         print("patch failed; the installed sources may be partially modified", file=sys.stderr)
         return proc.returncode
