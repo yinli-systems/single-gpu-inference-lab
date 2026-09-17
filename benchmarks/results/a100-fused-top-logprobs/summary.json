@@ -37,7 +37,15 @@
     "repo_commit": "5f43f31d9a21d4a69106acbff131665b928560db",
     "all_runs_clean": true,
     "benchmark_script_sha256": "9d33376ec4b869266e0f37e06ebfe496cfb248dbc29a551a641f13cef5bdc8e2",
-    "kernel_source_sha256": "54732dff708e884902f49f8b3e2fa1db71a729eef2ed688260fe0351a3352eb1"
+    "kernel_source_sha256": "54732dff708e884902f49f8b3e2fa1db71a729eef2ed688260fe0351a3352eb1",
+    "kernel_source_supersessions": [
+      {
+        "date": "2026-09-17",
+        "kernel_source_sha256": "989c62102feec0f5a6c4be792682c1ee96347ad2b9c7ef4c1dddb3896f077dd7",
+        "change": "Masked-tile fix in _top_logprobs_partial_kernel/_vllm_top_logprobs_partial_kernel (all -inf tile no longer produces NaN in the row log-normalizer) and matching guard in the reduce kernels; wrappers now enforce same-device contiguous tensors. The selection algorithm and launch configuration are unchanged.",
+        "performance_effect": "Not remeasured on A100. The A100 timings above describe the pre-fix source 54732dff708e884902f49f8b3e2fa1db71a729eef2ed688260fe0351a3352eb1. Post-fix timing evidence is the L20 artifact benchmarks/results/l20-fused-top-logprobs-2026-09/."
+      }
+    ]
   },
   "shape": {
     "vocab": 151936,

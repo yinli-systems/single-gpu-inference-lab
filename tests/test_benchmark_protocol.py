@@ -273,12 +273,26 @@ def test_checked_in_top_logprobs_revalidation_matches_raw_trials():
         "included_in_cuda_event_interval": False,
     }
 
-    for source_key, source_path in (
-        ("benchmark_script_sha256", Path("scripts/benchmark_l20_top_logprobs.py")),
-        ("kernel_source_sha256", Path("src/l20_stack/ops/triton_sampling.py")),
-    ):
-        actual_hash = hashlib.sha256(source_path.read_bytes()).hexdigest()
-        assert summary["provenance"][source_key] == actual_hash
+    script_hash = hashlib.sha256(
+        Path("scripts/benchmark_l20_top_logprobs.py").read_bytes()
+    ).hexdigest()
+    assert summary["provenance"]["benchmark_script_sha256"] == script_hash
+
+    # The kernel source may move on after a measurement. Every such change must
+    # be acknowledged in the artifact as a dated supersession entry that names
+    # the new source hash and states whether performance was remeasured, so the
+    # A100 numbers are never silently re-attributed to code they did not run.
+    kernel_hash = hashlib.sha256(
+        Path("src/l20_stack/ops/triton_sampling.py").read_bytes()
+    ).hexdigest()
+    acknowledged = {summary["provenance"]["kernel_source_sha256"]}
+    for entry in summary["provenance"].get("kernel_source_supersessions", []):
+        assert entry["date"] and entry["change"] and entry["performance_effect"]
+        acknowledged.add(entry["kernel_source_sha256"])
+    assert kernel_hash in acknowledged, (
+        "triton_sampling.py changed since the artifact was measured; add a "
+        "kernel_source_supersessions entry to summary.json describing the change"
+    )
 
     for row in summary["rows"]:
         payloads = [
