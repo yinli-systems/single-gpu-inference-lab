@@ -95,7 +95,9 @@ async def one_generate_request(
         "seed": seed,
         **sampling,
     }
-    if logprobs is not None:
+    if isinstance(logprobs, dict):
+        params.update(logprobs)
+    elif logprobs is not None:
         params["logprobs"] = logprobs
     payload = {"model": model, "token_ids": token_ids, "sampling_params": params, "stream": False}
     start = time.perf_counter()
@@ -113,9 +115,13 @@ async def one_generate_request(
     mask = choice.get("sampling_mask")
     mask_sizes = [len(m) for m in mask] if mask else []
     lp = choice.get("logprobs")
-    got_logprobs = bool(lp and (lp.get("content") or lp.get("token_logprobs")))
+    flat = choice.get("token_logprobs")
+    got_logprobs = bool(lp and (lp.get("content") or lp.get("token_logprobs"))) or bool(flat)
+    if flat is not None and len(flat) != out_tokens:
+        raise RuntimeError(f"token_logprobs length {len(flat)} != {out_tokens} tokens")
     return {
         "ttft_s": end - start,
+        "flat_token_logprobs": flat is not None,
         "e2e_s": end - start,
         "itl_s": [],
         "chunks": 1,
@@ -152,7 +158,9 @@ async def one_request(
         "seed": seed,
         **sampling,
     }
-    if logprobs is not None:
+    if isinstance(logprobs, dict):
+        payload.update(logprobs)
+    elif logprobs is not None:
         payload["logprobs"] = logprobs
     start = time.perf_counter()
     first_token = None
@@ -289,6 +297,7 @@ async def run_round(
         },
         "e2e_ms": {"median": 1e3 * statistics.median(e2es), "p99": 1e3 * pct(e2es, 0.99)},
         "all_got_logprobs": all(r["got_logprobs"] for r in results),
+        "all_flat_token_logprobs": all(r.get("flat_token_logprobs", False) for r in results),
         "mask_entries_total": sum(r["mask_entries"] for r in results),
         "mask_mean_size": statistics.fmean(
             [r["mask_mean_size"] for r in results if r["mask_mean_size"] is not None]
@@ -458,6 +467,9 @@ def main() -> None:
         # upper-bound experiment: upstream compact ids without producing or
         # copying the bitmask (raises on tie overflow; not exact)
         "mask_nobitmap": ["--return-sampling-mask", "--logprobs-mode", "processed_logprobs"],
+        # experiment: generate endpoint emits flat token_logprobs (env-gated patch)
+        "native_flat": [],
+        "mask_upstream_flat": ["--return-sampling-mask", "--logprobs-mode", "processed_logprobs"],
         "mask_upstream_skip_tokenizer": [
             "--return-sampling-mask", "--logprobs-mode", "processed_logprobs", "--skip-tokenizer-init",
         ],
@@ -465,11 +477,18 @@ def main() -> None:
     server_env = {
         "native_fi_off": {"VLLM_USE_FLASHINFER_SAMPLER": "0"},
         "mask_nobitmap": {"VLLM_MASK_SKIP_BITMAP": "1"},
+        "native_flat": {"VLLM_GENERATE_FLAT_TOKEN_LOGPROBS": "1"},
+        "mask_upstream_flat": {"VLLM_GENERATE_FLAT_TOKEN_LOGPROBS": "1"},
         "mask_fi_off": {"VLLM_USE_FLASHINFER_SAMPLER": "0"},
         "mask_compact": {"VLLM_SAMPLING_MASK_COMPACT": "1"},
         "mask_bitmap": {"VLLM_SAMPLING_MASK_COMPACT": "0"},
     }
-    request_logprobs = {"gen": None, "logprobs": 1}
+    request_logprobs = {
+        "gen": None,
+        "logprobs": 1,  # sampled token + top-1 (what the earlier artifacts measured)
+        "logprobs0": 0,  # sampled-token logprob only: the RL-correct request
+        "logprobs0_flat": {"logprobs": 0, "flat_logprobs": True},  # + existing engine knob
+    }
     extra = args.extra_server_args.split() if args.extra_server_args else []
 
     record: dict[str, Any] = {
