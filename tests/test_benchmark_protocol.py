@@ -414,3 +414,73 @@ def test_checked_in_top_logprobs_revalidation_matches_raw_trials():
     for path, claim in public_claims.items():
         assert claim in path.read_text(encoding="utf-8")
     assert summary["claim"]["paired_speedup_range"] == "8.39x-9.45x"
+
+
+def test_checked_in_l20_post_fix_top_logprobs_artifact_matches_raw_trials():
+    artifact_root = Path("benchmarks/results/l20-fused-top-logprobs-2026-09")
+    summary = json.loads((artifact_root / "summary.json").read_text(encoding="utf-8"))
+
+    assert summary["schema_version"] == 2
+    assert summary["evidence_status"] == "controlled_revalidation"
+    assert summary["hardware"]["gpu"] == "NVIDIA L20"
+    assert summary["hardware"]["compute_capability"] == [8, 9]
+    assert summary["collection"]["independent_processes_per_shape"] == 3
+    assert summary["collection"]["distinct_seeds_per_shape"] == [113, 114, 115]
+    assert summary["collection"]["total_paired_trials_per_shape"] == 15
+    assert summary["provenance"]["all_runs_clean"] is True
+    assert summary["timing_protocol"]["clock_policy"] == "steady-state-gemm"
+    assert summary["shape"] == {
+        "vocab": 151_936,
+        "top_n": 5,
+        "temperature": 0.8,
+        "dtype": "float16",
+    }
+
+    # This artifact is the post-fix measurement: its kernel hash must be the
+    # one the A100 artifact's supersession entry points at.
+    a100 = json.loads(
+        Path("benchmarks/results/a100-fused-top-logprobs/summary.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    superseding = {
+        entry["kernel_source_sha256"]
+        for entry in a100["provenance"]["kernel_source_supersessions"]
+    }
+    assert summary["provenance"]["kernel_source_sha256"] in superseding
+
+    for relative, expected_hash in summary["provenance"]["raw_file_sha256"].items():
+        assert hashlib.sha256((artifact_root / "raw" / relative).read_bytes()).hexdigest() == (
+            expected_hash
+        )
+
+    for row in summary["rows"]:
+        payloads = [
+            json.loads((artifact_root / relative).read_text(encoding="utf-8"))
+            for relative in row["raw_files"]
+        ]
+        assert len(payloads) == 3
+        assert {
+            payload["timing_policy"]["provider_order"]["seed"] for payload in payloads
+        } == {113, 114, 115}
+        for payload in payloads:
+            assert payload["schema_version"] == 2
+            assert payload["shape"]["batch"] == row["batch"]
+            assert payload["provenance"]["commit"] == summary["provenance"]["repo_commit"]
+            assert payload["provenance"]["dirty"] is False
+            assert payload["environment"]["gpu"]["name"] == "NVIDIA L20"
+            assert payload["correctness"]["tie_aware_match"] is True
+            assert payload["correctness"]["max_abs_logprob_error"] <= 5e-7
+        for baseline in ("torch_logsoftmax_then_topk", "torch_logsumexp_then_topk"):
+            paired = [
+                value
+                for payload in payloads
+                for value in payload["paired_speedups"][f"vs_{baseline}"]["paired_trial_values"]
+            ]
+            assert len(paired) == 15
+            recorded = row[f"paired_speedup_vs_{baseline}"]
+            assert recorded["median"] == statistics.median(paired)
+            assert recorded["min"] == min(paired)
+            assert recorded["max"] == max(paired)
+            assert recorded["all_15_trials_faster"] is True
+            assert min(paired) > 1.0

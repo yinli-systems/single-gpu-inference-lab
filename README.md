@@ -15,7 +15,7 @@ used as controls, and Apple M4 experiments provide a CPU deployment boundary.
 
 **Start here:** [reviewer guide](docs/reviewer-guide.md) ·
 [featured case study](docs/l20-sparse-penalty-case-study.md) ·
-[correctness notice](docs/sampling-correctness-notice-2026-07.md) ·
+[correctness notices](docs/sampling-correctness-notice-2026-07.md) ([2026-09](docs/top-logprobs-correctness-notice-2026-09.md)) ·
 [result index](benchmarks/results/README.md) ·
 [experiment status](docs/experiment-status.md) ·
 [repository map](docs/repo-map.md)
@@ -24,7 +24,7 @@ used as controls, and Apple M4 experiments provide a CPU deployment boundary.
 
 | Boundary | Implementation | Measured result | Scope |
 | --- | --- | --- | --- |
-| [Fused top-logprobs](src/l20_stack/ops/triton_sampling.py) | Two-stage Triton selection that avoids full-vocabulary log-softmax materialization | [**8.39x–9.45x** paired median speedup versus composed PyTorch baselines](benchmarks/results/a100-fused-top-logprobs/README.md); 3 independent seeded inputs per shape across 6 timing runs pass tie-aware correctness with at most `4.768e-7` error | Repeated, steady-state GEMM-conditioned A100 operator microbenchmark; not a serving-speed claim |
+| [Fused top-logprobs](src/l20_stack/ops/triton_sampling.py) | Two-stage Triton selection that avoids full-vocabulary log-softmax materialization | [**8.39x–9.45x** paired median speedup versus composed PyTorch baselines](benchmarks/results/a100-fused-top-logprobs/README.md) on A100 (pre-fix source); [**7.33x–8.25x**](benchmarks/results/l20-fused-top-logprobs-2026-09/README.md) on L20 after the [2026-09 masked-tile fix](docs/top-logprobs-correctness-notice-2026-09.md); 3 independent seeded inputs per shape pass tie-aware correctness with at most `4.768e-7` error | Repeated, steady-state GEMM-conditioned operator microbenchmarks; not a serving-speed claim |
 | [Sparse repetition penalty](integrations/vllm/cuda/l20_sparse_repetition_penalty.cu) | Custom CUDA kernel plus [PyTorch `TORCH_LIBRARY` registration](integrations/vllm/cuda/l20_sparse_repetition_penalty.cpp) and measured dispatch gate | [**39/39** correct L20 cases; **1.26x** median and **4.09x** best kernel speedup](benchmarks/results/l20-sparse-repetition-penalty/README.md); 0/39 measured policy regressions | Standalone kernel matrix |
 | [Residual RMSNorm](src/l20_stack/ops/triton_rmsnorm.py) | Triton fused residual-add + RMSNorm paths against PyTorch and FlashInfer | [**24/24** shapes correct; custom in-place path fastest on **14/24** shapes; best **2.412x**](benchmarks/results/l20-residual-rmsnorm-v3/README.md) | L20 FP16 microbenchmark; large prefill mostly approaches parity |
 | [Serving-path correctness audit](docs/sampling-correctness-notice-2026-07.md) | Corrected nucleus threshold semantics, removed a hot-path host sync, hardened CUDA device checks, and disabled unsafe deferred-penalty fusion | Historical custom-sampler serving numbers are **excluded from current performance claims** until GPU remeasurement | Correctness takes precedence over retaining a favorable result |

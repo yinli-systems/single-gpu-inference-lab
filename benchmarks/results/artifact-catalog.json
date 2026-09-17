@@ -5,7 +5,7 @@
     "negative": 2,
     "other": 6,
     "path_proof": 13,
-    "positive": 6,
+    "positive": 7,
     "superseded": 12
   },
   "entries": [
@@ -298,6 +298,18 @@
       "summary": "Three clean processes and distinct seeds per shape validate the dedicated top-logprobs primitive with 8.39x-9.45x paired median speedup in a steady-state GEMM-conditioned operator protocol; the original clock-uncontrolled files are retained only for provenance."
     },
     {
+      "category": "positive",
+      "compact_file_count": 2,
+      "has_campaign_summary_json": false,
+      "has_evidence_status_json": false,
+      "has_readme": true,
+      "has_summary_json": true,
+      "path": "benchmarks/results/l20-fused-top-logprobs-2026-09",
+      "reference": "l20-fused-top-logprobs-2026-09/",
+      "status": "Controlled L20 positive micro result",
+      "summary": "Post-fix remeasurement of the top-logprobs primitive after the all-masked-tile NaN fix (commit `8a987d2`): three clean processes and distinct seeds per shape, 7.33x-8.25x paired median speedup in the same steady-state GEMM-conditioned operator protocol, 4.77e-7 max logprob error. The A100 artifact describes the pre-fix source and was not remeasured."
+    },
+    {
       "category": "path_proof",
       "compact_file_count": 3,
       "has_campaign_summary_json": false,
@@ -550,7 +562,7 @@
       "summary": "Custom three-way serving path evidence; not yet a broad win."
     }
   ],
-  "entry_count": 45,
+  "entry_count": 46,
   "index_path": "benchmarks/results/README.md",
   "result_root": "benchmarks/results",
   "schema_version": 1
