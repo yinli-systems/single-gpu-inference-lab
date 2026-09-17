@@ -3,7 +3,7 @@
     "active": 5,
     "analysis": 1,
     "negative": 4,
-    "other": 9,
+    "other": 10,
     "path_proof": 13,
     "positive": 8,
     "superseded": 12
@@ -382,6 +382,18 @@
       "summary": "After the flat response, skipping `_ranks_kernel` is within noise and skipping every engine-side logprob kernel is worth <=5 points; detokenisation is the API server's remaining CPU but not the limiter. The remaining 0.5B gap (~16%) is engine-core transport/slicing; a rank-less kernel is not pursued."
     },
     {
+      "category": "other",
+      "compact_file_count": 2,
+      "has_campaign_summary_json": false,
+      "has_evidence_status_json": false,
+      "has_readme": true,
+      "has_summary_json": true,
+      "path": "benchmarks/results/l20-prefill-interference",
+      "reference": "l20-prefill-interference/",
+      "status": "Reproducer (L20)",
+      "summary": "8 decoders (13 ms/token undisturbed) under two injected 32k prefills on Qwen3-4B: every fixed token budget from 64 to 8192 fails a 25 ms ITL SLO; step cost is nonlinear in chunk size and small chunks cost 3.5x in TTFT. Motivates a wall-clock-budgeted prefill controller."
+    },
+    {
       "category": "path_proof",
       "compact_file_count": 3,
       "has_campaign_summary_json": false,
@@ -634,7 +646,7 @@
       "summary": "Custom three-way serving path evidence; not yet a broad win."
     }
   ],
-  "entry_count": 52,
+  "entry_count": 53,
   "index_path": "benchmarks/results/README.md",
   "result_root": "benchmarks/results",
   "schema_version": 1
