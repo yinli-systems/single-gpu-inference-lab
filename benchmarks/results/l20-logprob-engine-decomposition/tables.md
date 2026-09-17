@@ -59,3 +59,29 @@ Model `Qwen2.5-0.5B-Instruct`, 128 prompts x 256 tokens (ignore_eos), concurrenc
 | `native_skip_tokenizer` | `gen` | 18,740 (17,871–18,754) | 1.014x | 866 ms | 882 ms | 0.37 | 0.94 | 1,632 | — |
 | `native_skip_tokenizer` | `token_logprobs` | 16,402 (15,598–16,521) | 0.888x | 983 ms | 996 ms | 0.38 | 0.98 | 6,829 | — |
 
+### transport-ladder-qwen25-05b-c256
+
+Model `Qwen2.5-0.5B-Instruct`, 512 prompts x 256 tokens (ignore_eos), concurrency 256, API `generate`, sampling {'temperature': 1.0, 'top_k': 50, 'top_p': 0.95}, 3 interleaved rounds.
+
+| Server | Request | tok/s (median, min–max) | vs native/gen | e2e p50 | e2e p99 | API CPU | core CPU | bytes/req | mask mean |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| `native` | `gen` | 22,448 (21,486–22,524) | 1.000x | 2,063 ms | 4,107 ms | 0.37 | 0.97 | 1,632 | — |
+| `native` | `token_logprobs` | 19,065 (18,998–19,376) | 0.849x | 2,500 ms | 4,990 ms | 0.72 | 1.00 | 6,830 | — |
+| `native_skip_slicing` | `gen` | 23,193 (21,529–23,229) | 1.033x | 2,146 ms | 4,166 ms | 0.28 | 0.99 | 1,632 | — |
+| `native_skip_slicing` | `token_logprobs` | 22,431 (22,413–22,532) | 0.999x | 2,129 ms | 4,247 ms | 0.29 | 0.99 | 1,626 | — |
+| `native_drop_after_d2h` | `gen` | 23,292 (22,154–23,429) | 1.038x | 2,060 ms | 4,091 ms | 0.34 | 0.99 | 1,631 | — |
+| `native_drop_after_d2h` | `token_logprobs` | 22,147 (21,605–22,721) | 0.987x | 2,113 ms | 4,201 ms | 0.32 | 0.98 | 1,630 | — |
+
+### transport-ladder-qwen25-05b-c64
+
+Model `Qwen2.5-0.5B-Instruct`, 128 prompts x 256 tokens (ignore_eos), concurrency 64, API `generate`, sampling {'temperature': 1.0, 'top_k': 50, 'top_p': 0.95}, 3 interleaved rounds.
+
+| Server | Request | tok/s (median, min–max) | vs native/gen | e2e p50 | e2e p99 | API CPU | core CPU | bytes/req | mask mean |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| `native` | `gen` | 18,445 (17,823–18,609) | 1.000x | 874 ms | 898 ms | 0.40 | 0.92 | 1,635 | — |
+| `native` | `token_logprobs` | 16,337 (15,675–16,350) | 0.886x | 990 ms | 1,013 ms | 0.59 | 0.98 | 6,832 | — |
+| `native_skip_slicing` | `gen` | 18,610 (17,845–18,687) | 1.009x | 865 ms | 891 ms | 0.31 | 0.93 | 1,631 | — |
+| `native_skip_slicing` | `token_logprobs` | 17,925 (17,413–18,050) | 0.972x | 895 ms | 922 ms | 0.33 | 0.95 | 1,631 | — |
+| `native_drop_after_d2h` | `gen` | 18,510 (17,687–18,636) | 1.004x | 867 ms | 899 ms | 0.34 | 0.93 | 1,635 | — |
+| `native_drop_after_d2h` | `token_logprobs` | 17,946 (17,884–18,011) | 0.973x | 898 ms | 925 ms | 0.31 | 0.94 | 1,630 | — |
+
