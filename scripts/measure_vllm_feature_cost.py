@@ -95,11 +95,13 @@ async def one_generate_request(
         "seed": seed,
         **sampling,
     }
+    payload = {"model": model, "token_ids": token_ids, "sampling_params": params, "stream": False}
     if isinstance(logprobs, dict):
-        params.update(logprobs)
+        top_level = {k: v for k, v in logprobs.items() if k == "return_token_logprobs"}
+        params.update({k: v for k, v in logprobs.items() if k not in top_level})
+        payload.update(top_level)
     elif logprobs is not None:
         params["logprobs"] = logprobs
-    payload = {"model": model, "token_ids": token_ids, "sampling_params": params, "stream": False}
     start = time.perf_counter()
     async with session.post(url, json=payload) as resp:
         raw = await resp.read()
@@ -488,6 +490,8 @@ def main() -> None:
         "logprobs": 1,  # sampled token + top-1 (what the earlier artifacts measured)
         "logprobs0": 0,  # sampled-token logprob only: the RL-correct request
         "logprobs0_flat": {"logprobs": 0, "flat_logprobs": True},  # + existing engine knob
+        # request-level field of the upstream proposal (non-streaming generate only)
+        "token_logprobs": {"return_token_logprobs": True},
     }
     extra = args.extra_server_args.split() if args.extra_server_args else []
 
