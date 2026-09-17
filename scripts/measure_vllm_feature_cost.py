@@ -404,7 +404,8 @@ def main() -> None:
     parser.add_argument(
         "--server-conditions",
         default="native,mask",
-        help="comma list from {native,mask,mask_fi_off,mask_compact,mask_bitmap}; "
+        help="comma list from {native,native_fi_off,native_processed,mask,mask_fi_off,"
+        "mask_compact,mask_bitmap}; "
         "each starts its own vllm serve",
     )
     parser.add_argument("--request-conditions", default="gen,logprobs")
@@ -436,8 +437,14 @@ def main() -> None:
         # same flags; selected by env on a vLLM carrying the compact-mask patch
         "mask_compact": ["--return-sampling-mask", "--logprobs-mode", "processed_logprobs"],
         "mask_bitmap": ["--return-sampling-mask", "--logprobs-mode", "processed_logprobs"],
+        # native engine with the FlashInfer sampler disabled: isolates the cost
+        # of the top-k/top-p + Gumbel fallback that the mask server also uses
+        "native_fi_off": [],
+        # native engine in processed-logprobs mode without the mask
+        "native_processed": ["--logprobs-mode", "processed_logprobs"],
     }
     server_env = {
+        "native_fi_off": {"VLLM_USE_FLASHINFER_SAMPLER": "0"},
         "mask_fi_off": {"VLLM_USE_FLASHINFER_SAMPLER": "0"},
         "mask_compact": {"VLLM_SAMPLING_MASK_COMPACT": "1"},
         "mask_bitmap": {"VLLM_SAMPLING_MASK_COMPACT": "0"},
