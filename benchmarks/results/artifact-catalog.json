@@ -3,7 +3,7 @@
     "active": 5,
     "analysis": 1,
     "negative": 2,
-    "other": 8,
+    "other": 9,
     "path_proof": 13,
     "positive": 7,
     "superseded": 12
@@ -334,6 +334,18 @@
       "summary": "vLLM 0.29.0 with `--return-sampling-mask`: the shipped bitmap layout caps both a 0.5B and a 4B model at ~1.6K tok/s; the compact-mask patch restores 0.77x (0.5B) and 0.97x (4B) of native throughput with identical tokens under batch-invariant mode."
     },
     {
+      "category": "other",
+      "compact_file_count": 2,
+      "has_campaign_summary_json": false,
+      "has_evidence_status_json": false,
+      "has_readme": true,
+      "has_summary_json": true,
+      "path": "benchmarks/results/l20-logprobs-feature-cost",
+      "reference": "l20-logprobs-feature-cost/",
+      "status": "Diagnostic (L20)",
+      "summary": "With the mask solved upstream, `logprobs=1` costs 0.71x native on a 0.5B model: ~40 us/token of API-server CPU building per-token logprob objects, not detokenization (`--skip-tokenizer-init` changes nothing) and not the kernel; points at a flat output contract."
+    },
+    {
       "category": "path_proof",
       "compact_file_count": 3,
       "has_campaign_summary_json": false,
@@ -586,7 +598,7 @@
       "summary": "Custom three-way serving path evidence; not yet a broad win."
     }
   ],
-  "entry_count": 48,
+  "entry_count": 49,
   "index_path": "benchmarks/results/README.md",
   "result_root": "benchmarks/results",
   "schema_version": 1
