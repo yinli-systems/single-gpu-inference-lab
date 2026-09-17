@@ -1,5 +1,11 @@
 # Sampling-support output path: bitmap vs compact (L20 microbenchmark)
 
+> **Status (2026-09-18):** the "upstream" column is vLLM **v0.29.0**. Upstream
+> [#54901](https://github.com/vllm-project/vllm/pull/54901) (0.29.1) already replaced the host
+> unpack with a compact `[B, max_top_k]` layout; this benchmark therefore documents the 0.29.0
+> cost and an independent implementation of the same idea, not an improvement over current
+> upstream. See the serving artifact for the replication framing.
+
 Measures the whole per-step path a vLLM model runner pays to return the
 sampling mask (`--return-sampling-mask`): the GPU pack kernel, the
 device-to-host copy, and the host-side construction of the CSR lists the

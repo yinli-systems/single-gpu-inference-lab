@@ -1,5 +1,16 @@
 # vLLM sampling-mask serving A/B on L20: native vs bitmap mask vs compact mask
 
+> **Status (2026-09-18): independent replication, not a novel fix.** Upstream
+> [vllm-project/vllm#54901](https://github.com/vllm-project/vllm/pull/54901) (merged 2026-09-04,
+> shipped in 0.29.1) diagnosed the same host-side `np.unpackbits` bottleneck and landed the same
+> `top_k`-bounded compact layout, sized by the batch's largest `top_k`. This work was done against
+> v0.29.0 without knowledge of that PR. What this artifact adds is a replication on a different GPU
+> family (L20 vs GB200), host, and models, plus the batch-invariant token equivalence and the
+> bitmap-vs-bitmap repeatability control. The patch in `integrations/vllm/` applies to 0.29.0 only
+> and should not be used on 0.29.1+. Upstream's own description notes that the bit-packed mask is
+> still produced and copied to the host as the overflow fallback; that residual is measured in
+> [`../l20-support-pack-path/`](../l20-support-pack-path/README.md).
+
 End-to-end serving evidence for the compact sampling-mask layout
 ([patch](../../../integrations/vllm/vllm-v0.29.0-compact-sampling-mask.patch))
 against vLLM v0.29.0's shipped bitmap layout, with the native engine (no mask)
@@ -117,14 +128,16 @@ Serving level, per-request seeds, `VLLM_BATCH_INVARIANT=1` (`raw/qwen25-05b-bi-*
 | bitmap vs compact, `logprobs` | 128 / 128 | 124 / 128 |
 | bitmap run A vs bitmap run B, `gen` (control) | 128 / 128 | 123 / 128 |
 
-The control row is decisive: two runs of the *unpatched* bitmap server disagree on exactly
-as many masks (5 of 128) as bitmap-vs-compact does. The differences are all at position 0
-(the prefill step) or at a concurrency-wave boundary, involve only 1–5 tail tokens next to
-the top-p cut-off, and for the same request go in opposite directions between the `gen`
-and `logprobs` runs. They come from vLLM's top-p tail depending on
-the batch it was computed in (`apply_top_k_top_p` picks a Triton kernel at batch >= 8 and a
-sort-based PyTorch path below), which `VLLM_BATCH_INVARIANT` does not cover. The sampled
-token was inside both masks in every case. Without batch-invariant mode, token sequences
+Two runs of the *unpatched* bitmap server disagree on as many masks (5 of 128) as
+bitmap-vs-compact does under the same protocol, so this experiment does not attribute the
+remaining five differences to the compact representation. Observed properties of those
+differences, without a traced cause: all at position 0 (the prefill step) or at a
+concurrency-wave boundary; 1–5 tail tokens next to the top-p cut-off; for the same request
+they go in opposite directions between the `gen` and `logprobs` runs; the sampled token was
+inside both masks in every case. A plausible mechanism is that the top-p tail depends on the
+batch it was computed in (`apply_top_k_top_p` uses a Triton kernel at batch >= 8 and a
+sort-based PyTorch path below, which `VLLM_BATCH_INVARIANT` does not cover), but that has not
+been verified per request. Without batch-invariant mode, token sequences
 themselves diverge between any two servers after a few dozen tokens
 (`raw/*equivalence*.json`), which is expected and unrelated to the mask layout.
 

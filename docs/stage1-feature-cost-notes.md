@@ -1,5 +1,11 @@
 # Stage 1 notes: where the sampling-mask compatibility penalty actually sits (vLLM v0.29.0)
 
+> **Superseded upstream.** Everything below describes v0.29.0. vLLM #54901 (merged 2026-09-04,
+> in 0.29.1) fixed the host-side unpack with a compact `[B, max_top_k]` layout; its PR text also
+> notes the bit-packed mask is still produced and copied as the overflow fallback, and that the
+> remaining gap on small models is frontend work. The measurements in this repository were made
+> independently against v0.29.0 and are kept as a replication.
+
 Working notes; the measured artifacts live under `benchmarks/results/`.
 
 ## Code path (v0.29.0, `vllm/v1/worker/gpu/sample/`)
