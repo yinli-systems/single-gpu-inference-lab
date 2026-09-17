@@ -496,6 +496,9 @@ def main() -> None:
         # experiment: generate endpoint emits flat token_logprobs (env-gated patch)
         "native_flat": [],
         "mask_upstream_flat": ["--return-sampling-mask", "--logprobs-mode", "processed_logprobs"],
+        # engine-side decomposition experiments (env-gated patch on logprob.py)
+        "native_skip_ranks": [],
+        "native_skip_logprob_engine": [],
         "mask_upstream_skip_tokenizer": [
             "--return-sampling-mask", "--logprobs-mode", "processed_logprobs", "--skip-tokenizer-init",
         ],
@@ -504,6 +507,8 @@ def main() -> None:
         "native_fi_off": {"VLLM_USE_FLASHINFER_SAMPLER": "0"},
         "mask_nobitmap": {"VLLM_MASK_SKIP_BITMAP": "1"},
         "native_flat": {"VLLM_GENERATE_FLAT_TOKEN_LOGPROBS": "1"},
+        "native_skip_ranks": {"VLLM_EXP_SKIP_RANKS": "1"},
+        "native_skip_logprob_engine": {"VLLM_EXP_SKIP_LOGPROBS_ENGINE": "1"},
         "mask_upstream_flat": {"VLLM_GENERATE_FLAT_TOKEN_LOGPROBS": "1"},
         "mask_fi_off": {"VLLM_USE_FLASHINFER_SAMPLER": "0"},
         "mask_compact": {"VLLM_SAMPLING_MASK_COMPACT": "1"},
