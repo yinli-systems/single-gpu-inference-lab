@@ -189,6 +189,12 @@ def main() -> None:
     ap.add_argument("--extra-server-args", default="")
     ap.add_argument("--background", type=int, default=8)
     ap.add_argument("--background-prompt-tokens", type=int, default=128)
+    ap.add_argument(
+        "--background-prompt-tokens-list",
+        default="",
+        help="comma-separated per-decoder prompt lengths, cycled over --background "
+        "(decode KV-distribution control: balanced vs skewed at equal aggregate KV)",
+    )
     ap.add_argument("--background-tokens", type=int, default=4096)
     ap.add_argument("--settle-tokens", type=int, default=64)
     ap.add_argument("--before-window-s", type=float, default=3.0)
@@ -216,7 +222,8 @@ def main() -> None:
     args = ap.parse_args()
 
     rng = random.Random(args.seed)
-    bg_prompts = [[rng.randrange(1000, args.vocab_size) for _ in range(args.background_prompt_tokens)] for _ in range(args.background)]
+    bg_lens = [int(x) for x in args.background_prompt_tokens_list.split(",") if x] or [args.background_prompt_tokens]
+    bg_prompts = [[rng.randrange(1000, args.vocab_size) for _ in range(bg_lens[i % len(bg_lens)])] for i in range(args.background)]
     long_prompts = [[rng.randrange(1000, args.vocab_size) for _ in range(args.long_tokens)] for _ in range(args.inject)]
 
     record: dict[str, Any] = {
@@ -225,7 +232,7 @@ def main() -> None:
         "generated_at_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         "provenance": git_provenance(),
         "model": args.model,
-        "workload": {k: getattr(args, k) for k in ("background", "background_prompt_tokens", "background_tokens", "settle_tokens", "inject", "long_tokens", "long_output_tokens", "repeats", "seed", "max_model_len", "max_num_seqs", "long_prefill_token_threshold")},
+        "workload": {k: getattr(args, k) for k in ("background", "background_prompt_tokens", "background_prompt_tokens_list", "background_tokens", "settle_tokens", "inject", "long_tokens", "long_output_tokens", "repeats", "seed", "max_model_len", "max_num_seqs", "long_prefill_token_threshold")},
         "trace": args.trace_dir is not None,
         "conditions": {},
         "nvidia_smi_before": nvidia_smi(),
