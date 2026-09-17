@@ -455,12 +455,16 @@ def main() -> None:
         # token-in/token-out server without a tokenizer: removes per-token
         # logprob detokenization on the API side
         "native_skip_tokenizer": ["--skip-tokenizer-init"],
+        # upper-bound experiment: upstream compact ids without producing or
+        # copying the bitmask (raises on tie overflow; not exact)
+        "mask_nobitmap": ["--return-sampling-mask", "--logprobs-mode", "processed_logprobs"],
         "mask_upstream_skip_tokenizer": [
             "--return-sampling-mask", "--logprobs-mode", "processed_logprobs", "--skip-tokenizer-init",
         ],
     }
     server_env = {
         "native_fi_off": {"VLLM_USE_FLASHINFER_SAMPLER": "0"},
+        "mask_nobitmap": {"VLLM_MASK_SKIP_BITMAP": "1"},
         "mask_fi_off": {"VLLM_USE_FLASHINFER_SAMPLER": "0"},
         "mask_compact": {"VLLM_SAMPLING_MASK_COMPACT": "1"},
         "mask_bitmap": {"VLLM_SAMPLING_MASK_COMPACT": "0"},
