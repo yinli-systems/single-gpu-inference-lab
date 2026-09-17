@@ -54,12 +54,31 @@ Token sequences identical 16/16; `token_logprobs` length equals the generated le
 maximum absolute difference between the flat values and `content[i].logprob` is **0.0**; the flat
 response carries no `logprobs` object.
 
+## Final form: `return_token_logprobs` request field
+
+The env switch was replaced by a request-level field (`GenerateRequest.return_token_logprobs`),
+which sets `flat_logprobs=True` server-side, defaults `logprobs` to 0, keeps the OpenAI objects
+when `logprobs > 0`, and rejects `stream=True` with a 400
+(`vllm-main-return-token-logprobs.patch`, with four endpoint tests that pass against the
+installed server). Re-measured with the field (`raw/*-final-field.json`, commit `89019c8`):
+
+| Model | Server | `gen` | `logprobs=0` | `return_token_logprobs` |
+| --- | --- | ---: | ---: | ---: |
+| Qwen2.5-0.5B | `native` | 18,514 | 13,710 (0.74x) | **15,189 (0.82x)**; rounds 15,043–16,774 |
+| Qwen2.5-0.5B | `mask_upstream` | 16,504 | 11,416 (0.62x) | **13,920 (0.75x)** |
+| Qwen3-4B | `mask_upstream` | 3,431 | 3,315 (0.94x of native) | **3,458 (0.98x of native)** |
+
+The 0.5B native median is lower than the env-gated run (15.2K vs 16.6K) with a wider spread
+across rounds (15.0–16.8K); the mask-server and 4B numbers reproduce the earlier runs. The
+conservative statement is the median: +11 points on 0.5B native, +13 points on 0.5B with the
+mask, +4 points on 4B with the mask.
+
 ## Status
 
-Upper-bound experiment that turned out to be the feature itself: exact, small, opt-in, and it
-composes with #54901. Not yet proposed upstream; the request-level switch should be an explicit
-field rather than an environment variable before it is. No claim about other endpoints (the
-OpenAI `/v1/completions` route keeps its schema) or about streaming.
+Exact, small, opt-in, composes with #54901. Prepared as an upstream PR (branch
+`flat-token-logprobs` on the user's vLLM fork); submission waits on the submitter's DCO sign-off
+and line-by-line review, which vLLM's contributing policy requires of the human author. No claim
+about other endpoints (the OpenAI `/v1/completions` route keeps its schema) or about streaming.
 
 ## Files
 
