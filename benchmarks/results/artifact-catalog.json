@@ -2,7 +2,7 @@
   "category_counts": {
     "active": 5,
     "analysis": 1,
-    "negative": 3,
+    "negative": 4,
     "other": 9,
     "path_proof": 13,
     "positive": 8,
@@ -359,7 +359,7 @@
     },
     {
       "category": "positive",
-      "compact_file_count": 2,
+      "compact_file_count": 3,
       "has_campaign_summary_json": false,
       "has_evidence_status_json": false,
       "has_readme": true,
@@ -368,6 +368,18 @@
       "reference": "l20-flat-token-logprobs/",
       "status": "Controlled L20 positive serving result",
       "summary": "A flat per-token `token_logprobs` array on `/inference/v1/generate` (exact, ~25 lines, opt-in) lifts `logprobs=0` from 0.73x to 0.89x of native on Qwen2.5-0.5B, and the combined mask+logprob RL contract from 0.94x to 0.98x on Qwen3-4B; values identical to the OpenAI-style path (max abs diff 0.0)."
+    },
+    {
+      "category": "negative",
+      "compact_file_count": 2,
+      "has_campaign_summary_json": false,
+      "has_evidence_status_json": false,
+      "has_readme": true,
+      "has_summary_json": true,
+      "path": "benchmarks/results/l20-logprob-engine-decomposition",
+      "reference": "l20-logprob-engine-decomposition/",
+      "status": "Diagnostic / negative result (L20)",
+      "summary": "After the flat response, skipping `_ranks_kernel` is within noise and skipping every engine-side logprob kernel is worth <=5 points; detokenisation is the API server's remaining CPU but not the limiter. The remaining 0.5B gap (~16%) is engine-core transport/slicing; a rank-less kernel is not pursued."
     },
     {
       "category": "path_proof",
@@ -622,7 +634,7 @@
       "summary": "Custom three-way serving path evidence; not yet a broad win."
     }
   ],
-  "entry_count": 51,
+  "entry_count": 52,
   "index_path": "benchmarks/results/README.md",
   "result_root": "benchmarks/results",
   "schema_version": 1
