@@ -119,7 +119,7 @@ async def one_generate_request(
     lp = choice.get("logprobs")
     flat = choice.get("token_logprobs")
     got_logprobs = bool(lp and (lp.get("content") or lp.get("token_logprobs"))) or bool(flat)
-    if flat is not None and len(flat) != out_tokens:
+    if flat is not None and len(flat) not in (0, out_tokens):
         raise RuntimeError(f"token_logprobs length {len(flat)} != {out_tokens} tokens")
     return {
         "ttft_s": end - start,
@@ -499,6 +499,9 @@ def main() -> None:
         # engine-side decomposition experiments (env-gated patch on logprob.py)
         "native_skip_ranks": [],
         "native_skip_logprob_engine": [],
+        # transport-ladder experiments (env-gated patch on async_utils/scheduler/serving)
+        "native_drop_after_d2h": [],
+        "native_skip_slicing": [],
         "mask_upstream_skip_tokenizer": [
             "--return-sampling-mask", "--logprobs-mode", "processed_logprobs", "--skip-tokenizer-init",
         ],
@@ -509,6 +512,14 @@ def main() -> None:
         "native_flat": {"VLLM_GENERATE_FLAT_TOKEN_LOGPROBS": "1"},
         "native_skip_ranks": {"VLLM_EXP_SKIP_RANKS": "1"},
         "native_skip_logprob_engine": {"VLLM_EXP_SKIP_LOGPROBS_ENGINE": "1"},
+        "native_drop_after_d2h": {
+            "VLLM_EXP_DROP_LOGPROBS_AFTER_D2H": "1",
+            "VLLM_EXP_TOLERATE_MISSING_LOGPROBS": "1",
+        },
+        "native_skip_slicing": {
+            "VLLM_EXP_SKIP_LOGPROB_SLICING": "1",
+            "VLLM_EXP_TOLERATE_MISSING_LOGPROBS": "1",
+        },
         "mask_upstream_flat": {"VLLM_GENERATE_FLAT_TOKEN_LOGPROBS": "1"},
         "mask_fi_off": {"VLLM_USE_FLASHINFER_SAMPLER": "0"},
         "mask_compact": {"VLLM_SAMPLING_MASK_COMPACT": "1"},
