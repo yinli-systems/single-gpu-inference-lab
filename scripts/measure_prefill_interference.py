@@ -122,9 +122,14 @@ async def run_condition(base_url, model, args, bg_prompts, long_prompts) -> dict
             if any(t.done() and t.exception() for t in bg_tasks):
                 raise RuntimeError("background stream failed during settle")
         t_inject = time.perf_counter()
-        long_results = await asyncio.gather(
-            *(long_request(session, url, model, p, args.long_output_tokens, args.seed + 1000 + i) for i, p in enumerate(long_prompts))
-        )
+        if long_prompts:
+            long_results = await asyncio.gather(
+                *(long_request(session, url, model, p, args.long_output_tokens, args.seed + 1000 + i) for i, p in enumerate(long_prompts))
+            )
+        else:
+            # decode-only cell: hold the background for a fixed window
+            await asyncio.sleep(args.decode_only_window_s)
+            long_results = []
         t_long_done = time.perf_counter()
         await asyncio.sleep(args.tail_s)
         t_end = time.perf_counter()
@@ -191,6 +196,7 @@ def main() -> None:
     ap.add_argument("--long-tokens", type=int, default=32768)
     ap.add_argument("--long-output-tokens", type=int, default=32)
     ap.add_argument("--tail-s", type=float, default=3.0)
+    ap.add_argument("--decode-only-window-s", type=float, default=10.0, help="with --inject 0: measured decode-only window")
     ap.add_argument("--repeats", type=int, default=3)
     ap.add_argument("--seed", type=int, default=113)
     ap.add_argument("--vocab-size", type=int, default=151_000, help="random token id range for synthetic prompts")
@@ -245,7 +251,8 @@ def main() -> None:
         with Server(args, flags, log_path) as server:
             cond["command"] = server.cmd
             # warm-up: one short background-only pass
-            asyncio.run(run_condition(server.base_url, args.served_model_name, argparse.Namespace(**{**vars(args), "inject": 1, "long_tokens": 4096, "tail_s": 0.5}), bg_prompts[:2], [long_prompts[0][:4096]]))
+            warm_long = [long_prompts[0][:4096]] if long_prompts else []
+            asyncio.run(run_condition(server.base_url, args.served_model_name, argparse.Namespace(**{**vars(args), "inject": len(warm_long), "long_tokens": 4096, "tail_s": 0.5, "decode_only_window_s": 2.0}), bg_prompts[:2], warm_long))
             for r in range(args.repeats):
                 res = asyncio.run(run_condition(server.base_url, args.served_model_name, args, bg_prompts, long_prompts))
                 cond["repeats"].append(res)
@@ -253,7 +260,7 @@ def main() -> None:
                 print(
                     f"[chunk{budget} r{r}] during-injection ITL p50 {d['p50_ms']:.1f} p99 {d['p99_ms']:.1f} max {d['max_ms']:.0f} ms | "
                     f"SLO25 {d['slo_attainment']['25ms']:.2f} SLO50 {d['slo_attainment']['50ms']:.2f} | "
-                    f"long TTFT {statistics.median(x['ttft_s'] for x in res['long_requests']):.2f}s window {res['injection_window_s']:.1f}s | "
+                    f"long TTFT {statistics.median([x['ttft_s'] for x in res['long_requests']] or [float('nan')]):.2f}s window {res['injection_window_s']:.1f}s | "
                     f"bg tok/s during {res['background_tok_per_s_during']:.0f} overall {res['background_tok_per_s_overall']:.0f}",
                     flush=True,
                 )
