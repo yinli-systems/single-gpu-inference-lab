@@ -1,0 +1,571 @@
+{
+  "schema_version": 1,
+  "result_type": "vllm_sampling_mask_serving_ab",
+  "runs": {
+    "qwen25-05b-native-ladder": {
+      "raw_file": "qwen25-05b-ladder.json",
+      "raw_sha256": "4ad59f3e708368ae00ce4a042c23cea2f1b40fa777941d6a0d0ca4555d047ec2",
+      "model": "/home/hhai/inference/models/Qwen2.5-0.5B-Instruct",
+      "workload": {
+        "api": "generate",
+        "prompts": 128,
+        "prompt_tokens_approx": 96,
+        "max_tokens": 256,
+        "ignore_eos": true,
+        "concurrency": 64,
+        "rounds": 3,
+        "sampling": {
+          "temperature": 1.0,
+          "top_k": 50,
+          "top_p": 0.95
+        },
+        "seed": 113
+      },
+      "environment": {
+        "vllm_version_output": "0.29.0",
+        "python": "3.12.3"
+      },
+      "provenance": {
+        "commit": "f587fe4c9e4e3f24fb076a0ea1219d5f9e3c0d39",
+        "dirty": false
+      },
+      "servers": {
+        "native": {
+          "flags": [],
+          "env": {},
+          "log_markers": {
+            "sampler_backend": [
+              "(EngineCore pid=3587044) INFO 09-18 02:07:53 [topk_topp_sampler.py:62] Using FlashInfer for top-p & top-k sampling."
+            ],
+            "flashinfer_sampler_selected": true,
+            "cuda_graph_capture_seen": true,
+            "warnings": [
+              "(APIServer pid=3587016) WARNING 09-18 02:08:03 [model.py:1759] Default vLLM sampling parameters have been overridden by the model's `generation_config.json`: `{'repetition_penalty': 1.1, 'temperature': 0.7, 'top_k': 20, 'top_p': 0.8}`. If this is not intended, please relaunch vLLM instance with `--generation-config vllm`.",
+              "(EngineCore pid=3587044) WARNING 09-18 02:08:04 [jit_monitor.py:141] Triton kernel JIT compilation during inference: _gumbel_sample_kernel. This causes a latency spike; consider extending warmup to cover this shape/config."
+            ]
+          }
+        },
+        "native_flat": {
+          "flags": [],
+          "env": {
+            "VLLM_GENERATE_FLAT_TOKEN_LOGPROBS": "1"
+          },
+          "log_markers": {
+            "sampler_backend": [
+              "(EngineCore pid=3587325) INFO 09-18 02:08:56 [topk_topp_sampler.py:62] Using FlashInfer for top-p & top-k sampling."
+            ],
+            "flashinfer_sampler_selected": true,
+            "cuda_graph_capture_seen": true,
+            "warnings": [
+              "(APIServer pid=3587296) WARNING 09-18 02:09:06 [model.py:1759] Default vLLM sampling parameters have been overridden by the model's `generation_config.json`: `{'repetition_penalty': 1.1, 'temperature': 0.7, 'top_k': 20, 'top_p': 0.8}`. If this is not intended, please relaunch vLLM instance with `--generation-config vllm`.",
+              "(EngineCore pid=3587325) WARNING 09-18 02:09:07 [jit_monitor.py:141] Triton kernel JIT compilation during inference: _gumbel_sample_kernel. This causes a latency spike; consider extending warmup to cover this shape/config."
+            ]
+          }
+        }
+      },
+      "rows": [
+        {
+          "server": "native",
+          "request": "gen",
+          "rounds": 3,
+          "output_tokens_per_round": 32768,
+          "tok_per_s_median": 18613.310588080123,
+          "tok_per_s_min": 17922.19202595993,
+          "tok_per_s_max": 18682.31233644186,
+          "e2e_ms_median": 869.9692413210869,
+          "e2e_ms_p99_median": 892.0988561585546,
+          "mask_entries": 0,
+          "mask_mean_size": null,
+          "mask_max_size": 0,
+          "body_bytes": 209492,
+          "tokens_per_chunk": 256.0,
+          "itl_ms_median": NaN,
+          "itl_ms_mean": NaN,
+          "ttft_ms_median": 869.9692413210869,
+          "flashinfer_sampler_selected": true,
+          "tok_per_s_vs_native_gen": 1.0
+        },
+        {
+          "server": "native",
+          "request": "logprobs",
+          "rounds": 3,
+          "output_tokens_per_round": 32768,
+          "tok_per_s_median": 12939.488952819796,
+          "tok_per_s_min": 12641.178271949853,
+          "tok_per_s_max": 13298.110497732929,
+          "e2e_ms_median": 1215.1750875636935,
+          "e2e_ms_p99_median": 1248.2205517590046,
+          "mask_entries": 0,
+          "mask_mean_size": null,
+          "mask_max_size": 0,
+          "body_bytes": 5287571,
+          "tokens_per_chunk": 256.0,
+          "itl_ms_median": NaN,
+          "itl_ms_mean": NaN,
+          "ttft_ms_median": 1215.1750875636935,
+          "flashinfer_sampler_selected": true,
+          "tok_per_s_vs_native_gen": 0.6951739665863731
+        },
+        {
+          "server": "native",
+          "request": "logprobs0",
+          "rounds": 3,
+          "output_tokens_per_round": 32768,
+          "tok_per_s_median": 13717.835612396837,
+          "tok_per_s_min": 13662.508997916619,
+          "tok_per_s_max": 13841.095048130079,
+          "e2e_ms_median": 1174.6741943061352,
+          "e2e_ms_p99_median": 1208.4081564098597,
+          "mask_entries": 0,
+          "mask_mean_size": null,
+          "mask_max_size": 0,
+          "body_bytes": 5289502,
+          "tokens_per_chunk": 256.0,
+          "itl_ms_median": NaN,
+          "itl_ms_mean": NaN,
+          "ttft_ms_median": 1174.6741943061352,
+          "flashinfer_sampler_selected": true,
+          "tok_per_s_vs_native_gen": 0.7369906362160891
+        },
+        {
+          "server": "native",
+          "request": "logprobs0_flat",
+          "rounds": 3,
+          "output_tokens_per_round": 32768,
+          "tok_per_s_median": 13490.161368195731,
+          "tok_per_s_min": 13326.12832455301,
+          "tok_per_s_max": 13652.904699854942,
+          "e2e_ms_median": 1184.3660399317741,
+          "e2e_ms_p99_median": 1235.9014842659235,
+          "mask_entries": 0,
+          "mask_mean_size": null,
+          "mask_max_size": 0,
+          "body_bytes": 5288356,
+          "tokens_per_chunk": 256.0,
+          "itl_ms_median": NaN,
+          "itl_ms_mean": NaN,
+          "ttft_ms_median": 1184.3660399317741,
+          "flashinfer_sampler_selected": true,
+          "tok_per_s_vs_native_gen": 0.7247588388083294
+        },
+        {
+          "server": "native_flat",
+          "request": "gen",
+          "rounds": 3,
+          "output_tokens_per_round": 32768,
+          "tok_per_s_median": 18555.142223266583,
+          "tok_per_s_min": 17909.704582135815,
+          "tok_per_s_max": 18565.89566329632,
+          "e2e_ms_median": 871.5279432944953,
+          "e2e_ms_p99_median": 890.4406931251287,
+          "mask_entries": 0,
+          "mask_mean_size": null,
+          "mask_max_size": 0,
+          "body_bytes": 208174,
+          "tokens_per_chunk": 256.0,
+          "itl_ms_median": NaN,
+          "itl_ms_mean": NaN,
+          "ttft_ms_median": 871.5279432944953,
+          "flashinfer_sampler_selected": true,
+          "tok_per_s_vs_native_gen": 0.9968749049483551
+        },
+        {
+          "server": "native_flat",
+          "request": "logprobs",
+          "rounds": 3,
+          "output_tokens_per_round": 32768,
+          "tok_per_s_median": 13337.794960840869,
+          "tok_per_s_min": 13188.607339514236,
+          "tok_per_s_max": 13471.653717223191,
+          "e2e_ms_median": 1204.9327623099089,
+          "e2e_ms_p99_median": 1241.9009329751134,
+          "mask_entries": 0,
+          "mask_mean_size": null,
+          "mask_max_size": 0,
+          "body_bytes": 5285664,
+          "tokens_per_chunk": 256.0,
+          "itl_ms_median": NaN,
+          "itl_ms_mean": NaN,
+          "ttft_ms_median": 1204.9327623099089,
+          "flashinfer_sampler_selected": true,
+          "tok_per_s_vs_native_gen": 0.7165729544846434
+        },
+        {
+          "server": "native_flat",
+          "request": "logprobs0",
+          "rounds": 3,
+          "output_tokens_per_round": 32768,
+          "tok_per_s_median": 13910.78124552096,
+          "tok_per_s_min": 13691.373148658426,
+          "tok_per_s_max": 13944.394446909888,
+          "e2e_ms_median": 1154.5725474134088,
+          "e2e_ms_p99_median": 1191.4524240419269,
+          "mask_entries": 0,
+          "mask_mean_size": null,
+          "mask_max_size": 0,
+          "body_bytes": 5289791,
+          "tokens_per_chunk": 256.0,
+          "itl_ms_median": NaN,
+          "itl_ms_mean": NaN,
+          "ttft_ms_median": 1154.5725474134088,
+          "flashinfer_sampler_selected": true,
+          "tok_per_s_vs_native_gen": 0.7473566392014841
+        },
+        {
+          "server": "native_flat",
+          "request": "logprobs0_flat",
+          "rounds": 3,
+          "output_tokens_per_round": 32768,
+          "tok_per_s_median": 16596.213459902337,
+          "tok_per_s_min": 16041.92818563287,
+          "tok_per_s_max": 16655.87642583042,
+          "e2e_ms_median": 972.6036693900824,
+          "e2e_ms_p99_median": 995.2001608908176,
+          "mask_entries": 0,
+          "mask_mean_size": null,
+          "mask_max_size": 0,
+          "body_bytes": 873199,
+          "tokens_per_chunk": 256.0,
+          "itl_ms_median": NaN,
+          "itl_ms_mean": NaN,
+          "ttft_ms_median": 972.6036693900824,
+          "flashinfer_sampler_selected": true,
+          "tok_per_s_vs_native_gen": 0.8916314688548997
+        }
+      ]
+    },
+    "qwen25-05b-mask-ladder": {
+      "raw_file": "qwen25-05b-mask-ladder.json",
+      "raw_sha256": "97eb6fb12ef659d5d5de60a7d4ae949480f6a2b78d0a3179d2455bf14de1904f",
+      "model": "/home/hhai/inference/models/Qwen2.5-0.5B-Instruct",
+      "workload": {
+        "api": "generate",
+        "prompts": 128,
+        "prompt_tokens_approx": 96,
+        "max_tokens": 256,
+        "ignore_eos": true,
+        "concurrency": 64,
+        "rounds": 3,
+        "sampling": {
+          "temperature": 1.0,
+          "top_k": 50,
+          "top_p": 0.95
+        },
+        "seed": 113
+      },
+      "environment": {
+        "vllm_version_output": "0.29.0",
+        "python": "3.12.3"
+      },
+      "provenance": {
+        "commit": "f587fe4c9e4e3f24fb076a0ea1219d5f9e3c0d39",
+        "dirty": false
+      },
+      "servers": {
+        "mask_upstream": {
+          "flags": [
+            "--return-sampling-mask",
+            "--logprobs-mode",
+            "processed_logprobs"
+          ],
+          "env": {},
+          "log_markers": {
+            "sampler_backend": [],
+            "flashinfer_sampler_selected": false,
+            "cuda_graph_capture_seen": true,
+            "warnings": [
+              "(APIServer pid=3587682) WARNING 09-18 02:10:22 [model.py:1759] Default vLLM sampling parameters have been overridden by the model's `generation_config.json`: `{'repetition_penalty': 1.1, 'temperature': 0.7, 'top_k': 20, 'top_p': 0.8}`. If this is not intended, please relaunch vLLM instance with `--generation-config vllm`."
+            ]
+          }
+        },
+        "mask_upstream_flat": {
+          "flags": [
+            "--return-sampling-mask",
+            "--logprobs-mode",
+            "processed_logprobs"
+          ],
+          "env": {
+            "VLLM_GENERATE_FLAT_TOKEN_LOGPROBS": "1"
+          },
+          "log_markers": {
+            "sampler_backend": [],
+            "flashinfer_sampler_selected": false,
+            "cuda_graph_capture_seen": true,
+            "warnings": [
+              "(APIServer pid=3587959) WARNING 09-18 02:11:11 [model.py:1759] Default vLLM sampling parameters have been overridden by the model's `generation_config.json`: `{'repetition_penalty': 1.1, 'temperature': 0.7, 'top_k': 20, 'top_p': 0.8}`. If this is not intended, please relaunch vLLM instance with `--generation-config vllm`."
+            ]
+          }
+        }
+      },
+      "rows": [
+        {
+          "server": "mask_upstream",
+          "request": "gen",
+          "rounds": 3,
+          "output_tokens_per_round": 32768,
+          "tok_per_s_median": 16372.013498316212,
+          "tok_per_s_min": 15298.819498423967,
+          "tok_per_s_max": 16471.97776778425,
+          "e2e_ms_median": 982.4281595647335,
+          "e2e_ms_p99_median": 1005.1224706694484,
+          "mask_entries": 32768,
+          "mask_mean_size": 15.308380126953125,
+          "mask_max_size": 45,
+          "body_bytes": 2728087,
+          "tokens_per_chunk": 256.0,
+          "itl_ms_median": NaN,
+          "itl_ms_mean": NaN,
+          "ttft_ms_median": 982.4281595647335,
+          "flashinfer_sampler_selected": false
+        },
+        {
+          "server": "mask_upstream",
+          "request": "logprobs0_flat",
+          "rounds": 3,
+          "output_tokens_per_round": 32768,
+          "tok_per_s_median": 11755.923591292858,
+          "tok_per_s_min": 11256.519093375051,
+          "tok_per_s_max": 11808.080946175387,
+          "e2e_ms_median": 1361.1005111597478,
+          "e2e_ms_p99_median": 1410.7867702841759,
+          "mask_entries": 32768,
+          "mask_mean_size": 14.769134521484375,
+          "mask_max_size": 48,
+          "body_bytes": 7463586,
+          "tokens_per_chunk": 256.0,
+          "itl_ms_median": NaN,
+          "itl_ms_mean": NaN,
+          "ttft_ms_median": 1361.1005111597478,
+          "flashinfer_sampler_selected": false
+        },
+        {
+          "server": "mask_upstream_flat",
+          "request": "gen",
+          "rounds": 3,
+          "output_tokens_per_round": 32768,
+          "tok_per_s_median": 15991.029502200712,
+          "tok_per_s_min": 15501.247562681934,
+          "tok_per_s_max": 16599.693702765908,
+          "e2e_ms_median": 976.1407352052629,
+          "e2e_ms_p99_median": 1048.3996886759996,
+          "mask_entries": 32768,
+          "mask_mean_size": 15.33013916015625,
+          "mask_max_size": 45,
+          "body_bytes": 2732901,
+          "tokens_per_chunk": 256.0,
+          "itl_ms_median": NaN,
+          "itl_ms_mean": NaN,
+          "ttft_ms_median": 976.1407352052629,
+          "flashinfer_sampler_selected": false
+        },
+        {
+          "server": "mask_upstream_flat",
+          "request": "logprobs0_flat",
+          "rounds": 3,
+          "output_tokens_per_round": 32768,
+          "tok_per_s_median": 14045.033175314476,
+          "tok_per_s_min": 13377.015811855177,
+          "tok_per_s_max": 14048.64523830352,
+          "e2e_ms_median": 1143.8848013058305,
+          "e2e_ms_p99_median": 1177.0316241309047,
+          "mask_entries": 32768,
+          "mask_mean_size": 14.661834716796875,
+          "mask_max_size": 47,
+          "body_bytes": 3166945,
+          "tokens_per_chunk": 256.0,
+          "itl_ms_median": NaN,
+          "itl_ms_mean": NaN,
+          "ttft_ms_median": 1143.8848013058305,
+          "flashinfer_sampler_selected": false
+        }
+      ]
+    },
+    "qwen3-4b-mask-ladder": {
+      "raw_file": "qwen3-4b-mask-ladder.json",
+      "raw_sha256": "31582a2bb97df39bc6159e23642a43c9a0061f7c566d2b5e2e0ed4c5ab3bc04c",
+      "model": "/home/hhai/inference/models/Qwen3-4B",
+      "workload": {
+        "api": "generate",
+        "prompts": 128,
+        "prompt_tokens_approx": 96,
+        "max_tokens": 256,
+        "ignore_eos": true,
+        "concurrency": 64,
+        "rounds": 3,
+        "sampling": {
+          "temperature": 1.0,
+          "top_k": 50,
+          "top_p": 0.95
+        },
+        "seed": 113
+      },
+      "environment": {
+        "vllm_version_output": "0.29.0",
+        "python": "3.12.3"
+      },
+      "provenance": {
+        "commit": "f587fe4c9e4e3f24fb076a0ea1219d5f9e3c0d39",
+        "dirty": false
+      },
+      "servers": {
+        "mask_upstream": {
+          "flags": [
+            "--return-sampling-mask",
+            "--logprobs-mode",
+            "processed_logprobs"
+          ],
+          "env": {},
+          "log_markers": {
+            "sampler_backend": [],
+            "flashinfer_sampler_selected": false,
+            "cuda_graph_capture_seen": true,
+            "warnings": [
+              "(APIServer pid=3588286) WARNING 09-18 02:12:22 [model.py:1759] Default vLLM sampling parameters have been overridden by the model's `generation_config.json`: `{'temperature': 0.6, 'top_k': 20, 'top_p': 0.95}`. If this is not intended, please relaunch vLLM instance with `--generation-config vllm`."
+            ]
+          }
+        },
+        "mask_upstream_flat": {
+          "flags": [
+            "--return-sampling-mask",
+            "--logprobs-mode",
+            "processed_logprobs"
+          ],
+          "env": {
+            "VLLM_GENERATE_FLAT_TOKEN_LOGPROBS": "1"
+          },
+          "log_markers": {
+            "sampler_backend": [],
+            "flashinfer_sampler_selected": false,
+            "cuda_graph_capture_seen": true,
+            "warnings": [
+              "(APIServer pid=3588806) WARNING 09-18 02:14:42 [model.py:1759] Default vLLM sampling parameters have been overridden by the model's `generation_config.json`: `{'temperature': 0.6, 'top_k': 20, 'top_p': 0.95}`. If this is not intended, please relaunch vLLM instance with `--generation-config vllm`."
+            ]
+          }
+        }
+      },
+      "rows": [
+        {
+          "server": "mask_upstream",
+          "request": "gen",
+          "rounds": 3,
+          "output_tokens_per_round": 32768,
+          "tok_per_s_median": 3485.7088483703305,
+          "tok_per_s_min": 3227.054003258054,
+          "tok_per_s_max": 3499.827538116635,
+          "e2e_ms_median": 4671.663336921483,
+          "e2e_ms_p99_median": 4718.942303210497,
+          "mask_entries": 32768,
+          "mask_mean_size": 3.17767333984375,
+          "mask_max_size": 42,
+          "body_bytes": 779172,
+          "tokens_per_chunk": 256.0,
+          "itl_ms_median": NaN,
+          "itl_ms_mean": NaN,
+          "ttft_ms_median": 4671.663336921483,
+          "flashinfer_sampler_selected": false
+        },
+        {
+          "server": "mask_upstream",
+          "request": "logprobs",
+          "rounds": 3,
+          "output_tokens_per_round": 32768,
+          "tok_per_s_median": 3262.4908026642256,
+          "tok_per_s_min": 3238.5364128402716,
+          "tok_per_s_max": 3285.5774827202918,
+          "e2e_ms_median": 4965.852666180581,
+          "e2e_ms_p99_median": 5027.2286757826805,
+          "mask_entries": 32768,
+          "mask_mean_size": 3.17169189453125,
+          "mask_max_size": 42,
+          "body_bytes": 5403753,
+          "tokens_per_chunk": 256.0,
+          "itl_ms_median": NaN,
+          "itl_ms_mean": NaN,
+          "ttft_ms_median": 4965.852666180581,
+          "flashinfer_sampler_selected": false
+        },
+        {
+          "server": "mask_upstream",
+          "request": "logprobs0_flat",
+          "rounds": 3,
+          "output_tokens_per_round": 32768,
+          "tok_per_s_median": 3308.3820966455596,
+          "tok_per_s_min": 3295.962498000021,
+          "tok_per_s_max": 3343.019698137044,
+          "e2e_ms_median": 4829.440193716437,
+          "e2e_ms_p99_median": 4979.308162815869,
+          "mask_entries": 32768,
+          "mask_mean_size": 3.101837158203125,
+          "mask_max_size": 42,
+          "body_bytes": 5389894,
+          "tokens_per_chunk": 256.0,
+          "itl_ms_median": NaN,
+          "itl_ms_mean": NaN,
+          "ttft_ms_median": 4829.440193716437,
+          "flashinfer_sampler_selected": false
+        },
+        {
+          "server": "mask_upstream_flat",
+          "request": "gen",
+          "rounds": 3,
+          "output_tokens_per_round": 32768,
+          "tok_per_s_median": 3468.0555982073333,
+          "tok_per_s_min": 3207.242592650411,
+          "tok_per_s_max": 3496.6471792309053,
+          "e2e_ms_median": 4660.891081672162,
+          "e2e_ms_p99_median": 4835.679592564702,
+          "mask_entries": 32768,
+          "mask_mean_size": 3.1590576171875,
+          "mask_max_size": 42,
+          "body_bytes": 776199,
+          "tokens_per_chunk": 256.0,
+          "itl_ms_median": NaN,
+          "itl_ms_mean": NaN,
+          "ttft_ms_median": 4660.891081672162,
+          "flashinfer_sampler_selected": false
+        },
+        {
+          "server": "mask_upstream_flat",
+          "request": "logprobs",
+          "rounds": 3,
+          "output_tokens_per_round": 32768,
+          "tok_per_s_median": 3301.0351369594173,
+          "tok_per_s_min": 3292.7675143856086,
+          "tok_per_s_max": 3301.9591707993172,
+          "e2e_ms_median": 4892.025871668011,
+          "e2e_ms_p99_median": 5023.0942610651255,
+          "mask_entries": 32768,
+          "mask_mean_size": 3.2003173828125,
+          "mask_max_size": 42,
+          "body_bytes": 5411399,
+          "tokens_per_chunk": 256.0,
+          "itl_ms_median": NaN,
+          "itl_ms_mean": NaN,
+          "ttft_ms_median": 4892.025871668011,
+          "flashinfer_sampler_selected": false
+        },
+        {
+          "server": "mask_upstream_flat",
+          "request": "logprobs0_flat",
+          "rounds": 3,
+          "output_tokens_per_round": 32768,
+          "tok_per_s_median": 3445.6859086803825,
+          "tok_per_s_min": 3424.2895548999436,
+          "tok_per_s_max": 3458.0787022238515,
+          "e2e_ms_median": 4720.036330167204,
+          "e2e_ms_p99_median": 4753.5200249403715,
+          "mask_entries": 32768,
+          "mask_mean_size": 3.143096923828125,
+          "mask_max_size": 42,
+          "body_bytes": 1210947,
+          "tokens_per_chunk": 256.0,
+          "itl_ms_median": NaN,
+          "itl_ms_mean": NaN,
+          "ttft_ms_median": 4720.036330167204,
+          "flashinfer_sampler_selected": false
+        }
+      ]
+    }
+  },
+  "equivalence": {}
+}
