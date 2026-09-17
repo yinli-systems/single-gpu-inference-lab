@@ -484,3 +484,39 @@ def test_checked_in_l20_post_fix_top_logprobs_artifact_matches_raw_trials():
             assert recorded["max"] == max(paired)
             assert recorded["all_15_trials_faster"] is True
             assert min(paired) > 1.0
+
+
+def test_sampling_mask_artifacts_are_internally_consistent():
+    """The serving A/B summary must hash its raw files and reproduce its headline rows."""
+    root = Path("benchmarks/results/l20-vllm-sampling-mask-ab")
+    summary = json.loads((root / "summary.json").read_text(encoding="utf-8"))
+    for run in summary["runs"].values():
+        raw = root / "raw" / run["raw_file"]
+        assert hashlib.sha256(raw.read_bytes()).hexdigest() == run["raw_sha256"]
+        assert run["provenance"]["dirty"] is False
+        rows = {(r["server"], r["request"]): r for r in run["rows"]}
+        for row in rows.values():
+            assert row["tok_per_s_min"] <= row["tok_per_s_median"] <= row["tok_per_s_max"]
+    main = summary["runs"]["qwen25-05b-generate"]
+    rows = {(r["server"], r["request"]): r for r in main["rows"]}
+    assert rows[("mask_bitmap", "gen")]["tok_per_s_vs_native_gen"] < 0.1
+    assert rows[("mask_compact", "gen")]["tok_per_s_vs_native_gen"] > 0.7
+    big = {(r["server"], r["request"]): r for r in summary["runs"]["qwen3-4b-generate"]["rows"]}
+    assert big[("mask_compact", "gen")]["tok_per_s_vs_native_gen"] > 0.9
+    # equivalence: identical tokens under batch-invariant mode, and mask agreement no
+    # worse than the bitmap server's own run-to-run agreement
+    eq = summary["equivalence"]
+    for key in ("batch_invariant-gen", "batch_invariant-logprobs"):
+        assert eq[key]["token_sequences_identical"] == eq[key]["requests"]
+    control = eq["batch_invariant-bitmap-run-a-vs-b"]
+    assert control["token_sequences_identical"] == control["requests"]
+    assert eq["batch_invariant-gen"]["masks_identical"] >= control["masks_identical"]
+
+    path = json.loads(Path("benchmarks/results/l20-support-pack-path/raw.json").read_text(encoding="utf-8"))
+    assert path["provenance"]["dirty"] is False
+    assert path["provenance"]["upstream_output_py_sha256"] == (
+        "1a1abac89cc6cc2278b6f984e4e20dbf82df81130112a875eeb9d72a694f8230"
+    )
+    for row in path["rows"]:
+        assert row["speedup_total"] > 30
+        assert row["bytes_d2h"]["compact"] < row["bytes_d2h"]["upstream"] / 50
