@@ -196,6 +196,12 @@ def main() -> None:
     ap.add_argument("--vocab-size", type=int, default=151_000, help="random token id range for synthetic prompts")
     ap.add_argument("--output", type=Path, required=True)
     ap.add_argument(
+        "--long-prefill-token-threshold",
+        type=int,
+        default=0,
+        help="cap per-request prefill chunk so several injected prefills share a step (partition experiments)",
+    )
+    ap.add_argument(
         "--trace-dir",
         type=Path,
         help="if set, start servers with --enable-logging-iteration-details and "
@@ -213,7 +219,8 @@ def main() -> None:
         "generated_at_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         "provenance": git_provenance(),
         "model": args.model,
-        "workload": {k: getattr(args, k) for k in ("background", "background_prompt_tokens", "background_tokens", "settle_tokens", "inject", "long_tokens", "long_output_tokens", "repeats", "seed", "max_model_len", "max_num_seqs")},
+        "workload": {k: getattr(args, k) for k in ("background", "background_prompt_tokens", "background_tokens", "settle_tokens", "inject", "long_tokens", "long_output_tokens", "repeats", "seed", "max_model_len", "max_num_seqs", "long_prefill_token_threshold")},
+        "trace": args.trace_dir is not None,
         "conditions": {},
         "nvidia_smi_before": nvidia_smi(),
     }
@@ -224,6 +231,12 @@ def main() -> None:
             args.trace_dir.mkdir(parents=True, exist_ok=True)
             flags += ["--enable-logging-iteration-details"]
             os.environ["VLLM_EXP_ITER_TRACE"] = str(args.trace_dir / f"{args.output.stem}-chunk{budget}.jsonl")
+            os.environ["VLLM_EXP_STEP_TRACE"] = str(args.trace_dir / f"{args.output.stem}-chunk{budget}.steps.jsonl")
+        else:
+            os.environ.pop("VLLM_EXP_ITER_TRACE", None)
+            os.environ.pop("VLLM_EXP_STEP_TRACE", None)
+        if args.long_prefill_token_threshold:
+            flags += ["--long-prefill-token-threshold", str(args.long_prefill_token_threshold)]
         log_path = args.output.with_suffix("") / f"server-chunk{budget}.log"
         # Server expects these attribute names
         args.served_model_name = args.served_model_name
