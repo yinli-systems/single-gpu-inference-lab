@@ -15,10 +15,11 @@ of it (six partition series on one line, slopes within 4%); the aggregate predic
 unseen geometry by 126 ms P95 (under) or 1.2 s (over) depending on which geometry it was fit on;
 and on the live engine a deadline controller carrying that term, calibrated only on single-prefill
 data, finishes 4–8 concurrent 16k prefills 1.5–2.8× sooner than the same controller on the
-aggregate coordinate at zero deadline violations either way — but only 7–9% sooner than the best
-fixed budget chosen with hindsight, so the geometry term is *necessary* to price mixed-geometry
-steps and *sufficient* for a safe adaptive controller, not a large win over an oracle-tuned static
-budget at a 100 ms deadline. Context shift (≤16k → 32k), decode-load shift (B ≤ 16 → 32),
+aggregate coordinate at zero deadline violations either way — but only 5–12% sooner than the best
+fixed budget chosen with hindsight (§5b), and not at all on default-FCFS short-prompt bursts where
+steps hold one fresh prompt (§5c); so the geometry term is *necessary* to price steps that mix
+partially-prefilled requests and *sufficient* for a safe adaptive controller there, not a large
+win over an oracle-tuned static budget. Context shift (≤16k → 32k), decode-load shift (B ≤ 16 → 32),
 decode-KV skew at equal aggregate, and CUDA-graph capture boundaries are all handled by the
 aggregate coordinate and are recorded here as negative results.
 
@@ -36,8 +37,8 @@ per runner step) with the scripts linked; nothing in this directory was run on a
 | experiment patches (site-packages, not upstream) | tracer v2 [`patches/apply_tracer_v2.py`](patches/apply_tracer_v2.py) / [`patches/exp_iter_trace_v2_0290.diff`](patches/exp_iter_trace_v2_0290.diff); controller [`patches/apply_deadline_controller.py`](patches/apply_deadline_controller.py) + [`patches/patch_tracer_exp.py`](patches/patch_tracer_exp.py) |
 | model | Qwen3-4B (bf16), `--max-model-len 40960 --max-num-seqs 64 --no-enable-prefix-caching` |
 | harness | [`scripts/measure_prefill_interference.py`](../../../scripts/measure_prefill_interference.py): B background decoders (128-token prompts unless stated, 4096 output tokens) + N injected long prefills; one fresh `vllm serve` per condition |
-| lab commits | campaign17 `aacfac7`, campaign18 `395b189`, campaigns 19–20 `c8fb1b1` (clean trees; `provenance` block in every JSON) |
-| campaign scripts | [`raw/campaign17.sh`](raw/campaign17.sh) … [`raw/campaign20.sh`](raw/campaign20.sh) (exact server/harness commands) |
+| lab commits | campaign17 `aacfac7`, campaign18 `395b189`, campaigns 19–20 `c8fb1b1`, campaigns 21–22 `caf127e` (clean trees; `provenance` block in every JSON) |
+| campaign scripts | [`raw/campaign17.sh`](raw/campaign17.sh) … [`raw/campaign22.sh`](raw/campaign22.sh) (exact server/harness commands) |
 | analysis | [`scripts/step_trace_join.py`](../../../scripts/step_trace_join.py), [`scripts/analyze_measurement_contract.py`](../../../scripts/analyze_measurement_contract.py), [`scripts/analyze_step_cost_v2.py`](../../../scripts/analyze_step_cost_v2.py), [`scripts/replay_prefill_controller.py`](../../../scripts/replay_prefill_controller.py), [`scripts/plot_prefill_geometry.py`](../../../scripts/plot_prefill_geometry.py) |
 | upstream status | no upstream PR/issue/comment was opened or modified for this work; #57442 untouched |
 
@@ -319,32 +320,33 @@ tokens) + N × 16k prefills injected together; **one fresh server per run, condi
 3 repeats** ([`raw/campaign20.sh`](raw/campaign20.sh)); deadline 100 ms. Metrics from the CUDA
 trace and the harness ([`scripts/analyze_live_controller.py`](../../../scripts/analyze_live_controller.py),
 [`live-controller.json`](live-controller.json)); "safe prefill tok/s" = prefill tokens in steps
-under the deadline ÷ wall time of the prefill phase; TTFT = mean over the N injected requests;
+under the deadline ÷ wall time of the injected-prefill phase (steps with all 8 decoders present,
+so the background-prompt prefill at server start is excluded); TTFT = mean over the N injected requests;
 mean (min–max) over the 3 repeats.
 
 | N | controller | prefill steps | violations >100 ms | prefill step p95 / max | safe prefill tok/s | TTFT (s) | decoder ITL p95 / p99 during | budget p50 |
 | ---: | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| 4 | fixed-128 (4×32) | 544 | 0.0% | 53.5 / 55 ms | 3,292 (3,276–3,309) | 18.75 (18.67–18.81) | 54 / 55 | 128 |
-| 4 | fixed-256 (4×64) | 272 | 0.0% | 61.8 / 70 | 4,980 (4,954–5,013) | 11.72 (11.62–11.78) | 62 / 64 | 256 |
-| 4 | fixed-512 (4×128) | 136 | **4.4% (3.6–5.1)** | 99.5 / 108 | 5,607 (5,579–5,626) | 9.66 (9.63–9.68) | 99 / 108 | 512 |
-| 4 | **M0 aggregate** | 360 | 0.0% | 54.7 / 91 | 3,837 (3,836–3,838) | 15.82 (15.75–15.97) | 54 / 58 | 128 |
-| 4 | **M2 geometry** | 180 | 0.0% | 79.7 / 90 | **5,399 (5,314–5,446)** | **10.65 (10.62–10.69)** | 79 / 86 | 256 |
-| 8 | fixed-128 (8×16) | 1,057 | 0.0% | 77.3 / 81 | 2,559 (2,551–2,568) | 50.44 (50.30–50.56) | 77 / 80 | 128 |
-| 8 | fixed-256 (8×32) | 529 | 0.0% | 84.6 / 88 | 4,224 (4,222–4,227) | 29.70 (29.65–29.74) | 85 / 87 | 256 |
-| 8 | fixed-512 (8×64) | 265 | **10.3% (9.4–11.0)** | 102.9 / 132 | 5,509 (5,470–5,562) | 19.77 (19.73–19.80) | 103 / 113 | 512 |
-| 8 | **M0 aggregate** | 1,344 | 0.0% | 77.5 / 91 | 1,702 (1,696–1,707) | 77.02 (76.68–77.32) | 78 / 79 | 64 |
-| 8 | **M2 geometry** | 408 | 0.0% | 83.0 / 89 | **4,519 (4,506–4,529)** | **27.67 (27.56–27.74)** | 83 / 86 | 256 |
+| 4 | fixed-128 (4×32) | 544 | 0.0% | 53.5 / 55 ms | 3,458 (3,447–3,473) | 18.75 (18.67–18.81) | 54 / 55 | 128 |
+| 4 | fixed-256 (4×64) | 272 | 0.0% | 61.8 / 70 | 5,625 (5,598–5,655) | 11.72 (11.62–11.78) | 62 / 64 | 256 |
+| 4 | fixed-512 (4×128) | 136 | **4.4% (3.6–5.1)** | 99.5 / 108 | 6,516 (6,486–6,531) | 9.66 (9.63–9.68) | 99 / 108 | 512 |
+| 4 | **M0 aggregate** | 360 | 0.0% | 54.7 / 91 | 4,132 (4,129–4,137) | 15.82 (15.75–15.97) | 54 / 58 | 128 |
+| 4 | **M2 geometry** | 180 | 0.0% | 79.7 / 90 | **6,171 (6,051–6,232)** | **10.65 (10.62–10.69)** | 79 / 86 | 256 |
+| 8 | fixed-128 (8×16) | 1,057 | 0.0% | 77.3 / 81 | 2,558 (2,552–2,565) | 50.44 (50.30–50.56) | 77 / 80 | 128 |
+| 8 | fixed-256 (8×32) | 529 | 0.0% | 84.6 / 88 | 4,427 (4,421–4,433) | 29.70 (29.65–29.74) | 85 / 87 | 256 |
+| 8 | fixed-512 (8×64) | 265 | **10.3% (9.4–11.0)** | 102.9 / 132 | 5,966 (5,925–6,025) | 19.77 (19.73–19.80) | 103 / 113 | 512 |
+| 8 | **M0 aggregate** | 1,344 | 0.0% | 77.5 / 91 | 1,702 (1,697–1,707) | 77.02 (76.68–77.32) | 78 / 79 | 64 |
+| 8 | **M2 geometry** | 408 | 0.0% | 83.0 / 89 | **4,769 (4,761–4,775)** | **27.67 (27.56–27.74)** | 83 / 86 | 256 |
 
 Reading:
 
 - **Geometry vs aggregate, same controller, same calibration data, same deadline:** M2 finishes the
-  prefills in 10.65 s vs 15.82 s (N=4, −33%) and 27.7 s vs 77.0 s (N=8, −64%), i.e. +41% and
-  +166% safe prefill progress, both at zero violations. The aggregate model over-prices the
+  prefills in 10.65 s vs 15.82 s (N=4, −33%) and 27.7 s vs 77.0 s (N=8, −64%), i.e. +49% and
+  +180% safe prefill progress, both at zero violations. The aggregate model over-prices the
   multi-request steps (as §3.1 predicted) and starves them at 64–128-token budgets. This is the
   hypothesis test, and it is decisive.
 - **Geometry vs the best *safe* fixed budget** (fixed-256 — 0% violations at both N; fixed-512 is
   faster but violates 4.4% / 10.3%, above the ≤5–7% target at N=8 and at its edge at N=4): M2 is
-  +8.4% / +7.0% in safe progress and −9% / −7% in TTFT. That is below the "≥15% better than the
+  +9.7% / +7.7% in safe progress and −9% / −7% in TTFT. That is below the "≥15% better than the
   strongest safe baseline" bar set before the run. The fixed-256 budget is, however, chosen with
   hindsight for this workload (it violates 4× at 512 and wastes 40% at 128); M2 found the
   equivalent operating point without tuning, and stays 10–20 ms under the deadline at p95 (79.7 /
@@ -355,6 +357,85 @@ Reading:
 
 Verdict against the pre-registered gates: **aggregate → geometry: pass** (violations equal at 0%,
 progress +41% / +166%); **geometry → strongest safe fixed budget: fail** (+7–8%, target ≥15%).
+
+---
+
+### 5b. Calibration round — can the remaining slack be used? (campaign21)
+
+Two changes, applied to every controller: a finer budget grid ({64, 128, 192, 256, 384, 512, 768,
+1024, 1536, 2048, …}; the fixed baseline gets `fixed-384` for the same reason) and an **online
+margin**: the controller attributes each result-ready gap to the batch it priced
+(`update_from_output`, validated in §1 as equal to CUDA time) and replaces the static q95 by the
+95th percentile of the last 64 realised residuals in the step's prefill-count bucket (static until
+16 samples). Also run: the M2 fit on the multi-prefill cells with its thin in-sample q95 (4 ms) as a
+"perfect calibration" bound, and M0 with the online margin as the control for "do online margins
+alone rescue the aggregate coordinate". Same workload, deadline and protocol as above (fresh server
+per run, interleaved, 3 repeats); [`live-calibration.json`](live-calibration.json).
+
+| N | controller | violations >100 ms | prefill step p95 / max | safe prefill tok/s | TTFT (s) | final margin |
+| ---: | --- | ---: | ---: | ---: | ---: | ---: |
+| 4 | fixed-256 (anchor; c20: 11.72 s) | 0.0% | 62 / 64 | 5,619 | 11.76 | — |
+| 4 | **fixed-384** (strongest safe fixed) | 0.0% | 90 / 93 | 5,887 | 11.25 | — |
+| 4 | M2, static q95, fine grid | 0.0% | 87 / 89 | 6,330 | 10.47 | 13.2 |
+| 4 | **M2, online margin** | 0.3% (0–0.8) | 93 / 101 | **6,592 (6,554–6,627)** | **10.04 (10.01–10.06)** | 2.8 |
+| 4 | M2 multi-fit "oracle" (q95 4 ms) | 4.2% | 99 / 104 | 6,363 | 9.71 | 4.1 |
+| 4 | M0, online margin | 0.0% | 68 / 84 | 5,914 | 11.20 | −59 |
+| 8 | fixed-256 | 0.0% | 84 / 87 | 4,453 | 29.56 | — |
+| 8 | **fixed-384** | 0.0% | 94 / 97 | 5,742 | 22.97 | — |
+| 8 | M2, static q95, fine grid | 0.0% | 85 / 89 | 5,163 | 25.38 | 13.2 |
+| 8 | **M2, online margin** | 0.0% | 93 / 99 | **6,036 (6,028–6,049)** | **21.69 (21.65–21.71)** | 0.6 |
+| 8 | M2 multi-fit "oracle" | 11.8% | 106 / 114 | 5,131 | 21.01 | 4.1 |
+| 8 | M0, online margin | 0.0% | 81 / 89 | 4,145 (3,704–4,378) | 31.7 (30.2–34.7) | −33 (−108…+14) |
+
+- The online margin does what it should: M2's p95 moves from 80–87 ms to 93 ms at both N with
+  violations ≤0.3%, TTFT 10.04 / 21.69 s. Against the strongest safe fixed budget on the same grid
+  (fixed-384, hindsight-chosen) that is **+12.0% / +5.1% safe progress, −10.8% / −5.6% TTFT** —
+  closer to, but still under, the pre-registered 15%.
+- Why the gap stays small here: with equal-split, homogeneous requests the step geometry is
+  nearly constant within a run, so a hindsight-tuned fixed budget also saturates the deadline
+  (fixed-384 p95 90–94 ms). What the controller buys is adaptivity, not raw progress: the same
+  controller is safe at N=4 and N=8, while the safe fixed budget moves (512 is 4.4% at N=4 and
+  10.3% at N=8; 384 happens to be safe at both).
+- The multi-fit "oracle" q95 (4 ms) is too thin on the live engine (4.2% / 11.8% violations):
+  trace-fit residuals understate live step variance, which is why a margin must be learned online.
+- **Online margins do not rescue the aggregate coordinate.** At N=4 the bucket quantile becomes a
+  −59 ms bias correction and M0 reaches fixed-384 level (still −10% vs M2-online); at N=8 the
+  margin swings between −108 and +14 ms across repeats and TTFT spreads 30–35 s, because M0's error
+  grows with KV depth inside a run, which a per-count residual quantile cannot track.
+
+### 5c. Default-FCFS short-prompt bursts (campaign22) — where geometry does *not* matter
+
+vLLM's default chunking fills requests in order; multi-request prefill steps then arise only when
+the budget exceeds a request's remaining tokens. Workload: bursts of 16 × 2048-token or 32 ×
+1024-token prompts into 8 decoders, fixed budgets run **natively** (`--max-num-batched-tokens`,
+patch inactive), controllers pricing the FCFS partition (`VLLM_EXP_PARTITION=fcfs`), deadline
+100 ms, 3 interleaved repeats; [`live-fcfs-bursts.json`](live-fcfs-bursts.json).
+
+| burst | controller | violations | prefill step p95 / max | safe prefill tok/s | TTFT mean (s) | budget p50 |
+| --- | --- | ---: | ---: | ---: | ---: | ---: |
+| 16 × 2048 | fixed-256 | 0.0% | 31 / 32 | 8,339 | 2.12 | 256 |
+| 16 × 2048 | fixed-512 | 0.0% | 54 / 55 | 9,920 | 1.80 | 512 |
+| 16 × 2048 | **fixed-1024 (native)** | 0.0% | 98 / 100 | **11,042** | **1.66** | 1024 |
+| 16 × 2048 | M2 static / M2 online / M0 online | 0.0% each | 85–90 / 90–96 | 9,910 / 9,891 / 9,826 | 1.80 / 1.79 / 1.79 | 768 |
+| 32 × 1024 | fixed-256 † | 0.0% | 29 / 30 | 8,539 | 2.01 | 256 |
+| 32 × 1024 | fixed-512 | 0.0% | 52 / 52 | 10,083 | 1.72 | 512 |
+| 32 × 1024 | **fixed-1024 (native)** † | 0.0% | 95 / 96 | **11,317** | **1.57** | 1024 |
+| 32 × 1024 | M2 static / M2 online / M0 online | 0.0% each | 85–94 / 88–96 | 10,221 / 10,205 / 10,147 | 1.68 / 1.68 / 1.69 | 768 |
+
+† repeats 2–3; repeat 1 of these two runs (the first two runs after the scheduler reinstall)
+contains a single 3.8 s step (CUDA events 3,826 / 3,860 ms on a step whose engine gap is 17 ms,
+with a matching 3.9 s decoder stall) — a one-off warm-up/JIT-type event, not a scheduling
+effect; all 34 other runs have max ≤101 ms. Full per-run values in the JSON.
+
+Here the geometry term is irrelevant: at 100 ms the admissible budget (768) is below the prompt
+length, so every step is a single fresh prompt at depth <2k — exactly the single-prefill
+distribution both models were fit on — and M0 ≡ M2 (within 1%). The native fixed-1024 budget sits
+at p95 95–98 ms and beats every controller by ~10% because the 13 ms margin keeps them at 768;
+the online margin cannot help because the residual bucket for these shapes is already tight
+(final margin 13.2–13.5 = static, never enough samples per run). **Scope statement:** the
+aggregate/geometry collapse is a property of steps in which several *partially-prefilled*
+requests with deep KV share the budget — fairness/threshold partitions, or the tails of several
+long requests — not of fresh short-prompt bursts under FCFS chunking.
 
 ---
 
@@ -371,7 +452,10 @@ progress +41% / +166%); **geometry → strongest safe fixed budget: fail** (+7�
 | Uncertainty margins alone fix the aggregate model | §3.2: P99 lookup still 34% misses; §4: M0 fit on mixed geometry has q95 56 ms and never admits | not a fix — the coordinate, not the margin, is the problem |
 | A 50 ms deadline is attainable with 8 decoders and 16k prefills | §4: every controller ≥13% violations; the smallest admissible chunk already costs ~45 ms | out of reach on this hardware; 100 ms used |
 | Trace replay predicts live controller magnitudes | §4 vs §5: replay ran 94–99% extrapolated at 100 ms (small per-request chunks never traced) and over-priced them; it ordered the controllers correctly but predicted 1.6–1.9× over best-fixed where live gave 1.07–1.08× | replay is a screening tool only; live numbers are the result |
-| Geometry-aware control beats an oracle-tuned fixed budget by ≥15% at 100 ms | §5: +7–8% safe progress, −7–9% TTFT at equal (zero) violations | not met; recorded as a negative result |
+| Geometry-aware control beats an oracle-tuned fixed budget by ≥15% at 100 ms | §5: +8–10% with the static margin; §5b: +5–12% with an online margin and a finer grid, at ≤0.3% violations | not met; recorded as a negative result |
+| Online residual margins alone rescue the aggregate coordinate | §5b: M0+online reaches fixed-384 level at N=4 (−10% vs M2-online) but is unstable at N=8 (margin −108…+14 ms, TTFT 30–35 s) | killed |
+| A thin trace-fit margin (multi-fit q95 4 ms) transfers to the live engine | §5b: 4.2% / 11.8% violations | killed; margins must be learned online |
+| Geometry matters for default-FCFS short-prompt bursts | §5c: M0 ≡ M2 within 1%; native fixed-1024 beats every controller by ~10% | killed — scope of the finding is mixed-depth multi-request steps |
 
 ---
 
@@ -380,6 +464,9 @@ progress +41% / +166%); **geometry → strongest safe fixed budget: fail** (+7�
 On L20 / Qwen3-4B / vLLM 0.29, aggregate prefill coordinates collapse request partitions whose
 measured step costs differ by up to 1.9×; replacing the aggregate token × KV interaction with
 per-request attention work reduces geometry-OOD prediction error from hundreds of milliseconds to
-single-digit milliseconds and lets a live 100 ms-deadline controller deliver 41–166% more safe
-prefill progress than the aggregate controller at zero violations, although the gain over the best
-hindsight-tuned fixed budget is only 7–8%.
+single-digit milliseconds and lets a live 100 ms-deadline controller deliver 49–180% more safe
+prefill progress than the aggregate controller at zero violations; with an online margin it
+exceeds the best hindsight-tuned fixed budget by only 5–12%, and on default-FCFS short-prompt
+bursts — where steps hold one fresh prompt — geometry is irrelevant and a native fixed budget is
+best, so the finding is specific to steps in which several partially-prefilled requests share the
+budget.

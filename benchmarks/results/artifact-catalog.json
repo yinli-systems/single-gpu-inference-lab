@@ -415,7 +415,7 @@
       "path": "benchmarks/results/l20-prefill-cost-geometry",
       "reference": "l20-prefill-cost-geometry/",
       "status": "Falsifiable systems result (L20)",
-      "summary": "Aggregate coordinates (decode batch, aggregate KV, prefill tokens) collapse partitions of the same prefill budget that differ 1.4-1.9x in measured step time; one per-request attention-work term explains it; a live env-gated deadline controller carrying it finishes 4-8 concurrent 16k prefills 1.5-2.8x sooner than the aggregate controller at zero violations, but only 7-8% sooner than a hindsight-tuned fixed budget. Context/load shift, decode-KV skew and graph boundaries: negative. Replay was extrapolated and over-priced small chunks (recorded)."
+      "summary": "Aggregate coordinates (decode batch, aggregate KV, prefill tokens) collapse partitions of the same prefill budget that differ 1.4-1.9x in measured step time; one per-request attention-work term explains it; a live env-gated deadline controller carrying it finishes 4-8 concurrent 16k prefills 1.5-2.8x sooner than the aggregate controller at zero violations, but only 5-12% sooner than a hindsight-tuned fixed budget (online margin), and not at all on default-FCFS short-prompt bursts. Context/load shift, decode-KV skew and graph boundaries: negative. Replay was extrapolated and over-priced small chunks (recorded)."
     },
     {
       "category": "path_proof",
