@@ -85,5 +85,42 @@ def main():
     fig.savefig(args.out_dir / "ood_residuals.png", dpi=140)
 
 
+def plot_live(live_json: Path, fcfs_json: Path, out_dir: Path):
+    """Live controller A/B (campaign20/21) and the FCFS-burst appendix (campaign22)."""
+    live = json.load(open(live_json)); cal = None
+    fig, axes = plt.subplots(1, 2, figsize=(11, 4.4))
+    order = [("fixed128", "fixed 128"), ("fixed256", "fixed 256"), ("fixed512", "fixed 512"), ("m0", "M0 aggregate"), ("m2", "M2 geometry")]
+    for ax, N in zip(axes, (4, 8)):
+        names, prog, viol = [], [], []
+        for key, label in order:
+            m = live[f"N{N}-{key}"]["mean"]
+            names.append(label); prog.append(m["safe_tok_per_s"]); viol.append(100 * m["violation_rate"])
+        cols = ["C7", "C7", "C7", "C3", "C2"]
+        bars = ax.bar(names, prog, color=cols)
+        for b, v in zip(bars, viol):
+            ax.text(b.get_x() + b.get_width() / 2, b.get_height() + 80, f"{v:.1f}% viol.", ha="center", fontsize=8, color="crimson" if v > 1 else "black")
+        ax.set_title(f"{N} × 16k prefills into 8 decoders, 100 ms deadline\n(live, fresh server per run, 3 interleaved repeats)", fontsize=9)
+        ax.set_ylabel("safe prefill tokens / s"); ax.tick_params(axis="x", labelsize=8); ax.grid(alpha=.3, axis="y")
+    fig.tight_layout(); fig.savefig(out_dir / "live_controller.png", dpi=140)
+
+    fc = json.load(open(fcfs_json))
+    fig, axes = plt.subplots(1, 2, figsize=(11, 4.2))
+    for ax, burst in zip(axes, ("B16x2048", "B32x1024")):
+        keys = [("fixed256", "fixed 256"), ("fixed512", "fixed 512"), ("fixed1024", "fixed 1024"), ("m0online", "M0 online"), ("m2static", "M2 static"), ("m2online", "M2 online")]
+        vals = []
+        for k, _ in keys:
+            runs = fc[f"{burst}-{k}"]["runs"]
+            runs = [r for r in runs if r["prefill_cuda_max"] < 500] or runs  # drop the two one-off 3.8 s warm-up stalls
+            vals.append(np.mean([r["safe_tok_per_s"] for r in runs]))
+        ax.bar([l for _, l in keys], vals, color=["C7", "C7", "C7", "C3", "C2", "C2"])
+        ax.set_title(f"default-FCFS burst {burst[1:].replace('x', ' × ')} prompts, 100 ms deadline", fontsize=9)
+        ax.set_ylabel("safe prefill tokens / s"); ax.tick_params(axis="x", labelsize=8); ax.grid(alpha=.3, axis="y")
+    fig.tight_layout(); fig.savefig(out_dir / "fcfs_bursts.png", dpi=140)
+
+
 if __name__ == "__main__":
-    main()
+    import sys
+    if len(sys.argv) > 1 and sys.argv[1] == "live":
+        plot_live(Path(sys.argv[2]), Path(sys.argv[3]), Path(sys.argv[4]))
+    else:
+        main()
