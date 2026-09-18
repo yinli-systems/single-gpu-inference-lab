@@ -11,12 +11,17 @@
 set -u
 W=/data/run01/scxi253/inference
 MODEL_NAME=${1:-Qwen1.5-MoE-A2.7B-Chat}; MODE=${2:-eager}; LB=${3:-multiport}; Q=${4:-512}
-source $W/venv-vllm/bin/activate
+# venv lives on node-local disk at the same path it was built at (/tmp/scxi253/venv-vllm); untar once per node
+mkdir -p /tmp/scxi253
+[ -x /tmp/scxi253/venv-vllm/bin/python ] || tar -C /tmp/scxi253 -xf $W/venv-vllm.tar
+[ -d /tmp/scxi253/libfix ] || tar -C /tmp/scxi253 -xf $W/libfix.tar
+source /tmp/scxi253/venv-vllm/bin/activate
+export LD_LIBRARY_PATH=/tmp/scxi253/libfix${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
 export HF_HUB_OFFLINE=1 VLLM_LOGGING_LEVEL=INFO
 R=$W/results/m1-$SLURM_JOB_ID-$MODEL_NAME-$MODE-$LB-q$Q; mkdir -p $R/trace
 echo "host $(hostname) gpus $CUDA_VISIBLE_DEVICES"; nvidia-smi --query-gpu=name,driver_version --format=csv,noheader
 # stage model to node-local disk
-M=/tmp/$USER/models/$MODEL_NAME; mkdir -p $(dirname $M); [ -d $M ] || cp -r $W/models/$MODEL_NAME $M
+M=/tmp/scxi253/models/$MODEL_NAME; mkdir -p $(dirname $M); [ -f $M/config.json ] || cp -r $W/models/$MODEL_NAME $M
 export VLLM_EXP_ITER_TRACE=$R/trace/iter.jsonl VLLM_EXP_STEP_TRACE=$R/trace/step.jsonl VLLM_EXP_EP_TRACE=$R/trace/ep
 [ "$MODE" = graph ] && unset VLLM_EXP_ITER_TRACE VLLM_EXP_STEP_TRACE VLLM_EXP_EP_TRACE
 COMMON="--data-parallel-size 2 --data-parallel-size-local 2 --enable-expert-parallel --all2all-backend allgather_reducescatter \
@@ -32,7 +37,7 @@ for i in $(seq 1 240); do
   kill -0 $SPID 2>/dev/null || { echo "server died"; tail -30 $R/server.log; exit 1; }; sleep 5
 done
 PORTS="8300"; [ "$LB" = multiport ] && PORTS="8300 8301"
-cd $W/lab
-python scripts/dp_ep/measure_dp_ep_waves.py --model $M --ports $PORTS --output $R/waves.json --repeats 3 2>&1 | tee $R/waves.log
+cd $W/lab-scripts
+python measure_dp_ep_waves.py --model $M --ports $PORTS --output $R/waves.json --repeats 3 2>&1 | tee $R/waves.log
 curl -s localhost:8300/metrics > $R/metrics-8300.txt; [ "$LB" = multiport ] && curl -s localhost:8301/metrics > $R/metrics-8301.txt
 kill $SPID; sleep 5; pkill -u $USER -f "vllm serve" ; echo M1_DONE
