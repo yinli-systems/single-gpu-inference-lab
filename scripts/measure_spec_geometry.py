@@ -101,8 +101,8 @@ def build_prompts(cls: str, n: int, seed: int, long_chars: int) -> list[str]:
     raise ValueError(cls)
 
 
-async def run_batch(client: httpx.AsyncClient, model: str, prompts: list[str], max_tokens: int) -> dict[str, Any]:
-    async def one(p):
+async def run_batch(base: str, model: str, prompts: list[str], max_tokens: int) -> dict[str, Any]:
+    async def one(client, p):
         t0 = time.monotonic()
         r = await client.post("/v1/completions", json={"model": model, "prompt": p, "max_tokens": max_tokens, "temperature": 0, "ignore_eos": True, "stream": True, "stream_options": {"include_usage": True}})
         first = None; n = 0; np_ = 0
@@ -114,9 +114,10 @@ async def run_batch(client: httpx.AsyncClient, model: str, prompts: list[str], m
                 if d.get("usage"):
                     n = d["usage"]["completion_tokens"]; np_ = d["usage"]["prompt_tokens"]
         return {"ttft_s": (first or time.monotonic()) - t0, "e2e_s": time.monotonic() - t0, "tokens": n, "prompt_tokens": np_}
-    t0 = time.monotonic()
-    res = await asyncio.gather(*(one(p) for p in prompts))
-    wall = time.monotonic() - t0
+    async with httpx.AsyncClient(base_url=base, timeout=900) as client:
+        t0 = time.monotonic()
+        res = await asyncio.gather(*(one(client, p) for p in prompts))
+        wall = time.monotonic() - t0
     toks = sum(r["tokens"] for r in res)
     return {"wall_s": wall, "output_tokens": toks, "tok_per_s": toks / wall, "requests": res}
 
@@ -189,15 +190,14 @@ def main():
             proc = subprocess.Popen(cmd, stdout=log, stderr=subprocess.STDOUT, env=env, start_new_session=True)
             try:
                 wait_ready(base, proc, 900)
-                client = httpx.AsyncClient(base_url=base, timeout=600)
                 # warm-up
-                asyncio.run(run_batch(client, args.model, build_prompts("code-short", 4, args.seed, args.long_chars), 16))
+                asyncio.run(run_batch(base, args.model, build_prompts("code-short", 4, args.seed, args.long_chars), 16))
                 cond = record["conditions"].setdefault(name, {"spec": spec, "cmd": cmd, "batches": []})
                 for cls in classes:
                     for B in sizes:
                         prompts = build_prompts(cls, B, args.seed, args.long_chars)
                         t_start = time.monotonic()
-                        r = asyncio.run(run_batch(client, args.model, prompts, args.max_tokens))
+                        r = asyncio.run(run_batch(base, args.model, prompts, args.max_tokens))
                         r.update({"class": cls, "B": B, "repeat": rep, "t_start": t_start, "t_end": time.monotonic()})
                         cond["batches"].append(r)
                         print(f"[{name} r{rep}] {cls:12s} B={B:3d}: {r['output_tokens']} tok in {r['wall_s']:.2f}s = {r['tok_per_s']:.0f} tok/s; "
