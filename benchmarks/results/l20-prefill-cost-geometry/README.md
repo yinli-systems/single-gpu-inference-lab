@@ -23,6 +23,8 @@ win over an oracle-tuned static budget. Context shift (≤16k → 32k), decode-l
 decode-KV skew at equal aggregate, and CUDA-graph capture boundaries are all handled by the
 aggregate coordinate and are recorded here as negative results.
 
+Technical report: [`docs/when-token-budgets-lie.md`](../../../docs/when-token-budgets-lie.md).
+
 Everything below is reproducible from `raw/` (JSON per run, JSONL traces per engine iteration and
 per runner step) with the scripts linked; nothing in this directory was run on a dirty tree.
 
