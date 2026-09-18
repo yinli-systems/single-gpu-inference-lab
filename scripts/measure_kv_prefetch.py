@@ -272,7 +272,7 @@ def main():
                     plan_leads = []
                 else:
                     plan_leads = None
-                for rep in (range(args.repeats) if not args.policy_mode else []):
+                for rep in (range(args.repeats) if not (args.policy_mode or args.contention_mode) else []):
                     for P in [int(x) for x in args.prefixes.split(",")]:
                         plan = [("A", 0), ("B", 0)] + [("C", l) for l in [int(x) for x in args.leads_ms.split(",")]]
                         random.Random(rep * 100 + P).shuffle(plan)
