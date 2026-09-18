@@ -40,7 +40,8 @@ def load_joined(iter_path: Path, max_offset: int = 12, min_match: float = 0.98):
         s = st[k + o] if ok and k + o < len(st) and st[k + o]["num_tokens"] == r["total_tokens"] else None
         rows.append({**r, "gap_ms": gap[k], "cuda_ms": s["cuda_ms"] if s else np.nan,
                      "padded_tokens": s["padded_tokens"] if s else r["total_tokens"],
-                     "cg_mode": s["cg_mode"] if s else "?", "runner_step": s["step"] if s else None})
+                     "cg_mode": s["cg_mode"] if s else "?", "runner_step": s["step"] if s else None,
+                     "draft_ms": s.get("draft_ms") if s else None, "draft_rows": s.get("draft_rows") if s else None})
     info = {"iterations": len(it), "runner_steps": len(st), "offset": o, "matched": m, "compared": n_cmp,
             "match_frac": (m / n_cmp) if n_cmp else 0.0, "index_gaps": int(sum(1 for a, b in zip(it, it[1:]) if b["i"] != a["i"] + 1))}
     return rows, info
