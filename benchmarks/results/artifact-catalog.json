@@ -3,7 +3,7 @@
     "active": 5,
     "analysis": 1,
     "negative": 5,
-    "other": 10,
+    "other": 11,
     "path_proof": 14,
     "positive": 8,
     "superseded": 12
@@ -418,6 +418,18 @@
       "summary": "Aggregate coordinates (decode batch, aggregate KV, prefill tokens) collapse partitions of the same prefill budget that differ 1.4-1.9x in measured step time; one per-request attention-work term explains it; a live env-gated deadline controller carrying it finishes 4-8 concurrent 16k prefills 1.5-2.8x sooner than the aggregate controller at zero violations, but only 5-12% sooner than a hindsight-tuned fixed budget (online margin), and not at all on default-FCFS short-prompt bursts. Context/load shift, decode-KV skew and graph boundaries: negative. Replay was extrapolated and over-priced small chunks (recorded)."
     },
     {
+      "category": "other",
+      "compact_file_count": 1,
+      "has_campaign_summary_json": false,
+      "has_evidence_status_json": false,
+      "has_readme": true,
+      "has_summary_json": false,
+      "path": "benchmarks/results/l20-kv-prefetch-oracle",
+      "reference": "l20-kv-prefetch-oracle/",
+      "status": "Upper bound + policy screening (L20)",
+      "summary": "Request-free KV prefetch for agentic sessions: oracle timing halves resume TTFT (-52..58%, knee = load time); timing predictors fragile under lognormal tool waits (immediate prefetch recovers 95-100%); under sustained occupancy every admission policy incl. oracle-ordered raises aggregate resume latency +10..57% -> the lever is a slack gate on free blocks, not value-ranked admission."
+    },
+    {
       "category": "path_proof",
       "compact_file_count": 3,
       "has_campaign_summary_json": false,
@@ -670,7 +682,7 @@
       "summary": "Custom three-way serving path evidence; not yet a broad win."
     }
   ],
-  "entry_count": 55,
+  "entry_count": 56,
   "index_path": "benchmarks/results/README.md",
   "result_root": "benchmarks/results",
   "schema_version": 1
