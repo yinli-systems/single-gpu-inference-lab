@@ -74,6 +74,7 @@ def main():
                         sel = [s for s, t in zip(spec, spec_t) if t0 <= t <= t1 and len(s["acc"]) == B]
                     else:
                         sel = []
+                    acc_rows_all = [a for s in sel for a in s["acc"]] if sel else []
                     if sel:
                         acc_per_step = np.array([sum(a[3] for a in s["acc"]) for s in sel])
                         tokens_per_step = float(np.mean(acc_per_step)) + B
@@ -81,19 +82,69 @@ def main():
                         # per-row acceptance by prompt class (long vs short by depth at window start)
                         by_depth = defaultdict(list)
                         for s in sel:
-                            for rid, depth, nd, na in s["acc"]:
-                                by_depth["long" if depth > 3000 else "short"].append(na)
+                            for a in s["acc"]:
+                                by_depth["long" if a[1] > 3000 else "short"].append(a[3])
                         cls_acc = {k: float(np.mean(v)) for k, v in by_depth.items()}
                     else:
                         tokens_per_step = float(B); acc_row = 0.0; cls_acc = {}
                     good = tokens_per_step / (np.median(step) / 1e3)
                     key = (cond, b["class"], B, rep)
+                    accs = np.array([a[3] for a in acc_rows_all]) if acc_rows_all else np.array([0.0])
+                    depth_bins = defaultdict(list)
+                    for a in acc_rows_all:
+                        depth_bins[int(a[1] // 1024)].append(a[3])
                     table[key] = {"n_steps": len(win), "step_ms_p50": float(np.median(step)), "step_ms_p95": float(np.quantile(step, .95)),
+                                  "acc_quantiles": {q: float(np.quantile(accs, q / 100)) for q in (25, 50, 75, 90)}, "acc_frac_zero": float(np.mean(accs == 0)),
+                                  "acc_by_depth_k": {str(k): [len(v), float(np.mean(v))] for k, v in sorted(depth_bins.items())},
                                   "draft_ms_p50": float(np.median(draft)), "draft_share": float(np.median(draft) / np.median(step)),
                                   "tokens_per_step": tokens_per_step, "goodput": good, "acc_per_row": acc_row, "class_acc": cls_acc,
                                   "wall_tok_per_s": b["tok_per_s"], "prompt_tokens_p50": float(np.median([r["prompt_tokens"] for r in b["requests"]]))}
                     print(f"| {cond} | {b['class']} | {B} | {len(win)} | {np.median(step):.1f} | {np.median(draft):.1f} ({np.median(draft)/np.median(step)*100:.0f}%) | "
                           f"{tokens_per_step:.1f} | {good:.0f} | {acc_row:.2f} | {' '.join(f'{k}:{v:.2f}' for k, v in cls_acc.items())} |")
+
+    def cell(cond, cls, B):
+        vals = [v for (c, k, b, r), v in table.items() if c == cond and k == cls and b == B]
+        return vals
+
+    print("\n## T1. draft share of the step (median over co-decode steps; mean over repeats)")
+    conds_sorted = sorted({k[0] for k in table})
+    classes_sorted = sorted({k[1] for k in table}); sizes_sorted = sorted({k[2] for k in table})
+    for cond in conds_sorted:
+        if not any(v["draft_ms_p50"] > 0 for (c, _, _, _), v in table.items() if c == cond):
+            continue
+        print(f"\n{cond}: draft ms / step ms (share)")
+        print("| class | " + " | ".join(f"B={b}" for b in sizes_sorted) + " |"); print("| --- |" + " ---: |" * len(sizes_sorted))
+        for cls in classes_sorted:
+            row = []
+            for b in sizes_sorted:
+                vs = cell(cond, cls, b)
+                row.append(f"{np.mean([v['draft_ms_p50'] for v in vs]):.1f} / {np.mean([v['step_ms_p50'] for v in vs]):.1f} ({np.mean([v['draft_share'] for v in vs])*100:.0f}%)" if vs else "—")
+            print(f"| {cls} | " + " | ".join(row) + " |")
+
+    print("\n## T2. accepted-prefix length per row per step: P25 / P50 / P75 / P90, and share of rows with 0 accepted")
+    print("| condition | class | B | P25 | P50 | P75 | P90 | zero | mean |"); print("| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |")
+    for (cond, cls, B, rep), v in sorted(table.items()):
+        if rep != 0 or v["draft_ms_p50"] == 0:
+            continue
+        q = v["acc_quantiles"]
+        print(f"| {cond} | {cls} | {B} | {q[25]:.0f} | {q[50]:.0f} | {q[75]:.0f} | {q[90]:.0f} | {v['acc_frac_zero']*100:.0f}% | {v['acc_per_row']:.2f} |")
+
+    print("\n## T3. mixed batches: mean accepted per row per step by KV depth (1k bins; n rows)")
+    for (cond, cls, B, rep), v in sorted(table.items()):
+        if rep != 0 or not cls.startswith("mix") or v["draft_ms_p50"] == 0:
+            continue
+        print(f"{cond} {cls} B={B}: " + "; ".join(f"{k}k: {m:.2f} (n={n})" for k, (n, m) in v["acc_by_depth_k"].items()))
+
+    print("\n## T4. fixed K7 vs adaptive verification (per class, B; mean over repeats)")
+    print("| class | B | cond | goodput tok/s | step ms | draft ms | non-draft ms | tokens/step | acc/row |"); print("| --- | ---: | --- | ---: | ---: | ---: | ---: | ---: | ---: |")
+    for cls in classes_sorted:
+        for b in sizes_sorted:
+            for cond in conds_sorted:
+                vs = cell(cond, cls, b)
+                if not vs:
+                    continue
+                m = lambda k: float(np.mean([v[k] for v in vs]))
+                print(f"| {cls} | {b} | {cond} | {m('goodput'):.0f} | {m('step_ms_p50'):.1f} | {m('draft_ms_p50'):.1f} | {m('step_ms_p50') - m('draft_ms_p50'):.1f} | {m('tokens_per_step'):.1f} | {m('acc_per_row'):.2f} |")
 
     # A / B / C composition per (class, B, rep)
     print("\n## A (fixed K) vs B (fixed K + adaptive verification) vs C (oracle per-request pre-draft K; composed upper bound)")
