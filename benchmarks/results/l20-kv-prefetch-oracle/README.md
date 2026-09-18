@@ -1,7 +1,7 @@
 # Oracle request-free KV prefetch for agentic sessions — upper bound (L20, Qwen3-4B, vLLM 0.29)
 
-Status: **campaign26 done (oracle upper bound); campaigns 27 (uncertainty) and 28 (capacity-aware
-admission) pending.**
+Status: **campaigns 26 (oracle upper bound) and 27 (timing uncertainty) done; campaign 28
+(capacity-aware admission) pending.**
 
 **Question.** vLLM reloads a session's KV from the CPU tier only when the next request arrives
 (reactive). If the resume time were known, a request-free prefetch during the tool wait could take
@@ -55,6 +55,25 @@ load / (retained + load), i.e. structurally ~50–60% for this model/PCIe class.
 Decoder ITL inside prefetch/resume windows vs steady state: p50 16.8 / p95 25.6 ms vs 16.8 / 33.1
 — the transfer itself does not disturb decoders; the 16k stalls (ITL max 5–12 s) are block
 starvation, not bandwidth.
+
+## 3. Timing uncertainty (campaign27): predictors are fragile, "immediate" is not
+
+Tool waits drawn lognormal (median 600 ms, σ 0.6 → p10 341 / p50 597 / p90 1817 ms), policies
+interleaved per (prefix, repeat), 6 repeats; `raw/campaign27/`.
+
+| prefix | reactive | immediate (prefetch at wait start) | fixed lead (knee before the median wait) | EWMA α=0.3 | oracle |
+| ---: | ---: | ---: | ---: | ---: | ---: |
+| 4k | 79 ms | **45 (−43%)** | 50 (−37%), late 2/6 | 63 (−21%), late 2/6 | 43 (−45%) |
+| 8k | 120 | **60 (−50%)** | 116 (−3%), late 4/6 | 114 (−5%), late 5/6 | 61 (−49%) |
+| 16k | 196 | **81 (−58%)** | 90 (−54%), late 1/6 | 143 (−27%), late 3/6 | 89 (−54%) |
+| GPU residency before resume (p50) | 0 | 0.5–1.2 s | 0–0.6 s | 0.1–0.25 s | 50–250 ms |
+
+The loss is asymmetric: a late prefetch gains nothing, an early one pays only residency. A
+resume-time predictor would need error well below the load time (34–104 ms) to beat "prefetch
+immediately", which realistic tool-latency variance does not permit; immediate prefetch recovers
+95–100% of the oracle gain. The decision that matters is therefore not *when* but *whether* a
+paused session may hold GPU blocks during its wait — a capacity-aware admission problem
+(campaign28).
 
 ## Gate
 
