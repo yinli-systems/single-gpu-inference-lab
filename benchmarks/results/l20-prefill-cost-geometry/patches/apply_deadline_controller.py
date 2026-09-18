@@ -9,6 +9,13 @@ Env (all read at import):
   VLLM_EXP_FIXED_BUDGET   if set, ignore the model and use this prefill budget
                           (equal split over active prefills) -- the fixed baseline
                           run through the same code path
+  VLLM_EXP_PARTITION      equal (default; per-request cap = budget // n) or fcfs (vLLM's
+                          fill-in-order chunking; the controller prices that partition and
+                          sets no cap)
+  VLLM_EXP_ONLINE_MARGIN  1: replace the static q95 by the online (1-alpha) quantile of
+                          realised residuals per prefill-count bucket (VLLM_EXP_ALPHA,
+                          VLLM_EXP_WINDOW, VLLM_EXP_MIN_SAMPLES); the realised step time is
+                          the result-ready gap attributed in update_from_output
 """
 import re, sys
 path = sys.argv[1]
@@ -25,6 +32,61 @@ _EXP_DEADLINE_MS = float(_os.environ.get("VLLM_EXP_DEADLINE_MS", "0") or 0)
 _EXP_FIXED_BUDGET = int(_os.environ.get("VLLM_EXP_FIXED_BUDGET", "0") or 0)
 _EXP_CANDIDATES = [int(x) for x in _os.environ.get("VLLM_EXP_CANDIDATES", "64,128,256,512,1024,2048,4096,8192").split(",")]
 _EXP_MODEL = _json.load(open(_os.environ["VLLM_EXP_COST_MODEL"])) if _os.environ.get("VLLM_EXP_COST_MODEL") else None
+# Online margin: per prefill-count bucket, the (1-alpha) quantile of realised residuals
+# (result-ready gap minus prediction) over a sliding window replaces the static q95.
+_EXP_ONLINE = bool(int(_os.environ.get("VLLM_EXP_ONLINE_MARGIN", "0") or 0))
+_EXP_ALPHA = float(_os.environ.get("VLLM_EXP_ALPHA", "0.05"))
+_EXP_WINDOW = int(_os.environ.get("VLLM_EXP_WINDOW", "64"))
+_EXP_MIN_SAMPLES = int(_os.environ.get("VLLM_EXP_MIN_SAMPLES", "16"))
+_EXP_RESID = {}  # bucket -> list of recent residuals (ms)
+# Partition assumed when pricing a candidate budget: "equal" (per-request cap = budget // n, set
+# via the long-prefill threshold) or "fcfs" (vLLM default fill-in-order; no cap is set).
+_EXP_PARTITION = _os.environ.get("VLLM_EXP_PARTITION", "equal")
+
+
+def _exp_chunks(c, pre):
+    if _EXP_PARTITION == "fcfs":
+        out, left = [], c
+        for rem, _ in pre:
+            take = min(rem, left); out.append(take); left -= take
+        return out
+    cap = max(c // len(pre), 1)
+    return [min(rem, cap) for rem, _ in pre]
+
+
+def _exp_bucket(n):
+    return min(int(n), 8)
+
+
+def _exp_margin(n):
+    """Static q95 from the calibration fit, or the online bucket quantile once populated."""
+    if _EXP_ONLINE:
+        rs = _EXP_RESID.get(_exp_bucket(n))
+        if rs and len(rs) >= _EXP_MIN_SAMPLES:
+            xs = sorted(rs)
+            k = min(len(xs) - 1, int(round((1 - _EXP_ALPHA) * (len(xs) - 1))))
+            return xs[k], True
+    return _EXP_MODEL["q95"], False
+
+
+def _exp_observe(sched, scheduler_output):
+    """Called from update_from_output: attribute the result-ready gap to the batch it belongs to."""
+    import time as _time
+    now = _time.monotonic()
+    last = getattr(sched, "_exp_last_output_t", None)
+    sched._exp_last_output_t = now
+    dec = getattr(scheduler_output, "exp_decision", None)
+    if last is None or dec is None or dec.get("pred_ms") is None:
+        return
+    gap_ms = (now - last) * 1e3
+    if gap_ms > 4 * (dec["pred_ms"] + 50):  # idle gap, not a step time
+        return
+    b = _exp_bucket(dec["n_prefill"])
+    rs = _EXP_RESID.setdefault(b, [])
+    rs.append(gap_ms - dec["pred_ms"])
+    if len(rs) > _EXP_WINDOW:
+        del rs[0]
+    dec["actual_gap_ms"] = gap_ms
 
 
 def _exp_features(kind, chunks, depths, gen_reqs, gen_kv_sum):
@@ -66,22 +128,25 @@ def _exp_choose_budget(sched, token_budget):
         return token_budget, None
     n = len(pre)
     best, best_pred = 0, None
+    margin, online = (0.0, False) if _EXP_FIXED_BUDGET else _exp_margin(n)
     if _EXP_FIXED_BUDGET:
         best = _EXP_FIXED_BUDGET
     else:
         for c in _EXP_CANDIDATES:
-            cap = max(c // n, 1)
-            chunks = [min(rem, cap) for rem, _ in pre]
-            depths = [d for _, d in pre]
+            chunks = [x for x in _exp_chunks(c, pre) if x > 0]
+            depths = [d for (_, d), x in zip(pre, _exp_chunks(c, pre)) if x > 0]
             pred = _exp_predict(_EXP_MODEL, _exp_features(_EXP_MODEL["features"], chunks, depths, gen_reqs, gen_kv_sum))
-            if pred + _EXP_MODEL["q95"] <= _EXP_DEADLINE_MS:
+            if pred + margin <= _EXP_DEADLINE_MS:
                 best, best_pred = c, pred
     if best == 0:
         best = _EXP_CANDIDATES[0]  # never starve prefill: smallest candidate
+        if _EXP_MODEL is not None:
+            ch = _exp_chunks(best, pre)
+            best_pred = _exp_predict(_EXP_MODEL, _exp_features(_EXP_MODEL["features"], [x for x in ch if x > 0], [d for (_, d), x in zip(pre, ch) if x > 0], gen_reqs, gen_kv_sum))
     cap = max(best // n, 1)
-    sched._exp_threshold = cap
+    sched._exp_threshold = 0 if _EXP_PARTITION == "fcfs" else cap
     budget = min(token_budget, best + gen_reqs)
-    return budget, {"budget": best, "cap": cap, "n_prefill": n, "pred_ms": best_pred}
+    return budget, {"budget": best, "cap": sched._exp_threshold, "n_prefill": n, "pred_ms": best_pred, "margin_ms": margin, "online": online}
 
 '''
 anchor = "logger = init_logger(__name__)\n"
@@ -99,6 +164,10 @@ src = src.replace(a3, "            _thr = getattr(self, '_exp_threshold', 0) or 
 a4 = "                    threshold = self.scheduler_config.long_prefill_token_threshold\n"
 assert src.count(a4) == 1
 src = src.replace(a4, "                    threshold = getattr(self, '_exp_threshold', 0) or self.scheduler_config.long_prefill_token_threshold\n", 1)
+
+a6 = "    ) -> dict[int, EngineCoreOutputs]:\n        sampled_token_ids = model_runner_output.sampled_token_ids\n"
+assert src.count(a6) == 1
+src = src.replace(a6, "    ) -> dict[int, EngineCoreOutputs]:\n        if _EXP_DEADLINE_MS or _EXP_FIXED_BUDGET:\n            _exp_observe(self, scheduler_output)\n        sampled_token_ids = model_runner_output.sampled_token_ids\n", 1)
 
 a5 = "        return scheduler_output\n"
 assert src.count(a5) == 1

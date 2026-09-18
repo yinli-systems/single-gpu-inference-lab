@@ -1,0 +1,146 @@
+{
+  "schema_version": 1,
+  "result_type": "prefill_interference",
+  "generated_at_utc": "2026-09-18T04:29:04Z",
+  "provenance": {
+    "commit": "c8fb1b1b9e11d88d1f2dd82b315e86d84b045e81",
+    "dirty": false
+  },
+  "model": "/home/hhai/inference/models/Qwen3-4B",
+  "workload": {
+    "background": 8,
+    "background_prompt_tokens": 128,
+    "background_prompt_tokens_list": "",
+    "background_tokens": 4096,
+    "settle_tokens": 64,
+    "inject": 4,
+    "long_tokens": 16384,
+    "long_output_tokens": 32,
+    "repeats": 1,
+    "seed": 113,
+    "max_model_len": 40960,
+    "max_num_seqs": 64,
+    "long_prefill_token_threshold": 0
+  },
+  "trace": true,
+  "conditions": {
+    "chunk8192": {
+      "flags": [
+        "--max-num-batched-tokens",
+        "8192",
+        "--no-enable-prefix-caching",
+        "--enable-logging-iteration-details"
+      ],
+      "repeats": [
+        {
+          "background": {
+            "before": {
+              "count": 512,
+              "p50_ms": 12.957231141626835,
+              "p95_ms": 13.77048809081316,
+              "p99_ms": 14.482809230685234,
+              "max_ms": 14.598922803997993,
+              "slo_attainment": {
+                "10ms": 0.015625,
+                "25ms": 1.0,
+                "50ms": 1.0
+              }
+            },
+            "during": {
+              "count": 2328,
+              "p50_ms": 42.48700197786093,
+              "p95_ms": 61.80768460035324,
+              "p99_ms": 63.235155306756496,
+              "max_ms": 112.17784602195024,
+              "slo_attainment": {
+                "10ms": 0.013745704467353952,
+                "25ms": 0.020618556701030927,
+                "50ms": 0.6804123711340206
+              }
+            },
+            "after": {
+              "count": 1761,
+              "p50_ms": 13.68040218949318,
+              "p95_ms": 14.261641539633274,
+              "p99_ms": 14.517431147396564,
+              "max_ms": 14.70609288662672,
+              "slo_attainment": {
+                "10ms": 0.004542873367404884,
+                "25ms": 1.0,
+                "50ms": 1.0
+              }
+            }
+          },
+          "long_requests": [
+            {
+              "ttft_s": 11.632560419850051,
+              "e2e_s": 12.444575268775225,
+              "output_tokens": 32
+            },
+            {
+              "ttft_s": 11.631047897972167,
+              "e2e_s": 12.443093343637884,
+              "output_tokens": 32
+            },
+            {
+              "ttft_s": 11.629150437191129,
+              "e2e_s": 12.44139201194048,
+              "output_tokens": 32
+            },
+            {
+              "ttft_s": 11.628367096185684,
+              "e2e_s": 12.440449628047645,
+              "output_tokens": 32
+            }
+          ],
+          "injection_window_s": 12.44504859764129,
+          "background_output_tokens_total": 4609,
+          "background_tok_per_s_overall": 283.22171271803205,
+          "background_tok_per_s_during": 187.0623470639742
+        }
+      ],
+      "command": [
+        "vllm",
+        "serve",
+        "/home/hhai/inference/models/Qwen3-4B",
+        "--port",
+        "8123",
+        "--max-model-len",
+        "40960",
+        "--gpu-memory-utilization",
+        "0.9",
+        "--max-num-seqs",
+        "64",
+        "--seed",
+        "0",
+        "--max-num-batched-tokens",
+        "8192",
+        "--no-enable-prefix-caching",
+        "--enable-logging-iteration-details",
+        "--served-model-name",
+        "m"
+      ]
+    }
+  },
+  "nvidia_smi_before": {
+    "available": true,
+    "fields": [
+      "name",
+      "driver_version",
+      "clocks.current.sm",
+      "memory.used",
+      "temperature.gpu",
+      "power.draw"
+    ],
+    "rows": [
+      [
+        "NVIDIA L20",
+        "580.159.04",
+        "210 MHz",
+        "0 MiB",
+        "39",
+        "36.59 W"
+      ]
+    ]
+  }
+}
