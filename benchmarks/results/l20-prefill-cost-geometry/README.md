@@ -355,6 +355,8 @@ Reading:
 - Every repeat range is ≤3% of its mean; the ordering M2 > fixed-256 > M0 holds in all 3 repeats
   at both N.
 
+![live controller](figures/live_controller.png)
+
 Verdict against the pre-registered gates: **aggregate → geometry: pass** (violations equal at 0%,
 progress +41% / +166%); **geometry → strongest safe fixed budget: fail** (+7–8%, target ≥15%).
 
@@ -375,7 +377,7 @@ per run, interleaved, 3 repeats); [`live-calibration.json`](live-calibration.jso
 | N | controller | violations >100 ms | prefill step p95 / max | safe prefill tok/s | TTFT (s) | final margin |
 | ---: | --- | ---: | ---: | ---: | ---: | ---: |
 | 4 | fixed-256 (anchor; c20: 11.72 s) | 0.0% | 62 / 64 | 5,619 | 11.76 | — |
-| 4 | **fixed-384** (strongest safe fixed) | 0.0% | 90 / 93 | 5,887 | 11.25 | — |
+| 4 | **fixed-384** (hindsight-tuned oracle fixed baseline) | 0.0% | 90 / 93 | 5,887 | 11.25 | — |
 | 4 | M2, static q95, fine grid | 0.0% | 87 / 89 | 6,330 | 10.47 | 13.2 |
 | 4 | **M2, online margin** | 0.3% (0–0.8) | 93 / 101 | **6,592 (6,554–6,627)** | **10.04 (10.01–10.06)** | 2.8 |
 | 4 | M2 multi-fit "oracle" (q95 4 ms) | 4.2% | 99 / 104 | 6,363 | 9.71 | 4.1 |
@@ -392,7 +394,7 @@ per run, interleaved, 3 repeats); [`live-calibration.json`](live-calibration.jso
   (fixed-384, hindsight-chosen) that is **+12.0% / +5.1% safe progress, −10.8% / −5.6% TTFT** —
   closer to, but still under, the pre-registered 15%.
 - Why the gap stays small here: with equal-split, homogeneous requests the step geometry is
-  nearly constant within a run, so a hindsight-tuned fixed budget also saturates the deadline
+  nearly constant within a run, so a hindsight-tuned oracle fixed budget also saturates the deadline
   (fixed-384 p95 90–94 ms). What the controller buys is adaptivity, not raw progress: the same
   controller is safe at N=4 and N=8, while the safe fixed budget moves (512 is 4.4% at N=4 and
   10.3% at N=8; 384 happens to be safe at both).
@@ -402,6 +404,8 @@ per run, interleaved, 3 repeats); [`live-calibration.json`](live-calibration.jso
   −59 ms bias correction and M0 reaches fixed-384 level (still −10% vs M2-online); at N=8 the
   margin swings between −108 and +14 ms across repeats and TTFT spreads 30–35 s, because M0's error
   grows with KV depth inside a run, which a per-count residual quantile cannot track.
+  Calibration corrects residual error; it cannot recover information discarded by the state
+  representation.
 
 ### 5c. Default-FCFS short-prompt bursts (campaign22) — where geometry does *not* matter
 
@@ -426,6 +430,8 @@ patch inactive), controllers pricing the FCFS partition (`VLLM_EXP_PARTITION=fcf
 contains a single 3.8 s step (CUDA events 3,826 / 3,860 ms on a step whose engine gap is 17 ms,
 with a matching 3.9 s decoder stall) — a one-off warm-up/JIT-type event, not a scheduling
 effect; all 34 other runs have max ≤101 ms. Full per-run values in the JSON.
+
+![FCFS bursts](figures/fcfs_bursts.png)
 
 Here the geometry term is irrelevant: at 100 ms the admissible budget (768) is below the prompt
 length, so every step is a single fresh prompt at depth <2k — exactly the single-prefill
@@ -461,12 +467,14 @@ long requests — not of fresh short-prompt bursts under FCFS chunking.
 
 ## 7. Strongest defensible conclusion
 
-On L20 / Qwen3-4B / vLLM 0.29, aggregate prefill coordinates collapse request partitions whose
-measured step costs differ by up to 1.9×; replacing the aggregate token × KV interaction with
-per-request attention work reduces geometry-OOD prediction error from hundreds of milliseconds to
-single-digit milliseconds and lets a live 100 ms-deadline controller deliver 49–180% more safe
-prefill progress than the aggregate controller at zero violations; with an online margin it
-exceeds the best hindsight-tuned fixed budget by only 5–12%, and on default-FCFS short-prompt
-bursts — where steps hold one fresh prompt — geometry is irrelevant and a native fixed budget is
-best, so the finding is specific to steps in which several partially-prefilled requests share the
-budget.
+On L20 / Qwen3-4B / vLLM 0.29, aggregate prefill coordinates are sufficient for ordinary
+context/load shifts and short-prompt FCFS bursts, but alias partially-prefilled multi-request
+geometries whose measured step costs differ by up to 1.9×. Replacing the aggregate token × KV
+interaction with per-request attention work reduces geometry-OOD prediction error from hundreds
+of milliseconds to single-digit milliseconds and yields 49–180% more safe prefill progress than an
+aggregate deadline controller at essentially zero 100 ms violations; against a hindsight-tuned
+oracle fixed budget, the gain is a more modest 5–12%.
+
+**Status: frozen (2026-09-18).** The research question is answered; controller v3, campaigns
+16–22, all negative results and this README are the reference. No further tuning, models, GPUs or
+controller versions are planned under this artifact.
