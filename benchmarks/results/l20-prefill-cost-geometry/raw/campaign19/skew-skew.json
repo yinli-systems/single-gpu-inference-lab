@@ -1,0 +1,248 @@
+{
+  "schema_version": 1,
+  "result_type": "prefill_interference",
+  "generated_at_utc": "2026-09-17T23:58:41Z",
+  "provenance": {
+    "commit": "c8fb1b1b9e11d88d1f2dd82b315e86d84b045e81",
+    "dirty": false
+  },
+  "model": "/home/hhai/inference/models/Qwen3-4B",
+  "workload": {
+    "background": 8,
+    "background_prompt_tokens": 128,
+    "background_prompt_tokens_list": "7936,256",
+    "background_tokens": 4096,
+    "settle_tokens": 64,
+    "inject": 2,
+    "long_tokens": 16384,
+    "long_output_tokens": 32,
+    "repeats": 3,
+    "seed": 113,
+    "max_model_len": 40960,
+    "max_num_seqs": 64,
+    "long_prefill_token_threshold": 0
+  },
+  "trace": true,
+  "conditions": {
+    "chunk512": {
+      "flags": [
+        "--max-num-batched-tokens",
+        "512",
+        "--no-enable-prefix-caching",
+        "--enable-logging-iteration-details"
+      ],
+      "repeats": [
+        {
+          "background": {
+            "before": {
+              "count": 646,
+              "p50_ms": 19.500551745295525,
+              "p95_ms": 71.80445734411478,
+              "p99_ms": 78.31011526286602,
+              "max_ms": 164.8355731740594,
+              "slo_attainment": {
+                "10ms": 0.0,
+                "25ms": 0.7910216718266254,
+                "50ms": 0.8080495356037152
+              }
+            },
+            "during": {
+              "count": 800,
+              "p50_ms": 77.33020558953285,
+              "p95_ms": 110.76244246214628,
+              "p99_ms": 116.4192333817482,
+              "max_ms": 121.48421350866556,
+              "slo_attainment": {
+                "10ms": 0.0,
+                "25ms": 0.31375,
+                "50ms": 0.34
+              }
+            },
+            "after": {
+              "count": 1224,
+              "p50_ms": 19.51040420681238,
+              "p95_ms": 20.022442564368248,
+              "p99_ms": 22.6218793541193,
+              "max_ms": 24.519762955605984,
+              "slo_attainment": {
+                "10ms": 0.0,
+                "25ms": 1.0,
+                "50ms": 1.0
+              }
+            }
+          },
+          "long_requests": [
+            {
+              "ttft_s": 2.8368304278701544,
+              "e2e_s": 5.793453915975988,
+              "output_tokens": 32
+            },
+            {
+              "ttft_s": 5.954591997899115,
+              "e2e_s": 6.675407011061907,
+              "output_tokens": 32
+            }
+          ],
+          "injection_window_s": 6.680570042692125,
+          "background_output_tokens_total": 2733,
+          "background_tok_per_s_overall": 195.17134653557724,
+          "background_tok_per_s_during": 119.75026006577387
+        },
+        {
+          "background": {
+            "before": {
+              "count": 646,
+              "p50_ms": 19.436398521065712,
+              "p95_ms": 71.56333327293396,
+              "p99_ms": 78.59756704419851,
+              "max_ms": 84.30007379502058,
+              "slo_attainment": {
+                "10ms": 0.0,
+                "25ms": 0.7801857585139319,
+                "50ms": 0.7987616099071208
+              }
+            },
+            "during": {
+              "count": 800,
+              "p50_ms": 77.14913878589869,
+              "p95_ms": 110.91058515012264,
+              "p99_ms": 116.80844984948635,
+              "max_ms": 120.35514414310455,
+              "slo_attainment": {
+                "10ms": 0.01,
+                "25ms": 0.285,
+                "50ms": 0.34
+              }
+            },
+            "after": {
+              "count": 1224,
+              "p50_ms": 19.55409999936819,
+              "p95_ms": 20.122249610722065,
+              "p99_ms": 20.732817240059376,
+              "max_ms": 21.252685226500034,
+              "slo_attainment": {
+                "10ms": 0.0,
+                "25ms": 1.0,
+                "50ms": 1.0
+              }
+            }
+          },
+          "long_requests": [
+            {
+              "ttft_s": 2.8570855781435966,
+              "e2e_s": 5.807959374971688,
+              "output_tokens": 32
+            },
+            {
+              "ttft_s": 5.974037537351251,
+              "e2e_s": 6.689429304562509,
+              "output_tokens": 32
+            }
+          ],
+          "injection_window_s": 6.694142874330282,
+          "background_output_tokens_total": 2733,
+          "background_tok_per_s_overall": 195.0557658880398,
+          "background_tok_per_s_during": 119.50745823901111
+        },
+        {
+          "background": {
+            "before": {
+              "count": 662,
+              "p50_ms": 19.577358849346638,
+              "p95_ms": 72.21220340579748,
+              "p99_ms": 79.87301889806986,
+              "max_ms": 88.84696289896965,
+              "slo_attainment": {
+                "10ms": 0.0,
+                "25ms": 0.7854984894259819,
+                "50ms": 0.8036253776435045
+              }
+            },
+            "during": {
+              "count": 800,
+              "p50_ms": 77.6451425626874,
+              "p95_ms": 110.51428318023682,
+              "p99_ms": 116.80739372968674,
+              "max_ms": 120.33300660550594,
+              "slo_attainment": {
+                "10ms": 0.01,
+                "25ms": 0.32,
+                "50ms": 0.34
+              }
+            },
+            "after": {
+              "count": 1224,
+              "p50_ms": 19.553438760340214,
+              "p95_ms": 20.697209052741528,
+              "p99_ms": 22.20037765800953,
+              "max_ms": 22.362670861184597,
+              "slo_attainment": {
+                "10ms": 0.0,
+                "25ms": 1.0,
+                "50ms": 1.0
+              }
+            }
+          },
+          "long_requests": [
+            {
+              "ttft_s": 2.8671302841976285,
+              "e2e_s": 5.822732484899461,
+              "output_tokens": 32
+            },
+            {
+              "ttft_s": 5.9901272132992744,
+              "e2e_s": 6.705383071675897,
+              "output_tokens": 32
+            }
+          ],
+          "injection_window_s": 6.710679768584669,
+          "background_output_tokens_total": 2749,
+          "background_tok_per_s_overall": 195.2272206070265,
+          "background_tok_per_s_during": 119.21296017508013
+        }
+      ],
+      "command": [
+        "vllm",
+        "serve",
+        "/home/hhai/inference/models/Qwen3-4B",
+        "--port",
+        "8123",
+        "--max-model-len",
+        "40960",
+        "--gpu-memory-utilization",
+        "0.9",
+        "--max-num-seqs",
+        "64",
+        "--seed",
+        "0",
+        "--max-num-batched-tokens",
+        "512",
+        "--no-enable-prefix-caching",
+        "--enable-logging-iteration-details",
+        "--served-model-name",
+        "m"
+      ]
+    }
+  },
+  "nvidia_smi_before": {
+    "available": true,
+    "fields": [
+      "name",
+      "driver_version",
+      "clocks.current.sm",
+      "memory.used",
+      "temperature.gpu",
+      "power.draw"
+    ],
+    "rows": [
+      [
+        "NVIDIA L20",
+        "580.159.04",
+        "2520 MHz",
+        "0 MiB",
+        "56",
+        "153.40 W"
+      ]
+    ]
+  }
+}
