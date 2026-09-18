@@ -12,8 +12,8 @@ tokens, tok/s, per-request TTFT/e2e, and the trace file names.
 Prompt classes (synthetic but realistic text, deterministic per seed):
   code-short   ~60-token coding task            -> code output, high acceptance
   prose-short  ~40-token story prompt           -> prose output, lower acceptance
-  code-long    ~8k-token code file + task       -> code output at deep context
-  prose-long   ~8k-token story + continuation   -> prose output at deep context
+  code-long    ~6k-token code file + task       -> code output at deep context
+  prose-long   ~6k-token story + continuation   -> prose output at deep context
   mix-sl       half code-short + half prose-long (the "mixed utility" batch)
   mix-ls       half code-long  + half prose-short
 """
@@ -92,34 +92,58 @@ def build_prompts(cls: str, n: int, seed: int, long_chars: int) -> list[str]:
         return [long_code_body(random.Random(seed * 1000 + i), long_chars) + f"\n# Task: {TASKS[i % len(TASKS)]}. Add the function below with tests.\n" for i in range(n)]
     if cls == "prose-long":
         return [long_prose_body(random.Random(seed * 1000 + i), long_chars) + f"Continue the story, now about {TOPICS[i % len(TOPICS)]}.\n\n" for i in range(n)]
-    if cls == "mix-sl":
-        a = build_prompts("code-short", n // 2, seed, long_chars); b = build_prompts("prose-long", n - n // 2, seed, long_chars)
-        return [x for pair in zip(a, b) for x in pair] + (b[len(a):] if len(b) > len(a) else [])
-    if cls == "mix-ls":
-        a = build_prompts("code-long", n // 2, seed, long_chars); b = build_prompts("prose-short", n - n // 2, seed, long_chars)
-        return [x for pair in zip(a, b) for x in pair] + (b[len(a):] if len(b) > len(a) else [])
     raise ValueError(cls)
 
 
-async def run_batch(base: str, model: str, prompts: list[str], max_tokens: int) -> dict[str, Any]:
-    async def one(client, p):
+def build_workload(cls: str, n: int, seed: int, long_chars: int) -> tuple[list[str], list[int]]:
+    """Prompts and their release wave: long prompts first, short ones once the
+    long ones have all started decoding."""
+    if cls == "mix-sl":
+        long_, short = build_prompts("prose-long", n // 2, seed, long_chars), build_prompts("code-short", n - n // 2, seed, long_chars)
+        return long_ + short, [0] * len(long_) + [1] * len(short)
+    if cls == "mix-ls":
+        long_, short = build_prompts("code-long", n // 2, seed, long_chars), build_prompts("prose-short", n - n // 2, seed, long_chars)
+        return long_ + short, [0] * len(long_) + [1] * len(short)
+    p = build_prompts(cls, n, seed, long_chars)
+    return p, [0] * len(p)
+
+
+async def run_batch(base: str, model: str, prompts: list[str], max_tokens: int, waves: list[int] | None = None) -> dict[str, Any]:
+    """Send all prompts of wave 0 at once; a later wave is released when every
+    request of the previous wave has produced its first token (so a mixed
+    batch of long and short prompts actually decodes together)."""
+    waves = waves or [0] * len(prompts)
+    n_waves = max(waves) + 1
+    gates = [asyncio.Event() for _ in range(n_waves)]
+    gates[0].set()
+    pending = [sum(1 for w in waves if w == k) for k in range(n_waves)]
+
+    async def one(client, p, wave):
+        await gates[wave].wait()
         t0 = time.monotonic()
-        r = await client.post("/v1/completions", json={"model": model, "prompt": p, "max_tokens": max_tokens, "temperature": 0, "ignore_eos": True, "stream": True, "stream_options": {"include_usage": True}})
         first = None; n = 0; np_ = 0
-        async for line in r.aiter_lines():
-            if line.startswith("data: ") and line != "data: [DONE]":
-                d = json.loads(line[6:])
-                if first is None and d["choices"][0].get("text"):
-                    first = time.monotonic()
-                if d.get("usage"):
-                    n = d["usage"]["completion_tokens"]; np_ = d["usage"]["prompt_tokens"]
-        return {"ttft_s": (first or time.monotonic()) - t0, "e2e_s": time.monotonic() - t0, "tokens": n, "prompt_tokens": np_}
+        async with client.stream("POST", "/v1/completions", json={"model": model, "prompt": p, "max_tokens": max_tokens, "temperature": 0,
+                                                                  "ignore_eos": True, "stream": True, "stream_options": {"include_usage": True}}) as r:
+            async for line in r.aiter_lines():
+                if line.startswith("data: ") and line != "data: [DONE]":
+                    d = json.loads(line[6:])
+                    if first is None and d.get("choices") and d["choices"][0].get("text"):
+                        first = time.monotonic()
+                        pending[wave] -= 1
+                        if pending[wave] == 0 and wave + 1 < n_waves:
+                            gates[wave + 1].set()
+                    if d.get("usage"):
+                        n = d["usage"]["completion_tokens"]; np_ = d["usage"]["prompt_tokens"]
+        return {"wave": wave, "t_send": t0, "ttft_s": (first or time.monotonic()) - t0, "t_first": first, "e2e_s": time.monotonic() - t0, "tokens": n, "prompt_tokens": np_}
+
     async with httpx.AsyncClient(base_url=base, timeout=900) as client:
         t0 = time.monotonic()
-        res = await asyncio.gather(*(one(client, p) for p in prompts))
+        res = await asyncio.gather(*(one(client, p, w) for p, w in zip(prompts, waves)))
         wall = time.monotonic() - t0
     toks = sum(r["tokens"] for r in res)
-    return {"wall_s": wall, "output_tokens": toks, "tok_per_s": toks / wall, "requests": res}
+    t_all_first = max(r["t_first"] or t0 for r in res)
+    t_end = time.monotonic()
+    return {"wall_s": wall, "output_tokens": toks, "tok_per_s": toks / wall, "t_all_first": t_all_first, "requests": res}
 
 
 def wait_ready(base: str, proc: subprocess.Popen, timeout: int) -> None:
@@ -154,7 +178,8 @@ def main():
     ap.add_argument("--classes", default="code-short,prose-short,code-long,prose-long,mix-sl,mix-ls")
     ap.add_argument("--batch-sizes", default="8,16,32,64")
     ap.add_argument("--max-tokens", type=int, default=256)
-    ap.add_argument("--long-chars", type=int, default=30000, help="~8k tokens of synthetic code/prose")
+    ap.add_argument("--long-chars", type=int, default=20000, help="~5-6k tokens of synthetic code/prose")
+    ap.add_argument("--max-long-batch", type=int, default=32, help="largest B for long/mixed classes (KV capacity)")
     ap.add_argument("--repeats", type=int, default=1)
     ap.add_argument("--seed", type=int, default=7)
     ap.add_argument("--extra-server-args", default="--attention-backend TRITON_ATTN --max-model-len 16384 --max-num-seqs 64 --no-enable-prefix-caching")
@@ -192,12 +217,13 @@ def main():
                 wait_ready(base, proc, 900)
                 # warm-up
                 asyncio.run(run_batch(base, args.model, build_prompts("code-short", 4, args.seed, args.long_chars), 16))
+                sizes_for = lambda cls: [b for b in sizes if b <= args.max_long_batch or not (cls.endswith("long") or cls.startswith("mix"))]
                 cond = record["conditions"].setdefault(name, {"spec": spec, "cmd": cmd, "batches": []})
                 for cls in classes:
-                    for B in sizes:
-                        prompts = build_prompts(cls, B, args.seed, args.long_chars)
+                    for B in sizes_for(cls):
+                        prompts, waves = build_workload(cls, B, args.seed, args.long_chars)
                         t_start = time.monotonic()
-                        r = asyncio.run(run_batch(base, args.model, prompts, args.max_tokens))
+                        r = asyncio.run(run_batch(base, args.model, prompts, args.max_tokens, waves))
                         r.update({"class": cls, "B": B, "repeat": rep, "t_start": t_start, "t_end": time.monotonic()})
                         cond["batches"].append(r)
                         print(f"[{name} r{rep}] {cls:12s} B={B:3d}: {r['output_tokens']} tok in {r['wall_s']:.2f}s = {r['tok_per_s']:.0f} tok/s; "
