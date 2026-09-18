@@ -2,7 +2,7 @@
   "category_counts": {
     "active": 5,
     "analysis": 1,
-    "negative": 6,
+    "negative": 7,
     "other": 10,
     "path_proof": 14,
     "positive": 8,
@@ -430,6 +430,18 @@
       "summary": "Per-request heterogeneous pre-draft K for DSpark speculative decoding, screened and killed: draft pass is per-row-fixed (K=2->7 +5-20%), DSpark blocks are not prefix-invariant (small K loses 14-16% of positions), oracle heterogeneous K vs shipped adaptive verification C/B = 0.94-1.00. Adaptive verification saves verify-side time only, at B>=32."
     },
     {
+      "category": "negative",
+      "compact_file_count": 1,
+      "has_campaign_summary_json": false,
+      "has_evidence_status_json": false,
+      "has_readme": true,
+      "has_summary_json": false,
+      "path": "benchmarks/results/l20-adaptive-verification-profile",
+      "reference": "l20-adaptive-verification-profile/",
+      "status": "Negative result (L20)",
+      "summary": "Startup-static DSpark adaptive-verification cost profile vs real context: cost prediction wrong by +6..+55 ms (2x at 6k even with a matched profile), budget moves one tier only for low-acceptance content at <=2k, hindsight regret 0-3% -> online context-aware calibration not worth building."
+    },
+    {
       "category": "path_proof",
       "compact_file_count": 3,
       "has_campaign_summary_json": false,
@@ -682,7 +694,7 @@
       "summary": "Custom three-way serving path evidence; not yet a broad win."
     }
   ],
-  "entry_count": 56,
+  "entry_count": 57,
   "index_path": "benchmarks/results/README.md",
   "result_root": "benchmarks/results",
   "schema_version": 1
