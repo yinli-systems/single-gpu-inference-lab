@@ -13,7 +13,10 @@ W=/data/run01/scxi253/inference
 MODEL_NAME=${1:-Qwen1.5-MoE-A2.7B-Chat}; MODE=${2:-eager}; LB=${3:-multiport}; Q=${4:-512}
 # venv lives on node-local disk at the same path it was built at (/tmp/scxi253/venv-vllm); untar once per node
 mkdir -p /tmp/scxi253
-[ -x /tmp/scxi253/venv-vllm/bin/python ] || tar -C /tmp/scxi253 -xf $W/venv-vllm.tar
+# refresh the node-local venv whenever the tarball carries a newer VENV_VERSION
+NEWV=$(tar -xOf $W/venv-vllm.tar venv-vllm/VENV_VERSION 2>/dev/null || echo v1)
+CURV=$(cat /tmp/scxi253/venv-vllm/VENV_VERSION 2>/dev/null || echo none)
+if [ "$NEWV" != "$CURV" ]; then rm -rf /tmp/scxi253/venv-vllm; tar -C /tmp/scxi253 -xf $W/venv-vllm.tar; fi
 [ -d /tmp/scxi253/libfix ] || tar -C /tmp/scxi253 -xf $W/libfix.tar
 source /tmp/scxi253/venv-vllm/bin/activate
 export LD_LIBRARY_PATH=/tmp/scxi253/libfix${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
