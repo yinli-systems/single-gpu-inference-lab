@@ -12,6 +12,7 @@ tokens, tok/s, per-request TTFT/e2e, and the trace file names.
 Prompt classes (synthetic but realistic text, deterministic per seed):
   code-short   ~60-token coding task            -> code output, high acceptance
   prose-short  ~40-token story prompt           -> prose output, lower acceptance
+  code-ctxN / prose-ctxN   ~N tokens of context (any N)
   code-mid     ~3k-token code file + task       (long_chars // 2)
   code-long    ~6k-token code file + task       -> code output at deep context
   prose-long   ~6k-token story + continuation   -> prose output at deep context
@@ -26,6 +27,7 @@ import asyncio
 import json
 import os
 import random
+import re
 import signal
 import subprocess
 import sys
@@ -89,6 +91,12 @@ def build_prompts(cls: str, n: int, seed: int, long_chars: int) -> list[str]:
         return [code_prompt(i) for i in range(n)]
     if cls == "prose-short":
         return [prose_prompt(i) for i in range(n)]
+    m = re.match(r"(code|prose)-ctx(\d+)$", cls)
+    if m:  # ~N tokens of context (code ~3.2 chars/token, prose ~4.6 chars/token)
+        n_tok = int(m.group(2))
+        if m.group(1) == "code":
+            return [long_code_body(random.Random(seed * 1000 + i), int(n_tok * 3.2)) + f"\n# Task: {TASKS[i % len(TASKS)]}. Add the function below with tests.\n" for i in range(n)]
+        return [long_prose_body(random.Random(seed * 1000 + i), int(n_tok * 4.6)) + f"Continue the story, now about {TOPICS[i % len(TOPICS)]}.\n\n" for i in range(n)]
     if cls == "code-mid":
         return [long_code_body(random.Random(seed * 1000 + i), long_chars // 2) + f"\n# Task: {TASKS[i % len(TASKS)]}. Add the function below with tests.\n" for i in range(n)]
     if cls == "prose-mid":
@@ -184,7 +192,8 @@ def main():
     ap.add_argument("--batch-sizes", default="8,16,32,64")
     ap.add_argument("--max-tokens", type=int, default=256)
     ap.add_argument("--long-chars", type=int, default=20000, help="~5-6k tokens of synthetic code/prose")
-    ap.add_argument("--max-long-batch", type=int, default=32, help="largest B for long/mixed classes (KV capacity)")
+    ap.add_argument("--max-long-batch", type=int, default=32, help="(unused; see --kv-token-capacity)")
+    ap.add_argument("--kv-token-capacity", type=int, default=220000, help="skip (class, B) whose B*(ctx+max_tokens) exceeds this")
     ap.add_argument("--repeats", type=int, default=1)
     ap.add_argument("--seed", type=int, default=7)
     ap.add_argument("--extra-server-args", default="--attention-backend TRITON_ATTN --max-model-len 16384 --max-num-seqs 64 --no-enable-prefix-caching")
@@ -222,7 +231,10 @@ def main():
                 wait_ready(base, proc, 900)
                 # warm-up
                 asyncio.run(run_batch(base, args.model, build_prompts("code-short", 4, args.seed, args.long_chars), 16))
-                sizes_for = lambda cls: [b for b in sizes if b <= args.max_long_batch or not (cls.endswith(("long", "mid")) or cls.startswith("mix"))]
+                def sizes_for(cls):
+                    m = re.match(r"(code|prose)-ctx(\d+)$", cls)
+                    ctx = int(m.group(2)) if m else (6000 if cls.endswith("long") or cls.startswith("mix") else 3000 if cls.endswith("mid") else 100)
+                    return [b for b in sizes if b * (ctx + args.max_tokens) <= args.kv_token_capacity]
                 cond = record["conditions"].setdefault(name, {"spec": spec, "cmd": cmd, "batches": []})
                 for cls in classes:
                     for B in sizes_for(cls):
