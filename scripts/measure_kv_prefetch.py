@@ -91,6 +91,48 @@ async def trial(client, base, model, rng, P, arm, lead_ms, filler_tokens, filler
     return rec
 
 
+KNEE_MS = {4096: 50, 8192: 100, 16384: 250}  # campaign26: smallest lead within 5% of retained (unloaded)
+
+
+async def trial_policy(client, base, model, rng, P, policy, wait_ms, pred_ms, filler_tokens, filler_concurrency, append_tokens, gen_tokens):
+    """Two-turn session with a stochastic tool wait; the policy decides when to prefetch.
+    reactive: never; immediate: at wait start; fixed: knee ms before the *predicted* resume
+    using a fixed prediction = median wait; oracle: knee ms before the true resume;
+    ewma: knee ms before the EWMA-predicted resume. Residency = ms the blocks sit in GPU before the resume."""
+    prefix = rand_tokens(rng, P)
+    r1 = await completion(client, model, prefix, gen_tokens)
+    await asyncio.sleep(0.3)
+    per = max(filler_tokens // filler_concurrency, 256)
+    f0 = time.monotonic()
+    await asyncio.gather(*(completion(client, model, rand_tokens(rng, per), 1) for _ in range(filler_concurrency)))
+    filler_ms = (time.monotonic() - f0) * 1e3
+    knee = KNEE_MS[P]
+    if policy == "reactive":
+        t_pref = None
+    elif policy == "immediate":
+        t_pref = 0.0
+    elif policy == "oracle":
+        t_pref = max(0.0, wait_ms - knee)
+    else:  # fixed / ewma: prefetch at predicted resume - knee (may be late)
+        t_pref = max(0.0, pred_ms - knee)
+    t_wait0 = time.monotonic()
+    probe = None
+    if t_pref is not None and t_pref < wait_ms:
+        await asyncio.sleep(t_pref / 1e3)
+        probe = asyncio.create_task(completion(client, model, prefix, 1))
+        await asyncio.sleep(max(0.0, wait_ms - t_pref) / 1e3)
+    else:
+        await asyncio.sleep(wait_ms / 1e3)
+    resume_prompt = prefix + rand_tokens(rng, append_tokens)
+    t_res0 = time.monotonic()
+    r2 = await completion(client, model, resume_prompt, gen_tokens)
+    rec = {"P": P, "policy": policy, "wait_ms": wait_ms, "pred_ms": pred_ms, "t_prefetch_rel_ms": t_pref, "filler_ms": filler_ms,
+           "residency_ms": (wait_ms - t_pref) if t_pref is not None and t_pref < wait_ms else 0.0, "turn1": r1, "resume": r2}
+    if probe is not None:
+        rec["probe"] = await probe
+    return rec
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--model", required=True)
@@ -105,6 +147,11 @@ def main():
     ap.add_argument("--gen-tokens", type=int, default=32)
     ap.add_argument("--repeats", type=int, default=3)
     ap.add_argument("--seed", type=int, default=11)
+    ap.add_argument("--policy-mode", action="store_true", help="campaign27: stochastic tool waits and prefetch policies instead of fixed leads")
+    ap.add_argument("--policies", default="reactive,immediate,fixed,oracle,ewma")
+    ap.add_argument("--wait-median-ms", type=float, default=600.0)
+    ap.add_argument("--wait-sigma", type=float, default=0.6, help="lognormal sigma of the tool wait")
+    ap.add_argument("--ewma-alpha", type=float, default=0.3)
     ap.add_argument("--background", type=int, default=0, help="concurrent background decoders (128-token prompts, long generations) whose per-token arrival times are recorded")
     ap.add_argument("--background-tokens", type=int, default=2048)
     ap.add_argument("--output", type=Path, required=True)
@@ -147,7 +194,26 @@ def main():
                 bg_tasks = [asyncio.create_task(background(client, i, bg_store)) for i in range(args.background)]
                 if bg_tasks:
                     await asyncio.sleep(3.0)
-                for rep in range(args.repeats):
+                if args.policy_mode:
+                    import math
+                    ewma = None
+                    waits_seen = []
+                    for rep in range(args.repeats):
+                        for P in [int(x) for x in args.prefixes.split(",")]:
+                            wait_ms = args.wait_median_ms * math.exp(rng.gauss(0.0, args.wait_sigma))
+                            plan = args.policies.split(","); random.Random(rep * 100 + P).shuffle(plan)
+                            for pol in plan:
+                                pred = {"fixed": args.wait_median_ms, "ewma": (ewma if ewma is not None else args.wait_median_ms)}.get(pol, wait_ms)
+                                t = await trial_policy(client, base, args.model, rng, P, pol, wait_ms, pred, args.filler_tokens, args.filler_concurrency, args.append_tokens, args.gen_tokens)
+                                t["repeat"] = rep; rec["trials"].append(t)
+                                print(f"[r{rep}] P={P:6d} {pol:9s} wait {wait_ms:5.0f} pred {pred:5.0f}: resume TTFT {t['resume']['ttft_ms']:.0f} ms, residency {t['residency_ms']:.0f} ms", flush=True)
+                                args.output.write_text(json.dumps(rec, indent=1) + "\n")
+                            waits_seen.append(wait_ms)
+                            ewma = wait_ms if ewma is None else (args.ewma_alpha * wait_ms + (1 - args.ewma_alpha) * ewma)
+                    plan_leads = []
+                else:
+                    plan_leads = None
+                for rep in (range(args.repeats) if not args.policy_mode else []):
                     for P in [int(x) for x in args.prefixes.split(",")]:
                         plan = [("A", 0), ("B", 0)] + [("C", l) for l in [int(x) for x in args.leads_ms.split(",")]]
                         random.Random(rep * 100 + P).shuffle(plan)
