@@ -1,20 +1,25 @@
 # Oracle request-free KV prefetch for agentic sessions — upper bound (L20, Qwen3-4B, vLLM 0.29)
 
-Status: **campaigns 26 (oracle upper bound) and 27 (timing uncertainty) done; campaign 28
-(capacity-aware admission) pending.**
+Status: **campaigns 26 (oracle upper bound), 27 (timing uncertainty) and 28 (capacity /
+admission) done. Research question answered; remaining work is an engineering hook.**
 
 **Question.** vLLM reloads a session's KV from the CPU tier only when the next request arrives
 (reactive). If the resume time were known, a request-free prefetch during the tool wait could take
 the CPU→GPU transfer off the critical path. How much is there to gain, and what does it cost the
 rest of the engine?
 
-**Answer so far.** With perfect timing the resume TTFT drops 52–57% for 4k–16k prefixes (the load
+**Answer.** (1) With perfect timing the resume TTFT drops 52–57% for 4k–16k prefixes (the load
 is 1.2–1.4× the resume's own prefill, at 6.4 µs/token ≈ 23 GB/s); the useful lead time is exactly
 the load time (34 / 65 / 104 ms unloaded, ~80–100 ms under 16 concurrent decoders), an unfinished
 prefetch is worse than reactive (lead 0: +20%), and once the session does not fit next to the
 running decoders (16k prefix into a 24k-token GPU cache with 16 decoders) both reactive load and
-prefetch produce multi-second admission stalls — the capacity trade-off is real and is the next
-question.
+prefetch produce multi-second admission stalls. (2) Timing prediction is the fragile part: under
+lognormal tool waits, fixed/EWMA predictors fire late in 2–5 of 6 trials and lose most of the gain,
+while "prefetch immediately" recovers 95–100% of the oracle. (3) Under sustained occupancy no
+admission policy — not even one that knows the resume order — beats reactive on aggregate resume
+latency (+10…+57%): a session is evicted only when there is no slack, and a prefetch only pays into
+slack, so the two coincide only transiently (capacity that frees up *after* the eviction). The lever
+is a slack gate on the block pool, not a value-ranked admission policy.
 
 ## Setup
 
@@ -75,10 +80,41 @@ immediately", which realistic tool-latency variance does not permit; immediate p
 paused session may hold GPU blocks during its wait — a capacity-aware admission problem
 (campaign28).
 
+## 4. Capacity and admission (campaign28): prefetch only pays into slack
+
+N paused sessions resume on lognormal waits under 8 background decoders (512-token generations);
+no filler — sessions and decoders evict each other from the 24.5k-token GPU cache naturally.
+Policies: reactive; immediate-all; oracle-admit (earliest true resume first while Σ prefix ≤ 12k
+tokens ≈ nominal free capacity); random-admit and smallest-admit (same cap). 5–6 interleaved
+repeats; `raw/campaign28*/`.
+
+| paused-session KV vs free GPU | reactive mean / p50 / p95 | immediate-all | oracle-admit (admitted / non-admitted p50) | smallest-admit | decoder ITL p95 (reactive → immediate) |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| ≈60% (3×4k) | 63 / 65 / 70 ms | 61 | 60 (60 / —) | — | 16.7 → 17.3 |
+| ≈120% (2×4k + 2×8k) | **140 / 131 / 192** | 220 (+57%) | 176 (+26%; 75 / 263) | 154 (+10%; 64 / 171) | 18.6 → 22.8 |
+| ≈2× (4×4k + 3×8k) | **257 / 175 / 705** | 374 (+45%) | 299 (+16%; 68 / 331) | 282 (+10%; 76 / 207) | 22.9 → 36.4 |
+| 3× with an undersized CPU tier (9 sessions, filler; thrash) | 5,016 | 11,505 | 4,423 (1,389 / 4,975) | 5,201 | — |
+
+At 60% nothing is evicted (reactive is already a GPU hit); above 100% every prefetch displaces live
+work: admitted sessions get the full gain, non-admitted ones and the decoders pay more than that.
+Only the thrashing extreme (sessions recomputed rather than reloaded) rewards knowing the resume
+order. Contrast with campaign26, where filler traffic drained *before* the resume and prefetch
+gained 52–58%: the value exists exactly when capacity frees up after the eviction.
+
 ## Gate
 
 Pre-registered: kill if oracle TTFT gain <5% or the transfer was already overlapped; strong if
 resume TTFT ↓ >20% with an optimal lead region. **Strong**: 52–57% with the knee at the load time.
+
+## Conclusion
+
+Request-free KV prefetch halves agent resume TTFT when the GPU cache has slack (−52…−58% for
+4k–16k prefixes, PCIe-class transfer), the practical policy is "prefetch immediately when allowed"
+because resume-time prediction cannot beat the load time under realistic tool-latency variance, and
+the allow rule is a slack gate on free blocks — not a value-ranked admission — because under
+sustained occupancy any prefetch, even oracle-ordered, raises aggregate resume latency by 10–57%.
+What remains is engineering: a slack-gated prefetch-on-pause in the offloading connector and a live
+A/B on a bursty agent trace.
 
 ## Limitations
 
