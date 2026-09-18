@@ -93,7 +93,7 @@ def main():
     ap.add_argument("--model", required=True)
     ap.add_argument("--vllm-bin", default="vllm")
     ap.add_argument("--port", type=int, default=8123)
-    ap.add_argument("--server-args", default="--max-model-len 40960 --max-num-seqs 64 --kv-offloading-size 7 --num-gpu-blocks-override 1536 --gpu-memory-utilization 0.9")
+    ap.add_argument("--server-args", default="--max-model-len 20480 --max-num-seqs 64 --kv-offloading-size 7 --num-gpu-blocks-override 1536 --gpu-memory-utilization 0.9")
     ap.add_argument("--prefixes", default="4096,8192,16384")
     ap.add_argument("--leads-ms", default="0,10,25,50,100,250,500")
     ap.add_argument("--filler-tokens", type=int, default=32768, help="distinct tokens pushed through between turns (evicts the session from GPU)")
