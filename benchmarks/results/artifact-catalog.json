@@ -2,7 +2,7 @@
   "category_counts": {
     "active": 5,
     "analysis": 1,
-    "negative": 5,
+    "negative": 6,
     "other": 10,
     "path_proof": 14,
     "positive": 8,
@@ -418,6 +418,18 @@
       "summary": "Aggregate coordinates (decode batch, aggregate KV, prefill tokens) collapse partitions of the same prefill budget that differ 1.4-1.9x in measured step time; one per-request attention-work term explains it; a live env-gated deadline controller carrying it finishes 4-8 concurrent 16k prefills 1.5-2.8x sooner than the aggregate controller at zero violations, but only 5-12% sooner than a hindsight-tuned fixed budget (online margin), and not at all on default-FCFS short-prompt bursts. Context/load shift, decode-KV skew and graph boundaries: negative. Replay was extrapolated and over-priced small chunks (recorded)."
     },
     {
+      "category": "negative",
+      "compact_file_count": 1,
+      "has_campaign_summary_json": false,
+      "has_evidence_status_json": false,
+      "has_readme": true,
+      "has_summary_json": false,
+      "path": "benchmarks/results/l20-spec-decode-geometry",
+      "reference": "l20-spec-decode-geometry/",
+      "status": "Negative result (L20)",
+      "summary": "Per-request heterogeneous pre-draft K for DSpark speculative decoding, screened and killed: draft pass is per-row-fixed (K=2->7 +5-20%), DSpark blocks are not prefix-invariant (small K loses 14-16% of positions), oracle heterogeneous K vs shipped adaptive verification C/B = 0.94-1.00. Adaptive verification saves verify-side time only, at B>=32."
+    },
+    {
       "category": "path_proof",
       "compact_file_count": 3,
       "has_campaign_summary_json": false,
@@ -670,7 +682,7 @@
       "summary": "Custom three-way serving path evidence; not yet a broad win."
     }
   ],
-  "entry_count": 55,
+  "entry_count": 56,
   "index_path": "benchmarks/results/README.md",
   "result_root": "benchmarks/results",
   "schema_version": 1
