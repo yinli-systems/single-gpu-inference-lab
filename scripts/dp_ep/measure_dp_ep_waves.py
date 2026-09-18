@@ -40,7 +40,12 @@ def rand_tokens(rng, n, vocab=151000):
 
 
 async def stream_completion(client, base, model, prompt, max_tokens, store=None):
+    """store: a list; a dict with a live 'token_times' list is registered at start so a cancelled
+    stream still leaves its arrival times behind."""
     t0 = time.monotonic(); first = None; ts = []; n = 0
+    live = {"t_send": t0, "token_times": ts}
+    if store is not None:
+        store.append(live)
     async with client.stream("POST", f"{base}/v1/completions", json={"model": model, "prompt": prompt, "max_tokens": max_tokens, "temperature": 0,
                                                                       "ignore_eos": True, "stream": True, "stream_options": {"include_usage": True}}) as r:
         async for line in r.aiter_lines():
@@ -53,8 +58,7 @@ async def stream_completion(client, base, model, prompt, max_tokens, store=None)
                 if d.get("usage"):
                     n = d["usage"]["completion_tokens"]
     out = {"t_send": t0, "ttft_ms": ((first or time.monotonic()) - t0) * 1e3, "e2e_ms": (time.monotonic() - t0) * 1e3, "tokens": n, "token_times": ts}
-    if store is not None:
-        store.append(out)
+    live.update({k: v for k, v in out.items() if k != "token_times"})
     return out
 
 
