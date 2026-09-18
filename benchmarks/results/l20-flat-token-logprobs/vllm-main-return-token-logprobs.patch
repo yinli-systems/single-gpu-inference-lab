@@ -1,0 +1,235 @@
+From 817b31573448f2375280003906995297c99725f6 Mon Sep 17 00:00:00 2001
+From: Yin Li <kevinli.ai.work@gmail.com>
+Date: Thu, 17 Sep 2026 22:23:18 +0400
+Subject: [PATCH] [Frontend] Add return_token_logprobs to
+ /inference/v1/generate
+
+RL rollout collectors need one float per generated token: the sampled
+token's (processed) logprob. On the token-in/token-out endpoint that
+currently means logprobs=0 and parsing choices[].logprobs.content[i].logprob,
+and on the server it means building a dict[int, Logprob] per position in
+the output processor and a ChatCompletionLogProbsContent Pydantic object
+per token in the frontend before JSON encoding. On an 8-core host serving
+Qwen2.5-0.5B on one L20 (128 x 256-token rollouts, concurrency 64) that
+per-token work is ~40 us/token of API-server CPU and takes throughput from
+18.6K tok/s (no logprobs) to 13.7K (logprobs=0); --skip-tokenizer-init
+does not change it, so it is object construction, not detokenization.
+
+This adds GenerateRequest.return_token_logprobs. When set, the request
+uses the engine's existing flat_logprobs representation and the response
+carries choices[].token_logprobs: list[float], read directly from
+FlatLogprobs.logprobs at each position's start index (the sampled token
+is stored first). With logprobs unset it defaults to 0 and the OpenAI-style
+logprobs object is omitted; with logprobs > 0 both are returned. Streaming
+is rejected with a 400 (the per-chunk shape is a separate decision).
+
+Same workload: 13.5K -> 16.6K tok/s (0.73x -> 0.89x of no-logprobs); with
+--return-sampling-mask, the rollout contract (mask + token logprob) goes
+from 11.8K to 14.0K tok/s on the 0.5B model and from 0.94x to 0.98x of
+plain generation on Qwen3-4B. Values are identical to the object path
+(max abs diff 0.0 over 16 seeded sequences under VLLM_BATCH_INVARIANT=1).
+
+Tests: flat array equals the object path's per-token logprob, defaulting
+of logprobs, coexistence with logprobs > 0, stream rejection.
+---
+ .../token_in_token_out/test_serving_tokens.py | 77 +++++++++++++++++++
+ .../scale_out/token_in_token_out/protocol.py  | 11 +++
+ .../scale_out/token_in_token_out/serving.py   | 37 ++++++++-
+ 3 files changed, 122 insertions(+), 3 deletions(-)
+
+diff --git a/tests/entrypoints/scale_out/token_in_token_out/test_serving_tokens.py b/tests/entrypoints/scale_out/token_in_token_out/test_serving_tokens.py
+index 1c349e8d..284955a4 100644
+--- a/tests/entrypoints/scale_out/token_in_token_out/test_serving_tokens.py
++++ b/tests/entrypoints/scale_out/token_in_token_out/test_serving_tokens.py
+@@ -288,6 +288,83 @@ async def test_generate_logprobs(client, logprobs_value):
+         assert len(entry["top_logprobs"]) == max(logprobs_value, 1)
+ 
+ 
++@pytest.mark.asyncio
++async def test_generate_return_token_logprobs(client):
++    """Flat per-token sampled logprobs match the OpenAI-style objects."""
++    base = {
++        "model": MODEL_NAME,
++        "token_ids": [1, 2, 3],
++        "sampling_params": {"max_tokens": 8, "temperature": 0.0, "logprobs": 0},
++        "stream": False,
++    }
++    resp = await client.post(GEN_ENDPOINT, json=base)
++    resp.raise_for_status()
++    ref = resp.json()["choices"][0]
++
++    resp = await client.post(GEN_ENDPOINT, json={**base, "return_token_logprobs": True})
++    resp.raise_for_status()
++    choice = resp.json()["choices"][0]
++
++    assert choice["token_ids"] == ref["token_ids"]
++    assert choice["logprobs"] is None
++    assert len(choice["token_logprobs"]) == len(choice["token_ids"])
++    expected = [entry["logprob"] for entry in ref["logprobs"]["content"]]
++    assert choice["token_logprobs"] == pytest.approx(expected, abs=1e-6)
++
++
++@pytest.mark.asyncio
++async def test_generate_return_token_logprobs_defaults_logprobs(client):
++    """Omitting sampling_params.logprobs still returns the flat array."""
++    payload = {
++        "model": MODEL_NAME,
++        "token_ids": [1, 2, 3],
++        "sampling_params": {"max_tokens": 5, "temperature": 0.0},
++        "stream": False,
++        "return_token_logprobs": True,
++    }
++    resp = await client.post(GEN_ENDPOINT, json=payload)
++    resp.raise_for_status()
++    choice = resp.json()["choices"][0]
++    assert choice["logprobs"] is None
++    assert len(choice["token_logprobs"]) == len(choice["token_ids"])
++    assert all(v <= 0.0 for v in choice["token_logprobs"])
++
++
++@pytest.mark.asyncio
++async def test_generate_return_token_logprobs_keeps_top_logprobs(client):
++    """With logprobs > 0 both representations are returned."""
++    payload = {
++        "model": MODEL_NAME,
++        "token_ids": [1, 2, 3],
++        "sampling_params": {"max_tokens": 5, "temperature": 0.0, "logprobs": 2},
++        "stream": False,
++        "return_token_logprobs": True,
++    }
++    resp = await client.post(GEN_ENDPOINT, json=payload)
++    resp.raise_for_status()
++    choice = resp.json()["choices"][0]
++    content = choice["logprobs"]["content"]
++    assert len(content) == len(choice["token_ids"]) == len(choice["token_logprobs"])
++    assert choice["token_logprobs"] == pytest.approx(
++        [entry["logprob"] for entry in content], abs=1e-6
++    )
++    assert all(len(entry["top_logprobs"]) == 2 for entry in content)
++
++
++@pytest.mark.asyncio
++async def test_generate_return_token_logprobs_rejects_stream(client):
++    payload = {
++        "model": MODEL_NAME,
++        "token_ids": [1, 2, 3],
++        "sampling_params": {"max_tokens": 5, "temperature": 0.0},
++        "stream": True,
++        "return_token_logprobs": True,
++    }
++    resp = await client.post(GEN_ENDPOINT, json=payload)
++    assert resp.status_code == 400
++    assert "return_token_logprobs" in resp.text
++
++
+ @pytest.mark.asyncio
+ async def test_same_response_as_chat_completions(client, tokenizer, messages):
+     token_ids = tokenizer.apply_chat_template(
+diff --git a/vllm/entrypoints/scale_out/token_in_token_out/protocol.py b/vllm/entrypoints/scale_out/token_in_token_out/protocol.py
+index be8130e3..2de18d8d 100644
+--- a/vllm/entrypoints/scale_out/token_in_token_out/protocol.py
++++ b/vllm/entrypoints/scale_out/token_in_token_out/protocol.py
+@@ -222,6 +222,14 @@ class GenerateRequest(BaseModel):
+ 
+     stream: bool | None = False
+     stream_options: StreamOptions | None = None
++    return_token_logprobs: bool = False
++    """Return the sampled token's logprob per generated position as a flat
++    ``token_logprobs`` float list instead of the OpenAI-style per-token
++    ``logprobs`` objects. Intended for RL rollout collection, where the
++    trainer needs one float per token and the per-token objects dominate
++    API-server CPU time. Implies ``sampling_params.flat_logprobs``; sets
++    ``sampling_params.logprobs = 0`` when it is unset. Non-streaming only.
++    ``logprobs > 0`` still returns the ``logprobs`` objects alongside."""
+     cache_salt: str | None = Field(
+         default=None,
+         min_length=1,
+@@ -323,6 +331,9 @@ class GenerateRequest(BaseModel):
+ class GenerateResponseChoice(BaseModel):
+     index: int
+     logprobs: ChatCompletionLogProbs | None = None
++    # Sampled-token logprob per generated position; set when the request
++    # asked for ``return_token_logprobs``.
++    token_logprobs: list[float] | None = None
+     # per OpenAI spec this is the default
+     finish_reason: str | None = "stop"
+     token_ids: list[int] | None = None
+diff --git a/vllm/entrypoints/scale_out/token_in_token_out/serving.py b/vllm/entrypoints/scale_out/token_in_token_out/serving.py
+index a8a2804a..0032585a 100644
+--- a/vllm/entrypoints/scale_out/token_in_token_out/serving.py
++++ b/vllm/entrypoints/scale_out/token_in_token_out/serving.py
+@@ -33,7 +33,7 @@ from vllm.entrypoints.serve.utils.request_logger import RequestLogger
+ from vllm.exceptions import GenerationError
+ from vllm.inputs import EngineInput, TokensPrompt, mm_input
+ from vllm.logger import init_logger
+-from vllm.logprobs import Logprob
++from vllm.logprobs import FlatLogprobs, Logprob
+ from vllm.multimodal.inputs import (
+     MultiModalKwargsItems,
+     PlaceholderRange,
+@@ -128,6 +128,16 @@ class ServingTokens(GenerateBaseServing):
+             raw_request.state.request_metadata = request_metadata
+ 
+         sampling_params = request.sampling_params
++        if request.return_token_logprobs:
++            if request.stream:
++                return self.create_error_response(
++                    "return_token_logprobs is not supported with stream=True"
++                )
++            if sampling_params.logprobs is None:
++                sampling_params.logprobs = 0
++            # The flat engine representation is what makes the per-token
++            # array a slice rather than a rebuild.
++            sampling_params.flat_logprobs = True
+         max_num_seqs = self.engine_client.vllm_config.scheduler_config.max_num_seqs
+         if sampling_params.n > max_num_seqs:
+             return self.create_error_response(
+@@ -309,8 +319,17 @@ class ServingTokens(GenerateBaseServing):
+             token_ids = output.token_ids
+             out_logprobs = output.logprobs
+ 
+-            # This is top_logprobs in completions API
+-            if sampling_params.logprobs is not None:
++            token_logprobs = None
++            if request.return_token_logprobs:
++                assert isinstance(out_logprobs, FlatLogprobs), "Did not output logprobs"
++                token_logprobs = self._sampled_token_logprobs(out_logprobs)
++
++            # This is top_logprobs in completions API. With
++            # return_token_logprobs the objects are only built when the
++            # caller also asked for top logprobs.
++            if sampling_params.logprobs is not None and not (
++                request.return_token_logprobs and sampling_params.logprobs == 0
++            ):
+                 assert out_logprobs is not None, "Did not output logprobs"
+                 logprobs = self._create_tokens_logprobs(
+                     token_ids=token_ids,
+@@ -333,6 +352,7 @@ class ServingTokens(GenerateBaseServing):
+             choice_data = GenerateResponseChoice(
+                 index=output.index,
+                 logprobs=logprobs,
++                token_logprobs=token_logprobs,
+                 finish_reason=output.finish_reason if output.finish_reason else "stop",
+                 token_ids=as_list(output.token_ids),
+                 routed_experts=routed_experts_b64,
+@@ -526,6 +546,17 @@ class ServingTokens(GenerateBaseServing):
+             yield f"data: {data}\n\n"
+         yield "data: [DONE]\n\n"
+ 
++    @staticmethod
++    def _sampled_token_logprobs(flat: FlatLogprobs) -> list[float]:
++        """Sampled-token logprob per position from the flat representation.
++
++        The sampler stores the sampled token first at every position, so its
++        logprob is the entry at each position's start index. Every position
++        carries at least that entry whenever ``logprobs`` is requested.
++        """
++        logprobs = flat.logprobs
++        return [logprobs[start] for start in flat.start_indices]
++
+     def _create_tokens_logprobs(
+         self,
+         token_ids: GenericSequence[int],
+-- 
+2.54.0 (Apple Git-157)
+
