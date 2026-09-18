@@ -1,0 +1,84 @@
+diff --git a/vllm/v1/engine/core.py b/vllm/v1/engine/core.py
+index 7da7f2e0..5859df6c 100644
+--- a/vllm/v1/engine/core.py
++++ b/vllm/v1/engine/core.py
+@@ -96,6 +96,70 @@ from vllm.version import __version__ as VLLM_VERSION
+ 
+ logger = init_logger(__name__)
+ 
++import json as _json
++import os as _os
++
++# Experiment: per-iteration step-cost trace (features + wall time) to JSONL.
++_EXP_ITER_TRACE = _os.environ.get("VLLM_EXP_ITER_TRACE")
++_EXP_ITER_TRACE_FH = None
++
++
++def _exp_trace_iteration(scheduler_output, details, start_time: float) -> None:
++    """Append one JSON line with the iteration's cost coordinates.
++
++    Context (prefill) rows carry the KV depth they attend to (computed tokens
++    before this step) and the chunk size; generation rows carry the decode
++    batch and its KV depth. Wall time is the existing iteration timer.
++    """
++    global _EXP_ITER_TRACE_FH
++    if _EXP_ITER_TRACE_FH is None:
++        _EXP_ITER_TRACE_FH = open(_EXP_ITER_TRACE, "a", buffering=1)
++    cached = scheduler_output.scheduled_cached_reqs
++    new_ids = {r.req_id: r for r in scheduler_output.scheduled_new_reqs}
++    depth_of = {}
++    for r in scheduler_output.scheduled_new_reqs:
++        depth_of[r.req_id] = r.num_computed_tokens
++    for req_id, depth in zip(cached.req_ids, cached.num_computed_tokens):
++        depth_of[req_id] = depth
++    ctx_tokens = gen_tokens = 0
++    ctx_reqs = gen_reqs = 0
++    ctx_kv_sum = gen_kv_sum = 0
++    ctx_kv_max = gen_kv_max = 0
++    ctx_chunk_max = 0
++    for req_id, n in scheduler_output.num_scheduled_tokens.items():
++        depth = depth_of.get(req_id, 0)
++        if req_id in new_ids or cached.is_context_phase(req_id):
++            ctx_reqs += 1
++            ctx_tokens += n
++            ctx_kv_sum += depth
++            ctx_kv_max = max(ctx_kv_max, depth)
++            ctx_chunk_max = max(ctx_chunk_max, n)
++        else:
++            gen_reqs += 1
++            gen_tokens += n
++            gen_kv_sum += depth
++            gen_kv_max = max(gen_kv_max, depth)
++    _EXP_ITER_TRACE_FH.write(
++        _json.dumps(
++            {
++                "i": details.iteration_index,
++                "t": start_time,
++                "ms": round(details.elapsed_ms, 3),
++                "ctx_reqs": ctx_reqs,
++                "ctx_tokens": ctx_tokens,
++                "ctx_chunk_max": ctx_chunk_max,
++                "ctx_kv_sum": ctx_kv_sum,
++                "ctx_kv_max": ctx_kv_max,
++                "gen_reqs": gen_reqs,
++                "gen_tokens": gen_tokens,
++                "gen_kv_sum": gen_kv_sum,
++                "gen_kv_max": gen_kv_max,
++                "total_tokens": scheduler_output.total_num_scheduled_tokens,
++            }
++        )
++        + "\n"
++    )
++
+ 
+ HANDSHAKE_TIMEOUT_MINS = 5
+ 
+@@ -573,6 +637,8 @@ class EngineCore:
+         yield iteration_details
+         iteration_details.elapsed_ms = (time.monotonic() - start_time) * 1000
+         self._iteration_index = iteration_index + 1
++        if _EXP_ITER_TRACE and scheduler_output is not None:
++            _exp_trace_iteration(scheduler_output, iteration_details, start_time)
+ 
+     def _make_iteration_details_stats(
+         self, iteration_details: SchedulerIterationDetails

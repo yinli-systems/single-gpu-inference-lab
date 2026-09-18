@@ -384,7 +384,12 @@ if triton is not None:  # pragma: no cover - requires CUDA
             values = values / TEMPERATURE
 
         block_max = tl.max(values, axis=0)
-        block_sum = tl.sum(tl.exp(values - block_max), axis=0)
+        # An all-masked tile has block_max == -inf. Subtracting it would give
+        # exp(-inf - (-inf)) = NaN, which poisons the row reduction even when
+        # other tiles hold valid logits. Shift by a finite value instead so the
+        # tile contributes the identity (max=-inf, sum=0) to the log-sum-exp.
+        shift = tl.where(block_max == -float("inf"), 0.0, block_max)
+        block_sum = tl.sum(tl.exp(values - shift), axis=0)
         block_offset = row * BLOCKS_PER_ROW + block
         tl.store(partial_max + block_offset, block_max)
         tl.store(partial_sum_exp + block_offset, block_sum)
@@ -426,7 +431,11 @@ if triton is not None:  # pragma: no cover - requires CUDA
             mask=block_mask,
             other=0.0,
         ).to(tl.float32)
-        total_exp = tl.sum(tl.exp(block_maxes - global_max) * block_sums, axis=0)
+        # Tiles with block_max == -inf carry block_sum == 0 and drop out here.
+        # A row whose every tile is -inf keeps global_max == -inf; the shifted
+        # sum is then 0 and log_denom is NaN, matching torch.log_softmax.
+        global_shift = tl.where(global_max == -float("inf"), 0.0, global_max)
+        total_exp = tl.sum(tl.exp(block_maxes - global_shift) * block_sums, axis=0)
         log_denom = global_max + tl.log(total_exp)
 
         candidate_count = BLOCKS_PER_ROW * TOP_N
@@ -483,7 +492,12 @@ if triton is not None:  # pragma: no cover - requires CUDA
         rank_count = tl.sum(tl.where((values >= selected_value) & mask, 1, 0), axis=0)
 
         block_max = tl.max(values, axis=0)
-        block_sum = tl.sum(tl.exp(values - block_max), axis=0)
+        # An all-masked tile has block_max == -inf. Subtracting it would give
+        # exp(-inf - (-inf)) = NaN, which poisons the row reduction even when
+        # other tiles hold valid logits. Shift by a finite value instead so the
+        # tile contributes the identity (max=-inf, sum=0) to the log-sum-exp.
+        shift = tl.where(block_max == -float("inf"), 0.0, block_max)
+        block_sum = tl.sum(tl.exp(values - shift), axis=0)
         block_offset = row * BLOCKS_PER_ROW + block
         tl.store(partial_max + block_offset, block_max)
         tl.store(partial_sum_exp + block_offset, block_sum)
@@ -531,7 +545,11 @@ if triton is not None:  # pragma: no cover - requires CUDA
             mask=block_mask,
             other=0.0,
         ).to(tl.float32)
-        total_exp = tl.sum(tl.exp(block_maxes - global_max) * block_sums, axis=0)
+        # Tiles with block_max == -inf carry block_sum == 0 and drop out here.
+        # A row whose every tile is -inf keeps global_max == -inf; the shifted
+        # sum is then 0 and log_denom is NaN, matching torch.log_softmax.
+        global_shift = tl.where(global_max == -float("inf"), 0.0, global_max)
+        total_exp = tl.sum(tl.exp(block_maxes - global_shift) * block_sums, axis=0)
         log_denom = global_max + tl.log(total_exp)
 
         selected_token = tl.load(token_ids + row).to(tl.int64)
@@ -1501,6 +1519,26 @@ def topk_topp_sample_with_vllm_rng_out(
     return None
 
 
+
+def _require_cuda_contiguous(name: str, tensor, *, device) -> None:
+    """Enforce the flat-pointer contract used by the Triton logprob kernels.
+
+    The kernels index ``base + row * VOCAB + offset`` directly, so a
+    non-contiguous view (for example a sliced or transposed logits tensor) or a
+    tensor on a different CUDA device would read or write the wrong memory
+    without raising. Reject those inputs up front instead.
+    """
+
+    if not tensor.is_cuda:
+        raise ValueError(f"{name} must be a CUDA tensor")
+    if tensor.device != device:
+        raise ValueError(
+            f"{name} must be on {device}, got {tensor.device}; all inputs, outputs, "
+            "and workspaces must share one CUDA device"
+        )
+    if not tensor.is_contiguous():
+        raise ValueError(f"{name} must be contiguous; call .contiguous() before the kernel")
+
 def top_logprobs(
     logits,
     *,
@@ -1580,8 +1618,7 @@ def top_logprobs_out(
         ("output_values", output_values),
         ("output_tokens", output_tokens),
     ):
-        if not tensor.is_cuda:
-            raise ValueError(f"{name} must be a CUDA tensor")
+        _require_cuda_contiguous(name, tensor, device=logits.device)
     config = logprob_topk_launch_config(
         int(vocab),
         top_n,
@@ -1604,8 +1641,7 @@ def top_logprobs_out(
         ("partial_max", partial_max),
         ("partial_sum_exp", partial_sum_exp),
     ):
-        if not tensor.is_cuda:
-            raise ValueError(f"{name} must be a CUDA tensor")
+        _require_cuda_contiguous(name, tensor, device=logits.device)
 
     _top_logprobs_partial_kernel[(batch, config.blocks_per_row)](
         logits,
@@ -1696,8 +1732,7 @@ def vllm_top_logprobs_out(
         ("output_logprobs", output_logprobs),
         ("output_ranks", output_ranks),
     ):
-        if not tensor.is_cuda:
-            raise ValueError(f"{name} must be a CUDA tensor")
+        _require_cuda_contiguous(name, tensor, device=logits.device)
 
     config = logprob_topk_launch_config(
         int(vocab),
@@ -1724,8 +1759,7 @@ def vllm_top_logprobs_out(
         ("partial_sum_exp", partial_sum_exp),
         ("partial_ranks", partial_ranks),
     ):
-        if not tensor.is_cuda:
-            raise ValueError(f"{name} must be a CUDA tensor")
+        _require_cuda_contiguous(name, tensor, device=logits.device)
 
     _vllm_top_logprobs_partial_kernel[(batch, config.blocks_per_row)](
         logits,
