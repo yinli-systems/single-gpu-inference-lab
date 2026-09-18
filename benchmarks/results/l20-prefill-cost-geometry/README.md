@@ -377,10 +377,9 @@ progress +41% / +166%); **geometry → strongest safe fixed budget: fail** (+7�
 
 ## 7. Strongest defensible conclusion
 
-Aggregate runtime coordinates (decode batch, aggregate KV depth, prefill tokens) are sufficient for
-context and load shift but collapse execution geometries that differ up to 1.9× in measured
-model-step time on vLLM 0.29 / L20 / Qwen3-4B; the missing information is one linear per-request
-attention-work term, and on the live engine a deadline controller that carries it — calibrated only
-on single-prefill data — completes 4–8 concurrent 16k prefills 1.5–2.8× sooner than the same
-controller on the aggregate coordinate at zero deadline violations, while beating the best
-hindsight-tuned fixed budget by only 7–8%.
+On L20 / Qwen3-4B / vLLM 0.29, aggregate prefill coordinates collapse request partitions whose
+measured step costs differ by up to 1.9×; replacing the aggregate token × KV interaction with
+per-request attention work reduces geometry-OOD prediction error from hundreds of milliseconds to
+single-digit milliseconds and lets a live 100 ms-deadline controller deliver 41–166% more safe
+prefill progress than the aggregate controller at zero violations, although the gain over the best
+hindsight-tuned fixed budget is only 7–8%.
