@@ -147,9 +147,10 @@ async def trial_contention(client, base, model, rng, sizes, policy, cap_tokens, 
     for s_ in sessions:
         s_["turn1"] = await completion(client, model, s_["prefix"], gen_tokens)
     await asyncio.sleep(0.3)
-    per = max(filler_tokens // filler_concurrency, 256)
-    await asyncio.gather(*(completion(client, model, rand_tokens(rng, per), 1) for _ in range(filler_concurrency)))
-    await asyncio.sleep(0.5)
+    if filler_tokens > 0:
+        per = max(filler_tokens // filler_concurrency, 256)
+        await asyncio.gather(*(completion(client, model, rand_tokens(rng, per), 1) for _ in range(filler_concurrency)))
+        await asyncio.sleep(0.5)
     if policy == "reactive":
         admitted = set()
     elif policy == "immediate-all":
