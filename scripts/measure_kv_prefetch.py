@@ -133,6 +133,51 @@ async def trial_policy(client, base, model, rng, P, policy, wait_ms, pred_ms, fi
     return rec
 
 
+async def trial_contention(client, base, model, rng, sizes, policy, cap_tokens, wait_median, wait_sigma, filler_tokens, filler_concurrency, append_tokens, gen_tokens):
+    """N paused sessions whose KV does not fit in the free GPU cache. All sessions run turn 1
+    (stored to CPU), filler evicts them, then every session starts a tool wait W_i and resumes.
+    Policy = which sessions get an immediate prefetch (probe at wait start):
+      reactive        none
+      immediate-all   all (oversubscribed)
+      oracle-admit    earliest true resume first, while sum(prefix) <= cap_tokens
+      random-admit    random order, same capacity cap (isolates the value of knowing the order)
+      smallest-admit  smallest prefixes first, same cap (most sessions per capacity)"""
+    import math
+    sessions = [{"i": i, "P": P, "prefix": rand_tokens(rng, P), "wait_ms": wait_median * math.exp(rng.gauss(0.0, wait_sigma))} for i, P in enumerate(sizes)]
+    for s_ in sessions:
+        s_["turn1"] = await completion(client, model, s_["prefix"], gen_tokens)
+    await asyncio.sleep(0.3)
+    per = max(filler_tokens // filler_concurrency, 256)
+    await asyncio.gather(*(completion(client, model, rand_tokens(rng, per), 1) for _ in range(filler_concurrency)))
+    await asyncio.sleep(0.5)
+    if policy == "reactive":
+        admitted = set()
+    elif policy == "immediate-all":
+        admitted = {s_["i"] for s_ in sessions}
+    else:
+        order = {"oracle-admit": sorted(sessions, key=lambda x: x["wait_ms"]), "random-admit": random.Random(rng.random()).sample(sessions, len(sessions)),
+                 "smallest-admit": sorted(sessions, key=lambda x: x["P"])}[policy]
+        admitted, used = set(), 0
+        for s_ in order:
+            if used + s_["P"] <= cap_tokens:
+                admitted.add(s_["i"]); used += s_["P"]
+    m0 = metrics(base)
+    t_wait0 = time.monotonic()
+
+    async def one(s_):
+        probe = asyncio.create_task(completion(client, model, s_["prefix"], 1)) if s_["i"] in admitted else None
+        await asyncio.sleep(s_["wait_ms"] / 1e3)
+        r = await completion(client, model, s_["prefix"] + rand_tokens(rng, append_tokens), gen_tokens)
+        out = {"i": s_["i"], "P": s_["P"], "wait_ms": s_["wait_ms"], "admitted": s_["i"] in admitted, "resume": r}
+        if probe is not None:
+            out["probe"] = await probe
+        return out
+    results = await asyncio.gather(*(one(s_) for s_ in sessions))
+    m1 = metrics(base)
+    return {"policy": policy, "cap_tokens": cap_tokens, "sizes": sizes, "t_wait0": t_wait0, "t_end": time.monotonic(), "sessions": results,
+            "metrics_delta": {k: m1[k] - m0.get(k, 0.0) for k in m1 if m1[k] != m0.get(k, 0.0)}}
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--model", required=True)
@@ -147,6 +192,10 @@ def main():
     ap.add_argument("--gen-tokens", type=int, default=32)
     ap.add_argument("--repeats", type=int, default=3)
     ap.add_argument("--seed", type=int, default=11)
+    ap.add_argument("--contention-mode", action="store_true", help="campaign28: N paused sessions vs free GPU capacity")
+    ap.add_argument("--session-sizes", default="4096,4096,4096,4096,8192,8192,8192,16384,16384")
+    ap.add_argument("--cap-tokens", type=int, default=16384, help="prefetch admission capacity (tokens)")
+    ap.add_argument("--contention-policies", default="reactive,immediate-all,oracle-admit,random-admit,smallest-admit")
     ap.add_argument("--policy-mode", action="store_true", help="campaign27: stochastic tool waits and prefetch policies instead of fixed leads")
     ap.add_argument("--policies", default="reactive,immediate,fixed,oracle,ewma")
     ap.add_argument("--wait-median-ms", type=float, default=600.0)
@@ -194,7 +243,17 @@ def main():
                 bg_tasks = [asyncio.create_task(background(client, i, bg_store)) for i in range(args.background)]
                 if bg_tasks:
                     await asyncio.sleep(3.0)
-                if args.policy_mode:
+                if args.contention_mode:
+                    sizes = [int(x) for x in args.session_sizes.split(",")]
+                    for rep in range(args.repeats):
+                        plan = args.contention_policies.split(","); random.Random(rep).shuffle(plan)
+                        for pol in plan:
+                            t = await trial_contention(client, base, args.model, rng, sizes, pol, args.cap_tokens, args.wait_median_ms, args.wait_sigma, args.filler_tokens, args.filler_concurrency, args.append_tokens, args.gen_tokens)
+                            t["repeat"] = rep; rec["trials"].append(t)
+                            tt = sorted(x["resume"]["ttft_ms"] for x in t["sessions"])
+                            print(f"[r{rep}] {pol:14s}: resume TTFT p50 {tt[len(tt)//2]:.0f} max {tt[-1]:.0f} ms, admitted {sum(x['admitted'] for x in t['sessions'])}/{len(tt)}", flush=True)
+                            args.output.write_text(json.dumps(rec, indent=1) + "\n")
+                elif args.policy_mode:
                     import math
                     ewma = None
                     waits_seen = []
