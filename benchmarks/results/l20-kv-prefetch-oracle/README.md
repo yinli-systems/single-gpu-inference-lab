@@ -61,7 +61,28 @@ Decoder ITL inside prefetch/resume windows vs steady state: p50 16.8 / p95 25.6 
 — the transfer itself does not disturb decoders; the 16k stalls (ITL max 5–12 s) are block
 starvation, not bandwidth.
 
-## 3. Timing uncertainty (campaign27): predictors are fragile, "immediate" is not
+## 3a. Prediction-error frontier (campaign27A)
+
+Prefetch issued at `predicted resume − L*` with a controlled error ε = predicted − true resume
+(L* = 50 / 100 ms for 4k / 8k from §1); 5 interleaved repeats per cell; `raw/campaign27a/`.
+No catastrophic stalls in any cell (P(TTFT > 1 s) = 0, P(decoder ITL > 500 ms) = 0).
+
+| ε | 4k, no background (floor 42 / reactive 82 ms) | 8k, no background (65 / 123) | 4k, 8 decoders (60 / 145) | early residency | late exposure |
+| ---: | ---: | ---: | ---: | ---: | ---: |
+| −250 ms | 43 | 57 | 59 | 266–285 ms | 0 |
+| −100 | 47 | 58 | 62 | 116–135 | 0 |
+| −50 | 47 | 58 | 58 | 66–85 | 0 |
+| 0 | 41 | 55 | 95 | 16–35 | 0 |
+| +50 | 94 (+15% vs reactive) | 73 | 149 | 0 | 15–34 |
+| ≥ +100 | 82 (= reactive) | 123 (= reactive) | 145 (= reactive) | 0 | = load |
+
+Early errors cost only residency, linearly; a late error of one load time forfeits the whole gain,
+and a slightly late prefetch is worse than reactive. Under contention the load itself slows (34 →
+80 ms at 4k), so the safe region moves earlier than the unloaded knee. Operating rule: issue the
+prefetch at least one *loaded* transfer time before the resume — which, given tool-latency
+variance, means at the pause.
+
+## 3b. Realizable predictors (campaign27): fragile; "immediate" is not
 
 Tool waits drawn lognormal (median 600 ms, σ 0.6 → p10 341 / p50 597 / p90 1817 ms), policies
 interleaved per (prefix, repeat), 6 repeats; `raw/campaign27/`.
