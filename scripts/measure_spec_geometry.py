@@ -12,6 +12,7 @@ tokens, tok/s, per-request TTFT/e2e, and the trace file names.
 Prompt classes (synthetic but realistic text, deterministic per seed):
   code-short   ~60-token coding task            -> code output, high acceptance
   prose-short  ~40-token story prompt           -> prose output, lower acceptance
+  code-mid     ~3k-token code file + task       (long_chars // 2)
   code-long    ~6k-token code file + task       -> code output at deep context
   prose-long   ~6k-token story + continuation   -> prose output at deep context
   mix-sl       half code-short + half prose-long (the "mixed utility" batch)
@@ -88,6 +89,10 @@ def build_prompts(cls: str, n: int, seed: int, long_chars: int) -> list[str]:
         return [code_prompt(i) for i in range(n)]
     if cls == "prose-short":
         return [prose_prompt(i) for i in range(n)]
+    if cls == "code-mid":
+        return [long_code_body(random.Random(seed * 1000 + i), long_chars // 2) + f"\n# Task: {TASKS[i % len(TASKS)]}. Add the function below with tests.\n" for i in range(n)]
+    if cls == "prose-mid":
+        return [long_prose_body(random.Random(seed * 1000 + i), long_chars // 2) + f"Continue the story, now about {TOPICS[i % len(TOPICS)]}.\n\n" for i in range(n)]
     if cls == "code-long":
         return [long_code_body(random.Random(seed * 1000 + i), long_chars) + f"\n# Task: {TASKS[i % len(TASKS)]}. Add the function below with tests.\n" for i in range(n)]
     if cls == "prose-long":
@@ -217,7 +222,7 @@ def main():
                 wait_ready(base, proc, 900)
                 # warm-up
                 asyncio.run(run_batch(base, args.model, build_prompts("code-short", 4, args.seed, args.long_chars), 16))
-                sizes_for = lambda cls: [b for b in sizes if b <= args.max_long_batch or not (cls.endswith("long") or cls.startswith("mix"))]
+                sizes_for = lambda cls: [b for b in sizes if b <= args.max_long_batch or not (cls.endswith(("long", "mid")) or cls.startswith("mix"))]
                 cond = record["conditions"].setdefault(name, {"spec": spec, "cmd": cmd, "batches": []})
                 for cls in classes:
                     for B in sizes_for(cls):
