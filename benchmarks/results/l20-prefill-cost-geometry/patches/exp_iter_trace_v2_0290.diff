@@ -1,0 +1,181 @@
+diff --git a/vllm/v1/engine/core.py b/vllm/v1/engine/core.py
+index 7da7f2e0..f2110dde 100644
+--- a/vllm/v1/engine/core.py
++++ b/vllm/v1/engine/core.py
+@@ -96,6 +96,72 @@ from vllm.version import __version__ as VLLM_VERSION
+ 
+ logger = init_logger(__name__)
+ 
++import json as _json
++import os as _os
++
++# Experiment: per-iteration step-cost trace (scheduler geometry + engine wait) to JSONL.
++_EXP_ITER_TRACE = _os.environ.get("VLLM_EXP_ITER_TRACE")
++_EXP_ITER_TRACE_FH = None
++
++
++def _exp_trace_iteration(scheduler_output, details, start_time: float) -> None:
++    """Append one JSON line with the iteration's cost coordinates.
++
++    ``ms`` is the engine's wait for this iteration's result (NOT GPU time;
++    execution overlaps scheduling). Prefill rows carry each request's KV depth
++    (computed tokens before this step) and chunk; decode rows carry the batch
++    and KV depths. The model runner writes direct CUDA timing separately.
++    """
++    global _EXP_ITER_TRACE_FH
++    if _EXP_ITER_TRACE_FH is None:
++        _EXP_ITER_TRACE_FH = open(_EXP_ITER_TRACE, "a", buffering=1)
++    cached = scheduler_output.scheduled_cached_reqs
++    new_ids = {r.req_id for r in scheduler_output.scheduled_new_reqs}
++    depth_of = {r.req_id: r.num_computed_tokens for r in scheduler_output.scheduled_new_reqs}
++    for req_id, depth in zip(cached.req_ids, cached.num_computed_tokens):
++        depth_of[req_id] = depth
++    ctx_chunks, ctx_depths, gen_depths = [], [], []
++    for req_id, n in scheduler_output.num_scheduled_tokens.items():
++        depth = depth_of.get(req_id, 0)
++        if req_id in new_ids or cached.is_context_phase(req_id):
++            ctx_chunks.append(n)
++            ctx_depths.append(depth)
++        else:
++            gen_depths.append(depth)
++
++    def var(xs):
++        if len(xs) < 2:
++            return 0.0
++        m = sum(xs) / len(xs)
++        return sum((x - m) ** 2 for x in xs) / len(xs)
++
++    # attention-work proxy: sum over prefill rows of q * (kv + q/2), plus decode rows kv
++    attn_proxy = sum(q * (kv + q / 2) for q, kv in zip(ctx_chunks, ctx_depths)) + sum(gen_depths)
++    _EXP_ITER_TRACE_FH.write(
++        _json.dumps(
++            {
++                "i": details.iteration_index,
++                "t": start_time,
++                "ms": round(details.elapsed_ms, 3),
++                "ctx_reqs": len(ctx_chunks),
++                "ctx_tokens": sum(ctx_chunks),
++                "ctx_chunks": ctx_chunks,
++                "ctx_depths": ctx_depths,
++                "ctx_kv_sum": sum(ctx_depths),
++                "ctx_kv_max": max(ctx_depths, default=0),
++                "ctx_kv_var": var(ctx_depths),
++                "gen_reqs": len(gen_depths),
++                "gen_tokens": sum(scheduler_output.num_scheduled_tokens.values()) - sum(ctx_chunks),
++                "gen_kv_sum": sum(gen_depths),
++                "gen_kv_max": max(gen_depths, default=0),
++                "gen_kv_var": var(gen_depths),
++                "total_tokens": scheduler_output.total_num_scheduled_tokens,
++                "attn_proxy": attn_proxy,
++            }
++        )
++        + "\n"
++    )
++
+ 
+ HANDSHAKE_TIMEOUT_MINS = 5
+ 
+@@ -573,6 +639,8 @@ class EngineCore:
+         yield iteration_details
+         iteration_details.elapsed_ms = (time.monotonic() - start_time) * 1000
+         self._iteration_index = iteration_index + 1
++        if _EXP_ITER_TRACE and scheduler_output is not None:
++            _exp_trace_iteration(scheduler_output, iteration_details, start_time)
+ 
+     def _make_iteration_details_stats(
+         self, iteration_details: SchedulerIterationDetails
+diff --git a/vllm/v1/worker/gpu/model_runner.py b/vllm/v1/worker/gpu/model_runner.py
+index 631e6b04..6c94d739 100644
+--- a/vllm/v1/worker/gpu/model_runner.py
++++ b/vllm/v1/worker/gpu/model_runner.py
+@@ -182,6 +182,64 @@ from vllm.v1.worker.workspace import lock_workspace, use_workspace_lane
+ 
+ logger = init_logger(__name__)
+ 
++import json as _json
++import os as _os
++import time as _time
++from collections import deque as _deque
++
++# Experiment: direct per-step CUDA timing (events around execute_model ->
++# sample_tokens), drained without synchronizing, to JSONL.
++_EXP_STEP_TRACE = _os.environ.get("VLLM_EXP_STEP_TRACE")
++
++
++class _ExpStepTimer:
++    def __init__(self, path: str):
++        self.fh = open(path, "a", buffering=1)
++        self.pending: _deque = _deque()
++        self.current = None
++        self.step = 0
++
++    def begin(self, scheduler_output, batch_desc):
++        start = torch.cuda.Event(enable_timing=True)
++        start.record()
++        self.current = {
++            "step": self.step,
++            "t": _time.monotonic(),
++            "num_reqs": len(scheduler_output.num_scheduled_tokens),
++            "num_tokens": scheduler_output.total_num_scheduled_tokens,
++            "padded_tokens": batch_desc.num_tokens,
++            "cg_mode": str(batch_desc.cg_mode),
++            "uniform_decode": bool(batch_desc.uniform_decode),
++            "max_query_len": max(scheduler_output.num_scheduled_tokens.values()),
++            "_start": start,
++        }
++        self.step += 1
++
++    def end(self):
++        if self.current is None:
++            return
++        end = torch.cuda.Event(enable_timing=True)
++        end.record()
++        self.current["_end"] = end
++        self.pending.append(self.current)
++        self.current = None
++        self.drain()
++
++    def drain(self, force: bool = False):
++        while self.pending:
++            rec = self.pending[0]
++            if not force and not rec["_end"].query():
++                break
++            if force:
++                rec["_end"].synchronize()
++            rec = self.pending.popleft()
++            rec["cuda_ms"] = round(rec["_start"].elapsed_time(rec["_end"]), 3)
++            del rec["_start"], rec["_end"]
++            self.fh.write(_json.dumps(rec) + "\n")
++
++
++_EXP_STEP_TIMER = _ExpStepTimer(_EXP_STEP_TRACE) if _EXP_STEP_TRACE else None
++
+ 
+ class GPUModelRunner(LoRAModelRunnerMixin):
+     def __init__(self, vllm_config: VllmConfig, device: torch.device):
+@@ -1696,6 +1754,8 @@ class GPUModelRunner(LoRAModelRunnerMixin):
+             return self._merge_ec_connector_no_forward(scheduler_output, empty_output)
+ 
+         cudagraph_stats = None
++        if not dummy_run and _EXP_STEP_TIMER is not None:
++            _EXP_STEP_TIMER.begin(scheduler_output, batch_desc)
+         if not dummy_run:
+             # Common case.
+             # Prepare all the inputs and copy to the input buffers.
+@@ -1990,6 +2050,16 @@ class GPUModelRunner(LoRAModelRunnerMixin):
+     @step_eplb_after()
+     def sample_tokens(
+         self, grammar_output: GrammarOutput | None
++    ) -> AsyncOutput | ModelRunnerOutput | None:
++        if _EXP_STEP_TIMER is None:
++            return self._sample_tokens_impl(grammar_output)
++        try:
++            return self._sample_tokens_impl(grammar_output)
++        finally:
++            _EXP_STEP_TIMER.end()
++
++    def _sample_tokens_impl(
++        self, grammar_output: GrammarOutput | None
+     ) -> AsyncOutput | ModelRunnerOutput | None:
+         if self.execute_model_state is None:
+             # The prior execute_model call must have failed.

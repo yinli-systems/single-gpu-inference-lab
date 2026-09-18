@@ -2,7 +2,7 @@
   "category_counts": {
     "active": 5,
     "analysis": 1,
-    "negative": 4,
+    "negative": 5,
     "other": 10,
     "path_proof": 14,
     "positive": 8,
@@ -406,6 +406,18 @@
       "summary": "Per-iteration traces across context/batch/budget: a 512-token chunk costs 51 -> 136 ms as its KV depth grows 0 -> 32k; a point step-time predictor fitted at 4-8k is 56% false-safe at 32k (bias, not variance); online refit with a KV-read term removes the bias (+18 -> +0.1 ms) and an online residual quantile removes the tail (24% -> 0% false-safe) at halved prefill admission. Kill criterion for risk-calibrated scheduling not met."
     },
     {
+      "category": "negative",
+      "compact_file_count": 1,
+      "has_campaign_summary_json": false,
+      "has_evidence_status_json": false,
+      "has_readme": true,
+      "has_summary_json": false,
+      "path": "benchmarks/results/l20-prefill-cost-geometry",
+      "reference": "l20-prefill-cost-geometry/",
+      "status": "Falsifiable systems result (L20)",
+      "summary": "Aggregate coordinates (decode batch, aggregate KV, prefill tokens) collapse partitions of the same prefill budget that differ 1.4-1.9x in measured step time; one per-request attention-work term explains it; a live env-gated deadline controller carrying it finishes 4-8 concurrent 16k prefills 1.5-2.8x sooner than the aggregate controller at zero violations, but only 7-8% sooner than a hindsight-tuned fixed budget. Context/load shift, decode-KV skew and graph boundaries: negative. Replay was extrapolated and over-priced small chunks (recorded)."
+    },
+    {
       "category": "path_proof",
       "compact_file_count": 3,
       "has_campaign_summary_json": false,
@@ -658,7 +670,7 @@
       "summary": "Custom three-way serving path evidence; not yet a broad win."
     }
   ],
-  "entry_count": 54,
+  "entry_count": 55,
   "index_path": "benchmarks/results/README.md",
   "result_root": "benchmarks/results",
   "schema_version": 1
