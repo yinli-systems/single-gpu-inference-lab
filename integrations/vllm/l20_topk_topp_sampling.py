@@ -37,11 +37,26 @@ def _env_flag(name: str) -> bool:
     return os.environ.get(name, "0").lower() in {"1", "true", "yes", "on"}
 
 
-def _scalar_from_tensor(value: torch.Tensor | None, *, name: str) -> int | float | None:
+def _scalar_from_tensor(
+    value: torch.Tensor | None, *, name: str, allow_host_sync: bool = False
+) -> int | float | None:
+    """Resolve a per-row sampling parameter tensor to one scalar.
+
+    This performs a device-to-host synchronization (``torch.all(...)`` in a
+    Python condition plus ``.item()``) whenever ``value`` lives on the GPU. The
+    vLLM installer avoids it by passing ``top_k_value``/``top_p_value`` that it
+    resolved from CPU-side state, which keeps the hook CUDA Graph safe. Callers
+    that do not pre-resolve must opt in with ``allow_host_sync=True``;
+    otherwise a CUDA tensor is refused with ``unresolved_<name>`` so the
+    request falls back instead of silently stalling the stream.
+    """
+
     if value is None:
         return None
     if value.numel() == 0:
         return None
+    if value.is_cuda and not allow_host_sync:
+        raise ValueError(f"unresolved_{name}_requires_host_sync")
     first = value.reshape(-1)[0]
     if not torch.all(value == first):
         raise ValueError(f"mixed_{name}")
@@ -166,8 +181,16 @@ def maybe_l20_topk_topp_sample(
     defer_penalties: bool = False,
     top_k_value: int | None = None,
     top_p_value: float | None = None,
+    allow_host_sync: bool = False,
 ) -> torch.Tensor | None:
-    """Return sampled token ids or ``None`` when the guarded path is ineligible."""
+    """Return sampled token ids or ``None`` when the guarded path is ineligible.
+
+    Fast-path metadata contract: pass ``top_k_value`` and ``top_p_value`` as
+    Python scalars resolved from host-side state. When they are absent the hook
+    only reads ``k``/``p`` from CPU tensors, or from CUDA tensors if
+    ``allow_host_sync=True``; a CUDA tensor without that flag is traced as
+    ineligible rather than synchronizing the device inside the sampler.
+    """
 
     reasons: list[str] = []
     metadata: dict[str, Any] = {
@@ -208,12 +231,19 @@ def maybe_l20_topk_topp_sample(
             top_p = float(top_p_value)
         else:
             try:
-                top_k = int(_scalar_from_tensor(k, name="top_k"))
-                top_p = float(_scalar_from_tensor(p, name="top_p"))
+                top_k = int(
+                    _scalar_from_tensor(k, name="top_k", allow_host_sync=allow_host_sync)
+                )
+                top_p = float(
+                    _scalar_from_tensor(p, name="top_p", allow_host_sync=allow_host_sync)
+                )
             except ValueError as exc:
                 reasons.append(str(exc))
     metadata["top_k"] = top_k
     metadata["top_p"] = top_p
+    metadata["scalar_metadata_source"] = (
+        "pre_resolved" if top_k_value is not None and top_p_value is not None else "tensor"
+    )
     metadata["vllm_rng_state"] = not (
         expanded_idx_mapping is None or seeds is None or positions is None
     )

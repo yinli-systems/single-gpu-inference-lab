@@ -1,0 +1,344 @@
+diff --git a/tests/v1/test_outputs.py b/tests/v1/test_outputs.py
+index b6e120e..1216588 100644
+--- a/tests/v1/test_outputs.py
++++ b/tests/v1/test_outputs.py
+@@ -3,6 +3,7 @@
+ from unittest import TestCase
+ 
+ import numpy as np
++import pytest
+ import torch
+ 
+ from vllm.platforms import current_platform
+@@ -133,6 +134,59 @@ def test_sampling_mask_matches_processed_top_k_top_p_support():
+     assert result.to_nested_list() == [expected_token_ids]
+ 
+ 
++def test_sampling_mask_tensors_compact_tolist():
++    tensors = SamplingMaskTensors(
++        packed_mask=None,
++        counts=torch.tensor([2, 0, 1], dtype=torch.int32),
++        vocab_size=8,
++        token_ids=torch.tensor([[3, 5, 0, 0], [0, 0, 0, 0], [7, 0, 0, 0]], dtype=torch.int32),
++        overflow=torch.tensor([0, 0, 0], dtype=torch.int32),
++        max_support=4,
++    )
++
++    result = tensors.tolists(np.array([1, 0, 1]))
++
++    assert result.token_ids.tolist() == [3, 5, 7]
++    assert result.offsets.tolist() == [0, 2, 3]
++    assert result.cu_num_generated_tokens == [0, 1, 1, 2]
++
++
++def test_sampling_mask_compact_matches_bitpacked_layout():
++    torch.manual_seed(0)
++    batch, vocab, top_k = 16, 4096, 13
++    logits = torch.randn(batch, vocab, device=DEVICE_TYPE)
++    processed = apply_top_k_top_p(
++        logits,
++        k=torch.full((batch,), top_k, device=DEVICE_TYPE),
++        p=torch.full((batch,), 0.9, device=DEVICE_TYPE),
++    )
++    num_sampled = torch.ones(batch, dtype=torch.int32, device=DEVICE_TYPE)
++    num_sampled[5] = 0
++    num_sampled_np = num_sampled.cpu().numpy()
++
++    bitpacked = SamplingMaskTensors.from_logits(processed, num_sampled)
++    compact = SamplingMaskTensors.from_logits(processed, num_sampled, max_support=16)
++    assert compact.packed_mask is None and compact.token_ids is not None
++
++    expected = bitpacked.tolists(num_sampled_np)
++    actual = compact.to_cpu_nonblocking().tolists(num_sampled_np)
++
++    assert actual.token_ids.tolist() == expected.token_ids.tolist()
++    assert actual.offsets.tolist() == expected.offsets.tolist()
++    assert actual.cu_num_generated_tokens == expected.cu_num_generated_tokens
++    assert all(len(row) <= top_k for row in actual.to_nested_list())
++
++
++def test_sampling_mask_compact_overflow_raises():
++    logits = torch.zeros(1, 64, device=DEVICE_TYPE)  # every token survives
++    num_sampled = torch.ones(1, dtype=torch.int32, device=DEVICE_TYPE)
++    tensors = SamplingMaskTensors.from_logits(logits, num_sampled, max_support=32)
++    assert tensors.counts.tolist() == [64]
++    assert tensors.overflow.tolist() == [1]
++    with pytest.raises(RuntimeError, match="exceeded max_support"):
++        tensors.tolists(np.array([1]))
++
++
+ class TestLogprobsLists(TestCase):
+     def setUp(self):
+         self.logprobsLists = LogprobsLists(
+diff --git a/vllm/envs.py b/vllm/envs.py
+index 786864b..203db5b 100755
+--- a/vllm/envs.py
++++ b/vllm/envs.py
+@@ -246,6 +246,8 @@ if TYPE_CHECKING:
+     ) = None
+     VLLM_SSM_CONV_STATE_LAYOUT: Literal["SD", "DS"] | None = None
+     VLLM_COMPUTE_NANS_IN_LOGITS: bool = False
++    VLLM_SAMPLING_MASK_COMPACT: bool = True
++    VLLM_SAMPLING_MASK_COMPACT_MAX_K: int = 1024
+     VLLM_RAISE_ON_LOGIT_NANS: bool = False
+     VLLM_ROCM_QUICK_REDUCE_QUANTIZATION: Literal[
+         "FP", "INT8", "INT6", "INT4", "INT3", "NONE"
+@@ -1798,6 +1800,18 @@ environment_variables: dict[str, Callable[[], Any]] = {
+         int(os.getenv("VLLM_COMPUTE_NANS_IN_LOGITS", "0"))
+         or int(os.getenv("VLLM_RAISE_ON_LOGIT_NANS", "0"))
+     ),
++    # Return the sampling mask (--return-sampling-mask) as compact token IDs
++    # sized by the batch's largest top_k instead of a full-vocabulary bitmap,
++    # avoiding a ceil(V/8)-byte-per-row D2H copy and a full-vocabulary unpack
++    # on the host every step. Set to 0 to force the bit-packed layout.
++    "VLLM_SAMPLING_MASK_COMPACT": lambda: bool(
++        int(os.getenv("VLLM_SAMPLING_MASK_COMPACT", "1"))
++    ),
++    # Largest top_k for which the compact sampling-mask layout is used; batches
++    # containing a larger top_k fall back to the bit-packed layout.
++    "VLLM_SAMPLING_MASK_COMPACT_MAX_K": lambda: int(
++        os.getenv("VLLM_SAMPLING_MASK_COMPACT_MAX_K", "1024")
++    ),
+     # Raise an exception when generated logits contain NaNs. Enabling this
+     # also enables the NaN computation required to detect them.
+     "VLLM_RAISE_ON_LOGIT_NANS": lambda: bool(
+diff --git a/vllm/v1/worker/gpu/sample/output.py b/vllm/v1/worker/gpu/sample/output.py
+index 02e86cc..130cefa 100644
+--- a/vllm/v1/worker/gpu/sample/output.py
++++ b/vllm/v1/worker/gpu/sample/output.py
+@@ -62,23 +62,99 @@ def _pack_sampling_mask_kernel(
+     tl.store(counts_ptr + req_idx, count)
+ 
+ 
++@triton.jit
++def _pack_compact_support_kernel(
++    logits_ptr,
++    logits_row_stride,
++    logits_col_stride,
++    num_sampled_tokens_ptr,
++    token_ids_ptr,
++    token_ids_row_stride,
++    counts_ptr,
++    overflow_ptr,
++    vocab_size,
++    MAX_SUPPORT: tl.constexpr,
++    BLOCK_SIZE: tl.constexpr,
++):
++    """Emit the finite-logit support as compact, ascending token IDs.
++
++    Same keep rule as ``_pack_sampling_mask_kernel`` (finite logits of rows
++    that sampled a token). The support of a request with ``top_k = k`` has at
++    most ``k`` entries, so when every request in the batch has a bounded
++    ``top_k`` the caller can size ``MAX_SUPPORT`` from host-side state and the
++    D2H copy shrinks from ``ceil(V / 8)`` bytes per row to ``4 * MAX_SUPPORT``,
++    and the host no longer unpacks ``V`` bits per row. ``overflow`` is set
++    when a row's support exceeds ``MAX_SUPPORT``; the caller must treat that
++    as an error rather than a truncated mask.
++    """
++    req_idx = tl.program_id(0)
++    is_active = tl.load(num_sampled_tokens_ptr + req_idx) > 0
++    count = tl.zeros((), dtype=tl.int32)
++
++    for start_idx in range(0, vocab_size, BLOCK_SIZE):
++        offsets = start_idx + tl.arange(0, BLOCK_SIZE)
++        valid = offsets < vocab_size
++        logits = tl.load(
++            logits_ptr + req_idx * logits_row_stride + offsets * logits_col_stride,
++            mask=valid,
++            other=-float("inf"),
++        )
++        keep = (logits > -float("inf")) & (logits < float("inf")) & is_active
++        keep_i = keep.to(tl.int32)
++        # Inclusive prefix sum within the tile gives each kept token its
++        # slot; the running count offsets across tiles. Slots beyond
++        # MAX_SUPPORT are dropped and reported through ``overflow``.
++        position = count + tl.cumsum(keep_i, axis=0) - 1
++        tl.store(
++            token_ids_ptr + req_idx * token_ids_row_stride + position,
++            offsets.to(tl.int32),
++            mask=keep & (position < MAX_SUPPORT),
++        )
++        count += tl.sum(keep_i, axis=0)
++
++    tl.store(counts_ptr + req_idx, count)
++    tl.store(overflow_ptr + req_idx, (count > MAX_SUPPORT).to(tl.int32))
++
++
+ class SamplingMaskTensors(NamedTuple):
+-    """Bit-packed device-side sampling mask data pending async D2H."""
++    """Device-side sampling mask data pending async D2H.
+ 
+-    # [num_requests, ceil(vocab_size / 8)]
+-    packed_mask: torch.Tensor
++    Two layouts share one interface. The bit-packed layout stores
++    ``ceil(vocab_size / 8)`` bytes per row. The compact layout stores up to
++    ``max_support`` ascending token IDs per row plus a count; it is used when
++    every request in the batch has a bounded ``top_k`` (which the sampling
++    mask feature already requires), because the support can then never
++    exceed ``top_k``.
++    """
++
++    # [num_requests, ceil(vocab_size / 8)] in the bit-packed layout, else None
++    packed_mask: torch.Tensor | None
+     # [num_requests]
+     counts: torch.Tensor
+     vocab_size: int
++    # [num_requests, max_support] int32 in the compact layout, else None
++    token_ids: torch.Tensor | None = None
++    # [num_requests] int32, 1 where a row's support exceeded max_support
++    overflow: torch.Tensor | None = None
++    max_support: int = 0
+ 
+     @classmethod
+     def from_logits(
+         cls,
+         logits: torch.Tensor,
+         num_sampled_tokens: torch.Tensor,
++        max_support: int | None = None,
+     ) -> SamplingMaskTensors:
+-        """Pack the finite-logit support for requests that sampled tokens."""
++        """Pack the finite-logit support for requests that sampled tokens.
++
++        ``max_support`` selects the compact layout; it must be a power of two
++        no smaller than the largest ``top_k`` in the batch.
++        """
+         num_reqs, vocab_size = logits.shape
++        if max_support is not None:
++            return cls._from_logits_compact(
++                logits, num_sampled_tokens, num_reqs, vocab_size, max_support
++            )
+         packed_width = (vocab_size + 7) // 8
+ 
+         packed_mask = torch.empty(
+@@ -99,13 +175,52 @@ class SamplingMaskTensors(NamedTuple):
+ 
+         return cls(packed_mask, counts, vocab_size)
+ 
++    @classmethod
++    def _from_logits_compact(
++        cls,
++        logits: torch.Tensor,
++        num_sampled_tokens: torch.Tensor,
++        num_reqs: int,
++        vocab_size: int,
++        max_support: int,
++    ) -> SamplingMaskTensors:
++        assert max_support > 0 and (max_support & (max_support - 1)) == 0, (
++            "max_support must be a power of two"
++        )
++        token_ids = torch.empty(
++            (num_reqs, max_support), dtype=torch.int32, device=logits.device
++        )
++        counts = torch.empty(num_reqs, dtype=torch.int32, device=logits.device)
++        overflow = torch.empty(num_reqs, dtype=torch.int32, device=logits.device)
++        _pack_compact_support_kernel[(num_reqs,)](
++            logits,
++            logits.stride(0),
++            logits.stride(1),
++            num_sampled_tokens,
++            token_ids,
++            token_ids.stride(0),
++            counts,
++            overflow,
++            vocab_size,
++            MAX_SUPPORT=max_support,
++            BLOCK_SIZE=4096,
++        )
++        return cls(None, counts, vocab_size, token_ids, overflow, max_support)
++
+     def to_cpu_nonblocking(self) -> SamplingMaskTensors:
+-        if self.packed_mask.device.type == "cpu":
++        if self.counts.device.type == "cpu":
+             return self
++
++        def d2h(t: torch.Tensor | None) -> torch.Tensor | None:
++            return None if t is None else t.to("cpu", non_blocking=True)
++
+         return SamplingMaskTensors(
+-            self.packed_mask.to("cpu", non_blocking=True),
++            d2h(self.packed_mask),
+             self.counts.to("cpu", non_blocking=True),
+             self.vocab_size,
++            d2h(self.token_ids),
++            d2h(self.overflow),
++            self.max_support,
+         )
+ 
+     def tolists(self, num_sampled_tokens: np.ndarray) -> SamplingMaskLists:
+@@ -115,13 +230,25 @@ class SamplingMaskTensors(NamedTuple):
+         offsets = np.empty(len(counts) + 1, dtype=np.int64)
+         offsets[0] = 0
+         np.cumsum(counts, dtype=np.int64, out=offsets[1:])
+-        unpacked = np.unpackbits(
+-            self.packed_mask.cpu().numpy()[sampled_rows],
+-            axis=1,
+-            count=self.vocab_size,
+-            bitorder="little",
+-        )
+-        token_ids = np.nonzero(unpacked)[1].astype(np.int32, copy=False)
++        if self.token_ids is not None:
++            assert self.overflow is not None
++            if self.overflow.cpu().numpy()[sampled_rows].any():
++                raise RuntimeError(
++                    "sampling mask support exceeded max_support="
++                    f"{self.max_support}; the batch's top_k bound was violated"
++                )
++            ids = self.token_ids.cpu().numpy()[sampled_rows]
++            keep = np.arange(self.max_support)[None, :] < counts[:, None]
++            token_ids = ids[keep]
++        else:
++            assert self.packed_mask is not None
++            unpacked = np.unpackbits(
++                self.packed_mask.cpu().numpy()[sampled_rows],
++                axis=1,
++                count=self.vocab_size,
++                bitorder="little",
++            )
++            token_ids = np.nonzero(unpacked)[1].astype(np.int32, copy=False)
+         return SamplingMaskLists(
+             token_ids=token_ids,
+             offsets=offsets,
+diff --git a/vllm/v1/worker/gpu/sample/sampler.py b/vllm/v1/worker/gpu/sample/sampler.py
+index 3ee2c13..5447fd7 100644
+--- a/vllm/v1/worker/gpu/sample/sampler.py
++++ b/vllm/v1/worker/gpu/sample/sampler.py
+@@ -187,7 +187,9 @@ class Sampler:
+         sampling_mask_tensors = None
+         if self.return_sampling_mask:
+             sampling_mask_tensors = SamplingMaskTensors.from_logits(
+-                processed_logits, num_sampled
++                processed_logits,
++                num_sampled,
++                max_support=self._sampling_mask_max_support(idx_mapping_np),
+             )
+ 
+         # These are GPU tensors.
+@@ -204,6 +206,28 @@ class Sampler:
+         )
+         return sampler_output
+ 
++    def _sampling_mask_max_support(self, idx_mapping_np: np.ndarray) -> int | None:
++        """Bound on the sampling-mask support for the scheduled requests.
++
++        The sampling mask feature requires ``top_k > 0`` per request, and every
++        later filter (top-p, min-p, bias, penalties) can only shrink the
++        surviving set, so the support never exceeds the batch's largest
++        ``top_k``. That value lives in host memory, so choosing the compact
++        layout costs no device sync. Returns ``None`` (bit-packed layout) when
++        the bound is missing or larger than the configured cap.
++        """
++        if not envs.VLLM_SAMPLING_MASK_COMPACT:
++            return None
++        top_k = self.sampling_states.top_k.np[idx_mapping_np]
++        if top_k.size == 0:
++            return None
++        max_top_k = int(top_k.max())
++        if max_top_k <= 0 or max_top_k >= self.sampling_states.vocab_size:
++            return None
++        if max_top_k > envs.VLLM_SAMPLING_MASK_COMPACT_MAX_K:
++            return None
++        return 1 << (max_top_k - 1).bit_length() if max_top_k > 1 else 1
++
+     def apply_sampling_params(
+         self,
+         logits: torch.Tensor,

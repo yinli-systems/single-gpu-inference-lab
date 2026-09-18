@@ -273,12 +273,26 @@ def test_checked_in_top_logprobs_revalidation_matches_raw_trials():
         "included_in_cuda_event_interval": False,
     }
 
-    for source_key, source_path in (
-        ("benchmark_script_sha256", Path("scripts/benchmark_l20_top_logprobs.py")),
-        ("kernel_source_sha256", Path("src/l20_stack/ops/triton_sampling.py")),
-    ):
-        actual_hash = hashlib.sha256(source_path.read_bytes()).hexdigest()
-        assert summary["provenance"][source_key] == actual_hash
+    script_hash = hashlib.sha256(
+        Path("scripts/benchmark_l20_top_logprobs.py").read_bytes()
+    ).hexdigest()
+    assert summary["provenance"]["benchmark_script_sha256"] == script_hash
+
+    # The kernel source may move on after a measurement. Every such change must
+    # be acknowledged in the artifact as a dated supersession entry that names
+    # the new source hash and states whether performance was remeasured, so the
+    # A100 numbers are never silently re-attributed to code they did not run.
+    kernel_hash = hashlib.sha256(
+        Path("src/l20_stack/ops/triton_sampling.py").read_bytes()
+    ).hexdigest()
+    acknowledged = {summary["provenance"]["kernel_source_sha256"]}
+    for entry in summary["provenance"].get("kernel_source_supersessions", []):
+        assert entry["date"] and entry["change"] and entry["performance_effect"]
+        acknowledged.add(entry["kernel_source_sha256"])
+    assert kernel_hash in acknowledged, (
+        "triton_sampling.py changed since the artifact was measured; add a "
+        "kernel_source_supersessions entry to summary.json describing the change"
+    )
 
     for row in summary["rows"]:
         payloads = [
@@ -400,3 +414,109 @@ def test_checked_in_top_logprobs_revalidation_matches_raw_trials():
     for path, claim in public_claims.items():
         assert claim in path.read_text(encoding="utf-8")
     assert summary["claim"]["paired_speedup_range"] == "8.39x-9.45x"
+
+
+def test_checked_in_l20_post_fix_top_logprobs_artifact_matches_raw_trials():
+    artifact_root = Path("benchmarks/results/l20-fused-top-logprobs-2026-09")
+    summary = json.loads((artifact_root / "summary.json").read_text(encoding="utf-8"))
+
+    assert summary["schema_version"] == 2
+    assert summary["evidence_status"] == "controlled_revalidation"
+    assert summary["hardware"]["gpu"] == "NVIDIA L20"
+    assert summary["hardware"]["compute_capability"] == [8, 9]
+    assert summary["collection"]["independent_processes_per_shape"] == 3
+    assert summary["collection"]["distinct_seeds_per_shape"] == [113, 114, 115]
+    assert summary["collection"]["total_paired_trials_per_shape"] == 15
+    assert summary["provenance"]["all_runs_clean"] is True
+    assert summary["timing_protocol"]["clock_policy"] == "steady-state-gemm"
+    assert summary["shape"] == {
+        "vocab": 151_936,
+        "top_n": 5,
+        "temperature": 0.8,
+        "dtype": "float16",
+    }
+
+    # This artifact is the post-fix measurement: its kernel hash must be the
+    # one the A100 artifact's supersession entry points at.
+    a100 = json.loads(
+        Path("benchmarks/results/a100-fused-top-logprobs/summary.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    superseding = {
+        entry["kernel_source_sha256"]
+        for entry in a100["provenance"]["kernel_source_supersessions"]
+    }
+    assert summary["provenance"]["kernel_source_sha256"] in superseding
+
+    for relative, expected_hash in summary["provenance"]["raw_file_sha256"].items():
+        assert hashlib.sha256((artifact_root / "raw" / relative).read_bytes()).hexdigest() == (
+            expected_hash
+        )
+
+    for row in summary["rows"]:
+        payloads = [
+            json.loads((artifact_root / relative).read_text(encoding="utf-8"))
+            for relative in row["raw_files"]
+        ]
+        assert len(payloads) == 3
+        assert {
+            payload["timing_policy"]["provider_order"]["seed"] for payload in payloads
+        } == {113, 114, 115}
+        for payload in payloads:
+            assert payload["schema_version"] == 2
+            assert payload["shape"]["batch"] == row["batch"]
+            assert payload["provenance"]["commit"] == summary["provenance"]["repo_commit"]
+            assert payload["provenance"]["dirty"] is False
+            assert payload["environment"]["gpu"]["name"] == "NVIDIA L20"
+            assert payload["correctness"]["tie_aware_match"] is True
+            assert payload["correctness"]["max_abs_logprob_error"] <= 5e-7
+        for baseline in ("torch_logsoftmax_then_topk", "torch_logsumexp_then_topk"):
+            paired = [
+                value
+                for payload in payloads
+                for value in payload["paired_speedups"][f"vs_{baseline}"]["paired_trial_values"]
+            ]
+            assert len(paired) == 15
+            recorded = row[f"paired_speedup_vs_{baseline}"]
+            assert recorded["median"] == statistics.median(paired)
+            assert recorded["min"] == min(paired)
+            assert recorded["max"] == max(paired)
+            assert recorded["all_15_trials_faster"] is True
+            assert min(paired) > 1.0
+
+
+def test_sampling_mask_artifacts_are_internally_consistent():
+    """The serving A/B summary must hash its raw files and reproduce its headline rows."""
+    root = Path("benchmarks/results/l20-vllm-sampling-mask-ab")
+    summary = json.loads((root / "summary.json").read_text(encoding="utf-8"))
+    for run in summary["runs"].values():
+        raw = root / "raw" / run["raw_file"]
+        assert hashlib.sha256(raw.read_bytes()).hexdigest() == run["raw_sha256"]
+        assert run["provenance"]["dirty"] is False
+        rows = {(r["server"], r["request"]): r for r in run["rows"]}
+        for row in rows.values():
+            assert row["tok_per_s_min"] <= row["tok_per_s_median"] <= row["tok_per_s_max"]
+    main = summary["runs"]["qwen25-05b-generate"]
+    rows = {(r["server"], r["request"]): r for r in main["rows"]}
+    assert rows[("mask_bitmap", "gen")]["tok_per_s_vs_native_gen"] < 0.1
+    assert rows[("mask_compact", "gen")]["tok_per_s_vs_native_gen"] > 0.7
+    big = {(r["server"], r["request"]): r for r in summary["runs"]["qwen3-4b-generate"]["rows"]}
+    assert big[("mask_compact", "gen")]["tok_per_s_vs_native_gen"] > 0.9
+    # equivalence: identical tokens under batch-invariant mode, and mask agreement no
+    # worse than the bitmap server's own run-to-run agreement
+    eq = summary["equivalence"]
+    for key in ("batch_invariant-gen", "batch_invariant-logprobs"):
+        assert eq[key]["token_sequences_identical"] == eq[key]["requests"]
+    control = eq["batch_invariant-bitmap-run-a-vs-b"]
+    assert control["token_sequences_identical"] == control["requests"]
+    assert eq["batch_invariant-gen"]["masks_identical"] >= control["masks_identical"]
+
+    path = json.loads(Path("benchmarks/results/l20-support-pack-path/raw.json").read_text(encoding="utf-8"))
+    assert path["provenance"]["dirty"] is False
+    assert path["provenance"]["upstream_output_py_sha256"] == (
+        "1a1abac89cc6cc2278b6f984e4e20dbf82df81130112a875eeb9d72a694f8230"
+    )
+    for row in path["rows"]:
+        assert row["speedup_total"] > 30
+        assert row["bytes_d2h"]["compact"] < row["bytes_d2h"]["upstream"] / 50

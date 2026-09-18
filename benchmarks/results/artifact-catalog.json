@@ -2,10 +2,10 @@
   "category_counts": {
     "active": 5,
     "analysis": 1,
-    "negative": 2,
-    "other": 6,
-    "path_proof": 13,
-    "positive": 6,
+    "negative": 5,
+    "other": 10,
+    "path_proof": 14,
+    "positive": 8,
     "superseded": 12
   },
   "entries": [
@@ -298,6 +298,126 @@
       "summary": "Three clean processes and distinct seeds per shape validate the dedicated top-logprobs primitive with 8.39x-9.45x paired median speedup in a steady-state GEMM-conditioned operator protocol; the original clock-uncontrolled files are retained only for provenance."
     },
     {
+      "category": "positive",
+      "compact_file_count": 2,
+      "has_campaign_summary_json": false,
+      "has_evidence_status_json": false,
+      "has_readme": true,
+      "has_summary_json": true,
+      "path": "benchmarks/results/l20-fused-top-logprobs-2026-09",
+      "reference": "l20-fused-top-logprobs-2026-09/",
+      "status": "Controlled L20 positive micro result",
+      "summary": "Post-fix remeasurement of the top-logprobs primitive after the all-masked-tile NaN fix (commit `8a987d2`): three clean processes and distinct seeds per shape, 7.33x-8.25x paired median speedup in the same steady-state GEMM-conditioned operator protocol, 4.77e-7 max logprob error. The A100 artifact describes the pre-fix source and was not remeasured."
+    },
+    {
+      "category": "other",
+      "compact_file_count": 1,
+      "has_campaign_summary_json": false,
+      "has_evidence_status_json": false,
+      "has_readme": true,
+      "has_summary_json": false,
+      "path": "benchmarks/results/l20-support-pack-path",
+      "reference": "l20-support-pack-path/",
+      "status": "Replication of upstream #54901 (0.29.0 baseline)",
+      "summary": "Whole-path microbenchmark of vLLM v0.29.0's bitmap sampling-mask output versus compact support packing: identical CSR output, 39x-457x faster per step at batch 8-256 because the host no longer unpacks the full vocabulary."
+    },
+    {
+      "category": "other",
+      "compact_file_count": 2,
+      "has_campaign_summary_json": false,
+      "has_evidence_status_json": false,
+      "has_readme": true,
+      "has_summary_json": true,
+      "path": "benchmarks/results/l20-vllm-sampling-mask-ab",
+      "reference": "l20-vllm-sampling-mask-ab/",
+      "status": "Replication of upstream #54901 on L20",
+      "summary": "vLLM 0.29.0 with `--return-sampling-mask`: the shipped bitmap layout caps both a 0.5B and a 4B model at ~1.6K tok/s; the compact-mask patch restores 0.77x (0.5B) and 0.97x (4B) of native throughput with identical tokens under batch-invariant mode."
+    },
+    {
+      "category": "other",
+      "compact_file_count": 2,
+      "has_campaign_summary_json": false,
+      "has_evidence_status_json": false,
+      "has_readme": true,
+      "has_summary_json": true,
+      "path": "benchmarks/results/l20-logprobs-feature-cost",
+      "reference": "l20-logprobs-feature-cost/",
+      "status": "Diagnostic (L20)",
+      "summary": "With the mask solved upstream, `logprobs=1` costs 0.71x native on a 0.5B model: ~40 us/token of API-server CPU building per-token logprob objects, not detokenization (`--skip-tokenizer-init` changes nothing) and not the kernel; points at a flat output contract."
+    },
+    {
+      "category": "negative",
+      "compact_file_count": 2,
+      "has_campaign_summary_json": false,
+      "has_evidence_status_json": false,
+      "has_readme": true,
+      "has_summary_json": true,
+      "path": "benchmarks/results/l20-mask-bitmap-removal-upper-bound",
+      "reference": "l20-mask-bitmap-removal-upper-bound/",
+      "status": "Negative result (L20)",
+      "summary": "Removing #54901's residual bitmap production and D2H entirely changes serving throughput by nothing measurable on 0.5B or 4B at concurrency 64/256; a conditional-fallback design is not pursued."
+    },
+    {
+      "category": "positive",
+      "compact_file_count": 4,
+      "has_campaign_summary_json": false,
+      "has_evidence_status_json": false,
+      "has_readme": true,
+      "has_summary_json": true,
+      "path": "benchmarks/results/l20-flat-token-logprobs",
+      "reference": "l20-flat-token-logprobs/",
+      "status": "Controlled L20 positive serving result",
+      "summary": "A flat per-token `token_logprobs` array on `/inference/v1/generate` (exact, ~25 lines, opt-in) lifts `logprobs=0` from 0.73x to 0.89x of native on Qwen2.5-0.5B, and the combined mask+logprob RL contract from 0.94x to 0.98x on Qwen3-4B; values identical to the OpenAI-style path (max abs diff 0.0)."
+    },
+    {
+      "category": "negative",
+      "compact_file_count": 2,
+      "has_campaign_summary_json": false,
+      "has_evidence_status_json": false,
+      "has_readme": true,
+      "has_summary_json": true,
+      "path": "benchmarks/results/l20-logprob-engine-decomposition",
+      "reference": "l20-logprob-engine-decomposition/",
+      "status": "Diagnostic / negative result (L20)",
+      "summary": "After the flat response, skipping `_ranks_kernel` is within noise and skipping every engine-side logprob kernel is worth <=5 points; detokenisation is the API server's remaining CPU but not the limiter. The remaining 0.5B gap (~16%) is engine-core transport/slicing; a rank-less kernel is not pursued."
+    },
+    {
+      "category": "other",
+      "compact_file_count": 2,
+      "has_campaign_summary_json": false,
+      "has_evidence_status_json": false,
+      "has_readme": true,
+      "has_summary_json": true,
+      "path": "benchmarks/results/l20-prefill-interference",
+      "reference": "l20-prefill-interference/",
+      "status": "Reproducer (L20)",
+      "summary": "8 decoders (13 ms/token undisturbed) under two injected 32k prefills on Qwen3-4B: every fixed token budget from 64 to 8192 fails a 25 ms ITL SLO; step cost is nonlinear in chunk size and small chunks cost 3.5x in TTFT. Motivates a wall-clock-budgeted prefill controller."
+    },
+    {
+      "category": "path_proof",
+      "compact_file_count": 1,
+      "has_campaign_summary_json": false,
+      "has_evidence_status_json": false,
+      "has_readme": true,
+      "has_summary_json": false,
+      "path": "benchmarks/results/l20-step-cost-shift",
+      "reference": "l20-step-cost-shift/",
+      "status": "Phase-0 result (L20)",
+      "summary": "Per-iteration traces across context/batch/budget: a 512-token chunk costs 51 -> 136 ms as its KV depth grows 0 -> 32k; a point step-time predictor fitted at 4-8k is 56% false-safe at 32k (bias, not variance); online refit with a KV-read term removes the bias (+18 -> +0.1 ms) and an online residual quantile removes the tail (24% -> 0% false-safe) at halved prefill admission. Kill criterion for risk-calibrated scheduling not met."
+    },
+    {
+      "category": "negative",
+      "compact_file_count": 1,
+      "has_campaign_summary_json": false,
+      "has_evidence_status_json": false,
+      "has_readme": true,
+      "has_summary_json": false,
+      "path": "benchmarks/results/l20-prefill-cost-geometry",
+      "reference": "l20-prefill-cost-geometry/",
+      "status": "Falsifiable systems result (L20)",
+      "summary": "Aggregate coordinates (decode batch, aggregate KV, prefill tokens) collapse partitions of the same prefill budget that differ 1.4-1.9x in measured step time; one per-request attention-work term explains it; a live env-gated deadline controller carrying it finishes 4-8 concurrent 16k prefills 1.5-2.8x sooner than the aggregate controller at zero violations, but only 5-12% sooner than a hindsight-tuned fixed budget (online margin), and not at all on default-FCFS short-prompt bursts. Context/load shift, decode-KV skew and graph boundaries: negative. Replay was extrapolated and over-priced small chunks (recorded)."
+    },
+    {
       "category": "path_proof",
       "compact_file_count": 3,
       "has_campaign_summary_json": false,
@@ -550,7 +670,7 @@
       "summary": "Custom three-way serving path evidence; not yet a broad win."
     }
   ],
-  "entry_count": 45,
+  "entry_count": 55,
   "index_path": "benchmarks/results/README.md",
   "result_root": "benchmarks/results",
   "schema_version": 1

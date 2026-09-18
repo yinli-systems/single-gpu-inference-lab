@@ -1,0 +1,418 @@
+From 523bc71d92410945456c348dd1233cb3b439316b Mon Sep 17 00:00:00 2001
+From: Yin Li <kevinli.ai.work@gmail.com>
+Date: Fri, 18 Sep 2026 01:27:39 +0400
+Subject: [PATCH] [Core] Sampled-logprobs-only transport for
+ /inference/v1/generate return_token_logprobs
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Follow-up to the return_token_logprobs field. With per-token objects gone
+from the response, the remaining cost of asking for the sampled token's
+logprob is the per-request path that starts in the scheduler: one
+LogprobsLists (token ids, logprobs, ranks: three numpy slices) per request
+per step, msgpack-encoded into EngineCoreOutput, then decoded, converted
+with .tolist(), detokenized and appended into FlatLogprobs by the output
+processor. On an 8-core host serving Qwen2.5-0.5B on one L20 (256-token
+rollouts), keeping the D2H copy and tolists() but skipping that per-request
+slicing restores 1.00x of no-logprobs throughput at concurrency 256 and
+0.96x at 64, from 0.85x / 0.88x — the D2H itself is free at this scale.
+
+This adds SamplingParams.sampled_logprobs_only (requires logprobs == 0).
+For such requests the scheduler emits EngineCoreOutput.new_sampled_logprobs,
+one float per new token read from column 0 of the step's logprobs array
+(the sampler stores the sampled token first), instead of new_logprobs; the
+output processor keeps a plain float list (and the cumulative logprob) and
+never builds Logprob entries or detokenizes; CompletionOutput.sampled_logprobs
+carries the values. /inference/v1/generate sets the flag for
+return_token_logprobs when logprobs == 0 and reads the list directly (same
+-9999.0 clamp); with logprobs > 0 the previous flat-representation path is
+kept. The new EngineCoreOutput field is appended last; the Rust engine-core
+client mirrors it as an opaque optional field (it already ignores appended
+fields).
+
+Tests: LogprobsLists.sampled_logprobs column selection, processor
+accumulation and cumulative logprob, SamplingParams validation; the
+endpoint tests from the previous change exercise the new path end to end.
+
+Signed-off-by: Yin Li <kevinli.ai.work@gmail.com>
+Co-authored-by: Claude <noreply@anthropic.com>
+---
+ .../engine-core-client/src/protocol/output.rs |  6 +++
+ .../engine-core-client/src/tests/client.rs    |  1 +
+ .../src/tests/python_compat.py                |  1 +
+ tests/v1/engine/test_logprobs_processor.py    | 47 +++++++++++++++++++
+ tests/v1/test_outputs.py                      | 19 ++++++++
+ .../scale_out/token_in_token_out/serving.py   | 19 ++++++--
+ vllm/outputs.py                               |  3 ++
+ vllm/sampling_params.py                       | 13 +++++
+ vllm/v1/core/sched/scheduler.py               | 11 ++++-
+ vllm/v1/engine/__init__.py                    |  5 ++
+ vllm/v1/engine/logprobs.py                    | 12 ++++-
+ vllm/v1/engine/output_processor.py            |  8 ++++
+ vllm/v1/outputs.py                            | 12 +++++
+ 13 files changed, 150 insertions(+), 7 deletions(-)
+
+diff --git a/rust/src/engine-core-client/src/protocol/output.rs b/rust/src/engine-core-client/src/protocol/output.rs
+index c8a87054..9bf9eb57 100644
+--- a/rust/src/engine-core-client/src/protocol/output.rs
++++ b/rust/src/engine-core-client/src/protocol/output.rs
+@@ -133,6 +133,11 @@ pub struct EngineCoreOutput {
+     /// the Rust frontend does not yet surface it in responses.
+     #[serde(default)]
+     pub spec_decode_metrics: Option<OpaqueValue>,
++    /// Sampled-token logprob per new token for requests that set
++    /// `SamplingParams.sampled_logprobs_only`; replaces `new_logprobs` for
++    /// them. Opaque here; the Rust frontend does not surface it yet.
++    #[serde(default)]
++    pub new_sampled_logprobs: Option<OpaqueValue>,
+ }
+ 
+ impl EngineCoreOutput {
+@@ -501,6 +506,7 @@ mod tests {
+                             mm_cache_miss_hashes: None,
+                             new_sampling_mask: None,
+                             spec_decode_metrics: None,
++                            new_sampled_logprobs: None,
+                         },
+                     ],
+                     scheduler_stats: None,
+diff --git a/rust/src/engine-core-client/src/tests/client.rs b/rust/src/engine-core-client/src/tests/client.rs
+index 739c34d6..5d9322d7 100644
+--- a/rust/src/engine-core-client/src/tests/client.rs
++++ b/rust/src/engine-core-client/src/tests/client.rs
+@@ -2759,6 +2759,7 @@ fn python_msgpack_fixtures_match_rust_encoding() {
+                         mm_cache_miss_hashes: None,
+                         new_sampling_mask: None,
+                         spec_decode_metrics: None,
++                        new_sampled_logprobs: None,
+                     },
+                 ],
+                 scheduler_stats: None,
+diff --git a/rust/src/engine-core-client/src/tests/python_compat.py b/rust/src/engine-core-client/src/tests/python_compat.py
+index 5013f9e2..5cba303b 100755
+--- a/rust/src/engine-core-client/src/tests/python_compat.py
++++ b/rust/src/engine-core-client/src/tests/python_compat.py
+@@ -102,6 +102,7 @@ class EngineCoreOutput(
+     mm_cache_miss_hashes: list[str] | None = None
+     new_sampling_mask: object | None = None
+     spec_decode_metrics: object | None = None
++    new_sampled_logprobs: list[float] | None = None
+ 
+ 
+ class ExtendedEngineCoreOutput(EngineCoreOutput):
+diff --git a/tests/v1/engine/test_logprobs_processor.py b/tests/v1/engine/test_logprobs_processor.py
+index edb8cef5..b87516e4 100644
+--- a/tests/v1/engine/test_logprobs_processor.py
++++ b/tests/v1/engine/test_logprobs_processor.py
+@@ -64,3 +64,50 @@ def test_accepts_exactly_sized_row():
+ 
+     pos = processor.logprobs[0]
+     assert set(pos.keys()) == {7, 11, 13}
++
++
++def test_sampled_logprobs_only_keeps_a_float_list_and_no_entries():
++    """``sampled_logprobs_only`` requests receive one float per token from
++    the scheduler and never build Logprob entries or detokenize."""
++    from vllm.sampling_params import SamplingParams
++    from vllm.v1.engine import EngineCoreOutput, EngineCoreRequest
++
++    params = SamplingParams(logprobs=0, sampled_logprobs_only=True)
++    request = EngineCoreRequest(
++        request_id="r",
++        prompt_token_ids=[1, 2, 3],
++        mm_features=None,
++        sampling_params=params,
++        pooling_params=None,
++        arrival_time=0.0,
++        lora_request=None,
++        cache_salt=None,
++        data_parallel_rank=None,
++    )
++    processor = LogprobsProcessor.from_new_request(tokenizer=None, request=request)
++    assert processor.logprobs is None
++    assert processor.sampled_logprobs == []
++    assert processor.cumulative_logprob == 0.0
++
++    processor.update_from_output(
++        EngineCoreOutput(
++            request_id="r", new_token_ids=[7, 8], new_sampled_logprobs=[-0.5, -1.25]
++        )
++    )
++    processor.update_from_output(
++        EngineCoreOutput(request_id="r", new_token_ids=[9], new_sampled_logprobs=[-0.25])
++    )
++    assert processor.sampled_logprobs == [-0.5, -1.25, -0.25]
++    assert processor.cumulative_logprob == -2.0
++    assert processor.logprobs is None
++
++
++def test_sampled_logprobs_only_requires_logprobs_zero():
++    import pytest
++
++    from vllm.sampling_params import SamplingParams
++
++    with pytest.raises(ValueError, match="sampled_logprobs_only"):
++        SamplingParams(logprobs=2, sampled_logprobs_only=True)
++    with pytest.raises(ValueError, match="sampled_logprobs_only"):
++        SamplingParams(sampled_logprobs_only=True)
+diff --git a/tests/v1/test_outputs.py b/tests/v1/test_outputs.py
+index 5d52c863..0804e7f0 100644
+--- a/tests/v1/test_outputs.py
++++ b/tests/v1/test_outputs.py
+@@ -155,6 +155,25 @@ def test_sampling_mask_preserves_top_k_boundary_ties():
+     assert result.to_nested_list() == [expected_token_ids]
+ 
+ 
++def test_logprobs_lists_sampled_logprobs_takes_column_zero():
++    lists = LogprobsLists(
++        logprob_token_ids=np.array([[1, 9], [2, 8], [3, 7], [4, 6]]),
++        logprobs=np.array([[-0.1, -2.0], [-0.2, -3.0], [-0.3, -4.0], [-0.4, -5.0]]),
++        sampled_token_ranks=np.array([1, 1, 2, 1]),
++        cu_num_generated_tokens=[0, 1, 3, 4],
++    )
++    # request 1 owns positions 1 and 2
++    assert lists.sampled_logprobs(1, 2) == pytest.approx([-0.2, -0.3])
++    assert lists.sampled_logprobs(2, 1) == pytest.approx([-0.4])
++    flat = LogprobsLists(
++        logprob_token_ids=[[1], [2], [3]],
++        logprobs=[[-0.5], [-0.6], [-0.7]],
++        sampled_token_ranks=[1, 1, 1],
++        cu_num_generated_tokens=None,
++    )
++    assert flat.sampled_logprobs(1, 2) == pytest.approx([-0.6, -0.7])
++
++
+ class TestLogprobsLists(TestCase):
+     def setUp(self):
+         self.logprobsLists = LogprobsLists(
+diff --git a/vllm/entrypoints/scale_out/token_in_token_out/serving.py b/vllm/entrypoints/scale_out/token_in_token_out/serving.py
+index 9c8ac217..fa9d59ad 100644
+--- a/vllm/entrypoints/scale_out/token_in_token_out/serving.py
++++ b/vllm/entrypoints/scale_out/token_in_token_out/serving.py
+@@ -142,9 +142,15 @@ class ServingTokens(GenerateBaseServing):
+                 )
+             if sampling_params.logprobs is None:
+                 sampling_params.logprobs = 0
+-            # The flat engine representation is what makes the per-token
+-            # array a slice rather than a rebuild.
+-            sampling_params.flat_logprobs = True
++            if sampling_params.logprobs == 0:
++                # Only the sampled token's logprob is needed: transport one
++                # float per token from the scheduler and skip per-token
++                # Logprob entries and detokenization entirely.
++                sampling_params.sampled_logprobs_only = True
++            else:
++                # Top logprobs were also requested: keep the object path and
++                # read the sampled column from the flat representation.
++                sampling_params.flat_logprobs = True
+         max_num_seqs = self.engine_client.vllm_config.scheduler_config.max_num_seqs
+         if sampling_params.n > max_num_seqs:
+             return self.create_error_response(
+@@ -328,8 +334,11 @@ class ServingTokens(GenerateBaseServing):
+ 
+             token_logprobs = None
+             if request.return_token_logprobs:
+-                assert isinstance(out_logprobs, FlatLogprobs), "Did not output logprobs"
+-                token_logprobs = self._sampled_token_logprobs(out_logprobs)
++                if output.sampled_logprobs is not None:
++                    token_logprobs = [max(x, -9999.0) for x in output.sampled_logprobs]
++                else:
++                    assert isinstance(out_logprobs, FlatLogprobs), "Did not output logprobs"
++                    token_logprobs = self._sampled_token_logprobs(out_logprobs)
+ 
+             # This is top_logprobs in completions API. With
+             # return_token_logprobs the objects are only built when the
+diff --git a/vllm/outputs.py b/vllm/outputs.py
+index 9d46f327..9ddb677f 100644
+--- a/vllm/outputs.py
++++ b/vllm/outputs.py
+@@ -67,6 +67,9 @@ class CompletionOutput:
+     lora_request: LoRARequest | None = None
+     sampling_mask: SamplingMask | None = None
+     spec_decode_metrics: RequestSpecDecodeMetrics | None = None
++    # Sampled-token logprob per generated token for requests that set
++    # ``SamplingParams.sampled_logprobs_only``; ``logprobs`` is None then.
++    sampled_logprobs: list[float] | None = None
+ 
+     def finished(self) -> bool:
+         return self.finish_reason is not None
+diff --git a/vllm/sampling_params.py b/vllm/sampling_params.py
+index 6cd7b4e8..08c69b94 100644
+--- a/vllm/sampling_params.py
++++ b/vllm/sampling_params.py
+@@ -301,6 +301,14 @@ class SamplingParams(
+     NOTE: GC costs of FlatLogprobs is significantly smaller than
+     list[dict[int, Logprob]]. After enabled, PromptLogprobs and
+     SampleLogprobs would populated as FlatLogprobs."""
++    sampled_logprobs_only: bool = False
++    """Transport only the sampled token's logprob per generated position.
++    Requires ``logprobs == 0``. The scheduler emits one float per token
++    instead of a per-request ``LogprobsLists`` (token ids, logprobs, ranks),
++    and the output processor keeps a plain float list instead of building
++    ``Logprob`` entries or detokenizing; ``CompletionOutput.logprobs`` is
++    ``None`` and ``CompletionOutput.sampled_logprobs`` carries the values.
++    Set by ``/inference/v1/generate`` for ``return_token_logprobs``."""
+     # NOTE: This parameter is only exposed at the engine level for now.
+     # It is not exposed in the OpenAI API server, as the OpenAI API does
+     # not support returning only a list of token IDs.
+@@ -543,6 +551,11 @@ class SamplingParams(
+             self.skip_reading_prefix_cache = self.prompt_logprobs is not None
+ 
+     def _verify_args(self) -> None:
++        if self.sampled_logprobs_only and self.logprobs != 0:
++            raise ValueError(
++                "sampled_logprobs_only requires logprobs == 0, "
++                f"got logprobs={self.logprobs}."
++            )
+         _verify_num_sequences(self.n, "n")
+         if self.extra_args:
+             self._verify_extra_args()
+diff --git a/vllm/v1/core/sched/scheduler.py b/vllm/v1/core/sched/scheduler.py
+index e0c4997b..750ba458 100644
+--- a/vllm/v1/core/sched/scheduler.py
++++ b/vllm/v1/core/sched/scheduler.py
+@@ -2021,6 +2021,7 @@ class Scheduler(SchedulerInterface):
+ 
+             stopped = False
+             new_logprobs = None
++            new_sampled_logprobs = None
+             new_sampling_mask = None
+             new_token_ids = generated_token_ids
+             pooler_output = pooler_outputs[req_index] if pooler_outputs else None
+@@ -2145,7 +2146,14 @@ class Scheduler(SchedulerInterface):
+                 and request.sampling_params.num_logprobs is not None
+                 and logprobs
+             ):
+-                new_logprobs = logprobs.slice_request(req_index, len(new_token_ids))
++                if request.sampling_params.sampled_logprobs_only:
++                    new_sampled_logprobs = logprobs.sampled_logprobs(
++                        req_index, len(new_token_ids)
++                    )
++                else:
++                    new_logprobs = logprobs.slice_request(
++                        req_index, len(new_token_ids)
++                    )
+ 
+             if self.return_sampling_mask:
+                 sampling_masks = model_runner_output.sampling_masks
+@@ -2167,6 +2175,7 @@ class Scheduler(SchedulerInterface):
+                         new_token_ids=new_token_ids,
+                         finish_reason=finish_reason,
+                         new_logprobs=new_logprobs,
++                        new_sampled_logprobs=new_sampled_logprobs,
+                         new_sampling_mask=new_sampling_mask,
+                         new_prompt_logprobs_tensors=prompt_logprobs_tensors,
+                         pooling_output=pooler_output,
+diff --git a/vllm/v1/engine/__init__.py b/vllm/v1/engine/__init__.py
+index 7c424ea0..cd217500 100644
+--- a/vllm/v1/engine/__init__.py
++++ b/vllm/v1/engine/__init__.py
+@@ -234,6 +234,11 @@ class EngineCoreOutput(
+     # Appended last so `array_like` positional serialization stays compatible.
+     spec_decode_metrics: RequestSpecDecodeMetrics | None = None
+ 
++    # Sampled-token logprob per new token for requests with
++    # ``sampled_logprobs_only``; replaces ``new_logprobs`` for them. Appended
++    # last so `array_like` positional serialization stays compatible.
++    new_sampled_logprobs: list[float] | None = None
++
+     @property
+     def finished(self) -> bool:
+         return self.finish_reason is not None
+diff --git a/vllm/v1/engine/logprobs.py b/vllm/v1/engine/logprobs.py
+index ff483e12..2a5d3dac 100644
+--- a/vllm/v1/engine/logprobs.py
++++ b/vllm/v1/engine/logprobs.py
+@@ -38,6 +38,9 @@ class LogprobsProcessor:
+     cumulative_logprob: float | None
+     num_logprobs: int | None
+     num_prompt_logprobs: int | None
++    # Sampled-token logprob per position for ``sampled_logprobs_only``
++    # requests; ``logprobs`` stays None for them.
++    sampled_logprobs: list[float] | None = None
+ 
+     @classmethod
+     def from_new_request(
+@@ -49,14 +52,16 @@ class LogprobsProcessor:
+         assert sampling_params is not None
+         num_logprobs = sampling_params.num_logprobs
+         num_prompt_logprobs = sampling_params.prompt_logprobs
++        sampled_only = sampling_params.sampled_logprobs_only
+         return cls(
+             tokenizer=tokenizer,
+             cumulative_logprob=(None if num_logprobs is None else 0.0),
+             logprobs=(
+                 None
+-                if num_logprobs is None
++                if num_logprobs is None or sampled_only
+                 else create_sample_logprobs(sampling_params.flat_logprobs)
+             ),
++            sampled_logprobs=([] if sampled_only else None),
+             prompt_logprobs=(
+                 None
+                 if num_prompt_logprobs is None
+@@ -348,6 +353,11 @@ class LogprobsProcessor:
+         return decoded_tokens_list
+ 
+     def update_from_output(self, output: EngineCoreOutput) -> None:
++        if output.new_sampled_logprobs is not None:
++            assert self.sampled_logprobs is not None
++            assert self.cumulative_logprob is not None
++            self.sampled_logprobs.extend(output.new_sampled_logprobs)
++            self.cumulative_logprob += sum(output.new_sampled_logprobs)
+         if output.new_logprobs is not None:
+             self._update_sample_logprobs(output.new_logprobs)
+         if output.new_prompt_logprobs_tensors is not None:
+diff --git a/vllm/v1/engine/output_processor.py b/vllm/v1/engine/output_processor.py
+index b4f73380..f582945a 100644
+--- a/vllm/v1/engine/output_processor.py
++++ b/vllm/v1/engine/output_processor.py
+@@ -433,6 +433,13 @@ class RequestState:
+             # list or FlatLogprobs representation while returning no entries.
+             logprobs = logprobs[-num_new_tokens:] if num_new_tokens else logprobs[:0]
+ 
++        sampled_logprobs = self.logprobs_processor.sampled_logprobs
++        if delta and sampled_logprobs is not None:
++            num_new_tokens = len(token_ids)
++            sampled_logprobs = (
++                sampled_logprobs[-num_new_tokens:] if num_new_tokens else []
++            )
++
+         sampling_mask = None
+         if finished and self.sampling_mask_chunks:
+             sampling_mask = SamplingMask(
+@@ -451,6 +458,7 @@ class RequestState:
+             routed_experts=routed_experts,
+             sampling_mask=sampling_mask,
+             logprobs=logprobs,
++            sampled_logprobs=sampled_logprobs,
+             cumulative_logprob=self.logprobs_processor.cumulative_logprob,
+             finish_reason=str(finish_reason) if finished else None,
+             stop_reason=stop_reason if finished else None,
+diff --git a/vllm/v1/outputs.py b/vllm/v1/outputs.py
+index c4535f47..93681eae 100644
+--- a/vllm/v1/outputs.py
++++ b/vllm/v1/outputs.py
+@@ -53,6 +53,18 @@ class LogprobsLists(NamedTuple):
+             None,
+         )
+ 
++    def sampled_logprobs(self, req_idx: int, num_positions: int) -> list[float]:
++        """The sampled token's logprob at each of a request's new positions.
++
++        Column 0 of ``logprobs`` is the sampled token (the sampler stores it
++        first). This is the whole transport for ``sampled_logprobs_only``
++        requests: no token ids, no ranks, no per-request ``LogprobsLists``.
++        """
++        if self.cu_num_generated_tokens is not None:
++            req_idx = self.cu_num_generated_tokens[req_idx]
++        rows = np.asarray(self.logprobs[req_idx : req_idx + num_positions])
++        return rows[:, 0].tolist() if rows.ndim == 2 else rows.tolist()
++
+ 
+ class SamplingMaskLists(NamedTuple):
+     """CSR sampling masks; a step slice holds one position (``offsets=None``)."""
+-- 
+2.54.0 (Apple Git-157)
+

@@ -1,0 +1,286 @@
+{
+  "schema_version": 1,
+  "result_type": "prefill_interference",
+  "generated_at_utc": "2026-09-18T05:15:07Z",
+  "provenance": {
+    "commit": "c8fb1b1b9e11d88d1f2dd82b315e86d84b045e81",
+    "dirty": false
+  },
+  "model": "/home/hhai/inference/models/Qwen3-4B",
+  "workload": {
+    "background": 8,
+    "background_prompt_tokens": 128,
+    "background_prompt_tokens_list": "",
+    "background_tokens": 4096,
+    "settle_tokens": 64,
+    "inject": 32,
+    "long_tokens": 1024,
+    "long_output_tokens": 32,
+    "repeats": 1,
+    "seed": 113,
+    "max_model_len": 40960,
+    "max_num_seqs": 64,
+    "long_prefill_token_threshold": 0
+  },
+  "trace": true,
+  "conditions": {
+    "chunk8192": {
+      "flags": [
+        "--max-num-batched-tokens",
+        "8192",
+        "--no-enable-prefix-caching",
+        "--enable-logging-iteration-details"
+      ],
+      "repeats": [
+        {
+          "background": {
+            "before": {
+              "count": 512,
+              "p50_ms": 12.985066510736942,
+              "p95_ms": 13.608543202280998,
+              "p99_ms": 13.794093392789364,
+              "max_ms": 13.860910199582577,
+              "slo_attainment": {
+                "10ms": 0.015625,
+                "25ms": 1.0,
+                "50ms": 1.0
+              }
+            },
+            "during": {
+              "count": 632,
+              "p50_ms": 64.2379429191351,
+              "p95_ms": 84.38666723668575,
+              "p99_ms": 136.69853564351797,
+              "max_ms": 137.27478682994843,
+              "slo_attainment": {
+                "10ms": 0.02531645569620253,
+                "25ms": 0.46835443037974683,
+                "50ms": 0.4810126582278481
+              }
+            },
+            "after": {
+              "count": 1816,
+              "p50_ms": 13.242197223007679,
+              "p95_ms": 14.106303453445435,
+              "p99_ms": 14.829651452600956,
+              "max_ms": 15.123519115149975,
+              "slo_attainment": {
+                "10ms": 0.0,
+                "25ms": 1.0,
+                "50ms": 1.0
+              }
+            }
+          },
+          "long_requests": [
+            {
+              "ttft_s": 0.1574432086199522,
+              "e2e_s": 2.5109109580516815,
+              "output_tokens": 32
+            },
+            {
+              "ttft_s": 0.24414850398898125,
+              "e2e_s": 2.590327585116029,
+              "output_tokens": 32
+            },
+            {
+              "ttft_s": 0.3317831913009286,
+              "e2e_s": 2.668840321712196,
+              "output_tokens": 32
+            },
+            {
+              "ttft_s": 0.4682179242372513,
+              "e2e_s": 2.8319093491882086,
+              "output_tokens": 32
+            },
+            {
+              "ttft_s": 0.5371500737965107,
+              "e2e_s": 2.9112623501569033,
+              "output_tokens": 32
+            },
+            {
+              "ttft_s": 0.608879285864532,
+              "e2e_s": 2.984890893101692,
+              "output_tokens": 32
+            },
+            {
+              "ttft_s": 0.7618959061801434,
+              "e2e_s": 3.1512622460722923,
+              "output_tokens": 32
+            },
+            {
+              "ttft_s": 0.8201102670282125,
+              "e2e_s": 3.2289824495092034,
+              "output_tokens": 32
+            },
+            {
+              "ttft_s": 0.8931827796623111,
+              "e2e_s": 3.2921747928485274,
+              "output_tokens": 32
+            },
+            {
+              "ttft_s": 1.0397547725588083,
+              "e2e_s": 3.3294479716569185,
+              "output_tokens": 32
+            },
+            {
+              "ttft_s": 1.113507623784244,
+              "e2e_s": 3.3481780905276537,
+              "output_tokens": 32
+            },
+            {
+              "ttft_s": 1.188317645341158,
+              "e2e_s": 3.3646454364061356,
+              "output_tokens": 32
+            },
+            {
+              "ttft_s": 1.33447265625,
+              "e2e_s": 3.398903419263661,
+              "output_tokens": 32
+            },
+            {
+              "ttft_s": 1.4070027023553848,
+              "e2e_s": 3.415360434912145,
+              "output_tokens": 32
+            },
+            {
+              "ttft_s": 1.4834689246490598,
+              "e2e_s": 3.436062354594469,
+              "output_tokens": 32
+            },
+            {
+              "ttft_s": 1.633345895446837,
+              "e2e_s": 3.467132273130119,
+              "output_tokens": 32
+            },
+            {
+              "ttft_s": 1.7093767365440726,
+              "e2e_s": 3.4845721758902073,
+              "output_tokens": 32
+            },
+            {
+              "ttft_s": 1.7882416313514113,
+              "e2e_s": 3.50301112793386,
+              "output_tokens": 32
+            },
+            {
+              "ttft_s": 1.9386002384126186,
+              "e2e_s": 3.5326610365882516,
+              "output_tokens": 32
+            },
+            {
+              "ttft_s": 2.017530297860503,
+              "e2e_s": 3.55196884740144,
+              "output_tokens": 32
+            },
+            {
+              "ttft_s": 2.0971571104601026,
+              "e2e_s": 3.56556951161474,
+              "output_tokens": 32
+            },
+            {
+              "ttft_s": 2.2564333491027355,
+              "e2e_s": 3.5984210120514035,
+              "output_tokens": 32
+            },
+            {
+              "ttft_s": 2.3370695374906063,
+              "e2e_s": 3.6129749454557896,
+              "output_tokens": 32
+            },
+            {
+              "ttft_s": 2.415325910784304,
+              "e2e_s": 3.6282781939953566,
+              "output_tokens": 32
+            },
+            {
+              "ttft_s": 2.5756836496293545,
+              "e2e_s": 3.657725497148931,
+              "output_tokens": 32
+            },
+            {
+              "ttft_s": 2.6552596716210246,
+              "e2e_s": 3.672391850501299,
+              "output_tokens": 32
+            },
+            {
+              "ttft_s": 2.7374426489695907,
+              "e2e_s": 3.686069888062775,
+              "output_tokens": 32
+            },
+            {
+              "ttft_s": 2.8989885030314326,
+              "e2e_s": 3.7144298190250993,
+              "output_tokens": 32
+            },
+            {
+              "ttft_s": 2.973029269836843,
+              "e2e_s": 3.7268856521695852,
+              "output_tokens": 32
+            },
+            {
+              "ttft_s": 3.0552391866222024,
+              "e2e_s": 3.7418622514232993,
+              "output_tokens": 32
+            },
+            {
+              "ttft_s": 3.219263134524226,
+              "e2e_s": 3.768619067966938,
+              "output_tokens": 32
+            },
+            {
+              "ttft_s": 3.282753700390458,
+              "e2e_s": 3.7818686738610268,
+              "output_tokens": 32
+            }
+          ],
+          "injection_window_s": 3.799075365997851,
+          "background_output_tokens_total": 2968,
+          "background_tok_per_s_overall": 388.55233668239464,
+          "background_tok_per_s_during": 166.3562680689282
+        }
+      ],
+      "command": [
+        "vllm",
+        "serve",
+        "/home/hhai/inference/models/Qwen3-4B",
+        "--port",
+        "8123",
+        "--max-model-len",
+        "40960",
+        "--gpu-memory-utilization",
+        "0.9",
+        "--max-num-seqs",
+        "64",
+        "--seed",
+        "0",
+        "--max-num-batched-tokens",
+        "8192",
+        "--no-enable-prefix-caching",
+        "--enable-logging-iteration-details",
+        "--served-model-name",
+        "m"
+      ]
+    }
+  },
+  "nvidia_smi_before": {
+    "available": true,
+    "fields": [
+      "name",
+      "driver_version",
+      "clocks.current.sm",
+      "memory.used",
+      "temperature.gpu",
+      "power.draw"
+    ],
+    "rows": [
+      [
+        "NVIDIA L20",
+        "580.159.04",
+        "2520 MHz",
+        "0 MiB",
+        "49",
+        "87.64 W"
+      ]
+    ]
+  }
+}

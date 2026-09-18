@@ -1,0 +1,1000 @@
+{
+  "schema_version": 1,
+  "result_type": "vllm_feature_cost_baseline",
+  "generated_at_utc": "2026-09-17T20:31:35Z",
+  "provenance": {
+    "commit": "d0f66bb9d6d56ae6d5877dc70ba5cb35b5c9f540",
+    "dirty": false
+  },
+  "model": "/home/hhai/inference/models/Qwen2.5-0.5B-Instruct",
+  "workload": {
+    "api": "generate",
+    "prompts": 128,
+    "prompt_tokens_approx": 96,
+    "max_tokens": 256,
+    "ignore_eos": true,
+    "concurrency": 64,
+    "rounds": 3,
+    "sampling": {
+      "temperature": 1.0,
+      "top_k": 50,
+      "top_p": 0.95
+    },
+    "seed": 113
+  },
+  "environment": {
+    "vllm_version_output": "0.29.0",
+    "python": "3.12.3"
+  },
+  "servers": {
+    "native": {
+      "flags": [],
+      "env": {},
+      "log": "/home/hhai/inference/results/campaign10-d0f66bb/qwen25-05b-c64/server-native.log",
+      "rounds": [
+        {
+          "round": 0,
+          "request_condition": "gen",
+          "wall_s": 1.861964345909655,
+          "requests": 128,
+          "output_tokens": 32768,
+          "stream_chunks": 128,
+          "tokens_per_chunk": 256.0,
+          "output_tokens_per_s": 17598.618401036743,
+          "ttft_ms": {
+            "median": 919.1182744689286,
+            "p99": 957.098145969212
+          },
+          "itl_ms": {
+            "mean": NaN,
+            "median": NaN,
+            "p99": NaN
+          },
+          "e2e_ms": {
+            "median": 919.1182744689286,
+            "p99": 957.098145969212
+          },
+          "all_got_logprobs": false,
+          "all_flat_token_logprobs": false,
+          "mask_entries_total": 0,
+          "mask_mean_size": null,
+          "mask_max_size": 0,
+          "body_bytes_total": 209460,
+          "server_cpu": {
+            "api": {
+              "cpu_s": 0.74,
+              "utilization": 0.397
+            },
+            "core": {
+              "cpu_s": 1.76,
+              "utilization": 0.944
+            }
+          },
+          "outputs_file": "/home/hhai/inference/results/campaign10-d0f66bb/qwen25-05b-c64/outputs-native-gen-r0.json"
+        },
+        {
+          "round": 0,
+          "request_condition": "token_logprobs",
+          "wall_s": 1.9856753656640649,
+          "requests": 128,
+          "output_tokens": 32768,
+          "stream_chunks": 128,
+          "tokens_per_chunk": 256.0,
+          "output_tokens_per_s": 16502.193947015843,
+          "ttft_ms": {
+            "median": 984.9282274954021,
+            "p99": 994.9795436114073
+          },
+          "itl_ms": {
+            "mean": NaN,
+            "median": NaN,
+            "p99": NaN
+          },
+          "e2e_ms": {
+            "median": 984.9282274954021,
+            "p99": 994.9795436114073
+          },
+          "all_got_logprobs": true,
+          "all_flat_token_logprobs": true,
+          "mask_entries_total": 0,
+          "mask_mean_size": null,
+          "mask_max_size": 0,
+          "body_bytes_total": 874615,
+          "server_cpu": {
+            "api": {
+              "cpu_s": 1.19,
+              "utilization": 0.599
+            },
+            "core": {
+              "cpu_s": 1.96,
+              "utilization": 0.986
+            }
+          },
+          "outputs_file": "/home/hhai/inference/results/campaign10-d0f66bb/qwen25-05b-c64/outputs-native-token_logprobs-r0.json"
+        },
+        {
+          "round": 1,
+          "request_condition": "token_logprobs",
+          "wall_s": 2.0021334923803806,
+          "requests": 128,
+          "output_tokens": 32768,
+          "stream_chunks": 128,
+          "tokens_per_chunk": 256.0,
+          "output_tokens_per_s": 16366.541054683323,
+          "ttft_ms": {
+            "median": 990.2941463515162,
+            "p99": 1002.3510828614235
+          },
+          "itl_ms": {
+            "mean": NaN,
+            "median": NaN,
+            "p99": NaN
+          },
+          "e2e_ms": {
+            "median": 990.2941463515162,
+            "p99": 1002.3510828614235
+          },
+          "all_got_logprobs": true,
+          "all_flat_token_logprobs": true,
+          "mask_entries_total": 0,
+          "mask_mean_size": null,
+          "mask_max_size": 0,
+          "body_bytes_total": 874767,
+          "server_cpu": {
+            "api": {
+              "cpu_s": 1.2,
+              "utilization": 0.599
+            },
+            "core": {
+              "cpu_s": 2.0,
+              "utilization": 0.998
+            }
+          }
+        },
+        {
+          "round": 1,
+          "request_condition": "gen",
+          "wall_s": 1.7743800226598978,
+          "requests": 128,
+          "output_tokens": 32768,
+          "stream_chunks": 128,
+          "tokens_per_chunk": 256.0,
+          "output_tokens_per_s": 18467.29538291289,
+          "ttft_ms": {
+            "median": 870.2991628088057,
+            "p99": 906.0241496190429
+          },
+          "itl_ms": {
+            "mean": NaN,
+            "median": NaN,
+            "p99": NaN
+          },
+          "e2e_ms": {
+            "median": 870.2991628088057,
+            "p99": 906.0241496190429
+          },
+          "all_got_logprobs": false,
+          "all_flat_token_logprobs": false,
+          "mask_entries_total": 0,
+          "mask_mean_size": null,
+          "mask_max_size": 0,
+          "body_bytes_total": 208954,
+          "server_cpu": {
+            "api": {
+              "cpu_s": 0.65,
+              "utilization": 0.366
+            },
+            "core": {
+              "cpu_s": 1.66,
+              "utilization": 0.934
+            }
+          }
+        },
+        {
+          "round": 2,
+          "request_condition": "gen",
+          "wall_s": 1.7724029505625367,
+          "requests": 128,
+          "output_tokens": 32768,
+          "stream_chunks": 128,
+          "tokens_per_chunk": 256.0,
+          "output_tokens_per_s": 18487.89519877513,
+          "ttft_ms": {
+            "median": 869.4766163825989,
+            "p99": 901.6886008903384
+          },
+          "itl_ms": {
+            "mean": NaN,
+            "median": NaN,
+            "p99": NaN
+          },
+          "e2e_ms": {
+            "median": 869.4766163825989,
+            "p99": 901.6886008903384
+          },
+          "all_got_logprobs": false,
+          "all_flat_token_logprobs": false,
+          "mask_entries_total": 0,
+          "mask_mean_size": null,
+          "mask_max_size": 0,
+          "body_bytes_total": 209197,
+          "server_cpu": {
+            "api": {
+              "cpu_s": 0.67,
+              "utilization": 0.377
+            },
+            "core": {
+              "cpu_s": 1.66,
+              "utilization": 0.935
+            }
+          }
+        },
+        {
+          "round": 2,
+          "request_condition": "token_logprobs",
+          "wall_s": 2.0013413624837995,
+          "requests": 128,
+          "output_tokens": 32768,
+          "stream_chunks": 128,
+          "tokens_per_chunk": 256.0,
+          "output_tokens_per_s": 16373.01892333485,
+          "ttft_ms": {
+            "median": 981.2094024382532,
+            "p99": 1014.2873441800475
+          },
+          "itl_ms": {
+            "mean": NaN,
+            "median": NaN,
+            "p99": NaN
+          },
+          "e2e_ms": {
+            "median": 981.2094024382532,
+            "p99": 1014.2873441800475
+          },
+          "all_got_logprobs": true,
+          "all_flat_token_logprobs": true,
+          "mask_entries_total": 0,
+          "mask_mean_size": null,
+          "mask_max_size": 0,
+          "body_bytes_total": 875512,
+          "server_cpu": {
+            "api": {
+              "cpu_s": 1.2,
+              "utilization": 0.599
+            },
+            "core": {
+              "cpu_s": 1.98,
+              "utilization": 0.988
+            }
+          }
+        }
+      ],
+      "command": [
+        "vllm",
+        "serve",
+        "/home/hhai/inference/models/Qwen2.5-0.5B-Instruct",
+        "--port",
+        "8123",
+        "--max-model-len",
+        "2048",
+        "--gpu-memory-utilization",
+        "0.85",
+        "--max-num-seqs",
+        "256",
+        "--seed",
+        "0",
+        "--served-model-name",
+        "m"
+      ],
+      "log_markers": {
+        "sampler_backend": [
+          "(EngineCore pid=3635553) INFO 09-18 04:32:07 [topk_topp_sampler.py:62] Using FlashInfer for top-p & top-k sampling."
+        ],
+        "flashinfer_sampler_selected": true,
+        "cuda_graph_capture_seen": true,
+        "warnings": [
+          "(APIServer pid=3635467) WARNING 09-18 04:32:17 [model.py:1759] Default vLLM sampling parameters have been overridden by the model's `generation_config.json`: `{'repetition_penalty': 1.1, 'temperature': 0.7, 'top_k': 20, 'top_p': 0.8}`. If this is not intended, please relaunch vLLM instance with `--generation-config vllm`.",
+          "(EngineCore pid=3635553) WARNING 09-18 04:32:19 [jit_monitor.py:141] Triton kernel JIT compilation during inference: _gumbel_sample_kernel. This causes a latency spike; consider extending warmup to cover this shape/config."
+        ]
+      }
+    },
+    "native_skip_ranks": {
+      "flags": [],
+      "env": {
+        "VLLM_EXP_SKIP_RANKS": "1"
+      },
+      "log": "/home/hhai/inference/results/campaign10-d0f66bb/qwen25-05b-c64/server-native_skip_ranks.log",
+      "rounds": [
+        {
+          "round": 0,
+          "request_condition": "gen",
+          "wall_s": 1.8476400254294276,
+          "requests": 128,
+          "output_tokens": 32768,
+          "stream_chunks": 128,
+          "tokens_per_chunk": 256.0,
+          "output_tokens_per_s": 17735.05636866904,
+          "ttft_ms": {
+            "median": 913.4386205114424,
+            "p99": 939.6228808909655
+          },
+          "itl_ms": {
+            "mean": NaN,
+            "median": NaN,
+            "p99": NaN
+          },
+          "e2e_ms": {
+            "median": 913.4386205114424,
+            "p99": 939.6228808909655
+          },
+          "all_got_logprobs": false,
+          "all_flat_token_logprobs": false,
+          "mask_entries_total": 0,
+          "mask_mean_size": null,
+          "mask_max_size": 0,
+          "body_bytes_total": 209383,
+          "server_cpu": {
+            "api": {
+              "cpu_s": 0.73,
+              "utilization": 0.395
+            },
+            "core": {
+              "cpu_s": 1.77,
+              "utilization": 0.957
+            }
+          },
+          "outputs_file": "/home/hhai/inference/results/campaign10-d0f66bb/qwen25-05b-c64/outputs-native_skip_ranks-gen-r0.json"
+        },
+        {
+          "round": 0,
+          "request_condition": "token_logprobs",
+          "wall_s": 2.2432404328137636,
+          "requests": 128,
+          "output_tokens": 32768,
+          "stream_chunks": 128,
+          "tokens_per_chunk": 256.0,
+          "output_tokens_per_s": 14607.439987562153,
+          "ttft_ms": {
+            "median": 1041.9799559749663,
+            "p99": 1098.0160310864449
+          },
+          "itl_ms": {
+            "mean": NaN,
+            "median": NaN,
+            "p99": NaN
+          },
+          "e2e_ms": {
+            "median": 1041.9799559749663,
+            "p99": 1098.0160310864449
+          },
+          "all_got_logprobs": true,
+          "all_flat_token_logprobs": true,
+          "mask_entries_total": 0,
+          "mask_mean_size": null,
+          "mask_max_size": 0,
+          "body_bytes_total": 874600,
+          "server_cpu": {
+            "api": {
+              "cpu_s": 1.25,
+              "utilization": 0.557
+            },
+            "core": {
+              "cpu_s": 2.28,
+              "utilization": 1.015
+            }
+          },
+          "outputs_file": "/home/hhai/inference/results/campaign10-d0f66bb/qwen25-05b-c64/outputs-native_skip_ranks-token_logprobs-r0.json"
+        },
+        {
+          "round": 1,
+          "request_condition": "token_logprobs",
+          "wall_s": 2.047781789675355,
+          "requests": 128,
+          "output_tokens": 32768,
+          "stream_chunks": 128,
+          "tokens_per_chunk": 256.0,
+          "output_tokens_per_s": 16001.7049498203,
+          "ttft_ms": {
+            "median": 1001.7880951054394,
+            "p99": 1054.3875358998775
+          },
+          "itl_ms": {
+            "mean": NaN,
+            "median": NaN,
+            "p99": NaN
+          },
+          "e2e_ms": {
+            "median": 1001.7880951054394,
+            "p99": 1054.3875358998775
+          },
+          "all_got_logprobs": true,
+          "all_flat_token_logprobs": true,
+          "mask_entries_total": 0,
+          "mask_mean_size": null,
+          "mask_max_size": 0,
+          "body_bytes_total": 874531,
+          "server_cpu": {
+            "api": {
+              "cpu_s": 1.19,
+              "utilization": 0.58
+            },
+            "core": {
+              "cpu_s": 2.04,
+              "utilization": 0.995
+            }
+          }
+        },
+        {
+          "round": 1,
+          "request_condition": "gen",
+          "wall_s": 1.7520187264308333,
+          "requests": 128,
+          "output_tokens": 32768,
+          "stream_chunks": 128,
+          "tokens_per_chunk": 256.0,
+          "output_tokens_per_s": 18702.99643814545,
+          "ttft_ms": {
+            "median": 867.9085387848318,
+            "p99": 884.8695512861013
+          },
+          "itl_ms": {
+            "mean": NaN,
+            "median": NaN,
+            "p99": NaN
+          },
+          "e2e_ms": {
+            "median": 867.9085387848318,
+            "p99": 884.8695512861013
+          },
+          "all_got_logprobs": false,
+          "all_flat_token_logprobs": false,
+          "mask_entries_total": 0,
+          "mask_mean_size": null,
+          "mask_max_size": 0,
+          "body_bytes_total": 209092,
+          "server_cpu": {
+            "api": {
+              "cpu_s": 0.47,
+              "utilization": 0.268
+            },
+            "core": {
+              "cpu_s": 1.65,
+              "utilization": 0.94
+            }
+          }
+        },
+        {
+          "round": 2,
+          "request_condition": "gen",
+          "wall_s": 1.758379672653973,
+          "requests": 128,
+          "output_tokens": 32768,
+          "stream_chunks": 128,
+          "tokens_per_chunk": 256.0,
+          "output_tokens_per_s": 18635.338266019826,
+          "ttft_ms": {
+            "median": 870.4451899975538,
+            "p99": 882.2821471840143
+          },
+          "itl_ms": {
+            "mean": NaN,
+            "median": NaN,
+            "p99": NaN
+          },
+          "e2e_ms": {
+            "median": 870.4451899975538,
+            "p99": 882.2821471840143
+          },
+          "all_got_logprobs": false,
+          "all_flat_token_logprobs": false,
+          "mask_entries_total": 0,
+          "mask_mean_size": null,
+          "mask_max_size": 0,
+          "body_bytes_total": 208912,
+          "server_cpu": {
+            "api": {
+              "cpu_s": 0.4,
+              "utilization": 0.227
+            },
+            "core": {
+              "cpu_s": 1.64,
+              "utilization": 0.931
+            }
+          }
+        },
+        {
+          "round": 2,
+          "request_condition": "token_logprobs",
+          "wall_s": 1.9858129173517227,
+          "requests": 128,
+          "output_tokens": 32768,
+          "stream_chunks": 128,
+          "tokens_per_chunk": 256.0,
+          "output_tokens_per_s": 16501.050886354067,
+          "ttft_ms": {
+            "median": 975.2043448388577,
+            "p99": 1006.4362147822976
+          },
+          "itl_ms": {
+            "mean": NaN,
+            "median": NaN,
+            "p99": NaN
+          },
+          "e2e_ms": {
+            "median": 975.2043448388577,
+            "p99": 1006.4362147822976
+          },
+          "all_got_logprobs": true,
+          "all_flat_token_logprobs": true,
+          "mask_entries_total": 0,
+          "mask_mean_size": null,
+          "mask_max_size": 0,
+          "body_bytes_total": 875383,
+          "server_cpu": {
+            "api": {
+              "cpu_s": 1.21,
+              "utilization": 0.609
+            },
+            "core": {
+              "cpu_s": 1.95,
+              "utilization": 0.981
+            }
+          }
+        }
+      ],
+      "command": [
+        "vllm",
+        "serve",
+        "/home/hhai/inference/models/Qwen2.5-0.5B-Instruct",
+        "--port",
+        "8123",
+        "--max-model-len",
+        "2048",
+        "--gpu-memory-utilization",
+        "0.85",
+        "--max-num-seqs",
+        "256",
+        "--seed",
+        "0",
+        "--served-model-name",
+        "m"
+      ],
+      "log_markers": {
+        "sampler_backend": [
+          "(EngineCore pid=3635779) INFO 09-18 04:32:54 [topk_topp_sampler.py:62] Using FlashInfer for top-p & top-k sampling."
+        ],
+        "flashinfer_sampler_selected": true,
+        "cuda_graph_capture_seen": true,
+        "warnings": [
+          "(APIServer pid=3635751) WARNING 09-18 04:33:04 [model.py:1759] Default vLLM sampling parameters have been overridden by the model's `generation_config.json`: `{'repetition_penalty': 1.1, 'temperature': 0.7, 'top_k': 20, 'top_p': 0.8}`. If this is not intended, please relaunch vLLM instance with `--generation-config vllm`.",
+          "(EngineCore pid=3635779) WARNING 09-18 04:33:05 [jit_monitor.py:141] Triton kernel JIT compilation during inference: _gumbel_sample_kernel. This causes a latency spike; consider extending warmup to cover this shape/config."
+        ]
+      }
+    },
+    "native_skip_logprob_engine": {
+      "flags": [],
+      "env": {
+        "VLLM_EXP_SKIP_LOGPROBS_ENGINE": "1"
+      },
+      "log": "/home/hhai/inference/results/campaign10-d0f66bb/qwen25-05b-c64/server-native_skip_logprob_engine.log",
+      "rounds": [
+        {
+          "round": 0,
+          "request_condition": "gen",
+          "wall_s": 1.8468395564705133,
+          "requests": 128,
+          "output_tokens": 32768,
+          "stream_chunks": 128,
+          "tokens_per_chunk": 256.0,
+          "output_tokens_per_s": 17742.74320971486,
+          "ttft_ms": {
+            "median": 910.19999794662,
+            "p99": 945.8521502092481
+          },
+          "itl_ms": {
+            "mean": NaN,
+            "median": NaN,
+            "p99": NaN
+          },
+          "e2e_ms": {
+            "median": 910.19999794662,
+            "p99": 945.8521502092481
+          },
+          "all_got_logprobs": false,
+          "all_flat_token_logprobs": false,
+          "mask_entries_total": 0,
+          "mask_mean_size": null,
+          "mask_max_size": 0,
+          "body_bytes_total": 209397,
+          "server_cpu": {
+            "api": {
+              "cpu_s": 0.71,
+              "utilization": 0.384
+            },
+            "core": {
+              "cpu_s": 1.75,
+              "utilization": 0.946
+            }
+          },
+          "outputs_file": "/home/hhai/inference/results/campaign10-d0f66bb/qwen25-05b-c64/outputs-native_skip_logprob_engine-gen-r0.json"
+        },
+        {
+          "round": 0,
+          "request_condition": "token_logprobs",
+          "wall_s": 1.9646772257983685,
+          "requests": 128,
+          "output_tokens": 32768,
+          "stream_chunks": 128,
+          "tokens_per_chunk": 256.0,
+          "output_tokens_per_s": 16678.56662138706,
+          "ttft_ms": {
+            "median": 971.7106842435896,
+            "p99": 983.0347457900643
+          },
+          "itl_ms": {
+            "mean": NaN,
+            "median": NaN,
+            "p99": NaN
+          },
+          "e2e_ms": {
+            "median": 971.7106842435896,
+            "p99": 983.0347457900643
+          },
+          "all_got_logprobs": true,
+          "all_flat_token_logprobs": true,
+          "mask_entries_total": 0,
+          "mask_mean_size": null,
+          "mask_max_size": 0,
+          "body_bytes_total": 339181,
+          "server_cpu": {
+            "api": {
+              "cpu_s": 1.23,
+              "utilization": 0.625
+            },
+            "core": {
+              "cpu_s": 1.94,
+              "utilization": 0.986
+            }
+          },
+          "outputs_file": "/home/hhai/inference/results/campaign10-d0f66bb/qwen25-05b-c64/outputs-native_skip_logprob_engine-token_logprobs-r0.json"
+        },
+        {
+          "round": 1,
+          "request_condition": "token_logprobs",
+          "wall_s": 1.974795370362699,
+          "requests": 128,
+          "output_tokens": 32768,
+          "stream_chunks": 128,
+          "tokens_per_chunk": 256.0,
+          "output_tokens_per_s": 16593.111616411017,
+          "ttft_ms": {
+            "median": 977.7782675810158,
+            "p99": 995.3834917396307
+          },
+          "itl_ms": {
+            "mean": NaN,
+            "median": NaN,
+            "p99": NaN
+          },
+          "e2e_ms": {
+            "median": 977.7782675810158,
+            "p99": 995.3834917396307
+          },
+          "all_got_logprobs": true,
+          "all_flat_token_logprobs": true,
+          "mask_entries_total": 0,
+          "mask_mean_size": null,
+          "mask_max_size": 0,
+          "body_bytes_total": 339463,
+          "server_cpu": {
+            "api": {
+              "cpu_s": 1.24,
+              "utilization": 0.627
+            },
+            "core": {
+              "cpu_s": 1.95,
+              "utilization": 0.986
+            }
+          }
+        },
+        {
+          "round": 1,
+          "request_condition": "gen",
+          "wall_s": 1.767464772798121,
+          "requests": 128,
+          "output_tokens": 32768,
+          "stream_chunks": 128,
+          "tokens_per_chunk": 256.0,
+          "output_tokens_per_s": 18539.549135185363,
+          "ttft_ms": {
+            "median": 865.8450306393206,
+            "p99": 899.9408725649118
+          },
+          "itl_ms": {
+            "mean": NaN,
+            "median": NaN,
+            "p99": NaN
+          },
+          "e2e_ms": {
+            "median": 865.8450306393206,
+            "p99": 899.9408725649118
+          },
+          "all_got_logprobs": false,
+          "all_flat_token_logprobs": false,
+          "mask_entries_total": 0,
+          "mask_mean_size": null,
+          "mask_max_size": 0,
+          "body_bytes_total": 209100,
+          "server_cpu": {
+            "api": {
+              "cpu_s": 0.44,
+              "utilization": 0.248
+            },
+            "core": {
+              "cpu_s": 1.69,
+              "utilization": 0.954
+            }
+          }
+        },
+        {
+          "round": 2,
+          "request_condition": "gen",
+          "wall_s": 1.7638367963954806,
+          "requests": 128,
+          "output_tokens": 32768,
+          "stream_chunks": 128,
+          "tokens_per_chunk": 256.0,
+          "output_tokens_per_s": 18577.6825083611,
+          "ttft_ms": {
+            "median": 872.0065802335739,
+            "p99": 888.481848873198
+          },
+          "itl_ms": {
+            "mean": NaN,
+            "median": NaN,
+            "p99": NaN
+          },
+          "e2e_ms": {
+            "median": 872.0065802335739,
+            "p99": 888.481848873198
+          },
+          "all_got_logprobs": false,
+          "all_flat_token_logprobs": false,
+          "mask_entries_total": 0,
+          "mask_mean_size": null,
+          "mask_max_size": 0,
+          "body_bytes_total": 209087,
+          "server_cpu": {
+            "api": {
+              "cpu_s": 0.41,
+              "utilization": 0.232
+            },
+            "core": {
+              "cpu_s": 1.64,
+              "utilization": 0.928
+            }
+          }
+        },
+        {
+          "round": 2,
+          "request_condition": "token_logprobs",
+          "wall_s": 1.970231511630118,
+          "requests": 128,
+          "output_tokens": 32768,
+          "stream_chunks": 128,
+          "tokens_per_chunk": 256.0,
+          "output_tokens_per_s": 16631.54802193201,
+          "ttft_ms": {
+            "median": 972.1191413700581,
+            "p99": 991.75198469311
+          },
+          "itl_ms": {
+            "mean": NaN,
+            "median": NaN,
+            "p99": NaN
+          },
+          "e2e_ms": {
+            "median": 972.1191413700581,
+            "p99": 991.75198469311
+          },
+          "all_got_logprobs": true,
+          "all_flat_token_logprobs": true,
+          "mask_entries_total": 0,
+          "mask_mean_size": null,
+          "mask_max_size": 0,
+          "body_bytes_total": 339910,
+          "server_cpu": {
+            "api": {
+              "cpu_s": 1.21,
+              "utilization": 0.613
+            },
+            "core": {
+              "cpu_s": 1.95,
+              "utilization": 0.988
+            }
+          }
+        }
+      ],
+      "command": [
+        "vllm",
+        "serve",
+        "/home/hhai/inference/models/Qwen2.5-0.5B-Instruct",
+        "--port",
+        "8123",
+        "--max-model-len",
+        "2048",
+        "--gpu-memory-utilization",
+        "0.85",
+        "--max-num-seqs",
+        "256",
+        "--seed",
+        "0",
+        "--served-model-name",
+        "m"
+      ],
+      "log_markers": {
+        "sampler_backend": [
+          "(EngineCore pid=3636127) INFO 09-18 04:33:40 [topk_topp_sampler.py:62] Using FlashInfer for top-p & top-k sampling."
+        ],
+        "flashinfer_sampler_selected": true,
+        "cuda_graph_capture_seen": true,
+        "warnings": [
+          "(APIServer pid=3635985) WARNING 09-18 04:33:49 [model.py:1759] Default vLLM sampling parameters have been overridden by the model's `generation_config.json`: `{'repetition_penalty': 1.1, 'temperature': 0.7, 'top_k': 20, 'top_p': 0.8}`. If this is not intended, please relaunch vLLM instance with `--generation-config vllm`.",
+          "(EngineCore pid=3636127) WARNING 09-18 04:33:51 [jit_monitor.py:141] Triton kernel JIT compilation during inference: _gumbel_sample_kernel. This causes a latency spike; consider extending warmup to cover this shape/config."
+        ]
+      }
+    }
+  },
+  "nvidia_smi_before": {
+    "available": true,
+    "fields": [
+      "name",
+      "driver_version",
+      "clocks.current.sm",
+      "memory.used",
+      "temperature.gpu",
+      "power.draw"
+    ],
+    "rows": [
+      [
+        "NVIDIA L20",
+        "580.159.04",
+        "210 MHz",
+        "0 MiB",
+        "40",
+        "36.96 W"
+      ]
+    ]
+  },
+  "nvidia_smi_after": {
+    "available": true,
+    "fields": [
+      "name",
+      "driver_version",
+      "clocks.current.sm",
+      "memory.used",
+      "temperature.gpu",
+      "power.draw"
+    ],
+    "rows": [
+      [
+        "NVIDIA L20",
+        "580.159.04",
+        "2520 MHz",
+        "0 MiB",
+        "49",
+        "172.08 W"
+      ]
+    ]
+  },
+  "summary": {
+    "native/gen": {
+      "output_tokens_per_s_median": 18467.29538291289,
+      "output_tokens_per_s_all": [
+        17598.618401036743,
+        18467.29538291289,
+        18487.89519877513
+      ],
+      "itl_ms_median_of_medians": NaN,
+      "itl_ms_mean_median": NaN,
+      "e2e_ms_median_of_medians": 870.2991628088057,
+      "ttft_ms_median_of_medians": 870.2991628088057,
+      "mask_entries_total": 0,
+      "mask_mean_size": null,
+      "body_bytes_total": 209460,
+      "tokens_per_chunk": 256.0,
+      "throughput_vs_native_gen": 1.0,
+      "itl_mean_vs_native_gen": NaN
+    },
+    "native/token_logprobs": {
+      "output_tokens_per_s_median": 16373.01892333485,
+      "output_tokens_per_s_all": [
+        16502.193947015843,
+        16366.541054683323,
+        16373.01892333485
+      ],
+      "itl_ms_median_of_medians": NaN,
+      "itl_ms_mean_median": NaN,
+      "e2e_ms_median_of_medians": 984.9282274954021,
+      "ttft_ms_median_of_medians": 984.9282274954021,
+      "mask_entries_total": 0,
+      "mask_mean_size": null,
+      "body_bytes_total": 874615,
+      "tokens_per_chunk": 256.0,
+      "throughput_vs_native_gen": 0.8865953884337716,
+      "itl_mean_vs_native_gen": NaN
+    },
+    "native_skip_ranks/gen": {
+      "output_tokens_per_s_median": 18635.338266019826,
+      "output_tokens_per_s_all": [
+        17735.05636866904,
+        18702.99643814545,
+        18635.338266019826
+      ],
+      "itl_ms_median_of_medians": NaN,
+      "itl_ms_mean_median": NaN,
+      "e2e_ms_median_of_medians": 870.4451899975538,
+      "ttft_ms_median_of_medians": 870.4451899975538,
+      "mask_entries_total": 0,
+      "mask_mean_size": null,
+      "body_bytes_total": 209383,
+      "tokens_per_chunk": 256.0,
+      "throughput_vs_native_gen": 1.0090994853129613,
+      "itl_mean_vs_native_gen": NaN
+    },
+    "native_skip_ranks/token_logprobs": {
+      "output_tokens_per_s_median": 16001.7049498203,
+      "output_tokens_per_s_all": [
+        14607.439987562153,
+        16001.7049498203,
+        16501.050886354067
+      ],
+      "itl_ms_median_of_medians": NaN,
+      "itl_ms_mean_median": NaN,
+      "e2e_ms_median_of_medians": 1001.7880951054394,
+      "ttft_ms_median_of_medians": 1001.7880951054394,
+      "mask_entries_total": 0,
+      "mask_mean_size": null,
+      "body_bytes_total": 874600,
+      "tokens_per_chunk": 256.0,
+      "throughput_vs_native_gen": 0.8664888180987288,
+      "itl_mean_vs_native_gen": NaN
+    },
+    "native_skip_logprob_engine/gen": {
+      "output_tokens_per_s_median": 18539.549135185363,
+      "output_tokens_per_s_all": [
+        17742.74320971486,
+        18539.549135185363,
+        18577.6825083611
+      ],
+      "itl_ms_median_of_medians": NaN,
+      "itl_ms_mean_median": NaN,
+      "e2e_ms_median_of_medians": 872.0065802335739,
+      "ttft_ms_median_of_medians": 872.0065802335739,
+      "mask_entries_total": 0,
+      "mask_mean_size": null,
+      "body_bytes_total": 209397,
+      "tokens_per_chunk": 256.0,
+      "throughput_vs_native_gen": 1.0039125248594511,
+      "itl_mean_vs_native_gen": NaN
+    },
+    "native_skip_logprob_engine/token_logprobs": {
+      "output_tokens_per_s_median": 16631.54802193201,
+      "output_tokens_per_s_all": [
+        16678.56662138706,
+        16593.111616411017,
+        16631.54802193201
+      ],
+      "itl_ms_median_of_medians": NaN,
+      "itl_ms_mean_median": NaN,
+      "e2e_ms_median_of_medians": 972.1191413700581,
+      "ttft_ms_median_of_medians": 972.1191413700581,
+      "mask_entries_total": 0,
+      "mask_mean_size": null,
+      "body_bytes_total": 339181,
+      "tokens_per_chunk": 256.0,
+      "throughput_vs_native_gen": 0.900594682495877,
+      "itl_mean_vs_native_gen": NaN
+    }
+  }
+}

@@ -1,0 +1,110 @@
+diff --git a/vllm/v1/worker/gpu/sample/output.py b/vllm/v1/worker/gpu/sample/output.py
+index ff3675db..ae40ed34 100644
+--- a/vllm/v1/worker/gpu/sample/output.py
++++ b/vllm/v1/worker/gpu/sample/output.py
+@@ -70,6 +70,50 @@ def _compact_sampling_mask_kernel(
+     tl.store(counts_ptr + req_idx, count)
+ 
+ 
++@triton.jit
++def _compact_ids_only_kernel(
++    logits_ptr,
++    logits_row_stride,
++    logits_col_stride,
++    num_sampled_tokens_ptr,
++    token_ids_ptr,
++    token_ids_row_stride,
++    counts_ptr,
++    vocab_size,
++    max_num_kept,
++    BLOCK_SIZE: tl.constexpr,
++):
++    """Upper-bound experiment: compact ids + count, no bitmask at all."""
++    req_idx = tl.program_id(0)
++    is_active = tl.load(num_sampled_tokens_ptr + req_idx) > 0
++    count = tl.zeros((), dtype=tl.int32)
++    for start_idx in range(0, vocab_size, BLOCK_SIZE):
++        offsets = start_idx + tl.arange(0, BLOCK_SIZE)
++        logits = tl.load(
++            logits_ptr + req_idx * logits_row_stride + offsets * logits_col_stride,
++            mask=offsets < vocab_size,
++            other=-float("inf"),
++        )
++        keep = (logits > -float("inf")) & (logits < float("inf")) & is_active
++        keep_i32 = keep.to(tl.int32)
++        pos = count + tl.cumsum(keep_i32, axis=0) - keep_i32
++        tl.store(
++            token_ids_ptr + req_idx * token_ids_row_stride + pos,
++            offsets.to(tl.int32),
++            mask=keep & (pos < max_num_kept),
++        )
++        count += tl.sum(keep_i32)
++    tl.store(counts_ptr + req_idx, count)
++
++
++# Experiment switch: 1 = never materialise or copy the bitmask (rows whose
++# support exceeds the compact width raise instead of falling back). This is
++# NOT exact for boundary ties; it only measures the removable cost.
++import os as _os
++
++_SKIP_BITMAP = _os.environ.get("VLLM_MASK_SKIP_BITMAP", "0") == "1"
++
++
+ # Bounds the [num_reqs, width] int32 buffer; wider rows use the bitmask instead.
+ MAX_COMPACT_SUPPORT = 2048
+ 
+@@ -80,8 +124,8 @@ class SamplingMaskTensors(NamedTuple):
+ 
+     # [num_requests, max_num_kept]
+     token_ids: torch.Tensor
+-    # [num_requests, ceil(vocab_size / 8)]
+-    packed_mask: torch.Tensor
++    # [num_requests, ceil(vocab_size / 8)]; None in the no-bitmask experiment
++    packed_mask: torch.Tensor | None
+     # [num_requests]
+     counts: torch.Tensor
+     vocab_size: int
+@@ -101,6 +145,14 @@ class SamplingMaskTensors(NamedTuple):
+         token_ids = torch.empty(
+             (num_reqs, max_num_kept), dtype=torch.int32, device=device
+         )
++        if _SKIP_BITMAP:
++            counts = torch.empty(num_reqs, dtype=torch.int32, device=device)
++            _compact_ids_only_kernel[(num_reqs,)](
++                logits, logits.stride(0), logits.stride(1), num_sampled_tokens,
++                token_ids, token_ids.stride(0), counts, vocab_size, max_num_kept,
++                BLOCK_SIZE=8192,
++            )
++            return cls(token_ids, None, counts, vocab_size)
+         packed_mask = torch.empty(
+             (num_reqs, (vocab_size + 7) // 8), dtype=torch.uint8, device=device
+         )
+@@ -126,7 +178,7 @@ class SamplingMaskTensors(NamedTuple):
+             return self
+         return SamplingMaskTensors(
+             self.token_ids.to("cpu", non_blocking=True),
+-            self.packed_mask.to("cpu", non_blocking=True),
++            None if self.packed_mask is None else self.packed_mask.to("cpu", non_blocking=True),
+             self.counts.to("cpu", non_blocking=True),
+             self.vocab_size,
+         )
+@@ -135,8 +187,18 @@ class SamplingMaskTensors(NamedTuple):
+         """CSR over all requests; rows without a sampled token are empty."""
+         counts = self.counts.cpu().numpy()
+         token_ids = self.token_ids.cpu().numpy()
+-        packed_mask = self.packed_mask.cpu().numpy()
+         width = token_ids.shape[1]
++        if self.packed_mask is None:
++            if (counts > width).any():
++                raise RuntimeError(
++                    "VLLM_MASK_SKIP_BITMAP=1: a row's support exceeded the compact width "
++                    f"({int(counts.max())} > {width}); the exact fallback is disabled"
++                )
++            keep = np.arange(width)[None, :] < counts[:, None]
++            offsets = np.zeros(len(counts) + 1, dtype=np.int64)
++            np.cumsum(counts, out=offsets[1:])
++            return SamplingMaskLists(token_ids[keep], offsets)
++        packed_mask = self.packed_mask.cpu().numpy()
+ 
+         def support(row: int) -> np.ndarray:
+             if counts[row] <= width:
