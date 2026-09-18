@@ -64,9 +64,10 @@ def metrics(base):
 
 async def trial(client, base, model, rng, P, arm, lead_ms, filler_tokens, filler_concurrency, append_tokens, gen_tokens):
     prefix = rand_tokens(rng, P)
+    rec_t0 = time.monotonic()
     r1 = await completion(client, model, prefix, gen_tokens)
     await asyncio.sleep(0.3)  # let the finished request's blocks be stored to CPU
-    rec = {"P": P, "arm": arm, "lead_ms": lead_ms, "turn1": r1}
+    rec = {"P": P, "arm": arm, "lead_ms": lead_ms, "turn1": r1, "t_trial_start": rec_t0}
     if arm != "A":
         f0 = time.monotonic()
         per = max(filler_tokens // filler_concurrency, 256)
@@ -75,6 +76,7 @@ async def trial(client, base, model, rng, P, arm, lead_ms, filler_tokens, filler
         await asyncio.sleep(0.5)
     m0 = metrics(base)
     resume_prompt = prefix + rand_tokens(rng, append_tokens)
+    rec["t_prefetch_start"] = time.monotonic()
     if arm == "C":
         probe = asyncio.create_task(completion(client, model, prefix, 1))
         await asyncio.sleep(lead_ms / 1e3)
@@ -83,6 +85,7 @@ async def trial(client, base, model, rng, P, arm, lead_ms, filler_tokens, filler
     else:
         r2 = await completion(client, model, resume_prompt, gen_tokens)
     rec["resume"] = r2
+    rec["t_resume_end"] = time.monotonic()
     m1 = metrics(base)
     rec["metrics_delta"] = {k: m1[k] - m0.get(k, 0.0) for k in m1 if m1[k] != m0.get(k, 0.0)}
     return rec
@@ -102,6 +105,8 @@ def main():
     ap.add_argument("--gen-tokens", type=int, default=32)
     ap.add_argument("--repeats", type=int, default=3)
     ap.add_argument("--seed", type=int, default=11)
+    ap.add_argument("--background", type=int, default=0, help="concurrent background decoders (128-token prompts, long generations) whose per-token arrival times are recorded")
+    ap.add_argument("--background-tokens", type=int, default=2048)
     ap.add_argument("--output", type=Path, required=True)
     args = ap.parse_args()
     base = f"http://localhost:{args.port}"
@@ -124,9 +129,24 @@ def main():
         rec = {"schema_version": 1, "result_type": "kv_prefetch_oracle", "cmd": cmd, "args": {k: str(v) for k, v in vars(args).items()}, "trials": []}
         rng = random.Random(args.seed)
 
+        async def background(client, idx, store):
+            while not store["stop"]:
+                ts = []
+                async with client.stream("POST", "/v1/completions", json={"model": args.model, "prompt": rand_tokens(random.Random(idx * 7919 + len(store["runs"])), 128), "max_tokens": args.background_tokens, "temperature": 0, "ignore_eos": True, "stream": True}) as r:
+                    async for line in r.aiter_lines():
+                        if line.startswith("data: ") and line != "data: [DONE]":
+                            ts.append(time.monotonic())
+                            if store["stop"]:
+                                break
+                store["runs"].append(ts)
+
         async def run():
             async with httpx.AsyncClient(base_url=base, timeout=900) as client:
                 await completion(client, args.model, rand_tokens(rng, 256), 4)
+                bg_store = {"stop": False, "runs": []}
+                bg_tasks = [asyncio.create_task(background(client, i, bg_store)) for i in range(args.background)]
+                if bg_tasks:
+                    await asyncio.sleep(3.0)
                 for rep in range(args.repeats):
                     for P in [int(x) for x in args.prefixes.split(",")]:
                         plan = [("A", 0), ("B", 0)] + [("C", l) for l in [int(x) for x in args.leads_ms.split(",")]]
@@ -137,6 +157,11 @@ def main():
                             rec["trials"].append(t)
                             print(f"[r{rep}] P={P:6d} arm={arm} lead={lead:4d}: resume TTFT {t['resume']['ttft_ms']:.0f} ms" + (f" (probe ttft {t['probe']['ttft_ms']:.0f})" if "probe" in t else "") + (f" filler {t['filler_ms']:.0f} ms" if "filler_ms" in t else ""), flush=True)
                             args.output.write_text(json.dumps(rec, indent=1) + "\n")
+                bg_store["stop"] = True
+                for t in bg_tasks:
+                    t.cancel()
+                rec["background_token_times"] = bg_store["runs"]
+                args.output.write_text(json.dumps(rec, indent=1) + "\n")
         asyncio.run(run())
     finally:
         os.killpg(os.getpgid(proc.pid), signal.SIGTERM)
