@@ -1,32 +1,56 @@
-# Does deadline-aware prefill scheduling need request geometry? (L20, Qwen3-4B, vLLM 0.29)
+# When Token Budgets Lie: Request Geometry in Chunked LLM Prefill
 
-**Question.** Deadline-aware / SLO-aware chunked-prefill schedulers (SLOWeave-style budgeting,
-P-PAS-style pressure rules) price a prefill step from an *aggregate* coordinate: decode batch size,
-aggregate KV depth, candidate prefill tokens. Is that coordinate materially insufficient on a real
-vLLM engine — i.e. do steps with the same aggregate coordinate cost materially different amounts —
-and if so, does a cost model that sees the per-request geometry produce a measurable scheduling
-advantage?
+**Problem.** Deadline-aware prefill schedulers price an iteration from an aggregate coordinate
+(decode batch, aggregate KV depth, prefill tokens). On a real engine that coordinate can hide up to
+**1.9× different execution cost**: 1×2048 prefill tokens vs 8×256 at identical decode batch, total
+cached context and token count.
 
-**Answer (one sentence).** On one L20 running Qwen3-4B under vLLM 0.29, the aggregate coordinate
-collapses partitions of the same prefill token budget that differ 1.4–1.9× in measured model-step
-time (1×2048 vs 8×256 tokens at equal decode batch, equal total cached context, equal prefill
-tokens); a single linear per-request attention-work term `Σ_i q_i·(kv_i + (q_i+1)/2)` explains all
-of it (six partition series on one line, slopes within 4%); the aggregate predictor mis-prices the
-unseen geometry by 126 ms P95 (under) or 1.2 s (over) depending on which geometry it was fit on;
-and on the live engine a deadline controller carrying that term, calibrated only on single-prefill
-data, finishes 4–8 concurrent 16k prefills 1.5–2.8× sooner than the same controller on the
-aggregate coordinate at zero deadline violations either way — but only 5–12% sooner than the best
-fixed budget chosen with hindsight (§5b), and not at all on default-FCFS short-prompt bursts where
-steps hold one fresh prompt (§5c); so the geometry term is *necessary* to price steps that mix
-partially-prefilled requests and *sufficient* for a safe adaptive controller there, not a large
-win over an oracle-tuned static budget. Context shift (≤16k → 32k), decode-load shift (B ≤ 16 → 32),
-decode-KV skew at equal aggregate, and CUDA-graph capture boundaries are all handled by the
-aggregate coordinate and are recorded here as negative results.
+**Fix.** The cost is Σ qᵢ·kvᵢ, not (Σq)(Σkv). Use the per-request attention work
+Σ qᵢ(kvᵢ + (qᵢ+1)/2) instead of the aggregate token × KV interaction. Six partition series collapse
+onto one line (slopes within 4%).
+
+**Result.** Geometry-out-of-distribution prediction MAE **341 ms → 8.3 ms** (P95 abs 1.2 s →
+17.6 ms; reverse direction P95 under-prediction 126 ms → 9 ms). Live 100 ms-deadline controller on
+vLLM 0.29 / L20 / Qwen3-4B: **+49–180% safe prefill progress** over the same controller on the
+aggregate coordinate, at 0–0.3% violations, 3 interleaved repeats.
+
+**Boundary.** Only **+5–12%** over a hindsight-tuned best fixed budget; **no gain** on ordinary
+short-prompt FCFS bursts; context/load shift, decode-KV skew and CUDA-graph boundaries are all
+handled by the aggregate coordinate. The finding is specific to iterations in which several
+partially-prefilled requests with different KV depths share the budget.
+
+| | |
+| --- | --- |
+| ![same aggregate geometry](figures/same_aggregate_geometry.png) | ![OOD residuals](figures/ood_residuals.png) |
+| ![live controller](figures/live_controller.png) | ![FCFS bursts](figures/fcfs_bursts.png) |
 
 Technical report: [`docs/when-token-budgets-lie.md`](../../../docs/when-token-budgets-lie.md).
+Status: **frozen** at commit `17478ac` (research question answered). Everything below is the full
+evidence: reproducible from `raw/` (JSON per run, JSONL traces per engine iteration and per runner
+step) with the scripts linked; nothing in this directory was run on a dirty tree.
 
-Everything below is reproducible from `raw/` (JSON per run, JSONL traces per engine iteration and
-per runner step) with the scripts linked; nothing in this directory was run on a dirty tree.
+---
+
+## Detailed question
+
+Deadline-aware / SLO-aware chunked-prefill schedulers (SLOWeave-style budgeting, P-PAS-style
+pressure rules) price a prefill step from an *aggregate* coordinate: decode batch size, aggregate
+KV depth, candidate prefill tokens. Is that coordinate materially insufficient on a real vLLM
+engine — i.e. do steps with the same aggregate coordinate cost materially different amounts — and
+if so, does a cost model that sees the per-request geometry produce a measurable scheduling
+advantage?
+
+**Answer.** On one L20 running Qwen3-4B under vLLM 0.29, the aggregate coordinate collapses
+partitions of the same prefill token budget that differ 1.4–1.9× in measured model-step time; a
+single linear per-request attention-work term explains all of it; the aggregate predictor
+mis-prices the unseen geometry by 126 ms P95 (under) or 1.2 s (over) depending on which geometry it
+was fit on; and on the live engine a deadline controller carrying that term, calibrated only on
+single-prefill data, finishes 4–8 concurrent 16k prefills 1.5–2.8× sooner than the same controller
+on the aggregate coordinate at zero deadline violations either way — but only 5–12% sooner than the
+best fixed budget chosen with hindsight (§5b), and not at all on default-FCFS short-prompt bursts
+where steps hold one fresh prompt (§5c). Context shift (≤16k → 32k), decode-load shift (B ≤ 16 →
+32), decode-KV skew at equal aggregate, and CUDA-graph capture boundaries are all handled by the
+aggregate coordinate and are recorded here as negative results.
 
 ---
 
