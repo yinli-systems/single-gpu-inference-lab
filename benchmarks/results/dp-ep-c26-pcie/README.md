@@ -427,6 +427,39 @@ other-core placement during slow runs; B removes it if it is placement; C never 
 existing flag (evaluation result, not a new mechanism); if A does not reproduce it, the 1602608 state was node-specific
 (co-located load) and the real-mover claim reduces to "H2D/D2H at ~1–12 GB/s are benign for the peer (×1.01–1.02)".
 
+## Slow state: the cpuset finding and the placement diagnostic (round 61, 2026-09-19; CPU-only session, 0 free GPUs)
+
+**Correction of a premise.** "Slurm leaves the cpuset unconfined" (rounds 58–60) was wrong: the `taskset -cp $$` line
+logged by the NUMA round (`raw/gpus-numa-kv.txt`) shows the job's affinity confined to `--cpus-per-task` hardware
+threads allocated as whole cores with their SMT siblings — 1602619 (06g6, GPUs on NUMA 1 and 7): `6-8,36-38,70-72,100-102`
+= 3 cores on node 0 + 3 cores on node 4, **none on a GPU's node**; 1602620 (96-thread node, GPUs on NUMA 2 and 1):
+`6-8,12-14,54-56,60-62` = 3 cores on node 1 + 3 on node 2 (the GPU nodes, by luck). The site's submit filter caps
+`gpu_4090` at 6 CPUs per GPU (`DefCpuPerGPU=6`; a 12-CPU 1-GPU request is rejected), so every DP2 job ran two
+EngineCore launch threads, the API server, the client harness, the NCCL SHM proxy threads and (ON arm) the offload
+connector's CPU work on **6 cores**, and the 1-GPU jobs (1603014/15/52) run on 3 cores.
+
+Consequences. (1) The candidate mechanism for the sustained ×1.8 eager-step state is now concrete: two busy threads
+co-scheduled on SMT siblings of one core inside the cpuset (typical ×1.5–1.8 single-thread slowdown for launch-bound
+Python), flipping when the scheduler migrates a thread — the flip pattern, the unchanged graph steps (GPU-bound) and the
+inflated host slack all fit; run-queue oversubscription inside the cpuset is the second candidate (the sidecar's
+schedstat wait catches that one, a busy sibling it does not — the sidecar now records the sibling map and per-CPU busy
+from `/proc/stat`). (2) `--numa-bind` (0.29.0 `utils/numa_utils.py`) **cannot be the remedy inside such a cpuset**:
+auto-detection refuses a constrained affinity ("CPU affinity is already constrained… Skipping automatic NUMA binding"
+→ `RuntimeError` when `--numa-bind-nodes` is not given), `numactl` must be on PATH (absent on the login node), and
+`--cpunodebind=<GPU node>` fails when the cpuset has no CPU on that node → arm B of 1603052 will die at engine start
+(the script continues to arm C; A and C remain valid and pick up the upgraded sidecar at run time). (3) Whether the
+state is reachable in production depends on the CPU budget per rank — a real deployment knob (Kubernetes CPU limits,
+Slurm cpusets), which makes the DP lockstep export of one rank's CPU state a max-over-ranks amplifier.
+
+**Job 1603071** (`sbatch_c26kv4.sh`, 1 GPU, 6 threads = 3 cores, DP=1, numactl-free placement with `pinner.py` /
+`cpuplan.py`): arms `A-on-shared` (= 1603052 arm A), `D-on-squeezed` (whole tree + harness on 2 cores),
+`B-on-isolated` (EngineCore on its own core, API server on another, harness + sidecar on the third), `C-off-shared`.
+Pre-registered: (P1) A or D reproduce the slow state (chunk-step cuda p50 > 65 ms in ≥ 1/5 store cells or ≥ 10 % of
+chunk steps) and in slow samples the launch thread's sibling is ≥ 50 % busy or its wait ≥ 10 %; (P2) D's slow
+fraction ≥ A's; (P3) B < 5 % slow chunk steps with chunk p50 ≤ A's fast-state p50; (P4) C ≤ 5 %. P1 + P3 = core
+sharing inside the cpuset is the mechanism, the remedy a per-rank core budget / pinning (engineering; `--numa-bind`
+is not usable here). Analysis: `scripts/dp_ep/analyze_sidecar.py <arm dir>` (validated on a synthetic fixture).
+
 ## Caveats (pre-registered)
 
 - The hog is a separate process: it shares the link and root complex like a connector's copies
