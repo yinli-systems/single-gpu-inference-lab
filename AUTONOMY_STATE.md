@@ -85,7 +85,7 @@ cost. Cross-rank feature contagion equals the feature's own per-step cost (locks
    — if `C21_DONE`: `scripts/dp_ep/pc.sh 'cd /data/run01/scxi253/inference; LD_LIBRARY_PATH=/tmp/scxi253/libfix /tmp/scxi253/venv-vllm/bin/python lab-scripts/analyze_contagion.py --dir results/c21-1602499-Qwen1.5-MoE-A2.7B-Chat-graph-multiport-q512 --output results/c21-analysis/c21-round2-1602499.json > results/c21-analysis/c21-round2-1602499.md 2>&1; sed -n "/### contagion/,\$p" results/c21-analysis/c21-round2-1602499.md'`,
    then `scripts/dp_ep/pcget.sh /data/run01/scxi253/inference/results/c21-analysis/ benchmarks/results/dp-ep-c21-contagion/raw/` and add "Round 2" to that README
    (pen vs topk vs temp decomposition, plogp vs pfx difference, logprobs20). Close task 21.
-2. Start task 26 (PCIe KV-vs-EP): write `scripts/dp_ep/pcie_hog.py` (torch process on cuda:0
+2. Start task 26 (PCIe KV-vs-EP): `scripts/dp_ep/pcie_hog.py` is DRAFTED (untested; also copied to lab-scripts/) — a torch process on cuda:0
    doing pinned H2D / D2H copies of 4k/8k/16k-token KV equivalents — Qwen1.5-MoE KV ≈ 192 KB/token
    (24 layers × 2 × 16 heads × 128 × bf16) → 0.75/1.5/3 GB bursts — continuous vs 50 % duty vs
    rate-capped) and `scripts/dp_ep/sbatch_c26.sh` (copy of sbatch_c21.sh: server up, then plain
@@ -99,6 +99,7 @@ cost. Cross-rank feature contagion equals the feature's own per-step cost (locks
 - `benchmarks/results/dp-ep-g1-padding/README.md` (rounds 2–3 + verdict), `raw/g1-analysis/{g1-oracle-q128-graph-1602472-vs-eager-1602473.json,g1-oracle-q128.md,g1-oracle-q512cap512-graph-1602484-vs-eager-1602456.json,g1-oracle-q512cap512.md}`
 - `benchmarks/results/dp-ep-c21-contagion/README.md`, `raw/c21-round1-1602481.{json,md}`
 - `scripts/dp_ep/measure_contagion.py` (non-streaming prompt train; pen/topk/temp/logprobs20), `scripts/dp_ep/analyze_contagion.py` (committed)
+- `scripts/dp_ep/pcie_hog.py` (task 26 PCIe injector draft, untested — smoke-test it on a compute node first: `python pcie_hog.py --bytes 805306368 --duration 5 --log /tmp/scxi253/hog.jsonl`)
 - Cluster: `results/g1-analysis/`, `results/c21-analysis/` under `/data/run01/scxi253/inference/`.
 - `docs/multigpu-opportunity-ledger.md` updated (G1 killed, 21 downgraded, 24 queued).
 
