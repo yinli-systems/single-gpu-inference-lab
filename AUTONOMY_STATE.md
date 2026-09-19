@@ -1,7 +1,7 @@
 # Autonomous Research State
 
 ## Timestamp
-2026-09-19 06:13 (Mac, UTC+4) = 10:13 cluster clock (UTC+8). Written by autonomous round 57 (session started 05:43).
+2026-09-19 06:19 (Mac, UTC+4) = 10:19 cluster clock (UTC+8). Written by autonomous round 57 (session started 05:43).
 
 ## Git (branch, SHA, dirty files)
 branch `dp-ep-waves`; commits this round: `c535f14` (hog `--engine sm`, analyze_dmon, sbatch_c26r2/r3/hogtest), `fb2e0ce`
@@ -11,9 +11,9 @@ Cluster copies in `/data/run01/scxi253/inference/lab-scripts/` (md5 = repo files
 analyze_dmon.py, sbatch_c26r2.sh, sbatch_c26r3.sh, sbatch_c26topo.sh, sbatch_hogtest.sh, measure_kvoffload.py, sbatch_c26kv.sh.
 
 ## Running Slurm jobs (id, purpose, expected output path)
-- **1602541** `c26r2-dpep` (node wqd10nba07g3, same-socket pair NUMA 1+0; cells from 10:02, 29/72 done at 10:11, ends ≈10:28):
+- **1602541** `c26r2-dpep` (node wqd10nba07g3, same-socket pair NUMA 1+0; cells from 10:02, 53/72 done at 10:18, ends ≈10:25):
   round 2 = d2h duty/cap sweep, h2d:cap12, 0.75 GiB bursts, both:cap8, NCCL log → `results/c26-1602541-Qwen1.5-MoE-A2.7B-Chat-graph-multiport-q512/{pcie.json,waves.log,hog/,dmon.log,nccl-*.log,trace/}`.
-- **1602557** `c26r3-dpep` (node wqd10nba07g5, same-socket pair NUMA 2+0; 10/42 cells at 10:11, ends ≈10:24): round 3 = requester
+- **1602557** `c26r3-dpep` (node wqd10nba07g5, same-socket pair NUMA 2+0; 34/42 cells at 10:18, ends ≈10:21): round 3 = requester
   probe (copy engine vs Triton-SM, full rate and cap 8) → `results/c26-1602557-…/`.
 - **1602580** `c26topo-dpep` (node wqd10nba07g4, 6 GPUs, started 10:08): topology round — picks a same-socket and a cross-socket GPU
   pair from the allocation (NUMA via sysfs; `pairs.txt`, `topo.txt`, `gpus.txt`), runs the DP2/EP2 server + hog per pair with
@@ -46,8 +46,12 @@ Round 2 (job 1602541, same-socket pair, first repeat; rank-1 ITL p50 ms, ratio v
   d2h:0.5 ×1.06 / 22.4–23.3; d2h:0.25 ×1.13 (B=8); d2h cap2/4/8/12 at B=8 ×1.04/1.07/1.01/1.08, at B=32 22.4–22.6 / 22.3–23.0 / 22.3–22.5 / 23.2–23.8;
   h2d:cap12 ×1.05 (B=8); both:cap8 ×0.97 (B=8). p95 B=8: off 26.9, d2h:1.0 29.7 (×1.11), d2h:0.25 31.4 (×1.17), cap8 27.8 (×1.03).
 - vs round 1 (job 1602508, other node/pair, 3 repeats): d2h:1.0 ×1.20 / ×1.47 with the hog slowed to 17.5 / 14.8 GB/s.
-Round 3 (job 1602557, same-socket pair, first repeat): d2h-sm:1.0 (8.3 GB/s achieved) rank-1 p50 43.1–43.4 at B=32 (×1.96 vs 22.0), 28.2–29.4 at B=8 (×2.0);
-  d2h-sm:cap8 (5.3 GB/s) 32.4–32.7 at B=32 (×1.47); d2h:1.0 (18.0 GB/s) 14.9–15.0 at B=8 (×1.09); d2h:cap8 B=32 22.6–22.8 (×1.03); h2d:1.0 B=8 15.2–15.5.
+Round 3 (job 1602557, same-socket pair, repeats 0–2 at 10:18, 34/42 cells; rank-1 p50 ms): off B=8 13.9–14.1, B=32 21.5–22.0;
+  d2h-sm:1.0 (8.3–9.8 GB/s achieved) 43.1 / 44.9 / 45.5 at B=32 (×2.0–2.1), 27.2–29.4 at B=8 (×2.0); h2d-sm:1.0 (12.4 GB/s) 43.8–44.0 at B=32 (×2.0),
+  26.6–30.1 at B=8 (×1.9–2.2); d2h-sm:cap8 (5.3–5.6 GB/s) 31.4–32.7 at B=32 (×1.45), 20.3–20.6 at B=8 (×1.47);
+  copy engine: d2h:1.0 (18–20 GB/s) 24.3–25.5 at B=32 (×1.12–1.16), 14.7–15.0 at B=8 (×1.06–1.09); h2d:1.0 (21 GB/s) 23.4–23.8 (×1.08–1.10) / 14.8–14.9 (×1.07);
+  d2h:cap8 22.9–23.6 (×1.05–1.08) / 14.4–14.9 (×1.04–1.07). Round 2 repeat 1 (10:18): d2h:1.0 B=32 22.9–23.2 (×1.04 vs 22.1–22.3), d2h:0.25 ×1.00, cap8 ×1.02.
+  → SM-issued copies cost the peer ×2 in BOTH directions (SM/memory contention on GPU 0 exported by lockstep), copy-engine traffic ×1.04–1.16 on same-socket pairs.
 Standalone links: idle node (1602548) ce/sm 26.2–26.3 GB/s both ways; node 07g5 h2d ce 21.5 / sm 24.7, d2h ce 22.7 / sm 18.2 GB/s; node 07g3 d2d 450 GB/s.
 dmon medians (job 1602508, MB/s, GPU0 rx/tx | GPU1 rx/tx): off B=8 6399/889 | 6038/846; h2d:1.0 26513/3228 | 6594/852; d2h:1.0 3713/20353 | 7565/907; d2d 2039/358 | 12344/1258.
 
@@ -100,7 +104,7 @@ The mechanism class has an open prior-art PR (SGLang #34805); realistic native-c
 - Cluster: `results/c26-1602541-*/`, `results/c26-1602557-*/`, `results/c26topo-1602580-*/`, `results/c26-analysis/{dmon-1602508.json,c26-1602541-partial.json}`, `logs/hogtest-1602548.out`.
 
 ## Risks / unresolved methodological issues
-- Rounds 2/3 numbers are single-repeat at write time (jobs finish ≈10:24–10:28 cluster); the topology job is an untested script (pair
+- Rounds 2/3: repeats 0–2 seen for the round-3 cells and repeats 0–1 for round 2 at write time (jobs finish ≈10:21–10:25 cluster; rerun the analyzer); the topology job is an untested script (pair
   selection in an inline python heredoc; `continue 2` on server death) — verify `pairs.txt` first.
 - Round 1's GPU pair is unknown; the topology claim rests on 1602580. Even with a cross-socket pair, the pinned buffers' NUMA node
   (harness-spawned hog, first-touch on whatever core Slurm gives) is uncontrolled — log `numactl -s`/`taskset -p` in the hog next.
