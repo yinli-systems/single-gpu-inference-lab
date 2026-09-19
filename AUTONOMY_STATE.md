@@ -1,117 +1,72 @@
 # Autonomous Research State
 
 ## Timestamp
-2026-09-19 06:19 (Mac, UTC+4) = 10:19 cluster clock (UTC+8). Written by autonomous round 57 (session started 05:43).
+2026-09-19 06:50 (Mac, UTC+4) ≈ 10:37 cluster clock (CST; the cluster clock runs ~13 min behind Mac−4 h). Written by autonomous round 58 (session started 06:19).
 
 ## Git (branch, SHA, dirty files)
-branch `dp-ep-waves`; commits this round: `c535f14` (hog `--engine sm`, analyze_dmon, sbatch_c26r2/r3/hogtest), `fb2e0ce`
-(dmon counters, real mover, SGLang #34805), `8c791dd` (NCCL transport, real-mover harness draft), `14516cd` (pre-registered
-predictions), `5a5a0bc` (draft state), then the final state commit (see `git log -1`). Working tree clean after it.
-Cluster copies in `/data/run01/scxi253/inference/lab-scripts/` (md5 = repo files): pcie_hog.py 04e97116…, measure_pcie.py 976cb9d0…,
-analyze_dmon.py, sbatch_c26r2.sh, sbatch_c26r3.sh, sbatch_c26topo.sh, sbatch_hogtest.sh, measure_kvoffload.py, sbatch_c26kv.sh.
+branch `dp-ep-waves`; commits this round: `74bd87d` (rounds 2–3 final tables, task-27 harness fix, topology logging in sbatch_c27/c26kv, jobs 1602607/1602608/1602609), `6400c6c` (topology round result, NUMA-controlled hog round, README/ledger), then the final state commit (`git log -1`). Working tree clean after it.
+Cluster copies in `/data/run01/scxi253/inference/lab-scripts/` (md5 = repo files at `6400c6c`): pcie_hog.py (numa: set_mempolicy + move_pages readback), measure_pcie.py (`@N` spec suffix), measure_spec.py, sbatch_c27.sh, sbatch_c26kv.sh, sbatch_c26numa.sh, submit_c27.sh.
 
 ## Running Slurm jobs (id, purpose, expected output path)
-- **1602541** `c26r2-dpep` (node wqd10nba07g3, same-socket pair NUMA 1+0; cells from 10:02, 53/72 done at 10:18, ends ≈10:25):
-  round 2 = d2h duty/cap sweep, h2d:cap12, 0.75 GiB bursts, both:cap8, NCCL log → `results/c26-1602541-Qwen1.5-MoE-A2.7B-Chat-graph-multiport-q512/{pcie.json,waves.log,hog/,dmon.log,nccl-*.log,trace/}`.
-- **1602557** `c26r3-dpep` (node wqd10nba07g5, same-socket pair NUMA 2+0; 34/42 cells at 10:18, ends ≈10:21): round 3 = requester
-  probe (copy engine vs Triton-SM, full rate and cap 8) → `results/c26-1602557-…/`.
-- **1602580** `c26topo-dpep` (node wqd10nba07g4, 6 GPUs, started 10:08): topology round — picks a same-socket and a cross-socket GPU
-  pair from the allocation (NUMA via sysfs; `pairs.txt`, `topo.txt`, `gpus.txt`), runs the DP2/EP2 server + hog per pair with
-  `--specs off,d2h:1.0,h2d:1.0 --batch-sizes 8,32 --repeats 3 --seed 69` → `results/c26topo-1602580-…/{same,cross}/{pcie.json,waves.log,hog/,nccl-*.log,trace/}`, ≈ 2 × (4 min start + 7 min cells) after staging; log is `logs/c26-1602580.out` (template output path kept). Pair selection verified at
-  10:13: `pairs.txt` = `same:0,1:3-2 cross:0,4:3-6` (GPU bus 01 NUMA 3 + bus 25 NUMA 2 on socket 0; bus 01 NUMA 3 + bus A1 NUMA 6 across
-  sockets); `topo.txt` = all SYS. Server start/cells not yet verified at session end — if a server died the script `continue`s to the next pair.
-- 1602548 `hogtest` COMPLETED (SM engine validation).
-- Other jobs in `squeue -u $USER` (mbert149-glue, vft-*, moe2b-ds-*, fork1b, moe7b, f3b-prof) are the user's own unrelated work — never touch them.
+- 1602580 `c26topo-dpep` **COMPLETED** (`C26TOPO_DONE`; 18 + 18 cells, 3 repeats): `results/c26topo-1602580-Qwen1.5-MoE-A2.7B-Chat-graph-multiport-q512/{same,cross}/`, analysis `results/c26-analysis/c26topo-1602580-{same,cross}.json` (final, pulled to the repo).
+- **1602607** `c27-dpep` (node wqd10nba07g5, GPUs bus 25/61 = NUMA 2/0, same socket): task 27 spec-decode skew, n-gram K=4, graph mode; 17/24 cells at 10:37 → `results/c27-1602607-Qwen1.5-MoE-A2.7B-Chat-graph-multiport-q512/{spec.json,waves.log,trace/,gpus.txt,topo.txt}`, log `logs/c27-1602607.out`. Ends ≈ 10:45.
+- **1602608** `c26kv-dpep` OFFLOAD_GIB=16 (node wqd10nba07g6, GPUs bus 41/81 = NUMA 1/7 = **cross-socket**): real-mover ON arm → `results/c26kv-1602608-…-off16/{kvoffload.json,waves.log,dmon.log,trace/,gpus.txt}`; server still starting at 10:34 (cold node). Cells = plain/store/load × B 8/32 × 3 repeats.
+- **1602609** `c26kv-dpep` OFFLOAD_GIB=0 (node **wqd10nba06g6 = the round-1 node**, GPUs bus 41/81 = NUMA 1/7, cross-socket): real-mover OFF arm → `results/c26kv-1602609-…-off0/`. Server still starting at 10:34.
+- **1602620** `c26numa-dpep` (node wqd10naf13g7, GPUs bus 26/41 = NUMA 2/1, same socket; **this node confines the cpuset to 12 CPUs on NUMA 1–2**): NUMA-controlled hog round, specs `off,d2h:1.0@2,d2h:1.0@3,d2h:1.0@6,h2d:1.0@2,h2d:1.0@6,d2h:1.0` (hog pinned buffer on GPU 0's node / other node same socket / other socket), B 8/32, 3 repeats → `results/c26numa-1602620-…/{pcie.json,waves.log,hog/*.jsonl (start record carries "numa": {mempolicy_rc, affinity, pages_by_node}),gpus.txt}`. Started 10:31 with the *pre-fix* hog for its first cells (sched_setaffinity to a node outside the cpuset raises → those cells have hog rc≠0 / 0 bursts — drop them); the fixed hog (set_mempolicy, pushed 10:36) is used by every later cell.
+- **1602619** `c26numa-dpep` **PENDING** with `--nodelist=wqd10nba06g6` (round-1 node; all 8 GPUs busy, 2 free when 1602609 ends) — same specs computed from its GPU 0's NUMA node.
+- Other jobs in `squeue -u $USER` (vft-*, vision-data-*, moe2b-ds-*, moe7b, f3b-prof) are the user's own unrelated work — never touch them.
 
 ## Completed this round
-1. Rounds 2, 3 and the topology round of task 26 designed, harness extended, submitted (see above). `pcie_hog.py --engine sm` = Triton
-   kernel through the pinned host pointer (validated on an idle 4090, job 1602548: ce and sm 26.2–26.3 GB/s each way; d2d ce 454 / sm 221 GB/s).
-   `measure_pcie.py` accepts `d2h-sm:…`. The new hog file replaced the cluster copy during job 1602541 (`--engine` defaults to `ce`, same copy path).
-2. **PCIe counters of job 1602508** (`analyze_dmon.py`, `raw/dmon-1602508.json`): plain baseline ~6 GB/s PCIe rx per GPU = NCCL host-memory
-   transport polling (12.3 GB/s on the waiting GPU in the d2d cell); EP payload ≈ 0.3 GB/s; the hog saturates one direction of GPU 0's link,
-   rank 1's own traffic unchanged.
-3. **NCCL transport confirmed** (`raw/nccl-1602541-rank{0,1}.log`): `isAllDirectP2p 0`, `Channel 00/01 … via SHM/direct/direct` both ways.
-4. **Real mover read in 0.29.0** (`vllm/v1/kv_offload/cpu/gpu_worker.py`): GPU→CPU = copy engine `swap_blocks_batch`, own stream, serialised,
-   unpaced; CPU→GPU = Triton SM kernel for pages < 28 KiB (ours 128 KiB → copy engine). Enabled by `--kv-offloading-size <GiB>` (prefix caching on).
-5. **Prior art**: SGLang PR #34805 (open, unmerged, opt-in) = same mechanism class (bulk H2D vs NCCL all-to-all on PCIe-only boxes, no-DMA window)
-   for diffusion weight prefetch → task 26 novelty narrowed (README + ledger). vLLM/TRT-LLM/Dynamo/arXiv: nothing on offload traffic vs collectives.
-6. **Node topology discovered** (srun --overlap on the running jobs): 8 × 4090 per node, one GPU per PCIe root port, 2-socket 8-NUMA EPYC
-   (NPS4), no PCIe switches, `nvidia-smi topo -m` = SYS; Slurm pairs for rounds 2/3 were same-socket; round 1's pair (node wqd10nba06g6) unlogged.
-7. Real-mover harness drafted and pushed, untested: `measure_kvoffload.py` + `sbatch_c26kv.sh <model> graph multiport 512 <OFFLOAD_GIB>`.
-8. Pre-registered predictions for rounds 2–3 written before any cell ran (README), partially scored below.
+1. Rounds 2–3 of task 26 analyzed with 3 repeats (`raw/c26-1602541.json`, `raw/c26-1602557.json`, `raw/waves-1602541.log`, `raw/waves-1602557.log`); README "partial" section replaced by final tables; predictions scored (1–2 not supported, 3 holds; H_a rejected).
+2. **Topology round (1602580) decided the round-1 discrepancy**: on one node, the cross-socket GPU pair reproduces round 1 (d2h ×1.45 p50 / ×1.44 p95 at B=32, hog throttled to 14.5 GB/s) while the same-socket pair gives ×1.13 (hog 18.9 GB/s). README topology section + ledger row updated; raw files `raw/c26topo-1602580-{same,cross}.json`, `raw/waves-1602580-{same,cross}.log`, `raw/topo-1602580.txt`.
+3. Hidden variable discovered: Slurm leaves the cpuset unconfined on the nba nodes (cpuset = all 96/128 cores; `srun --overlap` on 1602541/1602580), confined on naf13g7 → pinned-buffer NUMA placement was first-touch luck in every run so far. vLLM's CPU offload tier = `torch.zeros(pin_memory=True)` with no NUMA policy (`kv_offload/cpu/gpu_worker.py:791`), so the same applies to the real connector.
+4. New harness pieces: `pcie_hog.py --numa-node N` (MPOL_BIND via `set_mempolicy(2)` + best-effort affinity, placement read back with `move_pages(2)`, validated on the login node: bind 5 → N5 ×256, reset → local), `measure_pcie.py` spec suffix `@N`, `sbatch_c26numa.sh` (computes local / same-socket-other / cross-socket nodes from GPU 0's NUMA node), topology logging (`gpus.txt`, `topo.txt`, cpuset) in `sbatch_c26kv.sh`, `sbatch_c27.sh`, `sbatch_c26numa.sh`.
+5. Task 27 harness fixed (tokens/s from the `/metrics` generation counter — an SSE chunk carries every accepted token of a step, so chunk counts undercount) and submitted; first cells show the acceptance counters parse (rep 0.79–0.93, rnd 0.71–0.76).
+6. Real-mover arms submitted (both landed on cross-socket pairs).
 
 ## Measured results (actual numbers only)
-Round 2 (job 1602541, same-socket pair, first repeat; rank-1 ITL p50 ms, ratio vs `off` at same B):
-- off B=8 13.6, B=32 21.9–22.0. d2h:1.0 (hog 22.3 / 19.5 GB/s, not slowed) 14.8 (×1.09) / 25.3–25.5 (×1.16); d2h:1.0:0.75 15.0 (×1.10) / 22.6–22.8 (×1.04);
-  d2h:0.5 ×1.06 / 22.4–23.3; d2h:0.25 ×1.13 (B=8); d2h cap2/4/8/12 at B=8 ×1.04/1.07/1.01/1.08, at B=32 22.4–22.6 / 22.3–23.0 / 22.3–22.5 / 23.2–23.8;
-  h2d:cap12 ×1.05 (B=8); both:cap8 ×0.97 (B=8). p95 B=8: off 26.9, d2h:1.0 29.7 (×1.11), d2h:0.25 31.4 (×1.17), cap8 27.8 (×1.03).
-- vs round 1 (job 1602508, other node/pair, 3 repeats): d2h:1.0 ×1.20 / ×1.47 with the hog slowed to 17.5 / 14.8 GB/s.
-Round 3 (job 1602557, same-socket pair, repeats 0–2 at 10:18, 34/42 cells; rank-1 p50 ms): off B=8 13.9–14.1, B=32 21.5–22.0;
-  d2h-sm:1.0 (8.3–9.8 GB/s achieved) 43.1 / 44.9 / 45.5 at B=32 (×2.0–2.1), 27.2–29.4 at B=8 (×2.0); h2d-sm:1.0 (12.4 GB/s) 43.8–44.0 at B=32 (×2.0),
-  26.6–30.1 at B=8 (×1.9–2.2); d2h-sm:cap8 (5.3–5.6 GB/s) 31.4–32.7 at B=32 (×1.45), 20.3–20.6 at B=8 (×1.47);
-  copy engine: d2h:1.0 (18–20 GB/s) 24.3–25.5 at B=32 (×1.12–1.16), 14.7–15.0 at B=8 (×1.06–1.09); h2d:1.0 (21 GB/s) 23.4–23.8 (×1.08–1.10) / 14.8–14.9 (×1.07);
-  d2h:cap8 22.9–23.6 (×1.05–1.08) / 14.4–14.9 (×1.04–1.07). Round 2 repeat 1 (10:18): d2h:1.0 B=32 22.9–23.2 (×1.04 vs 22.1–22.3), d2h:0.25 ×1.00, cap8 ×1.02.
-  → SM-issued copies cost the peer ×2 in BOTH directions (SM/memory contention on GPU 0 exported by lockstep), copy-engine traffic ×1.04–1.16 on same-socket pairs.
-Standalone links: idle node (1602548) ce/sm 26.2–26.3 GB/s both ways; node 07g5 h2d ce 21.5 / sm 24.7, d2h ce 22.7 / sm 18.2 GB/s; node 07g3 d2d 450 GB/s.
-dmon medians (job 1602508, MB/s, GPU0 rx/tx | GPU1 rx/tx): off B=8 6399/889 | 6038/846; h2d:1.0 26513/3228 | 6594/852; d2h:1.0 3713/20353 | 7565/907; d2d 2039/358 | 12344/1258.
+Rank-1 (no KV movement) ITL, pooled medians over repeats, ratio vs `off` at the same B; hog = copy engine unless "sm".
+- **Same-socket pairs, 3 repeats**: round 3 (07g5): d2h:1.0 (19.8/19.0 GB/s) p50 ×1.03 (B=8) / ×1.13 (B=32), p95 ×1.05 / ×1.13; d2h:cap8 ×1.01 / ×1.06; h2d:1.0 (21 GB/s) ×1.04 / ×1.10; d2h-sm:1.0 (9.7 GB/s) ×1.87 / ×2.08 (p95 ×1.96 / ×2.10); h2d-sm:1.0 (12.4 GB/s) ×1.87 / ×2.04; d2h-sm:cap8 (5.6 GB/s) ×1.40 / ×1.46. Round 2 (07g3): d2h:1.0 (22.1 GB/s) ×1.07 / ×1.04 (p95 ×1.11 / ×1.03); duty 0.5 / 0.25 ×1.03 / ×1.03 (B=8), ×1.00 / ×1.01 (B=32); 0.75 GiB bursts ×1.04 / ×1.03; cap 2/4/8/12 ×1.02/1.03/1.01/1.05 (B=8), ×1.01/1.00/1.02/1.07 (B=32); h2d:cap12 ×1.04 / ×1.02; both:cap8 ×1.01 / ×1.01. Topology job same pair (07g4, NUMA 3+2): d2h ×1.06 / ×1.13 (p95 ×1.05 / ×1.13; step period ×1.08 / ×1.14; hog 20.4 / 18.9 GB/s), h2d ×1.03 / ×1.07.
+- **Cross-socket pair (07g4, NUMA 3+6, 3 repeats)**: d2h:1.0 B=32 p50 22.2 → 32.2 (**×1.45**), p95 45.1 → 64.9 (**×1.44**), step period 21.9 → 32.1 (×1.47), hog 14.5 GB/s; B=8 p50 15.1 → 17.8 (×1.18), p95 29.0 → 34.1 (×1.18), step period 14.3 → 17.9 (×1.25), hog 17.5 GB/s; h2d:1.0 B=32 ×1.08 / ×1.06 (hog 20.2 GB/s), B=8 ×1.03 / ×1.07 (3 repeats, final). Round 1 (06g6, unlogged pair): ×1.47 / ×1.48 at B=32, ×1.20 at B=8, hog 14.8 / 17.5 GB/s → reproduced.
+- Task 27 (1602607, repeat 0, K=4 n-gram): rep|rep B=8 gen 1284 / 1423 tok/s per rank, accept 0.79 / 0.93, ITL p50 25.1; rnd|rep B=8 971 / 1063 tok/s, accept 0.71 / 0.75; rnd|rep B=32 2523 / 2823 tok/s, accept 0.74 / 0.92, ITL 33.9 / 34.0; rep|rnd B=32 2769 / 2478, accept 0.92 / 0.76, ITL 35.4 / 34.9. (rnd|rnd and rep|rep at B=32 not yet seen.)
 
 ## Alive hypotheses (evidence + gate)
-- **Task 26 — ALIVE but re-scoped**: the mechanism (bulk copy-engine D2H on rank 0's GPU degrading rank 1 via NCCL SHM transport) is real on
-  the round-1 pair (×1.47 p50 / ×1.48 p95 at B=32, 3 repeats) but only ×1.16 / ×1.09 on same-socket pairs (1 repeat) — **topology-dependent;
-  cross-socket hypothesis under test (job 1602580)**. Gate (rank-1 p95 +10 %) passed on the round-1 pair, marginal on same-socket pairs.
-  New sub-finding: SM-issued copies (vLLM's Triton swap path shape) cost the peer ×2 while resident (SM contention exported by lockstep).
-  Policy candidates now: (i) NUMA-/socket-aware placement of offload buffers or GPU pairs (if 1602580 confirms), (ii) prefer the copy engine
-  over the Triton path under DP/EP, (iii) pacing only if the cross-socket run shows a rate threshold. All need the real-connector run.
-- Task 27 (spec-decode acceptance skew): drafted, untested, not submitted. P1, 30: untouched.
+- **Task 26 — ALIVE, strong on cross-socket pairs, re-scoped as a topology-gated placement problem**: line-rate copy-engine GPU0→host traffic costs the other rank ×1.45 p50 / ×1.44 p95 (B=32) when the DP/EP pair spans sockets (2 pairs on 2 nodes: 06g6 round 1, 07g4 topology round), ×1.03–1.16 on three same-socket pairs (07g3, 07g5, 07g4). Gate (rank-1 p95 +10 %) passed on cross-socket pairs. Open: (i) which host resource saturates (fabric vs memory controller of the SHM segment) — NUMA round 1602620/1602619; (ii) the realistic connector traffic (1602608 vs 1602609, both cross-socket); (iii) whether Slurm's default GPU pairing spans sockets often (07g6/06g6 got NUMA 1+7 for 2-GPU jobs → yes, it happens). Policy = placement rule (socket-local DP/EP pairs when bulk KV moves, or socket-bound pinned buffers), not a runtime controller; SGLang #34805 remains the prior art for the mechanism class.
+- Sub-finding (upstream-relevant, needs the real connector): SM-issued copies (vLLM `swap_blocks_triton` shape) cost the whole DP/EP group ×1.9–2.1 while resident, even capped at 5.6 GB/s (×1.4–1.5); the copy engine is the benign requester.
+- Task 27: running; acceptance contrast rep 0.92 vs rnd 0.75 is weak (greedy continuations of random prompts loop → n-gram hits) — if the skew cells show < 5 % rank-rate differences, the regime needs a genuinely low-acceptance prompt kind (natural-language prompts, or temperature sampling on one rank) before the gate is scored.
 
 ## Killed hypotheses (reason + evidence)
-- H_a of round 3 ("SM-issued D2H interferes less"): rejected, ×1.96–2.0 vs ×1.09 for the copy engine (SM contention, like the d2d control).
-- Round-2 predictions 1–2 (linear duty scaling / monotone rate caps) not supported on the same-socket pair (residual ×1.02–1.10, no rate order).
-- G1–G4 (oracle 0.0 % in 45/45 cells); task 21 (closed, features ≤ ×1.13, penalties known upstream #47540); task 28 (analytic ≤ 11 % at EP2);
-  C1/29 (< 1 % visible at B ≥ 8; DP sync is Gloo under async scheduling); task 24 downgraded; 22/23 deprioritised.
+- Round-2 predictions 1–2 (linear duty scaling; monotone rate caps) — not supported at 3 repeats on same-socket pairs (all ≤ ×1.07, cap 2 ≈ cap 12).
+- H_a of round 3 ("SM-issued D2H interferes less") — rejected at 3 repeats (×1.87–2.10 vs ×1.03–1.13).
+- "GPU 0's PCIe link is the contended resource" — rejected: the link is equally loaded on same-socket pairs, where the peer pays ≤ ×1.16 and the hog keeps line rate.
+- Earlier: G1–G4 (oracle 0.0 % in 45/45 cells); task 21 (features ≤ ×1.13, penalties known upstream #47540); task 28 (analytic ≤ 11 % at EP2); C1/29 (< 1 % visible at B ≥ 8); task 24 downgraded; 22/23 deprioritised.
 
 ## Blocked hypotheses (specific blocker)
-- Round-1 topology cannot be recovered (pair not logged; from now on every sbatch logs `nvidia-smi topo -m` + bus ids — c26topo does).
-- 8-GPU single-node allocations unavailable in the partition right now (0 runnable 8-GPU jobs); 6 GPUs obtained.
+- Same-socket vs cross-socket *pinned buffer* placement (independent of the GPU pair) — data arriving (1602620; 1602619 pending on 06g6). On cpuset-confined nodes only the memory policy binds (no affinity) — check `pages_by_node` in each hog start record before trusting a cell.
+- The NCCL SHM segment's NUMA node cannot be set per rank without binding the whole `vllm serve` tree (`numactl` on the server binds both ranks alike) — first explain the hog-buffer result, then decide whether a per-rank `NCCL_*`/cgroup approach is needed.
+- 8-GPU single-node allocations still scarce (6 GPUs obtained for 1602580).
 
 ## Current strongest result (bounded wording)
-On 2×RTX 4090 DP2/EP2 (vLLM 0.29.0, Qwen1.5-MoE-A2.7B, EP over NCCL SHM/direct — no P2P, confirmed), a line-rate GPU→host copy-engine
-stream on rank 0's GPU raised rank 1's decode ITL ×1.47 (p50) / ×1.48 (p95) at B=32 on one GPU pair (3 repeats), but only ×1.16 on two
-same-socket pairs (1 repeat each) where the stream is not slowed by the server; the peer's cost is therefore set by the host-side path the
-copy and NCCL's host-memory traffic share, not by GPU 0's link alone. SM-issued copies of the same bytes cost the peer ×2 regardless.
-The mechanism class has an open prior-art PR (SGLang #34805); realistic native-connector traffic is projected ≤ 10 % (untested).
+On 2×RTX 4090 DP2/EP2 (vLLM 0.29.0, Qwen1.5-MoE-A2.7B, EP over NCCL SHM/direct — no P2P), a line-rate GPU→host copy-engine stream on rank 0's GPU raises rank 1's decode ITL ×1.45 (p50) / ×1.44 (p95) at B=32 **when the two GPUs sit on different sockets** of the 2-socket EPYC host (reproduced on two nodes; the stream itself is throttled to 14.5 GB/s), and only ×1.03–1.16 when they share a socket (three pairs, three nodes, 3 repeats each, stream at 19–22 GB/s). The mechanism is a shared host-side path (inter-socket fabric / memory controller) between the D2H stream and NCCL's host-memory transport — a placement problem. The realistic native-connector effect (prefill-rate-bound store traffic ≈ 2.4 GB/s; loads h2d) is still projected ≤ 10 % and is being measured on cross-socket pairs (1602608/1602609). SM-issued copies cost the group ×2 regardless of topology.
 
 ## Next exact action (the exact first command/file/experiment for the next session)
-1. Analyze all three jobs (2/3 should be COMPLETED; topo may still run — check `squeue`):
-   `scripts/dp_ep/pc.sh 'cd /data/run01/scxi253/inference && for d in results/c26-1602541-* results/c26-1602557-* results/c26topo-1602580-*/same results/c26topo-1602580-*/cross; do echo "## $d"; LD_LIBRARY_PATH=/tmp/scxi253/libfix /tmp/scxi253/venv-vllm/bin/python lab-scripts/analyze_pcie.py --dir $d --output results/c26-analysis/$(basename $(dirname $d))-$(basename $d).json | grep -A30 "rank-1 (no KV"; done; cat results/c26topo-1602580-*/pairs.txt; cat results/c26topo-1602580-*/topo.txt'`
-   then `pcget.sh` the analysis JSONs + `waves.log` + `pairs.txt`/`topo.txt` into `benchmarks/results/dp-ep-c26-pcie/raw/`, replace the
-   "partial" table in the README with 3-repeat numbers, and score: cross-socket d2h ×≥1.3 and same-socket ≤ ×1.16 → topology confirmed.
-2. If topology confirmed: policy = socket-aware placement (offload buffer NUMA-binding / pair selection) — check where vLLM's connector
-   allocates its pinned CPU tensors (`kv_offload/cpu/…` `torch.empty(pin_memory=True)`, no NUMA policy) and whether Slurm's CPU binding
-   already lands them on the GPU's socket; then the real-mover run on a cross-socket pair (extend `sbatch_c26kv.sh` with the pair logic of
-   `sbatch_c26topo.sh`): `sbatch lab-scripts/sbatch_c26kv.sh Qwen1.5-MoE-A2.7B-Chat graph multiport 512 16` and `… 0`.
-   If not confirmed (both pairs ≤ ×1.2): task 26 = engineering band (5–10 %); record, and move to task 27
-   (`sbatch lab-scripts/sbatch_c27.sh Qwen1.5-MoE-A2.7B-Chat graph multiport 512 "--speculative-config {\"method\":\"ngram\",\"num_speculative_tokens\":4,\"prompt_lookup_max\":4,\"prompt_lookup_min\":2}"`).
-3. Either way record the SM-copy ×2 finding as a separate upstream-relevant note (vLLM `swap_blocks_triton` under DP/EP) with the real
-   connector as the required next evidence (`measure_kvoffload.py` load cells use the copy engine for 128 KiB pages, so a Triton-path test
-   needs a model with pages < 28 KiB or `THRESHOLD_BYTES` raised in the node-local venv copy).
+1. Check jobs: `scripts/dp_ep/pc.sh 'squeue -u $USER -h -o "%i %j %t %M %N"; cd /data/run01/scxi253/inference; tail -2 logs/c26-1602580.out logs/c27-1602607.out logs/c26kv-1602608.out logs/c26kv-1602609.out logs/c26-1602620.out'`.
+2. Analyze in this order (all analyzers exist on the cluster; pull JSONs with `pcget.sh` into `benchmarks/results/<dir>/raw/`):
+   - NUMA round: `scripts/dp_ep/pc.sh 'cd /data/run01/scxi253/inference && LD_LIBRARY_PATH=/tmp/scxi253/libfix /tmp/scxi253/venv-vllm/bin/python lab-scripts/analyze_pcie.py --dir results/c26numa-1602620-* --output results/c26-analysis/c26numa-1602620.json | sed -n "/rank-1 (no KV/,\$p"; grep -h numa results/c26numa-1602620-*/hog/*.jsonl | python3 -c "import sys,json; [print(json.loads(l)[\"args\"][\"dir\"], json.loads(l)[\"args\"][\"numa_node\"], json.loads(l)[\"numa\"]) for l in sys.stdin]"'` — score: if d2h@cross-socket ≫ d2h@local on a same-socket GPU pair, the contended resource is the memory path of the pinned buffer (policy = bind offload buffers to the GPU's socket); if all @N are equal (≈×1.1), the GPU pair's socket span is what matters (policy = pair selection). Same for 1602619 (06g6) when it has run.
+   - Real mover: write `scripts/dp_ep/analyze_kvoffload.py` (per cell: rank-1 ITL p50/p95 from `itl_window`, rank-0 train n/TTFT, `kv_GiB_moved_est`; pool by (kind, B), ratio ON/OFF per kind; also store(ON)/plain(ON) and store(OFF)/plain(OFF)) — the ON/OFF arms are on different nodes (07g6 vs 06g6) but both cross-socket; report that caveat. Gate: rank-1 p95 +10 % with the connector on = strong; expected ≤ 10 %.
+   - Task 27: write `scripts/dp_ep/analyze_spec.py` (per cell per rank: gen tok/s from `spec[base]["gen_tok_s"]`, accept_rate, drafts, ITL p50; compare rnd rank in rnd|rep vs rnd|rnd and rep rank in rep|rnd vs rep|rep at the same B; step trace `num_tokens` vs `padded_tokens` per rank for the verification-width padding question). Gate: <5 % kill; if the acceptance contrast stays 0.75 vs 0.92, run a second job with a genuinely low-acceptance kind before scoring.
+3. Then update `benchmarks/results/dp-ep-c26-pcie/README.md` (NUMA + real-mover sections), the ledger, and — if the NUMA round points at buffer placement — draft the minimal fix: NUMA-bind the CPU offload tier allocation in `vllm/v1/kv_offload/cpu/gpu_worker.py` (set_mempolicy around `torch.zeros(pin_memory=True)` to the GPU's NUMA node from `/sys/bus/pci/devices/<bus>/numa_node`) and A/B it with `sbatch_c26kv.sh` on a cross-socket pair (`--nodelist` the same node for both arms).
 
 ## Files/artifacts created (paths)
-- `scripts/dp_ep/{pcie_hog.py (engine sm), measure_pcie.py (-sm specs), analyze_dmon.py, sbatch_c26r2.sh, sbatch_c26r3.sh, sbatch_c26topo.sh, sbatch_hogtest.sh, measure_kvoffload.py, sbatch_c26kv.sh}`
-- `benchmarks/results/dp-ep-c26-pcie/README.md` (round-2 groundwork, NCCL transport, real mover, prior art, pre-registered predictions,
-  partial rounds 2–3 + topology), `raw/{dmon-1602508.json, hogtest-1602548.txt, nccl-1602541-rank0.log, nccl-1602541-rank1.log, c26-1602541-partial.json}`
-- `docs/multigpu-opportunity-ledger.md` (task 26 row: prior art, mechanism evidence, topology dependence, requester result; C1/29 Gloo note)
-- Cluster: `results/c26-1602541-*/`, `results/c26-1602557-*/`, `results/c26topo-1602580-*/`, `results/c26-analysis/{dmon-1602508.json,c26-1602541-partial.json}`, `logs/hogtest-1602548.out`.
+- `scripts/dp_ep/{pcie_hog.py (--numa-node, set_mempolicy_bind, numa_placement), measure_pcie.py (@N), measure_spec.py (gen_tok_s), sbatch_c26numa.sh, submit_c27.sh, sbatch_c27.sh + sbatch_c26kv.sh (topology logging)}`
+- `benchmarks/results/dp-ep-c26-pcie/README.md` (rounds 2–3 final, topology round), `raw/{c26-1602541.json, c26-1602557.json, waves-1602541.log, waves-1602557.log, hog-standalone-1602557.jsonl, c26topo-1602580-same.json, c26topo-1602580-cross.json, waves-1602580-same.log, waves-1602580-cross.log, topo-1602580.txt}` (`c26-1602541-partial.json` removed)
+- `docs/multigpu-opportunity-ledger.md` (task 26 row: round-58 update, gate wording split by topology)
+- Cluster: `results/c26-analysis/{c26-1602541.json, c26-1602557.json, c26topo-1602580-{same,cross}.json, waves-1602580-*.log, topo-1602580.txt}`, `results/c27-1602607-*/`, `results/c26kv-16026{08,09}-*/`, `results/c26numa-1602620-*/`.
 
 ## Risks / unresolved methodological issues
-- Rounds 2/3: repeats 0–2 seen for the round-3 cells and repeats 0–1 for round 2 at write time (jobs finish ≈10:21–10:25 cluster; rerun the analyzer); the topology job is an untested script (pair
-  selection in an inline python heredoc; `continue 2` on server death) — verify `pairs.txt` first.
-- Round 1's GPU pair is unknown; the topology claim rests on 1602580. Even with a cross-socket pair, the pinned buffers' NUMA node
-  (harness-spawned hog, first-touch on whatever core Slurm gives) is uncontrolled — log `numactl -s`/`taskset -p` in the hog next.
-- The requester probe is confounded by SM occupancy (12 resident Triton programs); the "copy engine is benign" conclusion is still
-  the relevant product comparison, but "PCIe requester" per se was not isolated.
-- Real-mover harness untested; native-connector store traffic is prefill-rate-bound (~2.4 GB/s) → an expected null there bounds the
-  practical impact of the native connector, not the mechanism.
-- ITL p95 ≈ 2×p50 in temperature-0 streams (bimodal token delivery); p50 + step trace are the robust signals; p95 quoted because the gate names it.
-- `nvidia-smi dmon` PCIe counters are 1 s samples of a ~20 ms window — direction/magnitude reliable, timing not.
-- Task 27 harness untested; home quota (1 GB) full — every cache is redirected in the sbatch scripts.
+- Cross-socket evidence = 2 pairs on 2 nodes (round 1 inferred, 1602580 logged); same-socket = 3 pairs on 3 nodes.
+- Pinned-buffer NUMA (hog, NCCL SHM, connector tier) was uncontrolled in all runs before 1602620; on cpuset-confined nodes only the memory policy is enforceable. The first cells of 1602620 ran with the pre-fix hog (drop cells with hog rc≠0).
+- The real-mover ON and OFF arms run on different nodes (07g6 vs 06g6); a same-node ON/OFF pair (`--nodelist`) is needed before any real-connector claim.
+- Task 27's rnd regime is not low-acceptance (0.71–0.76); the skew is small, so a null there is a weak test of the hypothesis.
+- ITL p95 ≈ 2×p50 in temperature-0 streams (bimodal delivery); p50 + step trace are the robust signals; p95 quoted because the gate names it. `nvidia-smi dmon` PCIe counters are 1 s samples.
+- Home quota (1 GB) full — every cache is redirected in the sbatch scripts; node 07g4 is in DRAIN state (jobs there finish, new ones won't land).
