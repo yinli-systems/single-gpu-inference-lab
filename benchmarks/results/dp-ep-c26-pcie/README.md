@@ -1,6 +1,6 @@
 # Task 26 — PCIe arbitration: bulk KV movement on rank 0's GPU vs rank 1's EP communication
 
-Status: **round 1 (job 1602508, unlogged GPU pair): d2h ×1.20/×1.47 p50 — NOT reproduced on three same-socket pairs (rounds 2–3 + topology job, 3 repeats: copy-engine d2h ×1.03–1.16, caps/duty ≤ ×1.07); SM-issued copies ×1.9–2.1 (SM contention, both directions); cross-socket pair result below; prior art narrowed by SGLang #34805.**
+Status (2026-09-19, round 59): **hog (synthetic line-rate D2H): topology- and placement-gated — same-socket pair with a local buffer ×1.13 (B=32), buffer on the far socket +×1.14–1.16, pair spanning sockets +×1.15, worst corner ×1.48 = round 1 (NUMA round, `move_pages`-verified); SM-issued copies ×1.9–2.1 regardless. Real connector (vLLM CPU offload): H2D loads benign for the peer (×0.97–0.98, and ×0.5 vs recompute); D2H stores leave the peer's decode steps at ×1.01 but rank 0's own 512-token chunk step goes 48 → 86 ms (bimodal) with the connector on → peer p95 ×1.80 at B=32 — cause (connector store path vs cross-socket collective slowdown) pending the DP=1 control (jobs 1603014/1603015). Prior art for the mechanism class: SGLang #34805.**
 
 ## Question
 
