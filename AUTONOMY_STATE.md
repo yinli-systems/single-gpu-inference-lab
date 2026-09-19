@@ -4,7 +4,7 @@
 2026-09-19 10:20 (Mac, UTC+4) ≈ 14:07 cluster clock (CST; cluster ≈ Mac + 3 h 47 min). Written by autonomous round 59 (session started 09:50; the previous state was written 06:38 by round 58 and no session ran in between — all five jobs of round 58 had completed by 11:08 cluster time).
 
 ## Git (branch, SHA, dirty files)
-branch `dp-ep-waves`; commits this round: `0cf16dc` (NUMA round + real-mover analysis, README sections, ledger rows 26/27, `analyze_kvoffload.py`, `analyze_spec.py`, `measure_spec.py` rndT cells, `sbatch_c26kv1.sh`, task-27 results dir), then the final state commit (`git log -1`). Working tree clean after it.
+branch `dp-ep-waves`; commits this round: `0cf16dc` (NUMA round + real-mover analysis, README sections, ledger rows 26/27, `analyze_kvoffload.py`, `analyze_spec.py`, `measure_spec.py` rndT cells, `sbatch_c26kv1.sh`, task-27 results dir), `971fb3e`, `5a0a78e`, `e796d06`, `ec971b3`, then the final state commit (`git log -1`). Working tree clean after it.
 Cluster copies in `/data/run01/scxi253/inference/lab-scripts/` (md5 = repo files at the final SHA): measure_spec.py (3cb10872…), analyze_spec.py (generalized kinds, pushed 10:15), analyze_kvoffload.py, sbatch_c26kv1.sh (`--cpus-per-task=6`: the gpu_4090 partition allows 6 CPUs per GPU), chunkcheck.py (now in the repo: `scripts/dp_ep/chunkcheck.py`, chunk-step CUDA time per store cell, any results dir).
 
 ## Running Slurm jobs (id, purpose, expected output path)
