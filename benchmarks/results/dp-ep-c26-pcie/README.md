@@ -103,6 +103,71 @@ host→GPU.** Next: d2h duty/cap sweep (0.5, 0.25, cap 2/4/8/12 GB/s) to find th
 NCCL transport confirmation (`NCCL_DEBUG=INFO`), and a real-connector check (vLLM
 OffloadingConnector CPU offload on rank 0) before any policy claim.
 
+## Round 2 groundwork (round 57): PCIe counters, the real mover, prior art
+
+**Per-cell PCIe counters of job 1602508** (`nvidia-smi dmon -s ut`, 1 s samples, aligned to the
+windows through the `hog/start-NNN` mtimes; `scripts/dp_ep/analyze_dmon.py`, `raw/dmon-1602508.json`;
+medians of MB/s over the window, GPU0 rx/tx | GPU1 rx/tx):
+
+| cell | B=8 GPU0 | B=8 GPU1 | B=32 GPU0 | B=32 GPU1 |
+| --- | --- | --- | --- | --- |
+| off | 6399 / 889 | 6038 / 846 | 5853 / 1064 | 5524 / 1019 |
+| idle | 6236 / 882 | 5808 / 825 | 5954 / 1034 | 5431 / 1014 |
+| h2d:1.0 | **26513** / 3228 | 6594 / 852 | **27628** / 3546 | 5782 / 1015 |
+| d2h:1.0 | 3713 / **20353** | 7565 / 907 | 3431 / **17552** | 8042 / 1072 |
+| both:1.0 | 4028 / 15721 | 6784 / 860 | 13890 / 3475 | 7763 / 1081 |
+| h2d:cap4 | 10474 / 1344 | 5996 / 832 | 9972 / 1522 | 5568 / 1018 |
+| d2d:1.0 | 2039 / 358 | **12344** / 1258 | 1753 / 459 | 6488 / 864 |
+
+Reading: (a) the EP payload is tiny — at B=32 each rank sends 32 × 2048 × 2 B = 128 KiB per
+allgather and receives the same per reduce-scatter, × 24 layers ≈ 6 MiB per 21 ms step ≈ 0.3 GB/s —
+yet the *plain* baseline shows **~6 GB/s of PCIe rx on both GPUs** with ~0.9 GB/s tx. That is
+the receiver-side polling of NCCL's host-memory (SHM) transport: a GPU waiting for its peer spins
+on flags in host memory over PCIe, so rx scales with waiting time — it doubles on GPU 1 (12.3 GB/s)
+in the `d2d` cell, where GPU 0 is slowed by GDDR contention and GPU 1 waits longer. (b) The
+hog saturates one direction of GPU 0's link (rx 26.5–27.6 GB/s for h2d, tx 17.6–20.4 GB/s for
+d2h); rank 1's own traffic barely changes, so the harm is not bandwidth starvation of rank 1 but
+delayed completion of rank 0's *sends*, which sit on the saturated GPU0→host direction. (c) The
+tx in the baseline (~0.9–1.1 GB/s) is the sender side (payload + flags) — the direction the d2h
+hog contends with.
+
+**The real mover in vLLM 0.29.0** (`vllm/v1/kv_offload/cpu/gpu_worker.py`, read on the cluster):
+`SingleDirectionOffloadingHandler` runs each transfer on its own CUDA stream, serialised after the
+previous transfer, unpaced; **GPU→CPU always uses the copy engine** (`ops.swap_blocks_batch` =
+`cudaMemcpyBatchAsync`, comment "GPU->CPU is bandwidth-bound; the dedicated copy engine beats
+Triton"), CPU→GPU uses the Triton kernel `swap_blocks_triton._swap_blocks_kernel` (SM-issued
+loads over the UVA host pointer, 12 programs) for pages < 28 KiB and the copy engine otherwise.
+So the harmful direction measured here (d2h, copy engine, line rate, no pacing) is exactly what
+a real offload store does; the hog is a faithful mechanism proxy differing only in duty cycle
+(a real 4k-token store is one 0.75 GiB burst ≈ 30 ms ≈ 2 steps).
+
+**Requester probe (round 3, job 1602557)**: `pcie_hog.py --engine sm` moves the same bytes with a
+Triton kernel over the pinned pointer (validated standalone on an idle 4090, job 1602548: ce and
+sm both 26.2–26.3 GB/s in each direction, even with 4 programs; d2d ce 454 vs sm 221 GB/s;
+`raw/hogtest-1602548.txt`). If SM-issued D2H writes interfere less than copy-engine writes at the
+same rate, the fix is a one-line policy in `_select_swap_blocks_fn` (use the Triton path for
+GPU→CPU when the DP/EP transport is host-memory NCCL); if they interfere equally, only pacing
+(rate cap) remains.
+
+**Prior art update (2026-09-19, round 57)**: SGLang PR **#34805** "[Diffusion] Avoid H2D/A2A
+contention during layerwise offload" (open, opt-in, unmerged, 2026-08-14) — "layerwise offload can
+enqueue a full layer's pinned-memory H2D copy while Ulysses `all_to_all_single` is using the same
+PCIe fabric. On PCIe-only multi-GPU systems, this overlap slows both the collective and the
+denoise step"; remedy = bounded H2D submission + a hard no-H2D window around the NCCL collectives.
+That is the same mechanism class (bulk DMA vs a collective on a PCIe-only box) with a windowing
+remedy, for weight prefetch in diffusion serving. **Task 26's novelty is therefore narrowed** to:
+KV movement in the D2H direction under DP/EP LLM decode, where the collectives are continuous
+(48 per 14–21 ms step) so a no-DMA window is not applicable and the remedy must be rate- or
+requester-based; and the cross-rank victim (rank 1 moves nothing). vLLM: no issue/PR on offload
+traffic degrading collectives or peer ranks ("offload PCIe NCCL interference", "KV offload
+collective contention", "swap_blocks_batch copy engine", "cudaMemcpyBatchAsync NCCL", "copy engine
+all_reduce latency PCIe", "SHM transport PCIe contention", "offloading connector rate limit";
+adjacent #42212, #39306, #52838). SGLang HiCache PRs (#38358 load-back-aware prefill reorder,
+#37635/#37701 transfer-kernel block quota) tune transfer throughput, not collective interference.
+TensorRT-LLM / Dynamo: no hits. arXiv API ("copy engine" AND collective AND interference; PCIe AND
+offloading AND NCCL AND contention; "KV cache" AND offload AND "PCIe bandwidth" AND interference):
+none.
+
 ## Caveats (pre-registered)
 
 - The hog is a separate process: it shares the link and root complex like a connector's copies
