@@ -45,6 +45,7 @@ from measure_contagion import itl_summary, rand_tokens, stream_completion  # noq
 
 
 def hog_cmd(spec, args, log, start_file):
+    spec, _, numa = spec.partition("@")  # "d2h:1.0@6" = hog process + pinned buffer on NUMA node 6
     parts = spec.split(":")
     d = parts[0]
     engine = "ce"
@@ -55,6 +56,8 @@ def hog_cmd(spec, args, log, start_file):
     cmd = [sys.executable, str(Path(__file__).resolve().parent / "pcie_hog.py"), "--device", args.hog_device, "--bytes", str(int(gib * 2**30)),
            "--chunk-mb", str(args.chunk_mb), "--gpu-buf-mb", str(args.gpu_buf_mb), "--duration", str(args.window_s), "--log", str(log), "--start-file", str(start_file)]
     cmd += ["--dir", d, "--engine", engine]  # "idle" keeps the context + pinned buffers alive on GPU 0 for the window without copying
+    if numa:
+        cmd += ["--numa-node", numa]
     if duty.startswith("cap"):
         cmd += ["--rate-gbs", duty[3:], "--chunk-mb", "16"]
     else:

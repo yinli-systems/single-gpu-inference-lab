@@ -62,6 +62,45 @@ def make_sm_copy():
     return _copy_kernel
 
 
+def set_mempolicy_bind(node):
+    """set_mempolicy(2): MPOL_BIND to `node` (None = MPOL_DEFAULT). Returns 0 or -errno; needs no CPU affinity."""
+    import ctypes
+    try:
+        libc = ctypes.CDLL(None, use_errno=True)
+        if node is None:
+            rc = libc.syscall(238, 0, None, 0)  # SYS_set_mempolicy, MPOL_DEFAULT
+        else:
+            mask = (ctypes.c_ulong * 2)(0, 0)
+            mask[node // 64] = 1 << (node % 64)
+            rc = libc.syscall(238, 2, mask, 128)  # MPOL_BIND, maxnode = 128 bits
+        return int(rc) if rc == 0 else -ctypes.get_errno()
+    except Exception as e:  # noqa: BLE001
+        return repr(e)[:80]
+
+
+def numa_placement(addr, nbytes, samples=256):
+    """NUMA node of `samples` pages spread over [addr, addr+nbytes), via move_pages(2) with a null target (query mode).
+
+    Works for driver-owned pinned mappings that /proc/self/numa_maps does not account; returns {"N<node>": count}."""
+    import ctypes
+    try:
+        libc = ctypes.CDLL(None, use_errno=True)
+        page = os.sysconf("SC_PAGE_SIZE")
+        npages = max(nbytes // page, 1)
+        idx = sorted({(i * npages) // samples for i in range(samples)})
+        pages = (ctypes.c_void_p * len(idx))(*[addr + i * page for i in idx])
+        status = (ctypes.c_int * len(idx))()
+        rc = libc.syscall(279, 0, len(idx), pages, None, status, 0)  # SYS_move_pages on x86_64
+        if rc != 0:
+            return {"error": f"move_pages rc {rc} errno {ctypes.get_errno()}"}
+        out = {}
+        for st in status:
+            out[f"N{st}" if st >= 0 else f"err{st}"] = out.get(f"N{st}" if st >= 0 else f"err{st}", 0) + 1
+        return out
+    except Exception as e:  # noqa: BLE001
+        return {"error": repr(e)[:100]}
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--device", default="cuda:0")
@@ -77,12 +116,30 @@ def main():
     ap.add_argument("--log", required=True)
     ap.add_argument("--engine", choices=["ce", "sm"], default="ce", help="ce = cudaMemcpyAsync (copy engine); sm = Triton kernel over the pinned host pointer")
     ap.add_argument("--sm-count", type=int, default=12, help="Triton programs for --engine sm (vLLM's swap_blocks_triton uses 12)")
+    ap.add_argument("--numa-node", type=int, default=None, help="pin this process to the CPUs of NUMA node N before allocating the pinned buffer (first-touch places it there); the placement is read back with move_pages(2)")
     args = ap.parse_args()
     dev = torch.device(args.device)
     n = int(args.bytes)
     chunk = args.chunk_mb * 2**20
     gn = min(n, args.gpu_buf_mb * 2**20)
+    numa = {"requested": args.numa_node}
+    if args.numa_node is not None:
+        # memory policy first (works even when Slurm's cpuset excludes that node's CPUs), CPU affinity as best effort
+        numa["mempolicy_rc"] = set_mempolicy_bind(args.numa_node)
+        cpus = set()
+        for part in open(f"/sys/devices/system/node/node{args.numa_node}/cpulist").read().strip().split(","):
+            a, _, b = part.partition("-"); cpus.update(range(int(a), int(b or a) + 1))
+        cpus &= os.sched_getaffinity(0)
+        if cpus:
+            os.sched_setaffinity(0, cpus)
+        else:
+            numa["affinity_note"] = "no CPU of that node in the allowed cpuset; memory policy only"
+    numa["affinity"] = sorted(os.sched_getaffinity(0))
     host = torch.empty(n, dtype=torch.uint8, pin_memory=True)
+    host.fill_(0)  # touch every page from this CPU set so the placement is decided here, not by the first copy
+    numa["pages_by_node"] = numa_placement(host.data_ptr(), n)
+    if args.numa_node is not None:
+        set_mempolicy_bind(None)  # back to the default policy for everything allocated after the pinned buffer
     gpu = torch.empty(gn, dtype=torch.uint8, device=dev)
     gpu2 = torch.empty(gn, dtype=torch.uint8, device=dev) if args.dir == "d2d" else None
     stream = torch.cuda.Stream(device=dev)
@@ -123,7 +180,7 @@ def main():
     t_end_all = t_begin + args.duration
     k = 0
     with open(args.log, "a") as f:
-        f.write(json.dumps({"event": "start", "t": t_begin, "args": vars(args)}) + "\n"); f.flush()
+        f.write(json.dumps({"event": "start", "t": t_begin, "args": vars(args), "numa": numa}) + "\n"); f.flush()
         while time.monotonic() < t_end_all:
             if args.dir == "idle":
                 time.sleep(0.05); continue
