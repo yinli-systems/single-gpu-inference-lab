@@ -35,24 +35,10 @@ while (( $(date +%s) < END_TIME )); do
     # Each Claude instance gets at most ~50 minutes. If it crashes, hits context limits,
     # reaches max turns, or exits normally, the outer watchdog launches a fresh instance
     # that reads AUTONOMY_STATE.md.
-    ( "$CLAUDE" -p \
-      --model opus \
-      --effort max \
-      --max-turns 120 \
-      --output-format stream-json \
-      --verbose \
-      --permission-mode acceptEdits \
-      --allowedTools "Read" "Write" "Edit" "Glob" "Grep" "Bash" \
-      --disallowedTools \
-        "Bash(git push:*)" \
-        "Bash(gh:*)" \
-        "Bash(git remote:*)" \
-        "Bash(git reset --hard:*)" \
-        "Bash(git clean -fdx:*)" \
-        "Bash(sudo:*)" \
-        "Bash(rm -rf /*)" \
-        "Bash(rm -rf ~*)" \
-      "$(cat "$PROMPT")
+    PROMPT_FILE="$LOGDIR/round-${ROUND}-prompt.txt"
+    {
+      cat "$PROMPT"
+      cat <<EOP
 
 THIS IS AUTONOMOUS ROUND $ROUND OF AN APPROXIMATELY ${HOURS}-HOUR RESEARCH SPRINT.
 
@@ -100,8 +86,27 @@ Atomically rewrite $STATE with exactly these sections:
 ## Risks / unresolved methodological issues
 
 Also update docs/multigpu-opportunity-ledger.md. Commit locally. Then exit cleanly so the watchdog
-can start the next fresh Claude context." \
-      2>&1 | tee "$LOG" ) &
+can start the next fresh Claude context.
+EOP
+    } > "$PROMPT_FILE"
+    ( "$CLAUDE" -p \
+      --model opus \
+      --effort max \
+      --max-turns 120 \
+      --output-format stream-json \
+      --verbose \
+      --permission-mode acceptEdits \
+      --allowedTools "Read" "Write" "Edit" "Glob" "Grep" "Bash" \
+      --disallowedTools \
+        "Bash(git push:*)" \
+        "Bash(gh:*)" \
+        "Bash(git remote:*)" \
+        "Bash(git reset --hard:*)" \
+        "Bash(git clean -fdx:*)" \
+        "Bash(sudo:*)" \
+        "Bash(rm -rf /*)" \
+        "Bash(rm -rf ~*)" \
+      < "$PROMPT_FILE" 2>&1 | tee "$LOG" ) &
     CLAUDE_PID=$!
     ( sleep 3000; kill -TERM -"$CLAUDE_PID" 2>/dev/null; sleep 30; kill -KILL -"$CLAUDE_PID" 2>/dev/null ) &
     KILLER_PID=$!
