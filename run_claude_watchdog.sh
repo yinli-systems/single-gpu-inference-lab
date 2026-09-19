@@ -89,7 +89,7 @@ Also update docs/multigpu-opportunity-ledger.md. Commit locally. Then exit clean
 can start the next fresh Claude context.
 EOP
     } > "$PROMPT_FILE"
-    ( "$CLAUDE" -p \
+    "$CLAUDE" -p \
       --model opus \
       --effort max \
       --max-turns 120 \
@@ -106,9 +106,9 @@ EOP
         "Bash(sudo:*)" \
         "Bash(rm -rf /*)" \
         "Bash(rm -rf ~*)" \
-      < "$PROMPT_FILE" 2>&1 | tee "$LOG" ) &
+      < "$PROMPT_FILE" > "$LOG" 2>&1 &
     CLAUDE_PID=$!
-    ( sleep 3000; kill -TERM -"$CLAUDE_PID" 2>/dev/null; sleep 30; kill -KILL -"$CLAUDE_PID" 2>/dev/null ) &
+    ( sleep 3000; kill -TERM "$CLAUDE_PID" 2>/dev/null; sleep 30; kill -KILL "$CLAUDE_PID" 2>/dev/null ) &
     KILLER_PID=$!
     wait "$CLAUDE_PID"; EXIT_CODE=$?
     kill "$KILLER_PID" 2>/dev/null
