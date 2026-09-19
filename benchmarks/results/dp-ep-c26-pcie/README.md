@@ -1,6 +1,6 @@
 # Task 26 — PCIe arbitration: bulk KV movement on rank 0's GPU vs rank 1's EP communication
 
-Status: **measured (job 1602508, 54 windows, 3 repeats; `raw/c26-1602508.{json,md}`, `raw/hog-standalone.jsonl`) — ALIVE / STRONG for GPU→host traffic on that GPU pair**; round 57: rounds 2–3 on same-socket pairs reproduce only ×1.09–1.16 → **topology-dependent; cross- vs same-socket pair test (job 1602580) pending**; SM-issued copies ×2 (SM contention); prior art narrowed by SGLang #34805.
+Status: **round 1 (job 1602508, unlogged GPU pair): d2h ×1.20/×1.47 p50 — NOT reproduced on three same-socket pairs (rounds 2–3 + topology job, 3 repeats: copy-engine d2h ×1.03–1.16, caps/duty ≤ ×1.07); SM-issued copies ×1.9–2.1 (SM contention, both directions); cross-socket pair result below; prior art narrowed by SGLang #34805.**
 
 ## Question
 
@@ -201,40 +201,107 @@ is bounded by the prefill rate (≈ 12k tok/s × 192 KiB ≈ 2.4 GB/s average, ~
 predicted in the ≤ 10 % band — the ×1.47 headline needs sustained line-rate D2H (PD KV export
 staged through host memory, KV snapshots, host-side replication), not this connector on this model.
 
-## Rounds 2–3, partial results at session end (round 57; jobs 1602541 / 1602557 still running — first repeat only, `raw/c26-1602541-partial.json`, `waves.log` lines)
+## Rounds 2–3 results (jobs 1602541 / 1602557, 3 repeats each, same-socket GPU pairs; `raw/c26-1602541.json`, `raw/c26-1602557.json`, `raw/waves-*.log`)
 
-**The effect is topology-dependent.** Rounds 2 and 3 ran on nodes wqd10nba07g3 / g5 (8 × 4090, one GPU per PCIe root port on
-a 2-socket, 8-NUMA-node EPYC, no PCIe switches; `nvidia-smi topo -m` = `SYS`), and Slurm's GPU pairs were on the **same
-socket** (NUMA 1+0 and NUMA 2+0). Round 1 ran on wqd10nba06g6 with an unlogged pair. Same-socket numbers (rank-1 ITL p50,
-ratio vs `off` at the same B, 1 repeat):
+Exact commands (scripts at git SHA `c535f14`, analysis `74bd87d`):
 
-| cell (job 1602541, same-socket pair) | B=8 | B=32 |
-| --- | --- | --- |
-| off | 13.6 | 21.9–22.0 |
-| d2h:1.0 (22.3 / 19.5 GB/s, *not* slowed by the server) | 14.8 (×1.09) | 25.3–25.5 (×1.16) |
-| d2h:1.0:0.75 | 15.0 (×1.10) | 22.6–22.8 (×1.04) |
-| d2h:0.5 / 0.25 | ×1.06 / ×1.13 | 22.4–23.3 / — |
-| d2h cap 2 / 4 / 8 / 12 GB/s | ×1.04 / ×1.07 / ×1.01 / ×1.08 | 22.4–22.6 / 22.3–23.0 / 22.3–22.5 / 23.2–23.8 (×1.02–1.08) |
-| h2d:cap12 | ×1.05 | — |
-| both:cap8 | ×0.97 | — |
+```
+sbatch lab-scripts/sbatch_c26r2.sh Qwen1.5-MoE-A2.7B-Chat graph multiport 512    # -> 1602541 (node wqd10nba07g3, GPUs bus 41/61 = NUMA 1/0, socket 0)
+sbatch lab-scripts/sbatch_c26r3.sh Qwen1.5-MoE-A2.7B-Chat graph multiport 512    # -> 1602557 (node wqd10nba07g5, NUMA 2/0, socket 0)
+LD_LIBRARY_PATH=/tmp/scxi253/libfix /tmp/scxi253/venv-vllm/bin/python lab-scripts/analyze_pcie.py --dir results/c26-<job>-… --output results/c26-analysis/c26-<job>.json
+```
 
-versus round 1 (job 1602508, other node/pair): d2h:1.0 ×1.20 / ×1.47 with the hog slowed to 17.5 / 14.8 GB/s. On the
-same-socket pair the hog keeps line rate and the peer pays ≤ ×1.16; prediction 1 (linear duty scaling, p95 ≈ continuous)
-and prediction 2 (monotone caps) are **not supported** here — the residual ×1.02–1.10 has no clear rate dependence at one
-repeat. Working hypothesis for the next round: round 1's pair was **cross-socket** (or the pinned buffers sat on the remote
-socket), so the D2H stream and NCCL's host-memory transport shared the inter-socket fabric / memory path; the
-topology-controlled job **1602580** (`sbatch_c26topo.sh`: 6 GPUs, same-socket pair vs cross-socket pair, off/d2h/h2d, B 8/32,
-3 repeats, `topo.txt` + `gpus.txt` + NUMA per GPU logged) tests exactly that. Until it reports, the ×1.47 headline must be
-read as "on one unlogged GPU pair".
+**Topology facts (established this round).** The 4090 nodes are 8 × RTX 4090, one GPU per PCIe root port, on 2-socket
+EPYC 7542/7402 with 8 NUMA nodes (NPS4; socket = NUMA // 4), no PCIe switches, `nvidia-smi topo -m` = `SYS` for every
+pair. Slurm does **not** confine the job's CPUs (cpuset = all cores), so every pinned host buffer (NCCL SHM segments, the
+hog's buffer, vLLM's offload tier) is first-touched on whatever NUMA node the allocating process happened to run on —
+an uncontrolled variable in *all* runs so far (round 1 included). Rounds 2 and 3 got same-socket GPU pairs.
 
-**Requester probe (job 1602557, same-socket pair, 1 repeat)**: `d2h-sm:1.0` (Triton kernel, 12 programs, throttled by the server
-to 8.3 GB/s) → rank-1 p50 **43.1–43.4 ms at B=32 (×1.96)** and 28.2–29.4 at B=8 (×2.0); `d2h-sm:cap8` (5.3 GB/s achieved) →
-32.4–32.7 (×1.47); copy-engine `d2h:1.0` (18 GB/s) → 14.9–15.0 at B=8 (×1.09), `d2h:cap8` B=32 → 22.6–22.8 (×1.03);
-`h2d:1.0` B=8 → 15.2–15.5. **H_a rejected**: SM-issued copies are far *worse* for the peer than copy-engine copies — but for
-the `d2d`-control reason (a resident copy kernel steals SMs / memory bandwidth on GPU 0, lockstep exports it to rank 1), not
-PCIe arbitration. Actionable reading for vLLM's `swap_blocks_triton` path (SM-driven copies for small CPU→GPU pages): on a
-DP/EP node an SM copy kernel costs the *whole group* up to ×2 while resident, the copy engine ≤ ×1.1–1.2 — a policy
-candidate ("prefer the copy engine under DP/EP, or cap the Triton grid") that needs the real-connector run before any claim.
+**Round 3 — requester probe** (node 07g5, pooled medians over 3 repeats; rank-1 ITL p50 / p95 with ratio vs `off` at the same B; step period = rank-1 step period p50):
+
+| hog on GPU 0 | achieved GB/s | B=8 p50 (ratio) | B=8 p95 (ratio) | B=32 p50 (ratio) | B=32 p95 (ratio) | r1 step period B=8 / 32 |
+| --- | ---: | --- | --- | --- | --- | --- |
+| off | — | 14.5 | 28.5 | 21.7 | 44.0 | 13.8 / 21.4 |
+| d2h:1.0 copy engine | 19.8 / 19.0 | 14.9 (1.03) | 30.0 (1.05) | 24.5 (**1.13**) | 49.8 (**1.13**) | 14.8 / 24.3 |
+| d2h:cap8 copy engine | 8.0 | 14.6 (1.01) | 29.4 (1.03) | 23.0 (1.06) | 46.3 (1.05) | 14.3 / 22.5 |
+| h2d:1.0 copy engine | 21.1 / 21.0 | 15.1 (1.04) | 30.4 (1.07) | 23.8 (1.10) | 48.2 (1.09) | 15.0 / 23.3 |
+| d2h-sm:1.0 Triton kernel | 9.7 | 27.2 (**1.87**) | 55.9 (**1.96**) | 45.1 (**2.08**) | 92.6 (**2.10**) | 27.2 / 44.4 |
+| d2h-sm:cap8 Triton kernel | 5.6 | 20.3 (1.40) | 40.1 (1.41) | 31.6 (1.46) | 64.1 (1.46) | 20.2 / 31.4 |
+| h2d-sm:1.0 Triton kernel | 12.4 | 27.2 (1.87) | 55.8 (1.96) | 44.3 (2.04) | 92.0 (2.09) | 27.2 / 44.5 |
+
+**Round 2 — d2h duty / rate-cap sweep** (node 07g3, pooled medians over 3 repeats; rank-1 ITL p50 (ratio) / p95 (ratio)):
+
+| hog on GPU 0 | GB/s | B=8 p50 / p95 | B=32 p50 / p95 |
+| --- | ---: | --- | --- |
+| off | — | 13.9 / 26.9 | 22.1 / 44.7 |
+| d2h:1.0 | 22.1 | 14.9 (1.07) / 29.9 (1.11) | 22.9 (1.04) / 46.2 (1.03) |
+| d2h:1.0, 0.75 GiB bursts | 21.4 | 14.5 (1.04) / 28.8 (1.07) | 22.8 (1.03) / 46.0 (1.03) |
+| d2h:0.5 | 22.3 | 14.4 (1.03) / 29.0 (1.08) | 22.0 (1.00) / 44.2 (0.99) |
+| d2h:0.5, 0.75 GiB bursts | 22.2 | 14.5 (1.04) / 29.3 (1.09) | 23.8 (1.07) / 48.0 (1.07) |
+| d2h:0.25 | 21.6 | 14.3 (1.03) / 28.8 (1.07) | 22.4 (1.01) / 45.2 (1.01) |
+| d2h cap 2 / 4 / 8 / 12 GB/s | 2 / 4 / 8 / 12 | 1.02 / 1.03 / 1.01 / 1.05 (p95 1.06 / 1.07 / 1.05 / 1.09) | 1.01 / 1.00 / 1.02 / 1.07 (p95 1.02 / 1.00 / 1.02 / 1.06) |
+| h2d:cap12 | 12 | 14.5 (1.04) / 29.2 (1.09) | 22.5 (1.02) / 45.4 (1.02) |
+| both:cap8 | 8 | 14.1 (1.01) / 28.4 (1.06) | 22.4 (1.01) / 45.7 (1.02) |
+
+Reading (bounded):
+
+1. **On same-socket GPU pairs the copy-engine mechanism is in the engineering band**: line-rate GPU0→host costs the peer
+   ×1.03–1.07 (B=8) and ×1.04–1.13 (B=32) over two pairs (plus ×1.07 / ×1.12–1.16 on the third same-socket pair of the
+   topology job, below); every duty cycle and rate cap ≤ ×1.07; host→GPU0 ×1.04–1.10. The hog is **not** slowed by the
+   server here (19–22 GB/s), whereas in round 1 it fell to 14.8–17.5 GB/s while costing the peer ×1.47 — the two
+   symptoms of a shared saturated host path go together, and neither appears on these pairs.
+2. **Predictions 1–2 (linear duty scaling, monotone caps) are not supported**: with a ≤ ×1.07 total effect there is
+   no rate dependence to resolve (cap 2 ≈ cap 12; duty 0.25 ≈ 1.0 within repeat noise). Prediction 3 (burst size
+   irrelevant) holds trivially.
+3. **H_a rejected, decisively**: SM-issued copies of the same bytes cost the peer ×1.87–2.10 in *both* directions and
+   ×1.40–1.46 even when capped to 5.6 GB/s — the resident Triton copy kernel (12 programs) steals SM/memory bandwidth on
+   GPU 0 and lockstep exports the slowdown to rank 1 (the same signature as the `d2d` control). The copy engine is the
+   benign requester. Practical reading for vLLM's `swap_blocks_triton` path (SM copies for CPU→GPU pages < 28 KiB): on a
+   DP/EP node such a kernel costs the *whole group* ~×2 while resident; the real connector (`sbatch_c26kv.sh`) is the
+   required next evidence before any claim, and our 128 KiB pages take the copy engine anyway.
+4. The round-1 ×1.47 therefore needs a topology explanation (cross-socket GPU pair and/or cross-socket pinned buffers);
+   the topology-controlled job 1602580 is reported next.
+
+## Topology round (job 1602580, `sbatch_c26topo.sh`, node wqd10nba07g4, 6 × 4090: same-socket pair vs cross-socket pair, 3 repeats each; `raw/c26topo-1602580-{same,cross}.json`, `raw/waves-1602580-{same,cross}.log`, `raw/topo-1602580.txt`)
+
+Pairs chosen from the allocation by sysfs NUMA node (`pairs.txt`: `same:0,1:3-2 cross:0,4:3-6`, physical GPUs 0/1/5 = bus
+01/25/A1; socket = NUMA // 4): **same** = GPU bus 01 (NUMA 3) + bus 25 (NUMA 2), both socket 0; **cross** = bus 01 (NUMA 3) +
+bus A1 (NUMA 6), sockets 0 + 1. `nvidia-smi topo -m` = SYS for both. Same server config as rounds 1–3, specs `off, d2h:1.0,
+h2d:1.0`, B ∈ {8, 32}, hog = copy engine, 1.5 GiB bursts, continuous.
+
+| pair (job 1602580, node 07g4) | hog on GPU 0 | achieved GB/s B=8 / 32 | B=8 rank-1 p50 (ratio) / p95 (ratio) | B=8 step period | B=32 rank-1 p50 (ratio) / p95 (ratio) | B=32 step period |
+| --- | --- | ---: | --- | --- | --- | --- |
+| same socket (NUMA 3 + 2) | off | — | 14.7 / 29.4 | 14.3 | 22.0 / 44.6 | 21.8 |
+| same socket | d2h:1.0 | 20.4 / 18.9 | 15.6 (1.06) / 31.0 (1.05) | 15.4 (×1.08) | 25.0 (**1.13**) / 50.4 (**1.13**) | 24.8 (×1.14) |
+| same socket | h2d:1.0 | 21.6 / 21.5 | 15.2 (1.03) / 29.4 (1.00) | 15.1 (×1.06) | 23.6 (1.07) / 47.7 (1.07) | 23.3 (×1.07) |
+| **cross socket (NUMA 3 + 6)** | off | — | 14.4–15.1¹ / 29.3 | 14.2 | 22.2 / 45.1 | 21.9 |
+| cross socket | d2h:1.0 | 17.5 / **14.5** | 17.8 (×1.18–1.24¹) / 34.1 (1.17) | 17.9 (**×1.26**) | 32.2 (**1.45**) / 64.9 (**1.44**) | 32.1 (**×1.47**) |
+| cross socket | h2d:1.0 | 21.5 / 20.1 | 15.6 (1.03–1.08¹) / 30.9 (1.05) | 15.6 (×1.10) | 24.0 (1.08) / 48.2 (1.07) | 23.6 (×1.08) |
+
+¹ one `off` B=8 repeat of the cross pair delivered rank 1's tokens in coalesced pairs (p50 28.2, the known bimodal
+artifact), which skews the 2–3-repeat median of `off` (21.3); the per-repeat `off` values are 14.4–15.1 and the step
+period (robust) is quoted alongside. Both ranks show identical periods in every cell (lockstep).
+
+
+Reading (bounded):
+
+1. **The cross-rank effect is set by the GPU pair's socket topology.** On the *same node*, the same hog on the same GPU
+   (bus 01) costs the peer ×1.13 when the peer sits on the same socket and ×1.45 (p95 ×1.44, step period ×1.47) when it sits on the other
+   socket — the round-1 numbers (×1.47 p50 / ×1.48 p95 at B=32, ×1.20 at B=8, hog throttled to 14.8 / 17.5 GB/s) are
+   reproduced by the cross-socket pair including the hog throttling (14.5 / 17.5 GB/s), so round 1's unlogged pair was
+   cross-socket with high confidence.
+2. Mechanism reading: with no P2P, NCCL's SHM/direct transport moves every EP payload GPU0 → host memory → GPU1. For a
+   cross-socket pair that path crosses the inter-socket fabric and the memory controller of whichever NUMA node holds the
+   SHM segment; the D2H stream adds ~15–20 GB/s of writes into host memory on GPU 0's side. That both the hog *and* the
+   collectives slow down (the hog loses 25–30 % of its rate only on cross-socket pairs) says the two streams share a
+   saturated host-side resource, not merely GPU 0's PCIe link (which is equally loaded on same-socket pairs, where the
+   hog keeps 19–22 GB/s and the peer pays ≤ ×1.16). Which resource (fabric vs. memory controller, and where the pinned
+   buffers actually live — uncontrolled so far because Slurm leaves the cpuset unrestricted) is the NUMA round's job
+   (`sbatch_c26numa.sh`, jobs 1602619 on the round-1 node / 1602620: hog buffer bound to GPU 0's node, another node of
+   the same socket, a node of the other socket; placement verified with `move_pages(2)` in the hog's start record).
+3. Policy implication (still to be tested with the real connector, jobs 1602608/1602609): a DP/EP pair should not span
+   sockets on these PCIe-only boxes when either rank moves bulk KV, or the mover's pinned buffers should be bound to the
+   GPU's socket — a placement rule, not a runtime controller.
 
 ## Caveats (pre-registered)
 
