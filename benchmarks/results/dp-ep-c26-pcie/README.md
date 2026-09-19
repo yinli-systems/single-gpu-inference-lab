@@ -302,6 +302,85 @@ Reading (bounded):
    sockets on these PCIe-only boxes when either rank moves bulk KV, or the mover's pinned buffers should be bound to the
    GPU's socket — a placement rule, not a runtime controller.
 
+## NUMA round (jobs 1602620 / 1602619, `sbatch_c26numa.sh`, hog buffer bound with `set_mempolicy(MPOL_BIND)` and read back with `move_pages(2)`; `raw/c26numa-16026{20,19}.json`, `raw/waves-16026{20,19}.log`, `raw/gpus-numa-kv.txt`)
+
+Same server config as rounds 1–3; specs `off, d2h:1.0` (unbound, first-touch), `d2h:1.0@L` (buffer on GPU 0's own NUMA node),
+`d2h:1.0@S` (another node of GPU 0's socket), `d2h:1.0@X` (a node of the other socket), `h2d:1.0@L`, `h2d:1.0@X`; B ∈ {8, 32},
+3 repeats, copy engine, 1.5 GiB bursts, continuous. Every hog start record reads back 256/256 sampled pages on the requested
+node (`pages_by_node`), so placement is controlled for the first time. Both nodes confine the cpuset to 12 CPUs.
+
+| pair | node | spec (buffer node) | hog GB/s B=8 / 32 | B=8 rank-1 p50 (ratio) / p95 (ratio) | B=32 rank-1 p50 (ratio) / p95 (ratio) | B=32 step period |
+| --- | --- | --- | ---: | --- | --- | --- |
+| **same socket** (GPU0 NUMA 2, GPU1 NUMA 1) | naf13g7 (1602620) | off | — | 14.8 / 28.8 | 22.0 / 44.9 | 21.7 |
+| same socket | | d2h unbound (landed on N2 = local) | 22.2 / 20.9 | 14.6 (0.98) / 29.1 (1.01) | 24.5 (1.11) / 49.6 (1.10) | 24.4 |
+| same socket | | d2h @2 (local) | 22.2 / 20.9 | 14.9 (1.01) / 30.0 (1.04) | 24.8 (1.13) / 50.4 (1.12) | 24.4 |
+| same socket | | d2h @3 (same socket, other node) | 21.5 / 20.2 | 14.7 (1.00) / 29.5 (1.02) | 24.9 (1.13) / 50.2 (1.12) | 24.3 |
+| same socket | | **d2h @6 (other socket)** | 19.3 / **17.1** | 16.0 (**1.08**) / 32.2 (**1.11**) | 28.5 (**1.29**) / 57.4 (**1.28**) | 27.9 (×1.29) |
+| same socket | | h2d @2 / h2d @6 | 22.6 / 22.5 · 21.1 / 21.0 | 15.0 (1.02) / 30.3 (1.05) · 15.0 (1.01) / 30.2 (1.05) | 23.4 (1.06) / 47.4 (1.06) · 23.2 (1.05) / 47.4 (1.06) | 23.0 |
+| **cross socket** (GPU0 NUMA 1, GPU1 NUMA 7) | nba06g6 = round-1 node (1602619) | off | — | 14.1 / 28.4 | 22.1 / 44.7 | 21.7 |
+| cross socket | | d2h unbound (landed on N5 = GPU 1's socket) | 17.3 / **14.5** | 17.4 (1.24) / 34.7 (1.22) | 32.7 (**1.48**) / 65.9 (**1.47**) | 32.3 (×1.49) |
+| cross socket | | d2h @1 (local to GPU 0) | 18.9 / 16.7 | 16.2 (1.15) / 32.7 (1.15) | 28.9 (**1.31**) / 58.3 (**1.30**) | 28.7 (×1.32) |
+| cross socket | | d2h @2 (GPU 0's socket, other node) | 19.0 / 16.6 | 16.4 (1.16) / 32.9 (1.16) | 28.8 (1.30) / 58.2 (1.30) | 28.6 |
+| cross socket | | **d2h @5 (GPU 1's socket)** | 17.3 / **14.5** | 17.3 (1.23) / 34.8 (1.23) | 32.8 (**1.48**) / 66.2 (**1.48**) | 32.3 (×1.49) |
+| cross socket | | h2d @1 / h2d @5 | 21.9 / 21.7 · 20.7 / 20.5 | 15.2 (1.08) / 30.5 (1.07) · 14.9 (1.06) / 29.8 (1.05) | 23.4 (1.06) / 47.4 (1.06) · 23.3 (1.05) / 47.0 (1.05) | 23.0 |
+
+Reading (bounded, 3 repeats each, one node per pair type):
+
+1. **Two additive-looking factors, both host-side.** (a) *Buffer socket*: moving the D2H target buffer from GPU 0's socket to
+   the other socket costs the peer an extra ×1.14–1.16 at B=32 on both pair types (same-socket pair 1.13 → 1.29; cross pair
+   1.30 → 1.48) and throttles the hog (20.9 → 17.1, 16.7 → 14.5 GB/s) — the DMA then crosses the inter-socket fabric.
+   (b) *Pair socket span*: with the buffer local to GPU 0 (the best placement), the cross-socket pair still pays ×1.30 vs ×1.13
+   for the same-socket pair, so the EP payload's own host-memory hop across the fabric is what the D2H stream competes with.
+   Within a socket the node does not matter (@2 ≈ @3 ≈ unbound).
+2. Round 1's ×1.47 is therefore the *worst corner*: cross-socket pair **and** first-touch buffer on the far socket (the
+   round-1 node's unbound hog landed on N5 here as well — its cpuset spans nodes 0/1/4). The unbound case is exactly what
+   vLLM's CPU offload tier does today (`torch.zeros(pin_memory=True)`, no NUMA policy, `kv_offload/cpu/gpu_worker.py:791`).
+3. h2d is ×1.05–1.08 everywhere; buffer placement does not matter for the H2D direction at this rate.
+4. Policy reading: NUMA-binding the offload tier to the GPU's socket removes factor (a) (×1.48 → ×1.30 on a cross pair,
+   ×1.29 → ×1.13 on a same-socket pair when first touch would have landed far); only pair placement removes factor (b).
+   Both matter only when a rank moves bulk KV at multi-GB/s — see the real-mover section for what the connector actually moves.
+
+## Real mover (jobs 1602608 connector ON = `--kv-offloading-size 16` / 1602609 OFF, `sbatch_c26kv.sh` + `measure_kvoffload.py`, `analyze_kvoffload.py`; `raw/c26kv-1602608-1602609.json`, `raw/waves-16026{08,09}.log`)
+
+Both arms landed on **cross-socket pairs** (GPU bus 41 NUMA 1 + bus 81 NUMA 7) but on different nodes (ON 07g6, OFF 06g6);
+`plain` baselines agree within 2 % (14.1 vs 13.8 ms at B=8, 22.4 vs 22.2 at B=32). Rank 0 runs the workload (`plain`: B decode
+streams; `store`: back-to-back unique 4k-token prompts, 8 output tokens → every full block stored GPU→CPU; `load`: 4k prompts
+primed into the CPU tier, then re-requested round robin → CPU→GPU loads instead of recompute); rank 1 always runs B plain
+decode streams and moves no KV. 10-s windows, 3 repeats, graph mode, q=512 (chunk steps run eager, `cg_mode NONE`, capture cap 128).
+
+| kind | B | rank-1 ITL p50 OFF → ON (ratio) | rank-1 ITL p95 OFF → ON (ratio) | rank-1 step CUDA p50 on steps where rank 0 ran decode-only, OFF → ON | … where rank 0 ran a 512-token chunk, OFF → ON | rank-0 train: requests / TTFT p50 OFF → ON | KV moved (ON) |
+| --- | ---: | --- | --- | --- | --- | --- | ---: |
+| load (H2D) | 8 | 26.6 → 12.9 (**0.49**) | 91.9 → 26.2 (**0.29**) | 13.3 → 12.9 (0.97) | 45.3 → — (no chunk steps with the connector: full prefix hit) | 15 / 524 ms → 38 / 216 ms | 28.5 GiB, 3.8 GB/s |
+| load (H2D) | 32 | 40.3 → 20.5 (**0.51**) | 92.8 → 42.4 (**0.46**) | 20.7 → 20.2 (0.98) | 46.0 → — | 14 / 585 → 23 / 340 ms | 17.2 GiB, 2.3 GB/s |
+| plain | 8 | 13.8 → 14.1 (1.02) | 27.7 → 28.3 (1.02) | 13.6 → 13.8 (1.01) | — | — | 0 |
+| plain | 32 | 22.2 → 22.4 (1.01) | 45.0 → 45.5 (1.01) | 21.9 → 21.7 (0.99) | — | — | 0 |
+| store (D2H) | 8 | 27.9 → 29.9 (1.07) | 94.9 → 105.3 (1.11) | 13.7 → 13.9 (**1.02**) | 50.7 → 53.8 (85.3 in 1 of 3 repeats) | 14 / 602 → 12 / 833 ms | 9.0 GiB, 1.2 GB/s |
+| store (D2H) | 32 | 39.5 → 42.5 (1.08) | 98.9 → 178.1 (**1.80**) | 19.8 → 20.0 (**1.01**) | 45.9 → **86.7** (85.9 / 86.4 / 48.3 per repeat) | 13 / 618 → 9 / 903 ms | 6.8 GiB, 0.9 GB/s |
+
+Rank 0's *own* chunk steps (step trace, CUDA-event time): OFF 45–58 ms in every store cell; ON **85–86 ms** in 4 of 6 store
+cells (p50 by window third 86.2 / 85.8 / 85.8 — uniform, not bursty), 47.6–48.7 ms in the other two (`store B=8` repeat 0
+switched from 85 to 48 ms inside its window; repeat 2 of both B ran entirely at 48). Same 512 tokens, `cg_mode NONE`, 1 request.
+
+Reading (bounded):
+
+1. **The connector's H2D loads are benign for the peer** — decode-only steps ×0.97–0.98 at 2.3–3.8 GB/s of CPU→GPU traffic,
+   and because a loaded prompt needs no prefill chunk, rank 1 is *faster* than in `plain` (×0.92). The product comparison
+   (load vs recompute) is a 2–3.4× win for the peer's ITL and 2.5× for rank 0's TTFT — the synchronized 512-token chunk
+   (G1/24 mechanism) is what the recompute path exports.
+2. **The store (D2H) path's cost on the peer is not PCIe arbitration on ordinary steps**: rank 1's CUDA time on lockstep
+   steps where rank 0 ran a decode-only step is ×1.01–1.02 with the connector on (0.9–1.6 GB/s average D2H). The entire
+   ON−OFF difference (p95 ×1.80 at B=32) sits on the chunk steps, where rank 0's *own* step grows 48 → 86 ms and rank 1 waits.
+3. Two readings of the 86-ms chunk step are open and a DP=1 control (jobs 1603014 ON / 1603015 OFF, `sbatch_c26kv1.sh`:
+   one engine, no collectives, same trains) discriminates them: **H1** the connector's store path lengthens the chunk step by
+   itself (a single-rank cost exported 1:1 by the barrier — a G1-type contagion, not arbitration); **H2** the D2H bursts slow
+   the chunk step's EP collectives (512 tokens × 24 layers through host memory across the cross-socket path; the hog data
+   gives ×1.3–1.5 for that path at line rate). If H1: the finding is "vLLM's CPU offload store doubles the prefill chunk step"
+   (bimodal, to be explained: copy-engine queueing behind the sampler's D2H copy, or `wait_for_save`), an upstream issue with
+   a DP amplifier, not a topology problem. If H2: the placement rule of the NUMA round applies to the real connector, but only
+   during prefill-heavy store phases (the average store rate, ~1 GB/s, is far below the hog's 15–20 GB/s).
+4. Gate reading so far: with the connector on, rank-1 p95 +11 % (B=8) / +80 % (B=32) vs off — passes the +10 % gate on paper,
+   but the mechanism behind it must be settled (item 3) before it is counted for task 26; p50 is +7–8 % (engineering band).
+
 ## Caveats (pre-registered)
 
 - The hog is a separate process: it shares the link and root complex like a connector's copies
