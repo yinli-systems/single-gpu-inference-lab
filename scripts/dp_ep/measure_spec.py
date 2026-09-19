@@ -82,6 +82,8 @@ async def run_cell(args, rng, kind0, kind1, B, ports, model):
     for base in bases:
         d = {k: m1[base].get(k, 0.0) - m0[base].get(k, 0.0) for k in SPEC_METRICS if k != "vllm:num_requests_running"}
         d["accept_rate"] = d["vllm:spec_decode_num_accepted_tokens_total"] / d["vllm:spec_decode_num_draft_tokens_total"] if d.get("vllm:spec_decode_num_draft_tokens_total") else None
+        # tokens/s of this rank from the engine counter (a streamed chunk carries every token accepted in a step, so chunk counts undercount)
+        d["gen_tok_s"] = d.get("vllm:generation_tokens_total", 0.0) / (t_window1 - t_window0)
         spec[base] = d
     return {"kind0": kind0, "kind1": kind1, "B": B, "t_window0": t_window0, "t_window1": t_window1, "spec": spec,
             "decode": {base: [{k: v for k, v in s.items() if k != "t_send"} for s in v] for base, v in dec_store.items()}}
@@ -123,7 +125,7 @@ def main():
                 res["itl_window"] = itl_summary(res)
                 res["rate"] = rate_summary(res)
                 rec["cells"].append(res)
-                print(f"[r{rep}] {k0}|{k1} B={B}: " + "; ".join(f"{b.split(':')[-1]} {v['tok_s_per_stream_p50']:.1f} tok/s/stream ITL p50 {res['itl_window'][b].get('p50', float('nan')):.1f} accept {res['spec'][b].get('accept_rate') if res['spec'][b].get('accept_rate') is None else round(res['spec'][b]['accept_rate'], 2)} drafts {res['spec'][b].get('vllm:spec_decode_num_drafts_total', 0):.0f} err {res['itl_window'][b]['errors']}" for b, v in res["rate"].items()), flush=True)
+                print(f"[r{rep}] {k0}|{k1} B={B}: " + "; ".join(f"{b.split(':')[-1]} gen {res['spec'][b]['gen_tok_s']:.0f} tok/s ({v['tok_s_per_stream_p50']:.1f} chunks/s/stream) ITL p50 {res['itl_window'][b].get('p50', float('nan')):.1f} accept {res['spec'][b].get('accept_rate') if res['spec'][b].get('accept_rate') is None else round(res['spec'][b]['accept_rate'], 2)} drafts {res['spec'][b].get('vllm:spec_decode_num_drafts_total', 0):.0f} err {res['itl_window'][b]['errors']}" for b, v in res["rate"].items()), flush=True)
                 args.output.write_text(json.dumps(rec) + "\n")
                 await asyncio.sleep(2.0)
     asyncio.run(run())

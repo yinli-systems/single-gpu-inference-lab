@@ -33,6 +33,10 @@ export VLLM_CACHE_ROOT=/tmp/scxi253/vllm-cache TRITON_CACHE_DIR=/tmp/scxi253/tri
 mkdir -p $XDG_CACHE_HOME $XDG_CONFIG_HOME $VLLM_CACHE_ROOT $TRITON_CACHE_DIR $TORCHINDUCTOR_CACHE_DIR $HF_HOME $FLASHINFER_WORKSPACE_BASE
 R=$W/results/c26kv-$SLURM_JOB_ID-$MODEL_NAME-$MODE-$LB-q$Q-off$OFFLOAD; mkdir -p $R/trace
 echo "host $(hostname) gpus $CUDA_VISIBLE_DEVICES"; nvidia-smi --query-gpu=name,driver_version --format=csv,noheader
+# topology of the allocated GPUs (bus id + NUMA node; socket = numa // 4 on the 2-socket NPS4 EPYC nodes) so the pair is never unlogged again
+nvidia-smi topo -m > $R/topo.txt 2>&1; nvidia-smi --query-gpu=index,pci.bus_id --format=csv,noheader > $R/gpus.txt
+for b in $(cut -d, -f2 $R/gpus.txt); do b=${b# }; b=0000:${b#*:}; echo "$b numa $(cat /sys/bus/pci/devices/${b,,}/numa_node 2>/dev/null)"; done | tee -a $R/gpus.txt
+echo "step gpus $SLURM_STEP_GPUS job gpus $SLURM_JOB_GPUS cpus $(taskset -cp $$ | cut -d: -f2)" | tee -a $R/gpus.txt
 # stage model to node-local disk
 M=/tmp/scxi253/models/$MODEL_NAME; mkdir -p $(dirname $M); [ -f $M/config.json ] || cp -r $W/models/$MODEL_NAME $M
 # per-GPU PCIe rx/tx (MB/s) and utilisation at 1 s from nvidia-smi, for the whole job
