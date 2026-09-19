@@ -7,9 +7,14 @@ Rank r = port P_r (multi-port external LB). Each rank runs B temperature-0 decod
 prompt *kind* sets the acceptance regime:
   rep   a repeated 8-token pattern (128 tokens): the greedy continuation repeats it, n-gram
         lookup proposes K tokens every step and they are accepted -> verification width 1+K
-  rnd   random token ids (128 tokens): no n-gram match in the history -> width 1, or K
-        rejected drafts when a spurious match exists
-Cells: rep|rep, rnd|rnd (homogeneous), rep|rnd, rnd|rep (skewed, swapped for asymmetry).
+  rnd   random token ids (128 tokens), temperature 0: meant as the low-acceptance regime, but
+        the greedy continuation of random ids loops (job 1602607: accept 0.79-0.96, drafts on
+        0.6-0.9 of request-steps = the same width as rep) -> not a distinct regime
+  rndT  random token ids, temperature 1.0 (seeded): the sampled continuation has no 2-gram
+        repeats -> no draft on most steps -> width 1 (the genuinely low-acceptance regime;
+        note seeded temperature sampling itself costs ~+1 ms/step, task 21)
+Cells (--cells): default rep|rep, rnd|rnd (homogeneous), rep|rnd, rnd|rep (skewed, swapped for
+asymmetry); round 2 uses rep|rep, rndT|rndT, rep|rndT, rndT|rep.
 Questions: does the low-acceptance rank pay the high-acceptance rank's verification width
 (padded execution tokens, step period), i.e. is its own generation rate lower in rep|rnd than in
 rnd|rnd; and does the high-acceptance rank keep its rate in rep|rnd vs rep|rep?
@@ -67,7 +72,8 @@ async def run_cell(args, rng, kind0, kind1, B, ports, model):
         for base, kind in zip(bases, (kind0, kind1)):
             for _ in range(B):
                 prompt = rep_tokens(rng, 128) if kind == "rep" else rand_tokens(rng, 128)
-                dec_tasks.append(asyncio.create_task(stream_completion(client, base, model, prompt, args.decode_tokens, {}, dec_store[base])))
+                extra = {"temperature": 1.0, "seed": rng.randrange(1 << 30)} if kind == "rndT" else {}
+                dec_tasks.append(asyncio.create_task(stream_completion(client, base, model, prompt, args.decode_tokens, extra, dec_store[base])))
         await asyncio.sleep(args.settle_s)
         m0 = {base: await metrics(client, base) for base in bases}
         t_window0 = time.monotonic()
@@ -110,14 +116,17 @@ def main():
     ap.add_argument("--tail-s", type=float, default=0.5)
     ap.add_argument("--repeats", type=int, default=3)
     ap.add_argument("--seed", type=int, default=64)
+    ap.add_argument("--cells", default="rep|rep,rnd|rnd,rep|rnd,rnd|rep", help="comma-separated kind0|kind1 pairs (kinds: rep, rnd, rndT)")
+    ap.add_argument("--tag", default="", help="free-form label stored in the record (e.g. the server's speculation config)")
     ap.add_argument("--output", type=Path, required=True)
     args = ap.parse_args()
     rng = random.Random(args.seed)
-    rec = {"schema_version": 1, "result_type": "dp_ep_spec_skew", "args": {k: str(v) for k, v in vars(args).items()}, "cells": []}
+    rec = {"schema_version": 2, "result_type": "dp_ep_spec_skew", "args": {k: str(v) for k, v in vars(args).items()}, "tag": args.tag, "cells": []}
+    cell_kinds = [tuple(c.split("|")) for c in args.cells.split(",")]
 
     async def run():
         for rep in range(args.repeats):
-            plan = [(k0, k1, B) for B in [int(x) for x in args.batch_sizes.split(",")] for k0, k1 in (("rep", "rep"), ("rnd", "rnd"), ("rep", "rnd"), ("rnd", "rep"))]
+            plan = [(k0, k1, B) for B in [int(x) for x in args.batch_sizes.split(",")] for k0, k1 in cell_kinds]
             random.Random(rep).shuffle(plan)
             for k0, k1, B in plan:
                 res = await run_cell(args, rng, k0, k1, B, args.ports, args.model)
