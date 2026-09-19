@@ -131,6 +131,15 @@ delayed completion of rank 0's *sends*, which sit on the saturated GPU0→host d
 tx in the baseline (~0.9–1.1 GB/s) is the sender side (payload + flags) — the direction the d2h
 hog contends with.
 
+**NCCL transport confirmed (job 1602541, `NCCL_DEBUG=INFO NCCL_DEBUG_SUBSYS=INIT,P2P,SHM,NET,ENV`,
+`raw/nccl-1602541-rank{0,1}.log`)**: `Check P2P Type isAllDirectP2p 0 directMode 0 isAllCudaP2p 0`;
+`Channel 00/01 : 0[0] -> 1[1] via SHM/direct/direct` and `1[1] -> 0[0] via SHM/direct/direct` for
+both communicators (busId 41000 and 61000, i.e. the two GPUs hang off different PCIe segments;
+`NET/IB` initialised but unused intra-node). "SHM/direct" = the sending GPU's kernel writes the
+payload straight into host shared memory over its own PCIe link (GPU0→host, the direction the
+d2h hog saturates) and the receiver's kernel reads it from host memory over its link — no
+copy-engine proxy in the path, which is why the requester probe (round 3) is meaningful.
+
 **The real mover in vLLM 0.29.0** (`vllm/v1/kv_offload/cpu/gpu_worker.py`, read on the cluster):
 `SingleDirectionOffloadingHandler` runs each transfer on its own CUDA stream, serialised after the
 previous transfer, unpaced; **GPU→CPU always uses the copy engine** (`ops.swap_blocks_batch` =
