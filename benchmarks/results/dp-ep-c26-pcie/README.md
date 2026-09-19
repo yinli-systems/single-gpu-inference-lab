@@ -460,6 +460,39 @@ fraction ≥ A's; (P3) B < 5 % slow chunk steps with chunk p50 ≤ A's fast-stat
 sharing inside the cpuset is the mechanism, the remedy a per-rank core budget / pinning (engineering; `--numa-bind`
 is not usable here). Analysis: `scripts/dp_ep/analyze_sidecar.py <arm dir>` (validated on a synthetic fixture).
 
+## DP2 production-shaped placement follow-up (round 62, 2026-09-19; CPU-only session, job 1603076 pending)
+
+The 1-GPU diagnostic (1603071) runs one EngineCore on 3 cores; the slow state was observed in the DP2 shape (two
+EngineCores + API server + DP coordinator + harness + sidecar + NCCL proxies + connector helpers on 6 cores, job
+1602608, N = 1). **Job 1603076** (`sbatch_c26kv5.sh`, 2 GPUs, 12 threads = 6 cores, DP2/EP2 multiport, connector
+16 GiB per rank, `--kinds store,plain --batch-sizes 32 --repeats 5`, 1:10 limit) runs four arms in one allocation on
+the same node and cpuset, each with the round-61 sidecar:
+
+| arm | connector | placement (`cpuplan.py --dp 2`: ENGINE0/1 = 2 cores each, API = HARN = the remaining 2 cores) |
+| --- | --- | --- |
+| `A-on-shared` | on | none (= 1602608) |
+| `M-on-mainiso` | on | each EngineCore's **main thread** (tid == pid = scheduler + model-launch loop; `UniProcExecutor.execute_model` runs `run_method` in the caller even with `non_block=True`, only the output fetch is deferred) alone on its own core — both SMT threads reserved —, its helper threads (NCCL proxies, ZMQ in/out, connector/copy helpers) on the second core of the pair; API/coordinator/parent + harness/sidecar on the rest (`pinner.py --engine-main-cpus`) |
+| `B-on-isolated` | on | each EngineCore (all threads) on its own 2 cores; the rest as above (`pinner.py --engine-cpus "a;b"`, ranks matched by the `VLLM::EngineCore_DP<r>` process title) |
+| `C-off-shared` | off | none (= 1602609) |
+
+Pre-registered (chunk step = rank-0 eager step ≥ 256 tokens; slow = cuda p50 > 65 ms in a sustained run,
+`modeseries.py`; scored by `scripts/dp_ep/c26kv5_score.py`, validated on 1602608/1602609 where it returns the
+round-59 numbers — store p95 ×1.80, chunk p50 ×1.82, slow fraction 0.60 vs 0.13): **(Q1)** A reproduces the slow state
+— ≥ 1/5 store cells with chunk p50 > 65 ms or ≥ 10 % slow chunk steps, and rank-1 store-cell p95 ≥ 1.3× **arm C's
+store-cell p95** (same workload, connector off, same node); **(Q2)** M < 5 % slow chunk steps and rank-1 store p95
+≤ 1.2× C's → the launch thread's core sharing (SMT sibling / run queue) is the mechanism and a per-rank core
+reservation the remedy; **(Q3)** B like M → process-level isolation suffices (deployable as a `taskset` per
+EngineCore); **(Q4)** C < 5 %. (Correction made before any data existed: the first wording compared store with
+*plain* cells inside one arm, but a store cell's rank-1 stream runs against rank 0's prefill train, so that ratio
+is the synchronized-chunk cost — ×2.2–3.9 even with the connector off in 1602609 — not the slow state.)
+Q1 ∧ ¬Q2 ∧ ¬Q3 → the state is not CPU placement (memory / connector-internal, back to the H1 family); ¬Q1 → node-specific,
+N = 1 stands. Analysis per arm: `analyze_sidecar.py <arm> --rank 0 --main-pid <EngineCore_DP0 pid from pinner.txt /
+affinity-ready.txt>`, `modeseries.py <arm>`, `analyze_kvoffload.py`. Caveat: `pinner.py` pins after the server is up
+(startup and first-touch memory placement unpinned); B and M give an EngineCore's helper threads 2 hardware threads
+of one core, so a *slower* M/B than A would itself be informative (intra-process oversubscription, not sibling
+sharing of the launch thread). Validated on the login node with a dummy `setproctitle` tree (main → MAIN core,
+helpers → REST core per rank; single-list form unchanged for 1603071).
+
 ## Caveats (pre-registered)
 
 - The hog is a separate process: it shares the link and root complex like a connector's copies

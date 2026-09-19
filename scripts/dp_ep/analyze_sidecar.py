@@ -18,6 +18,8 @@ Pre-registered readings (README "Real mover, step-level re-analysis"):
 Prints a run-by-run timeline (each eager run with the main thread's cpu/node/wait% and PSI) and the
 per-state table; --json writes the numbers.
 usage: analyze_sidecar.py <arm-dir> [--thresh 65] [--chunk-min 256] [--top 5] [--json out.json]
+DP2 arms (c26kv5): --rank N keeps only trace/step.jsonl.dpN (the storing rank's chunk steps), --main-pid P
+takes the busiest thread of that pid (EngineCore_DP<N>'s pid from pinner.txt / affinity-ready.txt) as the main thread.
 """
 from __future__ import annotations
 
@@ -91,6 +93,8 @@ def main():
     ap.add_argument("--chunk-min", type=int, default=256)
     ap.add_argument("--top", type=int, default=5)
     ap.add_argument("--json")
+    ap.add_argument("--rank", type=int, default=None, help="use only trace/step.jsonl.dp<rank>")
+    ap.add_argument("--main-pid", type=int, default=None, help="main thread = busiest thread of this pid")
     a = ap.parse_args()
     d = a.arm_dir.rstrip("/")
 
@@ -98,6 +102,8 @@ def main():
     static = next((r for r in side if r.get("kind") == "static"), {})
     samples = [r for r in side if r.get("kind") == "sample"]
     step_files = sorted(glob.glob(os.path.join(d, "trace", "step.jsonl*")))
+    if a.rank is not None:
+        step_files = [p for p in step_files if p.endswith(f".dp{a.rank}")]
     steps = [s for p in step_files for s in load_jsonl(p)]
     steps.sort(key=lambda s: s["t"])
     gnode = gpu_numa(d)
@@ -149,6 +155,11 @@ def main():
     top = [k for k, _ in tot.most_common(a.top)]
     print(f"\n== busiest threads (whole arm): " + "; ".join(f"{comm[k]}[{k[0]}/{k[1]}] {tot[k]/1e3:.0f} s" for k in top))
     main_key = top[0]
+    if a.main_pid is not None:
+        mine = [k for k, _ in tot.most_common() if k[0] == a.main_pid]
+        if mine:
+            main_key = mine[0]
+            print(f"   main thread forced to pid {a.main_pid}: {comm[main_key]}[{main_key[0]}/{main_key[1]}] {tot[main_key]/1e3:.0f} s")
 
     # per-run timeline with the main thread's placement / wait and PSI
     print(f"\n== eager-run timeline (main thread {comm[main_key]}[{main_key[0]}/{main_key[1]}]; wait% = wait/(run+wait); cpu:node of the main thread, share of samples on its modal cpu)")
