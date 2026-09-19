@@ -177,6 +177,30 @@ TensorRT-LLM / Dynamo: no hits. arXiv API ("copy engine" AND collective AND inte
 offloading AND NCCL AND contention; "KV cache" AND offload AND "PCIe bandwidth" AND interference):
 none.
 
+## Pre-registered predictions for rounds 2–3 (written 2026-09-19 06:03 Mac, before any cell of jobs 1602541/1602557 had run)
+
+Round 2 (`sbatch_c26r2.sh … --specs off,d2h:1.0,d2h:0.5,d2h:0.25,d2h:cap2,d2h:cap4,d2h:cap8,d2h:cap12,h2d:cap12,d2h:1.0:0.75,d2h:0.5:0.75,both:cap8 --batch-sizes 8,32 --repeats 3 --seed 65`, job 1602541):
+1. Duty scales the *window-average* p50 linearly: d2h 0.5 / 0.25 ≈ ×1.24 / ×1.12 at B=32
+   (×1.10 / ×1.05 at B=8), but the p95 stays near the continuous value (×1.4) for duty ≥ 0.25
+   because in-burst steps exceed 5 % of tokens — i.e. the p95 gate can be passed by realistic
+   bursty movers even when the average looks fine.
+2. Caps are monotone in rate; d2h cap4 ≈ ×1.00–1.05, cap8 / cap12 intermediate; the harmless
+   rate for d2h is lower than for h2d. `h2d:cap12` < `d2h:cap12` (direction asymmetry survives
+   at equal rate).
+3. 0.75 GiB bursts behave like 1.5 GiB bursts at the same duty (rate, not burst size, matters).
+
+Round 3 (`sbatch_c26r3.sh … --specs off,d2h:1.0,d2h-sm:1.0,d2h:cap8,d2h-sm:cap8,h2d:1.0,h2d-sm:1.0 --batch-sizes 8,32 --repeats 3 --seed 67`, job 1602557): two competing hypotheses, no
+strong prior — H_a "requester matters": SM-issued writes share the link fairly with NCCL's
+SM-issued writes, so `d2h-sm` ≪ `d2h` (then the one-line Triton-for-D2H policy is the fix);
+H_b "bytes and direction matter": `d2h-sm` ≈ `d2h` (then only pacing remains). Decision rule:
+H_a if `d2h-sm:1.0` p50 ratio ≤ half of `d2h:1.0`'s excess at both B; H_b if within ±20 % of it.
+
+Real-mover projection (for `sbatch_c26kv.sh`, not yet run): the native connector's store traffic
+is bounded by the prefill rate (≈ 12k tok/s × 192 KiB ≈ 2.4 GB/s average, ~4 ms bursts per
+512-token chunk) and its loads go the mild h2d direction, so the *realistic* effect on rank 1 is
+predicted in the ≤ 10 % band — the ×1.47 headline needs sustained line-rate D2H (PD KV export
+staged through host memory, KV snapshots, host-side replication), not this connector on this model.
+
 ## Caveats (pre-registered)
 
 - The hog is a separate process: it shares the link and root complex like a connector's copies
