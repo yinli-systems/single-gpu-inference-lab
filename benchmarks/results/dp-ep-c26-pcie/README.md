@@ -274,13 +274,12 @@ h2d:1.0`, B ∈ {8, 32}, hog = copy engine, 1.5 GiB bursts, continuous.
 | same socket (NUMA 3 + 2) | off | — | 14.7 / 29.4 | 14.3 | 22.0 / 44.6 | 21.8 |
 | same socket | d2h:1.0 | 20.4 / 18.9 | 15.6 (1.06) / 31.0 (1.05) | 15.4 (×1.08) | 25.0 (**1.13**) / 50.4 (**1.13**) | 24.8 (×1.14) |
 | same socket | h2d:1.0 | 21.6 / 21.5 | 15.2 (1.03) / 29.4 (1.00) | 15.1 (×1.06) | 23.6 (1.07) / 47.7 (1.07) | 23.3 (×1.07) |
-| **cross socket (NUMA 3 + 6)** | off | — | 14.4–15.1¹ / 29.3 | 14.2 | 22.2 / 45.1 | 21.9 |
-| cross socket | d2h:1.0 | 17.5 / **14.5** | 17.8 (×1.18–1.24¹) / 34.1 (1.17) | 17.9 (**×1.26**) | 32.2 (**1.45**) / 64.9 (**1.44**) | 32.1 (**×1.47**) |
-| cross socket | h2d:1.0 | 21.5 / 20.1 | 15.6 (1.03–1.08¹) / 30.9 (1.05) | 15.6 (×1.10) | 24.0 (1.08) / 48.2 (1.07) | 23.6 (×1.08) |
+| **cross socket (NUMA 3 + 6)** | off | — | 15.1 / 29.0 | 14.3 | 22.2 / 45.1 | 21.9 |
+| cross socket | d2h:1.0 | 17.5 / **14.5** | 17.8 (**1.18**) / 34.1 (**1.18**) | 17.9 (**×1.25**) | 32.2 (**1.45**) / 64.9 (**1.44**) | 32.1 (**×1.47**) |
+| cross socket | h2d:1.0 | 21.5 / 20.2 | 15.6 (1.03) / 30.9 (1.07) | 15.6 (×1.09) | 23.9 (1.08) / 47.8 (1.06) | 23.6 (×1.08) |
 
-¹ one `off` B=8 repeat of the cross pair delivered rank 1's tokens in coalesced pairs (p50 28.2, the known bimodal
-artifact), which skews the 2–3-repeat median of `off` (21.3); the per-repeat `off` values are 14.4–15.1 and the step
-period (robust) is quoted alongside. Both ranks show identical periods in every cell (lockstep).
+Pooled medians over 3 repeats (one `off` B=8 repeat of the cross pair shows the known bimodal delivery artifact, p50 28.2; the
+3-repeat median absorbs it). Both ranks show identical step periods in every cell (lockstep).
 
 
 Reading (bounded):
