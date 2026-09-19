@@ -375,7 +375,9 @@ Reading (bounded):
    itself (a single-rank cost exported 1:1 by the barrier — a G1-type contagion, not arbitration); **H2** the D2H bursts slow
    the chunk step's EP collectives (512 tokens × 24 layers through host memory across the cross-socket path; the hog data
    gives ×1.3–1.5 for that path at line rate). If H1: the finding is "vLLM's CPU offload store doubles the prefill chunk step"
-   (bimodal, to be explained: copy-engine queueing behind the sampler's D2H copy, or `wait_for_save`), an upstream issue with
+   (bimodal, to be explained — not `wait_for_save` (a no-op) and not queueing of the sampler's D2H output copy, which runs on a
+   separate copy stream after the traced end event; the store copy of the previous chunk is deferred to the next step's start and
+   overlaps the next chunk step, so an SM-based memcpy path or GDDR contention is the candidate), an upstream issue with
    a DP amplifier, not a topology problem. If H2: the placement rule of the NUMA round applies to the real connector, but only
    during prefill-heavy store phases (the average store rate, ~1 GB/s, is far below the hog's 15–20 GB/s).
 4. Gate reading so far: with the connector on, rank-1 p95 +11 % (B=8) / +80 % (B=32) vs off — passes the +10 % gate on paper,
