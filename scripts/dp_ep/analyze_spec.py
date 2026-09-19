@@ -101,11 +101,14 @@ def main():
     print("| ---: | --- | --- | --- | --- | --- | --- | --- | --- |")
     summary = []
     Bs = sorted({k[2] for k in pooled})
+    kinds = sorted({k[0] for k in pooled} | {k[1] for k in pooled})  # e.g. rep/rnd (round 1) or rep/rndT (round 2)
     for B in Bs:
-        for kind, other in (("rnd", "rep"), ("rep", "rnd")):
+        for kind in kinds:
+            others = [o for o in kinds if o != kind]
             homo = pooled.get((kind, kind, B))
-            if homo is None:
+            if homo is None or len(others) != 1:
                 continue
+            other = others[0]
             h = {m: float(np.nanmean([homo[0][m], homo[1][m]])) for m in keys}
             for (k0, k1), r in (((kind, other), 0), ((other, kind), 1)):
                 sk = pooled.get((k0, k1, B))
