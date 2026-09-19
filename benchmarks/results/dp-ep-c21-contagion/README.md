@@ -62,6 +62,53 @@ one rank is not exported. Fixed in round 2 (non-streaming requests for the train
 
 Errors in decode streams: 0 in all 66 windows.
 
+## Round 2 — job 1602499 (`raw/c21-round2-1602499.{json,md}`, git bb647a3 harness, seed 62)
+
+Decomposition of the sampling bundle (`temp` = temperature 1 + per-request seed; `topk` = temp +
+top-p 0.9 / top-k 50 / min-p 0.05; `pen` = temp + repetition/presence/frequency penalties), the
+fixed prompt-logprobs cell (`plogp`: non-streaming 2048-token prompt train with `prompt_logprobs=1`,
+vs `pfx`: the same train without it) and top-20 logprobs. 90 windows, 3 repeats, shuffled; decode
+stream errors: 2 windows with one errored stream each. Plain-rank ITL p50 ratio vs plain|plain on
+the same rank, pooled medians over repeats:
+
+| feature | B | F on r0 → r1 plain (ratio) | F on r1 → r0 plain (ratio) | p95 ratios | plain-rank step period base → with F (ms) |
+| --- | ---: | --- | --- | --- | --- |
+| temp (T=1 + seed) | 8 | 13.3 → 14.3 (1.07) | 13.6 → 14.8 (1.09) | 1.04 / 1.10 | 13.2 → 14.3 / 13.1 → 14.7 |
+| topk (+ top-p/k, min-p) | 8 | 13.3 → 14.6 (1.10) | 13.6 → 14.6 (1.07) | 1.08 / 1.09 | 13.2 → 14.5 / 13.1 → 14.4 |
+| pen (+ penalties) | 8 | 13.3 → 15.0 (**1.13**) | 13.6 → 15.3 (**1.12**) | 1.12 / 1.12 | 13.2 → 15.0 / 13.1 → 15.2 |
+| sampling (all of the above) | 8 | 13.3 → 16.2 (**1.21**) | 13.6 → 16.2 (**1.20**) | 1.20 / 1.21 | 13.2 → 16.1 / 13.1 → 16.1 |
+| logprobs20 | 8 | 13.3 → 14.2 (1.07) | 13.6 → 14.2 (1.04) | 1.07 / 1.06 | 13.2 → 14.2 / 13.1 → 14.0 |
+| pfx (prompt train, no feature) | 8 | 13.3 → 15.8 (**1.18**) | 13.6 → 16.3 (**1.20**) | 1.89 / 2.03 | 13.2 → 15.6 / 13.1 → 15.1 |
+| plogp (prompt train + prompt_logprobs) | 8 | 13.3 → 16.8 (**1.26**) | 13.6 → 15.6 (**1.15**) | 2.35 / 2.08 | 13.2 → 15.8 / 13.1 → 15.2 |
+| temp | 32 | 21.8 → 22.2 (1.02) | 21.8 → 22.2 (1.02) | 1.02 / 1.02 | 21.3 → 21.8 / 21.4 → 21.7 |
+| topk | 32 | 21.8 → 23.2 (1.07) | 21.8 → 22.9 (1.05) | 1.07 / 1.05 | 21.3 → 22.7 / 21.4 → 22.5 |
+| pen | 32 | 21.8 → 22.8 (1.05) | 21.8 → 22.6 (1.04) | 1.05 / 1.03 | 21.3 → 22.3 / 21.4 → 22.3 |
+| sampling | 32 | 21.8 → 23.7 (1.09) | 21.8 → 23.6 (1.08) | 1.09 / 1.08 | 21.3 → 23.4 / 21.4 → 23.4 |
+| logprobs20 | 32 | 21.8 → 21.8 (1.00) | 21.8 → 21.6 (0.99) | 1.01 / 0.99 | 21.3 → 21.6 / 21.4 → 21.3 |
+| pfx | 32 | 21.8 → 34.5 (**1.58**)² | 21.8 → 28.0 (**1.29**) | 1.93 / 1.79 | 21.3 → 23.5 / 21.4 → 23.7 |
+| plogp | 32 | 21.8 → 27.8 (**1.28**) | 21.8 → 27.5 (**1.26**) | 1.83 / 1.73 | 21.3 → 23.6 / 21.4 → 23.5 |
+
+² pfx remains bimodal across repeats (see round 1, ¹); its step-period increase (21.3 → 23.5) is the
+same as plogp's (→ 23.6), so the 1.58 vs 1.28 difference is token-delivery noise, not a mechanism.
+
+Reading of round 2:
+
+1. **Every sampler component is exported 1:1 and each is small.** At B=8 (13 ms steps) the
+   penalties path adds +1.8–2.1 ms per step on both ranks (×1.12–1.13) — the PR #47540 mechanism at
+   the short-history end of its curve; seeded temperature sampling alone adds +1.1–1.6 ms (×1.07–1.09,
+   the per-request generator path); top-k/p/min-p add ≤0.3 ms beyond that; the bundle is the sum
+   (+2.9–3.0 ms, ×1.20–1.21). At B=32 (21 ms steps) all of them are ≤×1.09. Nothing here is a
+   separate isolation mechanism.
+2. **Prompt logprobs add nothing beyond the prefill train**: plogp and pfx raise the plain rank's
+   step period identically (B=8: 15.1–15.8 ms; B=32: 23.5–23.7 ms); the plain rank pays for the
+   synchronized 512-token chunk steps, not for the logprob gather on the other GPU.
+3. **logprobs20 ≤ ×1.07** (B=8) and nil at B=32 — same verdict as top-5 in round 1.
+
+**Task 21 closed (2026-09-19):** cross-rank feature contagion on this platform = the feature's own
+per-step cost exported by lockstep; individual features ≤ ×1.13 (pen) at B=8 and ≤ ×1.07 at B=32;
+the only >20 % effect is chunked prefill on the peer (×1.2–1.6), which is the synchronized-shape
+cost recorded under G1 / task 24. No new line.
+
 ## Reading (bounded)
 
 1. **Lockstep export is exact.** In every cell the plain rank's step period rose by the same
