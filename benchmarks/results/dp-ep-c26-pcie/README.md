@@ -1,6 +1,6 @@
 # Task 26 — PCIe arbitration: bulk KV movement on rank 0's GPU vs rank 1's EP communication
 
-Status: **job 1602508 running (2026-09-19 09:16 cluster clock)**; analysis pending (round 57).
+Status: **measured (job 1602508, 54 windows, 3 repeats; `raw/c26-1602508.{json,md}`, `raw/hog-standalone.jsonl`) — ALIVE / STRONG for GPU→host traffic**; policy oracle next (round 57).
 
 ## Question
 
@@ -62,9 +62,46 @@ transfer AND interference AND serving", "expert AND parallel AND PCIe AND offloa
 PCIe arbitration between KV movement and EP collectives. No implementation of a PCIe-window-aware
 KV mover found in these sources as of 2026-09-19.
 
-## Results
+## Results (pooled medians over 3 repeats; ratio vs `off` at the same B; both ranks show identical numbers in every cell = lockstep)
 
-_pending — see `raw/` after round 57._
+Standalone GPU-0 link: h2d 23.1 GB/s, d2h 24.6 GB/s (PCIe 4.0 x16); d2d 454 GB/s.
+
+| hog on GPU 0 | achieved GB/s | B | rank-1 ITL p50 (ratio) | rank-1 ITL p95 (ratio) | step period / CUDA ms both ranks |
+| --- | ---: | ---: | --- | --- | --- |
+| idle (context only) | — | 8 / 32 | 14.2 → 14.3 (1.00) / 21.9 → 21.9 (1.00) | 1.11¹ / 1.01 | 14.1 → 14.0 / 21.6 → 21.7 |
+| h2d continuous | 20.7 / 21.8 | 8 / 32 | 15.6 (1.09) / 23.5 (1.07) | 1.20 / 1.08 | → 15.0 / 23.1 |
+| **d2h continuous** | 17.5 / 14.8 | 8 / 32 | **17.0 (1.20)** / **32.3 (1.47)** | **1.28 / 1.48** | → 17.0 / 32.1 |
+| both (alternating) | 20.5 / 20.2 | 8 / 32 | 16.1 (1.13) / 30.0 (1.37) | 1.26 / 1.42 | → 15.8 / 27.5 |
+| h2d 50 % duty | 20.7 / 21.8 | 8 / 32 | 14.9 (1.05) / 22.8 (1.04) | 1.15 / 1.06 | in-burst CUDA 14.9 / 22.7 vs pause 14.7 / 22.6 |
+| h2d 25 % duty | 20.6 / 20.5 | 8 / 32 | 14.2 (1.00) / 22.5 (1.02) | 1.11 / 1.03 | in-burst 14.3 / 22.5 |
+| h2d capped 4 GB/s | 4.0 / 4.0 | 8 / 32 | 14.2 (1.00) / 21.9 (1.00) | 1.01 / 1.01 | → 14.2 / 21.6 |
+| d2d control (GPU-0 internal, 206 GB/s) | 206 | 8 / 32 | 27.8 (1.96) / 41.2 (1.88) | 2.04 / 1.93 | → 25.5 / 41.4 |
+
+¹ `off` B=8 p95 is the bimodal 25.9 ms baseline; idle's 1.11 is within that noise (p50 1.00, step period 14.0 vs 14.1).
+
+Reading (bounded):
+
+1. **A bulk GPU→host stream on rank 0's GPU degrades rank 1's decode by 20 % (B=8) to 47 % (B=32),
+   p95 likewise (×1.28 / ×1.48)** — above the pre-registered 10 % gate, strong band. The step
+   period rises identically on both ranks (lockstep), so rank 1 pays even though it moves no KV.
+2. **Direction asymmetry**: host→GPU0 traffic at a *higher* rate (21 GB/s) costs only 7–9 %, while
+   GPU0→host at 15–17 GB/s costs 20–47 %, and the d2h hog itself is slowed from 24.6 to 15–17 GB/s
+   by the server — the upstream (GPU→host) direction of GPU 0's link is the contended resource.
+   Hypothesis to verify: NCCL's SHM transport (no P2P on 4090) has the sender's SMs write the EP
+   allgather/reduce-scatter payloads into host memory = upstream on the sender's link; the
+   effect grows with B (payload 32 → 128 KB per collective), consistent with a bandwidth-shared path.
+3. **Context sharing is not the cause** (`idle` = 1.00) and **GPU memory bandwidth cannot be** (the
+   PCIe hogs move ≤ 22 GB/s of GDDR traffic, 2 % of the card); the `d2d` control (206 GB/s
+   GPU-internal copies, ×1.9) is a memory-bandwidth-contention arm, not a copy-engine-only arm.
+4. **Rate limiting works**: 4 GB/s continuous = 1.00; 50 %/25 % duty at full rate = 1.05 / 1.00
+   on the window average, with only +0.2 ms in-burst CUDA time for h2d — i.e. an 8k-token KV
+   burst (1.5 GiB) at line rate costs ~5 steps × +1–2 ms for h2d; the d2h duty-cycled cells were
+   not run (next round).
+
+Gate outcome: **ALIVE, strong (>20 %) for GPU→host movement; 7–9 % (engineering band) for
+host→GPU.** Next: d2h duty/cap sweep (0.5, 0.25, cap 2/4/8/12 GB/s) to find the harmless rate,
+NCCL transport confirmation (`NCCL_DEBUG=INFO`), and a real-connector check (vLLM
+OffloadingConnector CPU offload on rank 0) before any policy claim.
 
 ## Caveats (pre-registered)
 
