@@ -17,7 +17,9 @@ analyze_dmon.py, sbatch_c26r2.sh, sbatch_c26r3.sh, sbatch_c26topo.sh, sbatch_hog
   probe (copy engine vs Triton-SM, full rate and cap 8) → `results/c26-1602557-…/`.
 - **1602580** `c26topo-dpep` (node wqd10nba07g4, 6 GPUs, started 10:08): topology round — picks a same-socket and a cross-socket GPU
   pair from the allocation (NUMA via sysfs; `pairs.txt`, `topo.txt`, `gpus.txt`), runs the DP2/EP2 server + hog per pair with
-  `--specs off,d2h:1.0,h2d:1.0 --batch-sizes 8,32 --repeats 3 --seed 69` → `results/c26topo-1602580-…/{same,cross}/{pcie.json,waves.log,hog/,nccl-*.log,trace/}`, ≈ 2 × (4 min start + 7 min cells) after staging; `logs/c26topo-1602580.out`. Untested script: if `pairs.txt` is empty or a server dies, read the log.
+  `--specs off,d2h:1.0,h2d:1.0 --batch-sizes 8,32 --repeats 3 --seed 69` → `results/c26topo-1602580-…/{same,cross}/{pcie.json,waves.log,hog/,nccl-*.log,trace/}`, ≈ 2 × (4 min start + 7 min cells) after staging; log is `logs/c26-1602580.out` (template output path kept). Pair selection verified at
+  10:13: `pairs.txt` = `same:0,1:3-2 cross:0,4:3-6` (GPU bus 01 NUMA 3 + bus 25 NUMA 2 on socket 0; bus 01 NUMA 3 + bus A1 NUMA 6 across
+  sockets); `topo.txt` = all SYS. Server start/cells not yet verified at session end — if a server died the script `continue`s to the next pair.
 - 1602548 `hogtest` COMPLETED (SM engine validation).
 - Other jobs in `squeue -u $USER` (mbert149-glue, vft-*, moe2b-ds-*, fork1b, moe7b, f3b-prof) are the user's own unrelated work — never touch them.
 
