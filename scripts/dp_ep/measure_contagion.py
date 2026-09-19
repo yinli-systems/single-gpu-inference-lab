@@ -44,8 +44,13 @@ number ::= [0-9]+
 FEATURES = {
     "plain": {},
     "logprobs": {"logprobs": 5},
+    "logprobs20": {"logprobs": 20},
     "struct": {"structured_outputs": {"grammar": GRAMMAR}},
     "sampling": {"temperature": 1.0, "top_p": 0.9, "top_k": 50, "min_p": 0.05, "repetition_penalty": 1.2, "presence_penalty": 0.5, "frequency_penalty": 0.5, "seed": 7},
+    # decomposition of `sampling` (round 2): which part of the sampler path is exported to the peer rank
+    "temp": {"temperature": 1.0, "seed": 7},
+    "topk": {"temperature": 1.0, "top_p": 0.9, "top_k": 50, "min_p": 0.05, "seed": 7},
+    "pen": {"temperature": 1.0, "repetition_penalty": 1.2, "presence_penalty": 0.5, "frequency_penalty": 0.5, "seed": 7},
 }
 
 
@@ -81,10 +86,30 @@ async def stream_completion(client, base, model, prompt, max_tokens, extra, stor
     return live
 
 
+async def blocking_completion(client, base, model, prompt, max_tokens, extra, store):
+    """Non-streaming request (vLLM rejects prompt_logprobs with stream=True); ttft := e2e."""
+    t0 = time.monotonic(); live = {"t_send": t0, "token_times": []}
+    store.append(live)
+    body = {"model": model, "prompt": prompt, "max_tokens": max_tokens, "temperature": 0, "ignore_eos": True}
+    body.update(extra)
+    try:
+        r = await client.post(f"{base}/v1/completions", json=body)
+        if r.status_code != 200:
+            live["error"] = r.text[:300]
+        else:
+            live["tokens"] = r.json().get("usage", {}).get("completion_tokens", 0)
+    except asyncio.CancelledError:
+        raise
+    except Exception as e:  # noqa: BLE001
+        live["error"] = repr(e)[:300]
+    live.update({"ttft_ms": (time.monotonic() - t0) * 1e3, "e2e_ms": (time.monotonic() - t0) * 1e3})
+    return live
+
+
 async def prompt_train(client, base, model, rng, L, extra, until, store):
     """Back-to-back short-generation requests with long prompts until `until` (monotonic)."""
     while time.monotonic() < until:
-        await stream_completion(client, base, model, rand_tokens(rng, L), 8, extra, store)
+        await blocking_completion(client, base, model, rand_tokens(rng, L), 8, extra, store)
 
 
 async def run_cell(args, rng, feat0, feat1, B, ports, model):
