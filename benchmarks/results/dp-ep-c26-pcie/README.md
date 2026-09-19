@@ -383,6 +383,50 @@ Reading (bounded):
 4. Gate reading so far: with the connector on, rank-1 p95 +11 % (B=8) / +80 % (B=32) vs off — passes the +10 % gate on paper,
    but the mechanism behind it must be settled (item 3) before it is counted for task 26; p50 is +7–8 % (engineering band).
 
+## Real mover, step-level re-analysis (round 60, 2026-09-19; `scripts/dp_ep/{chunkseq,modeseries,modescan}.py`; `raw/chunkseq-1602608-dp0.txt`, `raw/modeseries-16026{08,09}.txt`, `raw/modescan-all.txt`)
+
+The 48 → 86 ms chunk step of the connector-ON arm (job 1602608) is **not** a per-copy effect. Reading the rank-0 step
+trace step by step (host `t` + `cuda_ms`, cell windows from `kvoffload.json`):
+
+- In the slow store cells **every** eager 512-token step is ~85 ms, including the first chunk of each prompt (78.9 /
+  79.5 / 80.3 ms vs 41.4 / 36.9 ms in the fast cells) — a step with no store in flight (the previous prompt's last store,
+  96 MiB at the connector's own 10–12.7 GB/s = ~8 ms per store from the `kv_offload_store_*` metrics, finished several
+  decode steps earlier). The later chunks add the same +7 ms over the first chunk in both modes (41 → 48, 79 → 86).
+- Graph-mode decode steps are identical in both modes (B=32: 20.0 vs 20.1 ms; B=8: 13.8 vs 13.3 ms) → the GPU is not slower.
+- The between-step host slack (period − cuda_ms) is 2.9–3.7 ms in slow cells vs 1.4–1.6 ms in fast cells → the worker's
+  CPU-only work is slower too.
+- The mode is a **time state**: slow 0–53 s, fast 53–91 s, slow 91–170 s, fast 170–189 s, slow 189–262 s, fast 262–311 s
+  of the run (`raw/modeseries-1602608.txt`), covering store trains, load-cell priming and the plain-cell priming alike;
+  cell 3 (store B=8 r0) flipped slow → fast between two chunks of the same prompt (steps 687 → 688).
+- Store cells in the fast state look like the OFF arm: chunk p50 47.6 / 48.7 ms, train 16 / 14 requests, TTFT 521 / 605 ms
+  (slow state: 83–86 ms, 9–12 requests, 833–923 ms); the peer's p95 ×1.80 was measured in the slow state.
+- Prompts are fresh random tokens from one RNG (no cross-cell repeats), cell 1 ran on an empty tier and cells 15/16 on a
+  full one → tier fill / eviction / cache hits are excluded as the differentiator.
+- Nothing per step in the connector explains a constant +37 ms: `pre_forward → start_kv_transfers → transfer_async` runs
+  inside the tracer window (before `self.model()`), so CPU time there would land in `cuda_ms` of a launch-bound eager
+  step, but the first chunk has no transfer to submit; the CPU worker path has no background thread; `cudaHostRegister`
+  of the 17.18 GB `/dev/shm` region succeeded (no warning in `server.log`).
+- Scan of every results dir with step traces (`raw/modescan-all.txt`, eager `cg NONE` 512-token steps, "slow" = > 65 ms):
+  15 runs without the connector (m1/g1/c21/c26/c26numa, ~10 k steps) have slow fractions 0.00–0.05 and p50 44.7–55.6 ms
+  (the round-1 node 06g6 sits at 53–56 ms); the OFF arm 1602609 (06g6) 0.13 with 95 flips = scattered single steps plus one
+  mixed phase in its first cell (p50 66 ms, `raw/modeseries-1602609.txt`); the ON arm 1602608 (07g6) **0.60 with 10 flips
+  = sustained 85-ms runs** on both ranks (dp1 0.59: rank 1's own 32 × 128-token prefills in lockstep).
+
+Reading: a CPU-side slowdown of the worker process (eager steps are launch-bound at ~44–48 ms; ×1.8 slower launching
+gives 80–86 ms), present ~60 % of the time in the only run that had the connector, independent of connector activity.
+Candidates: worker thread placement (far NUMA node from the GPU, SMT sibling, core shared with a co-located job — Slurm
+leaves the cpuset unconfined) or node memory pressure from 2 × 17.18 GB of pinned tmpfs. vLLM 0.29.0 ships `--numa-bind`
+(default **off**; numactl `--cpunodebind/--membind` of the GPU worker to its GPU's NUMA node, which also first-touches the
+`/dev/shm` offload region locally) — the ON arm ran without it. H1 ("the store path lengthens the chunk step") is
+**withdrawn** in its per-copy form; the DP2 ×1.80 p95 is the lockstep export of a rank-0 CPU slow state. Diagnostic job
+**1603052** (`sbatch_c26kv3.sh`, 1 GPU, DP=1, one node): arms A connector on / unbound, B connector on / `--numa-bind`,
+C connector off, each with `cpusidecar.py` sampling every thread's CPU ticks, last CPU + NUMA node, schedstat run/wait
+(run-queue delay = contention), nonvoluntary switches, PSI and meminfo at 0.5 s on the step tracer's monotonic clock.
+Pre-registered: A reproduces the slow state in ≥ 1/3 of store cells with either high wait_ms (contention) or a far-node /
+other-core placement during slow runs; B removes it if it is placement; C never shows it. If B cures it, the remedy is an
+existing flag (evaluation result, not a new mechanism); if A does not reproduce it, the 1602608 state was node-specific
+(co-located load) and the real-mover claim reduces to "H2D/D2H at ~1–12 GB/s are benign for the peer (×1.01–1.02)".
+
 ## Caveats (pre-registered)
 
 - The hog is a separate process: it shares the link and root complex like a connector's copies
