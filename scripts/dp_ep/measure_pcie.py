@@ -18,6 +18,8 @@ starts `pcie_hog.py` on GPU 0 (a separate process in the same allocation) with o
   h2d:cap4         bandwidth-capped to ~4 GB/s (chunked copies with sleeps)
   d2d:1.0          control: GPU0-internal copies (copy engine busy, no PCIe traffic)
   <dir>:<duty>:<GiB> optional third field = bytes per burst in GiB (default 1.5)
+  d2h-sm:1.0       `-sm` suffix: the same bytes moved by a Triton kernel (SM-issued PCIe writes/reads)
+                   instead of the copy engine (cudaMemcpyAsync) — separates requester from bytes
 The hog is started at the beginning of the cell (allocates, warms up, then waits for a start
 file); the start file is created exactly at t_window0 so bursts and the window coincide.
 Metrics per rank: ITL of the decode streams inside the window (p50/p95), plus the per-rank step
@@ -45,11 +47,14 @@ from measure_contagion import itl_summary, rand_tokens, stream_completion  # noq
 def hog_cmd(spec, args, log, start_file):
     parts = spec.split(":")
     d = parts[0]
+    engine = "ce"
+    if d.endswith("-sm"):
+        d, engine = d[:-3], "sm"
     duty = parts[1] if len(parts) > 1 else "1.0"
     gib = float(parts[2]) if len(parts) > 2 else args.burst_gib
     cmd = [sys.executable, str(Path(__file__).resolve().parent / "pcie_hog.py"), "--device", args.hog_device, "--bytes", str(int(gib * 2**30)),
            "--chunk-mb", str(args.chunk_mb), "--gpu-buf-mb", str(args.gpu_buf_mb), "--duration", str(args.window_s), "--log", str(log), "--start-file", str(start_file)]
-    cmd += ["--dir", d]  # "idle" keeps the context + pinned buffers alive on GPU 0 for the window without copying
+    cmd += ["--dir", d, "--engine", engine]  # "idle" keeps the context + pinned buffers alive on GPU 0 for the window without copying
     if duty.startswith("cap"):
         cmd += ["--rate-gbs", duty[3:], "--chunk-mb", "16"]
     else:
