@@ -4,7 +4,7 @@
 2026-09-19 05:25 (Mac, UTC+4) = 09:25 cluster clock (UTC+8). Written by autonomous round 55.
 
 ## Git (branch, SHA, dirty files)
-branch `dp-ep-waves`, HEAD `bb647a3` ("G1 rounds 2-3 ... KILLED; task 21 round 1 ..."), plus this
+branch `dp-ep-waves`, HEAD `bf8c8a6` (task 26 hog draft) on top of `bb647a3` (G1 killed, task 21 round 1) and `0f39577`; this final
 state-file/ledger commit on top. Working tree clean after the final commit of this round.
 Cluster copies of scripts: `/data/run01/scxi253/inference/lab-scripts/` (measure_contagion.py
 there is the fixed round-2 version, md5 must match the repo file).
