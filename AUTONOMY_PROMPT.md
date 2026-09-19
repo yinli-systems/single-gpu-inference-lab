@@ -1,7 +1,8 @@
 # Multi-GPU autonomy run — standing instructions
 
-You are running headless on the ParaCloud login node inside a watchdog loop (fresh session every
-~50 minutes; this file plus `AUTONOMY_STATE.md` are your only memory). Your job for the whole run:
+You are running headless **on the user's Mac** inside a watchdog loop (fresh session every ~50
+minutes; this file plus `AUTONOMY_STATE.md` are your only memory). You drive ParaCloud over SSH —
+the cluster has no Claude CLI and cannot reach Anthropic endpoints. Your job for the whole run:
 
 > **Find one multi-GPU mechanism where the current runtime provably does unnecessary work, show an
 > oracle gain >10%, then build the smallest fix.** Not "as many optimizations as possible".
@@ -11,6 +12,24 @@ labels → pre-registered kill gate → minimal env-gated implementation → int
 positive, negative and superseded results with equal care. Every number links to raw data with the
 exact command and git SHA.
 
+## How to reach the cluster (every remote command)
+
+Run remote work through the helper `scripts/dp_ep/pc.sh`, which wraps
+`ssh -b <local-ip> paracloud` (the `-b` bind is required by this network):
+
+```bash
+scripts/dp_ep/pc.sh 'squeue -u $USER -h -o "%i %j %t %M"'
+scripts/dp_ep/pc.sh 'cd /data/run01/scxi253/inference && sbatch lab-scripts/sbatch_m1.sh Qwen1.5-MoE-A2.7B-Chat eager multiport 512'
+scripts/dp_ep/pcget.sh <remote-path> <local-path>     # rsync pull (use for result JSON, not 40 MB traces)
+```
+
+Heavy analysis of large traces should run **remotely** (`pc.sh '/tmp/scxi253/venv-vllm/bin/python ...'`
+with `LD_LIBRARY_PATH=/tmp/scxi253/libfix`); pull only summaries into this repo. The login node is
+slow and its SSH occasionally resets — retry once, then continue with other work. Local repo:
+this checkout; the same branch is **not** cloned on the cluster, so copy any script you need with
+`scripts/dp_ep/pcput.sh <local-file> <remote-dir>` (the job template lives at
+`/data/run01/scxi253/inference/lab-scripts/`).
+
 ## Environment facts (verified 2026-09-19)
 
 - Login node: internet OK (slow: ~100 KB/s mirrors, ~0.8 MB/s scp inbound), Slurm submit host,
@@ -19,8 +38,8 @@ exact command and git SHA.
   Qwen3-30B-A3B-FP8 31 GB), `venv-vllm.tar` (vLLM 0.29.0 + torch 2.13 cu130 + tracers, built at
   `/tmp/scxi253/venv-vllm`, untarred to node-local disk by the job script), `libfix.tar`
   (libstdc++ shim), `results/`, `logs/`, `lab-scripts/`.
-- This repo checkout: `/data/run01/scxi253/multigpu-autonomy/single-gpu-inference-lab`, branch
-  `dp-ep-waves`. Commit locally; **never push, never open/comment on GitHub, never sign DCO.**
+- Repo lives on the Mac (branch `dp-ep-waves`). Commit locally; **never push, never open/comment on
+  GitHub, never sign DCO.** Scripts are pushed to the cluster with `pcput.sh`.
 - Slurm: `--partition gpu_4090 --qos gpugpu --gres gpu:2` (RTX 4090 24 GB, driver 580.82, PCIe, no
   NVLink), `--cpus-per-task 12`, **no `--mem`**. Jobs: `scripts/dp_ep/sbatch_m1.sh <model> <eager|graph>
   <internal|multiport> <q>`; outputs `$W/results/m1-<jobid>-*/` with `server.log`, `waves.json`,
@@ -105,3 +124,136 @@ is never claimable; "no implementation found as of <date> in <sources>" is.
   completed work, exact git SHA, Slurm job ids and states, result paths, measured numbers,
   alive/killed/blocked decision per line, the exact next command, unresolved risks.
 - Never publish GitHub content, push, merge, force-push, sign DCO, or post comments.
+
+---
+
+# FRONTIER EXTENSION — TEN ADDITIONAL MULTI-GPU RESEARCH TASKS
+
+Not mandatory sequential tasks. Treat as a **ranked opportunity pool**. Before spending >30 minutes
+on any task: search current vLLM/SGLang/TensorRT-LLM/Dynamo source, issues, PRs and recent papers;
+record the closest prior work; kill immediately if an active implementation already covers the same
+mechanism. Prefer an upper-bound experiment before implementation.
+
+**21. Cross-Rank Feature Contagion.** Can an expensive request-local feature on one DP/EP rank slow
+unrelated plain-generation requests on another rank because ranks rendezvous at synchronized expert
+steps? Features: logprobs, structured output, speculative decoding, sampling-heavy, prompt logprobs.
+The question is not whether the feature is expensive but whether client A's feature imposes latency
+on unrelated client B on another GPU — a distributed performance-isolation failure. Use
+deterministic rank placement; measure the unaffected rank's TPOT, ITL, time-to-next-forward,
+arrival time at the first EP collective, full step CUDA time; compare plain/plain vs feature/plain;
+swap ranks. Gate: <5% kill, 10% alive, 20% strong, 50% priority upstream problem. Follow-up:
+decompose into GPU sampling work / CPU output processing / scheduler delay / graph-mode change /
+collective arrival skew.
+
+**22. Dummy-Rank Compute Elimination.** When a DP rank has no local requests but must stay alive for
+EP, how much unnecessary model computation does the dummy rank execute? Does the idle rank need the
+whole local attention/normalization/sampling path, or only the expert-service portions peers need?
+Phase A: rank0 sustained traffic, rank1 idle; measure rank1 CUDA time by operator family
+(attention, router, dispatch, local expert GEMM, combine, normalization, sampling, misc); estimate
+useful_remote_expert_work / total_dummy_GPU_work. Phase B: remove one obviously local-only component
+at a time while preserving identical collective order (skip local sampler / logits / attention for
+zero-real-token state / post-processing). Do NOT skip communication or change collective ordering
+unless correctness is proven. Gate: <5% kill, 15% alive, 30% strong.
+
+**23. Tail Dummy Amplification.** After initially balanced ranks diverge because request lengths
+differ, one rank may spend the tail executing dummy forwards only because the other is alive. Define
+dummy_tail_GPU_seconds = Σ_r GPU time after local useful work ended. Workloads: identical initial
+request counts, controlled output lengths (128/128, 128/256, 128/512, 128/1024, 256/1024). Oracle:
+perfect length cohorting (short with short, long with long), same requests and total tokens. Metrics:
+aggregate throughput, per-request TPOT, dummy GPU ms, fraction of total GPU work that is dummy.
+Continue if dummy GPU time >10% of total or oracle cohorting improves throughput / p95 TPOT >10%.
+Do NOT build a learned length predictor first: test requested max_tokens, historical class, trivial
+short/long bins; if two bins recover most of the oracle, stop there.
+
+**24. Group-Aware Chunked-Prefill Shaping.** Each rank can have a different prefill workload but EP
+makes ranks advance together. Choose each rank's chunked-prefill budget jointly so one rank does not
+create an unnecessarily large synchronized shape for everyone. This is NOT routing: assignments are
+fixed; the decision is how much work each already-assigned rank admits next. Estimate per rank
+attention work, MoE token work, current decode work; choose q_r maximizing Σ useful_tokens_r /
+predicted_wave_time subject to a TPOT/step bound. Oracle: enumerate q ∈ {64,128,256,384,512,768,
+1024,2048} on the heavy rank (cheap for DP2). Compare native chunking, fixed conservative chunk,
+oracle. Alive at >10% safe progress/throughput; strong if p95 TPOT improves >20% without materially
+reducing prefill throughput. Direct multi-GPU continuation of the single-GPU geometry work.
+
+**25. Prefix Locality vs EP Synchronization.** Routing repeated prefixes to the same rank maximizes
+cache hits; balancing synchronized work minimizes stragglers. Does maximizing locality create enough
+imbalance to lose overall? Several long shared prefixes with skewed popularity; compare round-robin,
+least-loaded, prefix-affinity, perfect cache-affinity, perfect synchronized-work oracle, hybrid.
+Metrics: prefix-cache hit rate, recomputed prompt tokens, rank work skew, EP wait/step latency,
+TTFT, TPOT, throughput. Find the Pareto frontier; start with score = cache_saved_compute − λ ·
+predicted_wave_imbalance and sweep λ. Alive if pure affinity loses >10% end-to-end and a hybrid
+recovers ≥70% of both benefits.
+
+**26. PCIe Arbitration: KV Movement vs EP Communication.** On PCIe-only GPUs, CPU↔GPU KV transfer and
+GPU↔GPU EP communication may contend for the same root complex. Can a KV load on ONE rank degrade
+serving latency on OTHERS? DP2/EP2, stable decode on both; inject on rank0 CPU→GPU reload and
+GPU→CPU offload at 4k/8k/16k-equivalent KV; measure rank1 (no KV movement). Compare no transfer,
+transfer concurrent with EP, transfer staggered between waves, bandwidth-capped transfer. Metrics:
+EP collective latency, rank1 TPOT/ITL, H2D/D2H bandwidth, PCIe counters if available, step latency.
+Strong if rank0 transfer raises rank1 p95 TPOT >10%. Minimal policy: defer/rate-limit bulk KV
+movement during an EP-critical window — only if the oracle exceeds 10%.
+
+**27. Speculative-Decoding Skew Amplification.** Across synchronized ranks, can different acceptance
+regimes cause one rank's verification shape to inflate work or delay another? rank0 high-acceptance
+(code/repetitive) vs rank1 low-acceptance (prose/random), compared to high/high and low/low, same
+spec config. Per rank measure draft tokens, accepted, verification tokens, generated, padded
+execution tokens, graph mode, step duration, collective arrival. Questions: does acceptance
+heterogeneity change execution shape across ranks; is one rank padded to another's verification
+width; does adaptive verification stay locally optimal under synchronous execution; can a rank that
+already reduced its budget still pay for another's. Oracle: force matched or group-aware budgets.
+<5% kill; >10% continue; >10% for group-aware over independent per-rank control = strong new line.
+
+**28. Portable Sparse PCIe EP Dispatcher.** Can a direct variable-size expert dispatch using ordinary
+NCCL/PyTorch collectives beat the generic allgather/reduce-scatter path without DeepEP, NVLink
+kernels or datacenter-only features? Engineering line; novelty target is a practical portable
+SM89/PCIe vLLM path with serving evidence, not sparse all-to-all itself. Phase A: from real router
+outputs compute bytes_AGRS vs bytes_required_by_actual_destinations; kill if <1.3×. Phase B:
+`torch.distributed.all_to_all_single` microprototype on exact router assignments. Phase C: serving
+path only if the microbenchmark is >15% better. Gates: communication <10% kill; >20% communication
+but <5% serving = record Amdahl negative; serving >10% = upstream candidate.
+
+**29. DP Control-Plane Collective Tax.** Every step synchronizes tens of bytes (actual tokens, padded
+tokens, ubatch decision, graph mode) through a distributed all-reduce. Phase A: instrument
+`coordinate_batch_across_dp`, `_run_ar`, post-processing; measure per-step cost at decode B=1/4/8/16
+and DP2/DP3; quantify control_plane_ms / total_step_ms. <2% kill; >5% alive; >10% for low-latency
+decode = strong. Alternative prototype (same node only): shared-memory slot per rank, epoch counter,
+memory fence, lock-free rendezvous, with identical semantics. Prove no stale epoch reads, rank
+failure times out, no hot spin, async scheduling correct, graph mode and token agreement identical.
+
+**30. Barrier-Free Expert Service — Upper Bound.** How much performance would be recoverable if
+expert service were asynchronous instead of a global per-layer barrier? Upper-bound task only.
+Step 1: trace per rank and layer attention-ready, dispatch-ready, remote expert demand, expert
+compute start/end, combine completion, time waiting for peers. Step 2: conservative event-driven
+replay preserving dependency ordering, measured compute durations and real bandwidth limits.
+Step 3: report current measured step time vs asynchronous replay lower bound. <10% not worth
+pursuing; 10–20% interesting; >20% strong; >40% potentially flagship. Step 4 (only if strong): one
+isolated MoE layer prototype with P2P send/recv or async work queues. Do NOT redesign vLLM.
+
+## GLOBAL PRIORITY AMONG THESE TEN
+21 → 26 → 24 → 23 → 22 → 27 → 25 → 29 → 28 → 30
+(ordered by time to falsify, 2–3×4090 feasibility, probability of a visible benchmark, upstream
+relevance, research distinctness). Task 30 has the highest ceiling but the largest scope, so it
+begins as trace/replay research only. For every task, preserve negative results and move on
+immediately when its gate fails.
+
+## RESEARCH PRIORITY (overall)
+First: (1) DP/EP cross-rank padding amplification and graph-vs-eager oracle [G1–G4];
+(2) cross-rank feature contagion [21]; (3) PCIe KV-vs-EP interference [26]; (4) group-aware chunked
+prefill [24]; (5) tail/dummy-rank amplification [23/22]. Then choose among the remaining frontier
+tasks by novelty, feasibility and observed effect.
+
+## DECISION GATES (global)
+<5% useful end-to-end effect: kill unless it exposes a correctness/reliability defect.
+5–10%: engineering-only unless unusually general. >10%: continue. >20%: strong candidate.
+At least 3 interleaved repeats for any headline positive result.
+
+## GPU / SLURM SAFETY
+Use `/data/run01/scxi253` for durable storage; compute-node `/tmp` only for disposable scratch.
+Never fill the home quota. Put timeouts around servers and requests. Kill orphaned server processes
+between conditions. Preserve logs before cleanup. Do not let one hung NCCL/vLLM process consume the
+sprint: if a job is clearly deadlocked, collect evidence, terminate it and continue.
+
+## GIT / EXTERNAL SAFETY
+Local commits and local branches are allowed. Do NOT: push, force push, open or modify upstream
+PRs/issues, publish GitHub comments, merge, sign DCO/Signed-off-by, request upstream labels,
+trigger upstream CI, or claim independent human review.
