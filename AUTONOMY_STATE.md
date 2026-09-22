@@ -1,70 +1,92 @@
 # Autonomous Research State
 
 ## Timestamp
-2026-09-19 11:15 (Mac, UTC+4) = 15:15 cluster clock (CST = Mac + 4 h exactly; the "+3 h 47" of round 61 was wrong). Written by autonomous round 62 (session started 10:57 Mac). CPU-only session again: 0 free GPUs on every partition (gpu_4090 / gpu_5090 / hp_4090 / hp_5090 all 0 of 248–408), every lab job PENDING (Priority); Slurm start estimates swing between 2026-09-19 evening and 2026-09-22.
+2026-09-23 ~00:55 (Mac, UTC+4) = 04:55 cluster clock. Written by an interactive session (the 8-hour
+autonomous sprint ended 2026-09-19 ~12:16 Mac; the six jobs it had queued started *after* that, so no
+autonomous round ever saw their output — this session scored them).
 
 ## Git (branch, SHA, dirty files)
-branch `dp-ep-waves`; base at session start `4194e64`; this round's commit = `git log -1` (pinner.py DP form, cpuplan.py --dp, analyze_sidecar.py --rank/--main-pid, c26kv5_score.py, sbatch_c26kv5.sh, README section "DP2 production-shaped placement follow-up (round 62)", ledger rows 26/27, raw/c26kv5score-1602608-1602609.json, state). Working tree clean after it.
-Cluster copies in `/data/run01/scxi253/inference/lab-scripts/`: pinner.py, cpuplan.py, analyze_sidecar.py, c26kv5_score.py, sbatch_c26kv5.sh (= repo files, round-62 versions; pinner/cpuplan stay backward compatible with the pending 1603071 which reads them at run time) plus the round-59/61 set.
+branch `dp-ep-waves`, 38 commits ahead of `origin/dp-ep-waves` (nothing pushed since the sprint).
+This session's commit adds the 1603076 / 1603006 results, the ledger rows and this file.
 
 ## Running Slurm jobs (id, purpose, expected output path)
-All **PENDING (Priority)**, none started; per-job estimates (cluster clock, unreliable — they moved three times within 20 min): at 15:16 CST 1603006/1603014 → 09-20 03:39, 1603015/1603052 → 04:40, 1603071 → 05:40, 1603076 → 06:10 (= 23:39–02:10 Mac).
-- **1603076** `c26kv5-dp2pin` (2 GPUs, 12 threads = 6 cores, 1:10, NEW this round): production-shaped DP2/EP2 placement follow-up, four arms in one allocation: `A-on-shared` (= 1602608), `M-on-mainiso` (each EngineCore's main/launch thread alone on its own core, helpers on the pair's second core), `B-on-isolated` (2 cores per EngineCore), `C-off-shared` (= 1602609); harness `--kinds store,plain --batch-sizes 32 --repeats 5`; sidecar per arm → `results/c26kv5-1603076-Qwen1.5-MoE-A2.7B-Chat-q512/{A-on-shared,M-on-mainiso,B-on-isolated,C-off-shared}/{kvoffload.json,waves.log,trace/step.jsonl.dp{0,1},cpusidecar.jsonl,server.log,affinity-ready.txt,engine-threads.txt,pinner.txt(M,B)}` + `{cpuplan.txt,gpus.txt,topo.txt,dmon.log}`; log `logs/c26kv5-1603076.out`. Pre-registered Q1–Q4 (README + script header; corrected before any data: ratios are against arm C's store cells, not plain cells).
-- **1603071** `c26kv4-place` (1 GPU, 3 cores, 1:30): DP=1 placement diagnostic, arms A-on-shared / D-on-squeezed / B-on-isolated / C-off-shared, P1–P4 → `results/c26kv4-1603071-…/`, log `logs/c26kv4-1603071.out`.
-- **1603052** `c26kv3-mode` (1 GPU, 1:30): arms A on/unbound, B on/`--numa-bind` (expected to die at engine start — numa_utils refuses a constrained affinity), C off → `results/c26kv3-1603052-…/`.
-- **1603014** / **1603015** `c26kv1-dp1` (1 GPU each, 1:00): DP=1 connector ON (16 GiB) / OFF controls → `results/c26kv1-16030{14,15}-…-off{16,0}/`.
-- **1603006** `c27-dpep` (2 GPUs, 1:00): task 27 round 2 (`rndT`) → `results/c27-1603006-*/spec.json`; predictions in `benchmarks/results/dp-ep-c27-spec-skew/README.md`.
-- Other jobs in `squeue -u $USER` (vft-*, moe2b-ds-*, moe7b, f3b-prof) are the user's own unrelated work — never touch them.
+None. Queue holds only the user's unrelated training jobs (dense2b / ccl2 / moe7b).
 
 ## Completed this round
-1. `pinner.py` DP form: `--engine-cpus "a;b"` per `VLLM::EngineCore_DP<r>` title (fallback pid order), `--engine-main-cpus` pins only tid == pid (the busy loop: `run_engine_core` → `run_busy_loop()` in the main thread; `UniProcExecutor.execute_model` runs the model in the caller even with `non_block=True`, only the output fetch is deferred — verified in the installed 0.29.0). Validated on the login node with a `setproctitle` dummy tree (main → MAIN core, helpers → REST core per rank; single-list form unchanged).
-2. `cpuplan.py --dp 2` (ENGINE0/1, *_MAIN, *_REST, API = HARN = remaining cores; default output unchanged), `analyze_sidecar.py --rank N --main-pid P` for DP2 arms.
-3. `sbatch_c26kv5.sh` written, syntax-checked, pushed, **submitted as job 1603076** with pre-registered Q1–Q4.
-4. `c26kv5_score.py` (per-arm rank-1 ITL from token times in the window, rank-0 chunk steps per cell, slow fraction / sustained runs, cross-arm Q1–Q4 against the OFF arm) — **validated on 1602608 vs 1602609: it reproduces the round-59 numbers exactly** (B=32 store p95 ×1.80, p50 ×1.05, chunk p50 ×1.82, slow fraction 0.60 vs 0.13; B=8 p95 ×1.11) → `raw/c26kv5score-1602608-1602609.json`. Found and fixed a flaw in the first Q1/Q2 wording (store/plain inside one arm is the synchronized-chunk cost: ×2.2–3.9 even with the connector off) before any data existed; README, script header and ledger say so.
-5. Task 27 arXiv duplicate search done (API queries listed in the ledger): no paper on acceptance skew across barrier-synchronized DP/EP ranks or a group-aware speculation budget; closest = single-engine adaptive-length serving (FASER 2604.20503, Nightjar 2512.22420, DSDE 2509.01083), MoESD 2505.19645 (MoE SD cost model), 2605.15051 (SD latency model vs load/acceptance).
-6. README section "DP2 production-shaped placement follow-up (round 62)", ledger rows 26 and 27.
-7. Duplicate check for the remedy candidate (GitHub API, vLLM): per-DP-rank CPU/NUMA slices exist only for the CPU backend (issue #47328 / PR #47336, open 2026-07-01: `EngineCore_DP*` OMP autobind collides after #45026); nothing on GPU EngineCores contending for cores in a cpuset or a per-rank core budget — recorded in ledger row 26.
+Scored every job the sprint left behind:
+- **1603076** (`c26kv5-dp2pin`, DP2/EP2 placement, 4 arms × 5 repeats, node wqd10naf05g2): full data,
+  scored against the pre-registered Q1–Q4 + per-arm CPU sidecar.
+- **1603006** (`c27-dpep`, spec-decode acceptance skew round 2): full data, scored against the
+  pre-registered gate.
+- **1603014 / 1603015 / 1603052 / 1603071**: void — every 1-GPU arm died at engine init with
+  `OOM on device 0 … free: 720896 of 25250627584` (the GPU handed to them was already occupied).
+Artifacts pulled into `benchmarks/results/dp-ep-c26-pcie/raw/` and `dp-ep-c27-spec-skew/raw/`.
 
 ## Measured results (actual numbers only)
-- No new GPU data this round (nothing ran). Re-derived with the new scorer from 1602608/1602609 (identical to round 59): rank-1 store-cell p95 ON/OFF ×1.80 (B=32) / ×1.11 (B=8), p50 ×1.05 / ×1.07; rank-0 chunk p50 85.8 vs 47.1 ms (×1.82); slow fraction 0.60 (15 of 21 sustained runs, 68 s) vs 0.13 (1 of 27, 6 s); store/plain within one arm ×3.9 (ON) and ×2.2 (OFF) at B=32 = chunk contagion.
-- Cluster: 0 available GPUs on all four GPU partitions at 14:57 and 15:07 CST.
+1603076, ratios against arm C (connector off, same node and cpuset), rank-0 chunk step = eager step ≥ 256 tokens:
+| arm | chunk p50 | slow frac | sustained slow runs | peer store p95 | vs C |
+| --- | --- | --- | --- | --- | --- |
+| A-on-shared (on, unpinned) | 82.7 ms | 0.83 | 11 of 15 (35 s) | 164.8 ms | ×1.72 |
+| M-on-mainiso | 54.7 ms | 0.25 | 0 of 10 | 116.3 ms | ×1.21 |
+| B-on-isolated | 58.4 ms | 0.39 | 4 of 11 (10 s) | 115.0 ms | ×1.20 |
+| C-off-shared | 47.0 ms | 0.00 | 0 of 10 | 96.0 ms | ×1.00 |
+Sidecar, arm A, EngineCore main threads, slow vs fast samples: sibling busy 16/17 % vs 36/18 %,
+run-queue wait ≈ 0.02 % both, migrations < 1.1/s, util 96–97 % vs 83–84 %, node PSI 0; on-GPU-node
+21 % vs 0 % (rank 0) and 82 % vs 17 % (rank 1). Arm C: one main thread 87 % far-node, no slow state.
+1603006: `rndT|rndT` period 25.8 ms (B=8) / 35.1 ms (B=32) vs `rep|rep` 26.0 / 34.1; skew effect on the
+low-acceptance rank ITL p50 ×1.02, period ×1.01, generation rate ×1.24–1.34 (B=8) with padded width
+32 → 40; the high-acceptance rank −12–13 %; everything ≤ ×1.03 at B=32.
 
 ## Alive hypotheses (evidence + gate)
-- **Task 26 — ALIVE (hog: strong on cross-socket pairs; real connector: reframed as a CPU slow state)**. Hog evidence unchanged (buffer socket +×1.14–1.16, pair span +×1.15, worst corner ×1.48 at B=32, 3 repeats). Real connector: peer's decode steps benign (×0.97–1.02); peer p95 ×1.80 = lockstep export of a sustained CPU-side slow state of the storing rank's worker inside a 6-core cpuset. Candidates: SMT-sibling co-scheduling / run-queue sharing of the EngineCore launch thread (S-smt / S-contend) vs S-place vs S-mem. Decided by 1603071 (P1–P4, DP=1) and now **1603076 (Q1–Q4, DP2 production shape)**. Gate unchanged (rank-1 p95 +10 %). If M/B cure it: remedy = per-rank core reservation / `taskset` per EngineCore (engineering; `--numa-bind` inapplicable in a cpuset — upstream usability gap).
-- **Task 27 — undecided**: round 2 (1603006) pending with pre-registered predictions; novelty check now complete (GitHub round 56 + arXiv round 62: nothing on cross-rank acceptance skew). Gate: <5 % kill, >10 % continue, >10 % group-aware over per-rank control = strong.
+Row 26 residual: with per-rank core reservation the connector still costs the peer ×1.16–1.21 and the
+slow state is still *entered* (0.25–0.39 of chunk steps). Target for the next round: explain that
+residual inside the connector/memory family (H1), gate unchanged (peer p95 +10 % strong, <5 % kill).
+`--numa-bind` as a remedy is untested (its job died before serving).
 
 ## Killed hypotheses (reason + evidence)
-- "Slurm leaves the cpuset unconfined" (rounds 58–60 premise): `taskset -cp $$` logs show 12 confined threads = 6 cores + siblings.
-- "`--numa-bind` is the remedy" in its literal form: not usable inside a constrained cpuset (numa_utils.py). Kept only as "upstream flag cannot address this deployment shape".
-- "store/plain ITL ratio inside one arm measures the slow state" (this round's first Q1 wording): it is the synchronized-chunk cost (×2.2 with the connector off).
-- H1 per-copy form; tier fill / eviction; "the GPU is slower in the slow state"; within-socket buffer node; H2D loads interfere; D2H stores hit ordinary decode steps; round-2 predictions 1–2; H_a round 3; "GPU 0's PCIe link is the contended resource"; G1–G4 (0.0 %); task 21 (≤ ×1.13, #47540); task 28 (≤ 11 % at EP2); C1/29 (< 1 % at B ≥ 8); task 24 downgraded; 22/23 deprioritised — all unchanged.
+- **SMT-sibling / run-queue sharing of the launch thread** (round-61 candidate): no slow-vs-fast
+  contrast in sibling busy, run-queue wait, migrations or PSI within arm A; core reservation changes
+  how often the state is entered without changing any per-sample contention reading.
+- **NUMA placement of the EngineCore main thread**: points the wrong way (fast samples are *less*
+  often on the GPU node; the clean arm runs 87 % far-node; the fully GPU-node-pinned arm still flips).
+- **Row 27, spec-decode acceptance skew across DP ranks**: ITL effect ×1.02 vs a 5 % gate; the
+  premise (a faster low-acceptance period to be dragged up) is false. Throughput redistribution at
+  B=8 is symmetric, so no group-aware policy wins.
 
 ## Blocked hypotheses (specific blocker)
-- Everything GPU-side: 0 free GPUs on every partition; six lab jobs pending. Nothing can be forced (short 1-GPU jobs of the user did backfill at 12:23–13:04 CST today, so backfill is possible but not predictable).
-- H2 (cross-socket collective slowdown by store bursts) moot unless the DP=1 arms show no slow state and the DP2 chunk step is still slow on a same-socket pair (1603076 logs the pair's NUMA nodes in `gpus.txt`).
+`--numa-bind` arm: needs a rerun; vLLM refuses auto-detection in a constrained cpuset and wants
+`--numa-bind-nodes` explicitly. Any rerun needs a free-GPU-memory assertion before `vllm serve`
+(four jobs were wasted on an occupied GPU).
 
 ## Current strongest result (bounded wording)
-On 2×RTX 4090 DP2/EP2 (vLLM 0.29.0, Qwen1.5-MoE-A2.7B, NCCL SHM/direct), a line-rate GPU→host copy-engine stream on rank 0's GPU raises rank 1's decode ITL through two additive host-side placement factors at B=32 (3 repeats, `move_pages`-verified): far-socket pinned buffer +×1.14–1.16 and a DP/EP pair spanning sockets +×1.15; worst corner ×1.48 (vLLM's NUMA-agnostic offload tier can hit it); same-socket pair with a local buffer ×1.13. vLLM's real CPU-offload connector moves KV at 10–12.7 GB/s (store) / 21.5 GB/s (load) without touching the peer's decode steps (×1.01–1.02; loads help: peer ITL ×0.5, TTFT 2.5× better). The peer's p95 ×1.80 with the connector on is the lockstep export of a sustained CPU-side slow state of the storing rank's worker (eager chunk steps ×1.8, graph steps unchanged, 40–80-s runs flipping mid-prompt; N = 1), which ran with two EngineCores, the API server, the harness and NCCL proxies confined to a 6-core Slurm cpuset; whether launch-thread core sharing inside that cpuset is the cause (and a per-rank core reservation cures it) is the pending diagnostic pair 1603071 (DP=1, P1–P4) + 1603076 (DP2, Q1–Q4).
+On 2×RTX 4090 DP2/EP2 (vLLM 0.29.0, Qwen1.5-MoE-A2.7B) inside a 6-core Slurm cpuset, turning the
+native CPU-offload connector on puts the storing rank's worker into a sustained CPU-side slow state:
+its eager 512-token chunk steps run ×1.75 the connector-off cost (82.7 vs 47.0 ms, 5 repeats) and the
+peer rank's store-cell ITL p95 is ×1.72, with 11 of 15 sustained runs slow. Reserving cores per rank
+(either the launch thread alone or the whole EngineCore) removes the sustained state and cuts the
+peer cost to ×1.20–1.21, but does not eliminate it, and no per-sample CPU contention reading (SMT
+sibling, run-queue wait, migrations, NUMA node, PSI) separates slow from fast samples — so core
+reservation is a ~75 % mitigation, not the mechanism.
 
 ## Next exact action (the exact first command/file/experiment for the next session)
-1. `scripts/dp_ep/pc.sh 'squeue -u $USER -h -o "%i %j %t %M %S %N %R" | grep -E "c26|c27"; cd /data/run01/scxi253/inference; ls results/ | grep -E "1603076|1603071|1603052|1603014|1603015|1603006"; tail -n 3 logs/c26kv5-1603076.out logs/c26kv4-1603071.out logs/c26kv3-1603052.out logs/c26kv1-1603014.out logs/c26kv1-1603015.out logs/c27-1603006.out 2>/dev/null'` (this site's `tail` rejects `-3`; use `-n 3`).
-2. When 1603076 has ≥ 2 finished arms (C needed for the ratios; A first): `scripts/dp_ep/pc.sh 'cd /data/run01/scxi253/inference; export LD_LIBRARY_PATH=/tmp/scxi253/libfix; P=/tmp/scxi253/venv-vllm/bin/python; R=$(ls -d results/c26kv5-1603076-* | head -1); cat $R/cpuplan.txt $R/gpus.txt; $P lab-scripts/c26kv5_score.py $R --json results/c26-analysis/c26kv5score-1603076.json; for a in A-on-shared M-on-mainiso B-on-isolated C-off-shared; do echo == $a; cat $R/$a/pinner.txt 2>/dev/null; head -n 6 $R/$a/engine-threads.txt; PID0=$(grep -m1 "EngineCore_DP0" $R/$a/pinner.txt $R/$a/affinity-ready.txt 2>/dev/null | grep -o "pid *[0-9]*" | head -1 | grep -o "[0-9]*"); $P lab-scripts/analyze_sidecar.py $R/$a --rank 0 ${PID0:+--main-pid $PID0} --json results/c26-analysis/sidecar-1603076-$a.json | tail -n 45; done'` → score Q1–Q4 (README "DP2 production-shaped placement follow-up"); pull the JSONs + printed outputs to `benchmarks/results/dp-ep-c26-pcie/raw/`. Check in `engine-threads.txt` (M arm) that exactly the tid == pid rows carry the MAIN masks.
-3. When 1603071 (or 1603052) has finished arms: the round-61 loop (`modeseries.py`, `analyze_sidecar.py <arm> --json …`) over arms `A-on-shared D-on-squeezed B-on-isolated C-off-shared` (1603052: `A-on-unbound B-on-numabind C-off-unbound`, expect B "server died" — record the numa_utils message from `B-on-numabind/server.log`); score P1–P4.
-4. When 1603014/1603015 finish: `modeseries.py` + `chunkcheck.py` on both (slow state at DP=1 ON → process-local; absent → node/neighbour-specific). When 1603006 finishes: `analyze_spec.py --dir results/c27-1603006-* --output results/c27-analysis/c27-1603006.json`, score the README predictions.
-5. If Q1 ∧ (Q2 ∨ Q3): the claim becomes "with 3 cores per rank the connector's store phase exports ×1.8 to every rank in lockstep; a per-rank core reservation removes it" — write it up (engineering remedy, measured, 3 repeats needed → a repeat job `sbatch_c26kv5.sh` with arms reordered M, A, C would be the confirmation). If Q1 ∧ ¬Q2 ∧ ¬Q3: back to memory / connector-internal candidates (S-mem readings of the sidecar; `--kv-offloading-size 4` vs 16 to test tier size).
-6. If nothing runs: remaining CPU-side items are small — none of the frontier lines can advance without GPU data; do not submit more jobs (six pending already).
+No GPU work should be submitted until the site has free GPUs (`sinfo`/`squeue` show the partitions
+full). When one is available, the single highest-value experiment is the residual: rerun
+`sbatch_c26kv5.sh` with arms {A-on-shared, M-on-mainiso} × {`--kv-offloading-size 4`, `16`} plus a
+free-GPU-memory assertion at the top of the script (`nvidia-smi --query-gpu=memory.used` must be
+< 500 MiB per assigned GPU before `vllm serve`), to test whether the residual scales with tier size
+(connector-internal) or not (memory path). CPU-side meanwhile: nothing in this line is blocked on it.
 
 ## Files/artifacts created (paths)
-- `scripts/dp_ep/sbatch_c26kv5.sh` (new), `scripts/dp_ep/c26kv5_score.py` (new), `scripts/dp_ep/pinner.py` (DP form), `scripts/dp_ep/cpuplan.py` (`--dp`), `scripts/dp_ep/analyze_sidecar.py` (`--rank`, `--main-pid`)
-- `benchmarks/results/dp-ep-c26-pcie/README.md` (section "DP2 production-shaped placement follow-up (round 62)"), `benchmarks/results/dp-ep-c26-pcie/raw/c26kv5score-1602608-1602609.json`
-- `docs/multigpu-opportunity-ledger.md` (row 26: round-62 note; row 27: arXiv search)
-- Cluster: `lab-scripts/{pinner.py,cpuplan.py,analyze_sidecar.py,c26kv5_score.py,sbatch_c26kv5.sh}`, `results/c26-analysis/c26kv5score-1602608{,-1602609}.json`, job 1603076
+benchmarks/results/dp-ep-c26-pcie/README.md ("Result: DP2 placement follow-up"), its
+raw/{c26kv5-1603076.txt,c26kv5score-1603076.json,sidecar-1603076-*.json};
+benchmarks/results/dp-ep-c27-spec-skew/README.md ("Round 2 result"), raw/c27-1603006.json;
+docs/multigpu-opportunity-ledger.md rows 26 (round 63) and 27 (killed).
 
 ## Risks / unresolved methodological issues
-- The slow state is still N = 1 (one run, one node, 07g6); 1603076 arm A is the replication in the production shape; if A does not reproduce it, M/B say nothing about the mechanism (record as "node-specific, N = 1 stands").
-- M and B give each EngineCore's helper threads (NCCL proxies, ZMQ, connector) one core; a slower M/B than A is possible (intra-process oversubscription) and would be informative, not a failure.
-- `pinner.py` pins after the server is up (startup runs unpinned; first-touch memory placement unchanged) — a CPU test, not a NUMA-memory test. Rank matching relies on the `VLLM::EngineCore_DP<r>` title (setproctitle present in the venv; fallback pid order) — verify `pinner.txt` shows `ENGINE r0` and `ENGINE r1` once each.
-- `pkill -u $USER -f "vllm serve"` between arms would kill another of my lab jobs' servers if two landed on the same node simultaneously (same pattern as every earlier lab script).
-- Q1 needs arm C to finish (ratios vs C); if the job hits the 1:10 limit before C, use 1602609's store p95 (99.1 ms at B=32, different node) as a weaker reference and say so.
-- Per-CPU busy from `/proc/stat` includes every job on the node (intended); the sidecar samples at 0.5 s.
-- Task 27 `rndT` adds seeded temperature sampling (~+1 ms/step) to the rndT rank only — compare against `rndT|rndT`, never `rep|rep`. ITL p95 ≈ 2×p50 in temperature-0 streams; p50 + step trace are the robust signals. Home quota (1 GB) full — every cache is redirected in the sbatch scripts.
+- 1603076 is one node and one allocation; the arms are sequential within it, so a drift in node state
+  across the ~26 min run is not excluded (arm order A, M, B, C; the two pinned arms sit in the middle).
+- "Slow" is an absolute 65 ms threshold on rank-0 chunk steps, chosen from the round-59 data; M and B
+  sit just above it (54–58 ms p50) so their slow fractions are threshold-sensitive, while the sustained-run
+  count (0 and 4 of 11 vs A's 11 of 15) is not.
+- The node's GPUs were occupied by another tenant during the 16:07–16:27 window; whether that also
+  perturbed the 19:14 run is not knowable from the data kept.
