@@ -493,6 +493,51 @@ of one core, so a *slower* M/B than A would itself be informative (intra-process
 sharing of the launch thread). Validated on the login node with a dummy `setproctitle` tree (main → MAIN core,
 helpers → REST core per rank; single-list form unchanged for 1603071).
 
+## Result: DP2 placement follow-up (job 1603076, 2026-09-19, scored 2026-09-23)
+
+All four arms ran in one allocation on `wqd10naf05g2` (6 cores, 2 GPUs, 5 repeats each,
+`--kinds store,plain --batch-sizes 32`). Scored by `scripts/dp_ep/c26kv5_score.py`
+(`raw/c26kv5-1603076.txt`, `raw/c26kv5score-1603076.json`); per-arm CPU sidecar analysis in
+`raw/sidecar-1603076-<arm>.json`. Ratios are against arm C's store cells, as pre-registered.
+
+| arm | rank-0 chunk-step cuda p50 | slow (> 65 ms) fraction | sustained runs slow | rank-1 store p95 | vs C p95 | chunk p50 vs C | slow store cells |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| `A-on-shared` (on, unpinned) | 82.7 ms | 0.83 | 11 of 15 (35 s) | 164.8 ms | ×1.72 | ×1.75 | 4/5 |
+| `M-on-mainiso` (on, main thread reserved) | 54.7 ms | 0.25 | 0 of 10 | 116.3 ms | ×1.21 | ×1.16 | 0/5 |
+| `B-on-isolated` (on, whole EngineCore reserved) | 58.4 ms | 0.39 | 4 of 11 (10 s) | 115.0 ms | ×1.20 | ×1.19 | 1/5 |
+| `C-off-shared` (connector off) | 47.0 ms | 0.00 | 0 of 10 | 96.0 ms | ×1.00 | ×1.00 | 0/5 |
+
+**Q1 reproduced (N = 5, was N = 1).** Arm A repeats job 1602608 closely: rank-0's eager chunk steps
+run ×1.75 the connector-off cost and the peer's store-cell ITL p95 is ×1.72 (round-59 numbers were
+×1.82 / ×1.80). The state builds up rather than being present from the start — cell r0 is 0.17 slow,
+r1–r4 are 0.89–1.00.
+
+**Q2 and Q3 both FAIL as registered, but the sustained state is mostly gone.** Reserving cores cuts
+the peer cost from ×1.72 to ×1.20–1.21 and removes the *sustained* slow runs (M: 0 of 10; B: 4 of 11,
+and B's single bad cell carries the whole excursion at chunk p50 103.7 ms / p95 216.3 ms while its
+other four cells sit at 55–56 ms). Neither reaches the registered gate (≤ 1.2× **and** < 5 % slow chunk
+steps): M is 0.25 slow, B 0.39. Q4 holds (C is 0.00). By the pre-registered logic
+Q1 ∧ ¬Q2 ∧ ¬Q3 → **the slow state is not (purely) CPU placement**; a ×1.16–1.21 residual survives full
+per-rank core reservation, so the H1 family (memory / connector-internal) is back on the table.
+
+**The round-61 SMT-sibling hypothesis is killed by the sidecar.** Within arm A, slow and fast samples
+of the EngineCore main threads are not separated by any placement or contention reading: sibling busy
+16 % / 17 % (slow) vs 36 % / 18 % (fast), run-queue wait ≈ 0.02 % in both, migrations < 1.1/s, thread
+utilisation 96–97 % (slow) vs 83–84 % (fast), node-wide PSI 0. NUMA placement does not separate them
+either, and points the wrong way: in A rank 0's main thread is on the GPU's node in 21 % of slow vs
+0 % of fast samples, rank 1 in 82 % vs 17 %; arm C runs one of its EngineCore main threads 87 % on the
+far node with no slow state at all; both of B's main threads are ~100 % on the GPU node and B still
+flips one cell. So "the launch thread shares a core / a NUMA node" is not the mechanism — what core
+reservation buys is that the *sustained* state stops being entered, not a change in any per-sample
+contention reading.
+
+**Void companion jobs.** 1603014, 1603015 (DP=1 on/off) FAILED and 1603052 (`--numa-bind` arms),
+1603071 (P1–P4 placement) produced no data: on the same node every 1-GPU arm died at engine init with
+`OOM on device 0 … free: 720896 of 25250627584` — the single GPU handed to those jobs was already
+fully occupied. 1603052's `B-on-numabind` additionally hit `NUMA binding was requested, but vLLM could
+not detect the GPU-to-NUMA topology automatically. Pass --numa-bind-nodes explicitly`, so the
+`--numa-bind` remedy remains untested. Any rerun must assert free GPU memory before `vllm serve`.
+
 ## Caveats (pre-registered)
 
 - The hog is a separate process: it shares the link and root complex like a connector's copies

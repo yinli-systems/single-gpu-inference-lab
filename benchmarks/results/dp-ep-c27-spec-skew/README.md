@@ -43,3 +43,31 @@ plain temperature-sampled decode period, ~15 / 23 ms) → ITL ×1.5–1.8 — th
 Whether the rndT rank is *padded* to the peer's verification width (36–40 / 100–112 tokens per step vs its own B) or merely
 waits is read from its own step CUDA time vs the peer's (padded → equal; waiting → its CUDA time stays at the B-token cost
 and the gap is idle). The `rep` rank in `rep|rndT` is predicted unchanged vs rep|rep (it already sets the wave).
+
+### Round 2 result (job 1603006 ran 2026-09-19 18:52–19:14; scored 2026-09-23) — KILLED
+
+Raw: `raw/c27-1603006.json`. Two repeats per cell, B ∈ {8, 32}, K = 3, multiport DP2/EP2, graph mode.
+
+**The prediction is falsified at its premise.** `rndT|rndT` does not run at the plain temperature-sampled
+decode period: its step period is 25.8 ms at B=8 (predicted ≈ 15 ms) and 35.1 ms at B=32 (predicted ≈ 23 ms) —
+i.e. the same period as `rep|rep` (26.0 / 34.1 ms). With no period difference between the regimes there is
+nothing for lockstep to drag, and the skewed cells confirm it: the `rndT` rank's period in `rep|rndT` is
+26.1 ms (×1.01 of its homogeneous cell) and its ITL p50 26.3 ms (×1.02).
+
+| B | kind | skewed placement | gen tok/s homo → skew | ITL p50 | ITL p95 | period | est. padded width |
+| ---: | --- | --- | --- | ---: | ---: | ---: | --- |
+| 8 | rep | `rep\|rndT` rank 0 | 1395 → 1225 (×0.88) | ×1.02 | ×1.18 | ×1.00 | 40 → 40 |
+| 8 | rep | `rndT\|rep` rank 1 | 1395 → 1212 (×0.87) | ×1.02 | ×1.13 | ×1.02 | 40 → 40 |
+| 8 | rndT | `rndT\|rep` rank 0 | 795 → 1064 (×1.34) | ×1.02 | ×0.96 | ×1.02 | 32 → 40 |
+| 8 | rndT | `rep\|rndT` rank 1 | 795 → 985 (×1.24) | ×1.02 | ×0.98 | ×1.01 | 32 → 40 |
+| 32 | rep | either placement | ×1.00 / ×1.03 | ×1.00–1.03 | ×0.95–0.99 | ×1.00–1.02 | 120 → 120 |
+| 32 | rndT | either placement | ×1.03 | ×0.97–0.98 | ×0.96–1.00 | ×0.98–1.00 | 120 → 120 |
+
+**Gate: ITL change ×1.02 (< 5 %) → KILLED.** The gate scores the user-visible latency cost, as registered.
+
+Secondary observation, recorded but not chased: at B=8 the pairing *redistributes throughput* — the
+low-acceptance rank gains 24–34 % and the high-acceptance rank loses 12–13 %, with the low-acceptance rank's
+estimated padded width rising 32 → 40, i.e. it is carried up to the peer's verification width and spends the
+padding on its own tokens. The effect is gone at B=32 (≤ 3 %), where both ranks already fill the width. This is
+a throughput reallocation at small batch, not a latency cost, and it is symmetric (what one rank gains the
+other pays), so there is no group-aware policy to win here.
