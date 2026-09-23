@@ -227,3 +227,78 @@ stability (TTFT p50 < 1 s, clock in range) before launch:
 The Mooncake tool-agent windows (130 / 245 requests) and the shift chat and agent phases (613 /
 156 requests) are unchanged. The two original Azure-code cells (t = 0) are kept and reported as
 unsaturated.
+
+## Addendum 8 (2026-09-24): pairing swap, learned baseline, P-PAS, cache-aware pricing, window rule; before any of it runs
+
+### A. Pairing swap (live, L20 and A100, Qwen3-4B)
+`scripts/measure_pairing_swap.py`: two partial prefills at depths (k_a, k_b) get chunks (q_a, q_b)
+in state A and (q_b, q_a) in state B. Everything an aggregate or marginal-statistics model can see
+is identical between the states: prefill count, Σq, Σk, both multisets and so their max/min/
+variance, decode state, padded tokens. Only the pairing differs; ΔW = (q_a − q_b)(k_a − k_b).
+The states are built exactly through vLLM's own scheduler (cached prefixes, budget = q_a + q_b);
+every step is verified against the intended (chunks, depths). 20 trials per state, A/B
+alternating, fresh suffix tokens each trial.
+
+Configs (k_a/k_b, q_a/q_b): 4k/16k 256/768; 4k/16k 128/896; 4k/16k 384/640; 8k/24k 256/768;
+0/16k 256/768; control 4k/16k 512/512 (ΔW = 0).
+- PS1: for every config with |ΔW| ≥ 3M, the measured Δ = median(A) − median(B) has the predicted
+  sign and lies within ±25% of slope × ΔW (slope: L20 6.5, A100 3.3 ms/M, the published fits).
+- PS2: control |Δ| ≤ 1 ms.
+- Identifiability: A and B map to the same aggregate vector, so any deterministic aggregate
+  predictor has mean absolute error ≥ |Δ|/2 on the pair (|f − y_A| + |f − y_B| ≥ |y_A − y_B|).
+  This is reported as the measured |Δ|/2.
+
+### B. LPRS-style learned baseline (offline, existing steps.csv)
+An MLP with 3 layers (2 hidden layers of 64, ReLU, scikit-learn, early stopping) on 16 aggregate
+features: decode batch, Σ decode KV, max/mean decode KV, prefill count, Σq, max q, Σ prefill KV,
+max/mean prefill KV, Σq·Σk, total tokens, padded tokens, eager flag, Σq², decode KV variance. It
+sees every aggregate and marginal statistic but not the per-request pairing. Same primary and
+reverse splits, same filters.
+- LB1: MLP primary-split MAE > M2n MAE on all six datasets.
+- LB2 (sample efficiency): train on N ∈ {32, 64, 128, 256, 512, 1024, 2048} one-prefill steps
+  (5 random draws each) and test on the multi-prefill cells. Predicted: M2n reaches ≤ 5 ms MAE by
+  N = 256 on every dataset; M0 and the MLP do not reach it at any N.
+- LB3 (geometry exposure): add a fraction f ∈ {0, 1, 5, 10, 25}% of multi-prefill steps from the
+  2×512 and 4×512 cells to training; test only on the 4×256 and 8×256 cells. This is exploratory;
+  it reports how much representative geometry each model needs.
+
+### C. Live arms added to the replay and workload-shift runs (A100)
+- `ppas`: P-PAS as published (arXiv 2608.15171 Alg. 1: N_th 2, B_max 16384, B_cap 2048, prefill-token
+  cap only, no per-request cap), `--max-num-batched-tokens` 16384.
+- `ppas-8k`: the same with B_max = 8192 and MBT 8192, budget-matched to our 8192 ceiling. Labelled
+  "P-PAS-style (budget-matched)", never "P-PAS".
+- `ctl-m2n-fcfs-cache`: `ctl-m2n-fcfs` pricing the first 16 waiting requests at their prefix-cache
+  hit depth.
+
+Where they run:
+- Workload shift: these three arms are added, and every arm goes to **4 repeats** (2 per GPU;
+  GPU is a block). Report means with 95% CIs.
+- Mooncake tool-agent ×0.2: the three arms, 2 repeats.
+- R4: goodput(`ctl-m2n-fcfs-cache`) ≥ goodput(`ctl-m2n-fcfs`) on Mooncake tool-agent.
+- W4: regret(`ctl-m2n-fcfs`) ≤ regret(`ppas`) and ≤ regret(`ppas-8k`) in the workload shift.
+  This is the claim under test.
+
+### D. Window-selection rule (frozen here)
+A replay window is the earliest contiguous 240 s (after rate scaling) that has ≥ 100 requests, no
+arrival gap > 20 s, simulated `default` TTFT p50 < 1 s, and < 10% of simulated steps outside the
+clock range. No geometry statistic or controller outcome is used. The primary windows already
+chosen are checked against this rule and any deviation is reported. For robustness, two more
+non-overlapping windows per trace (Mooncake tool-agent ×0.2, Azure code ×0.5, BurstGPT ×60) are
+picked by the same rule and run with {`default`, `ppas`, `ctl-m2n-fcfs`} for one repeat each.
+
+### E. Mooncake within-slot spread
+Simulator: 10 jitter seeds. Live: a second jitter seed for Mooncake tool-agent ×0.2 with
+{`default`, `ppas`, `ctl-m2n-fcfs`}. Report the range.
+
+### F. SLO sensitivity
+The primary SLO stays TTFT ≤ 5 s and TPOT ≤ 100 ms. A sensitivity grid TTFT ∈ {2, 5, 10} s ×
+TPOT ∈ {50, 100, 200} ms is computed from the per-request records.
+
+### G. Scheduler overhead
+The controller decision time is reported vs active requests (offline on the controller code:
+p50 15 µs at 1 active and 133 µs at 256 on an M-series CPU; to be repeated on the A100 host's CPU).
+
+### H. vLLM 0.30.0 minimal replication (A100, Qwen3-4B)
+Partition cells (1×2048 / 4×512 / 8×256) and the pairing swap on vLLM 0.30.0, with the tracer
+re-anchored. Pass criterion: 12–16k ratio 1×2048/8×256 within ±15% of the 0.29 value (2.02×),
+and PS1 holds.
