@@ -138,7 +138,13 @@ def main():
     ap.add_argument("--alpha", type=float, default=0.05)
     ap.add_argument("--output", type=Path, required=True)
     ap.add_argument("--csv", type=Path, help="per-step CSV (all joined steps, all cells)")
+    ap.add_argument("--exclude-over-median-x", type=float, default=None,
+                    help="drop prefill steps slower than this multiple of their cell's median prefill "
+                         "step (off by default; used for one-off kernel-compile steps on a fresh machine)")
+    ap.add_argument("--exclude-first-iteration", action="store_true",
+                    help="drop each server's engine iteration 0 (warm-up; off by default)")
     args = ap.parse_args()
+    excluded_steps = []
 
     cells, joins, decode_cells = {}, {}, {}
     all_rows = []
@@ -152,6 +158,16 @@ def main():
                 all_rows.append({"cell": f.stem, **r})
             decode_cells[f.stem] = [r for r in rows if r["ctx_tokens"] == 0 and np.isfinite(r["cuda_ms"])]
             pre = [r for r in rows if r["ctx_tokens"] > 0 and np.isfinite(r["cuda_ms"])]
+            if args.exclude_first_iteration:
+                excluded_steps += [{"cell": f.stem, "i": r["i"], "cuda_ms": r["cuda_ms"], "reason": "first iteration"}
+                                   for r in pre if r["i"] == 0]
+                pre = [r for r in pre if r["i"] != 0]
+            if pre and args.exclude_over_median_x:
+                med = float(np.median([r["cuda_ms"] for r in pre]))
+                excluded_steps += [{"cell": f.stem, "i": r["i"], "cuda_ms": r["cuda_ms"], "cell_median_ms": med,
+                                    "reason": f"> {args.exclude_over_median_x:g}x cell median"}
+                                   for r in pre if r["cuda_ms"] > args.exclude_over_median_x * med]
+                pre = [r for r in pre if r["cuda_ms"] <= args.exclude_over_median_x * med]
             if pre:
                 cells[f.stem] = (pre, cell_meta(f.stem))
     print(f"cells with prefill steps: {len(cells)}; join match fraction min "
@@ -173,7 +189,9 @@ def main():
         "ctx_le16k_to_32k": (lambda m: m["kind"] == "ctx" and m["L"] <= 16384, one, lambda m: m["kind"] == "ctx" and m["L"] == 32768, one),
         "batch_le16_to_32": (lambda m: m["kind"] in ("ctx", "load") and m["bg"] <= 16 and m["L"] == 16384, one, lambda m: m["kind"] == "load" and m["bg"] == 32, one),
     }
-    report = {"target": "cuda_ms", "alpha": args.alpha, "lambda": LAMBDA, "splits": {}}
+    report = {"target": "cuda_ms", "alpha": args.alpha, "lambda": LAMBDA, "splits": {},
+              "exclude_over_median_x": args.exclude_over_median_x,
+              "exclude_first_iteration": args.exclude_first_iteration, "excluded_steps": excluded_steps}
     for split, (tr_cell, tr_row, te_cell, te_row) in splits.items():
         tr = [r for k, (rows, m) in cells.items() if tr_cell(m) for r in rows if tr_row(r)]
         te = [r for k, (rows, m) in cells.items() if te_cell(m) for r in rows if te_row(r)]
