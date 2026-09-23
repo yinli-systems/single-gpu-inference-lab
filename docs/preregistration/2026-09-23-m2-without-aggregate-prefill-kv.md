@@ -194,3 +194,17 @@ Disk was freed on the L20 so the 7B model fits. Same cells and filters as the ot
 - Partition gap at 12–16k, budget 2048 (1×2048 / 8×256): below the L20 Qwen3-4B's 1.88×,
   because the 7B has a larger fixed cost per step (A100: 7B 1.48× vs 4B 2.02×). **Accepted range
   1.3–1.7×.**
+
+## Addendum 7 (2026-09-24): Azure-code window correction, before any shift or corrected run
+
+The Azure 2023 code trace has 63 requests in its first 60 s, **none between 60 and 120 s**, then
+~4 req/s. The addendum-4 cells ×0.25 and ×0.5 with a 240 s window starting at t = 0 therefore
+replay the same 63 requests. The window was not checked at design time. Both cells are
+unsaturated (every arm meets the SLO), so they carry no information about the arms; they are
+kept and reported as such.
+
+Corrections (same arms, SLOs, predictions R1–R3 and W1–W3):
+- New cells `azure-code-t120` at ×0.25 and ×0.5: the trace from t = 120 s on, 240 s window,
+  2 repeats (one per A100 GPU), run after the BurstGPT control.
+- Workload-shift `code` phase: offset 120 s instead of 0 (Azure code ×0.5, 150 s). This is changed
+  before any shift run starts.
