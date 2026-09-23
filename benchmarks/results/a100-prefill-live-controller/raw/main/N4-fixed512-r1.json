@@ -1,0 +1,154 @@
+{
+  "schema_version": 1,
+  "result_type": "prefill_interference",
+  "generated_at_utc": "2026-09-23T10:31:43Z",
+  "provenance": {
+    "commit": "8ce9c7aa4dec35fcd79fea711d0336bdc82ed5b0",
+    "dirty": false
+  },
+  "model": "/root/lab/models/Qwen3-4B",
+  "workload": {
+    "background": 8,
+    "background_prompt_tokens": 128,
+    "background_prompt_tokens_list": "",
+    "background_tokens": 4096,
+    "settle_tokens": 64,
+    "inject": 4,
+    "long_tokens": 16384,
+    "long_output_tokens": 32,
+    "repeats": 1,
+    "seed": 113,
+    "max_model_len": 40960,
+    "max_num_seqs": 64,
+    "long_prefill_token_threshold": 0
+  },
+  "trace": true,
+  "conditions": {
+    "chunk8192": {
+      "flags": [
+        "--max-num-batched-tokens",
+        "8192",
+        "--no-enable-prefix-caching",
+        "--enable-logging-iteration-details"
+      ],
+      "repeats": [
+        {
+          "background": {
+            "before": {
+              "count": 554,
+              "p50_ms": 7.353243068791926,
+              "p95_ms": 7.786346017383039,
+              "p99_ms": 8.19509697612375,
+              "max_ms": 15.989313018508255,
+              "slo_attainment": {
+                "10ms": 0.9981949458483754,
+                "25ms": 1.0,
+                "50ms": 1.0
+              }
+            },
+            "during": {
+              "count": 1336,
+              "p50_ms": 38.89415692538023,
+              "p95_ms": 59.021783992648125,
+              "p99_ms": 60.640333918854594,
+              "max_ms": 120.71906798519194,
+              "slo_attainment": {
+                "10ms": 0.05389221556886228,
+                "25ms": 0.24251497005988024,
+                "50ms": 0.75
+              }
+            },
+            "after": {
+              "count": 3128,
+              "p50_ms": 7.657577050849795,
+              "p95_ms": 8.3461650647223,
+              "p99_ms": 9.219739004038274,
+              "max_ms": 16.861077048815787,
+              "slo_attainment": {
+                "10ms": 0.9948849104859335,
+                "25ms": 1.0,
+                "50ms": 1.0
+              }
+            }
+          },
+          "long_requests": [
+            {
+              "ttft_s": 5.757392965024337,
+              "e2e_s": 6.181450090021826,
+              "output_tokens": 32
+            },
+            {
+              "ttft_s": 5.754392770002596,
+              "e2e_s": 6.178210970014334,
+              "output_tokens": 32
+            },
+            {
+              "ttft_s": 5.7516102619702,
+              "e2e_s": 6.175420332001522,
+              "output_tokens": 32
+            },
+            {
+              "ttft_s": 5.748933640890755,
+              "e2e_s": 6.172977756941691,
+              "output_tokens": 32
+            }
+          ],
+          "injection_window_s": 6.181553127942607,
+          "background_output_tokens_total": 5026,
+          "background_tok_per_s_overall": 517.3021994617644,
+          "background_tok_per_s_during": 216.12691379466605
+        }
+      ],
+      "command": [
+        "/root/lab/venv-ctl/bin/vllm",
+        "serve",
+        "/root/lab/models/Qwen3-4B",
+        "--port",
+        "8124",
+        "--max-model-len",
+        "40960",
+        "--gpu-memory-utilization",
+        "0.9",
+        "--max-num-seqs",
+        "64",
+        "--seed",
+        "0",
+        "--max-num-batched-tokens",
+        "8192",
+        "--no-enable-prefix-caching",
+        "--enable-logging-iteration-details",
+        "--served-model-name",
+        "m"
+      ]
+    }
+  },
+  "nvidia_smi_before": {
+    "available": true,
+    "fields": [
+      "name",
+      "driver_version",
+      "clocks.current.sm",
+      "memory.used",
+      "temperature.gpu",
+      "power.draw"
+    ],
+    "rows": [
+      [
+        "NVIDIA A100-SXM4-80GB",
+        "595.91.07",
+        "1410 MHz",
+        "0 MiB",
+        "45",
+        "133.51 W"
+      ],
+      [
+        "NVIDIA A100-SXM4-80GB",
+        "595.91.07",
+        "1275 MHz",
+        "73487 MiB",
+        "38",
+        "102.73 W"
+      ]
+    ]
+  }
+}

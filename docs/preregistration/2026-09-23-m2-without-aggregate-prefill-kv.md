@@ -94,3 +94,16 @@ and M2n as anchors: N ∈ {4, 8}, 3 repeats, the four arms interleaved, same ser
 evaluated against the best fixed budget with violations ≤ 5% across **both** blocks. If an anchor
 differs by more than 5% in safe prefill tok/s between blocks, cross-block comparisons are
 reported as unreliable.
+
+## Outcomes (recorded 2026-09-23 after all runs)
+
+- Qwen2.5-1.5B (L20): predictions 1–3 held; slope held at budget 2048, missed at 1024.
+- Qwen2.5-7B (A100): predictions 1–3 held (M2n MAE 1.23 vs M2 16.98 ms, signed +0.88; reverse
+  1.60 vs 2.32); slope held (2.27–2.32 / 2.52–2.58 ms/M, range 2.0–3.0).
+- Live A100 controller: P1 held (M2 at 64-token budgets at N=8, 2,806 tok/s); P2 held (M2n 2.38× /
+  4.80× M0 at ≤ 0.6% violations); **P3 failed** (M2n vs best safe fixed-512: 0.98× / 1.02× main
+  block, 1.07× / 1.04× follow-up block; fixed-768/1024 violate 23–59%). The N=4 M2n anchor moved
+  +7.1% between blocks, above the 5% threshold, so N=4 cross-block comparisons are unreliable.
+
+Evidence: `benchmarks/results/prefill-geometry-attention-shape/`,
+`benchmarks/results/a100-prefill-live-controller/`.
