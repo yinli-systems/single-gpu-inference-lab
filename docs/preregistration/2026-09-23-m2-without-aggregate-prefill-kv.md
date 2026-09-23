@@ -327,3 +327,26 @@ accepts both). Every cell of the shape campaigns runs on Qwen3-4B, plus the pair
 - H1: 12–16k ratio 1×2048 / 8×256 within ±15% of the L20 0.29 value (1.88×), i.e. 1.60–2.16×.
 - H2: pairing swap PS1 and PS2 hold on 0.30.
 - H3: M2n primary-split MAE ≤ 5 ms and below M2's, as in addendum 1.
+
+## Addendum 10 (2026-09-24): stage-1 replay outcome and SLO-aligned deadline arms; before any D = 100 run
+
+Stage-1 live replay outcome (addendum 4): on Mooncake tool-agent ×0.2 both deadline controllers
+collapse. `ctl-m2n-fcfs` and `ctl-m0-fcfs` reach 0.06 req/s primary goodput against 0.98 for
+`default` and `b8192`, with TTFT p50 of 42–45 s. They fill every step to the 65 ms deadline (TPOT
+p50 52–53 ms) and so admit less prefill per second than the stock 2048 budget; the queue grows.
+- R1: held at ×0.1 (0.51 vs 0.49); a tie at ×0.2 (0.06 vs 0.06).
+- R2: held at ×0.2 (TTFT p90 188 s vs 64 s); **failed** at ×0.1 (2.40 s vs 3.76 s).
+- R3: held. No arm beats the best stock arm; the controllers lose.
+- V2: held for the four cells measured so far.
+- The Azure-code t = 0 cells are unsaturated, as expected; every arm reaches 0.26 req/s.
+
+The 65 ms deadline was chosen on the synthetic workload to match the L20's relative tightness. It is
+stricter than the serving SLO needs (TPOT ≤ 100 ms). **Exploratory arms with the step deadline set
+equal to the TPOT SLO (D = 100 ms)**, added after stage 3 on each GPU:
+`ctl-m2n-fcfs-D100`, `ctl-m0-fcfs-D100`, `ctl-m2n-fcfs-cache-D100`. They run on Mooncake tool-agent
+×0.2 (1 repeat per GPU) and in the workload shift (2 repeats per GPU).
+- R5: goodput(`ctl-m2n-fcfs-D100`) ≥ 0.9 × the best stock arm on Mooncake ×0.2. If it holds, the
+  collapse came from deadline tightness; if it fails, per-step deadline control is the wrong
+  objective for SLO goodput.
+- R6: goodput(`ctl-m2n-fcfs-D100`) ≥ goodput(`ctl-m0-fcfs-D100`) on Mooncake ×0.2.
+- W5: regret(`ctl-m2n-fcfs-D100`) ≤ the smallest regret among the stock arms (the claim under test).
