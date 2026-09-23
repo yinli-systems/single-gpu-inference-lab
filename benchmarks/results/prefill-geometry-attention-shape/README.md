@@ -56,6 +56,7 @@ Median step CUDA ms at 12–16k aggregate KV (full tables in [`partition.md`](pa
 | A100 Qwen3-8B | 111.2 / 90.0 / 78.7 | 1.41× | 216.0 / 144.7 / 133.4 | 1.62× |
 | **A100 Qwen2.5-7B** | 94.7 / 77.8 / 69.6 | **1.36×** | 179.9 / 130.3 / 121.7 | **1.48×** |
 | **A100 Qwen2.5-1.5B** | 29.4 / 22.6 / 19.2 | **1.53×** | 56.9 / 34.8 / 31.3 | **1.82×** |
+| **L20 Qwen2.5-7B** | 190.3 / 164.5 / 150.6 | **1.26×** | 381.2 / 292.5 / 277.5 | **1.37×** (pre-registered 1.3–1.7: held) |
 
 Attention-work slope (ms per million units of Σqᵢ(kvᵢ+(qᵢ+1)/2)), from fits on the proxy alone,
 one fit per partition:
@@ -68,6 +69,7 @@ one fit per partition:
 | A100 | Qwen3-8B | 1152 | 3.29–3.43 | 3.20–3.33 | — |
 | A100 | Qwen2.5-7B | 784 | 2.52–2.58 | 2.27–2.32 | 2.25, range 2.0–3.0: **held** |
 | A100 | Qwen2.5-1.5B | 336 | 0.98–1.02 | 0.98–1.00 | — (run after the addendum; no prediction) |
+| L20 | Qwen2.5-7B | 784 | 4.21–4.29 | 4.22–4.30 | 4.4–4.9, range 4.0–5.6 (2048) / 4.0–6.6 (1024): **held** |
 
 Normalized per 1,000 layer·query-head units at budget 2048: the L20 gives 5.6 (4B) and 6.2
 (1.5B), the A100 gives 2.8 (4B/8B), 2.9 (7B) and 2.9 (1.5B). So one GPU-specific constant times the attention
@@ -90,6 +92,7 @@ median dropped). Primary split = train on one-prefill steps, test on multi-prefi
 | **L20 Qwen2.5-1.5B** (unseen) | 116.4 | 23.9 / 67.3 / −23.7 | **1.75 / 3.4 / −0.6** | 11.5 | 2.3 | 1.6 |
 | **A100 Qwen2.5-7B** (unseen) | 122.7 | 17.0 / 48.4 / −16.6 | **1.23 / 2.3 / +0.9** | 11.4 | 1.4 | 1.0 |
 | A100 Qwen2.5-1.5B (after the addendum) | 55.9 | 17.4 / 45.9 / −17.2 | 2.13 / 3.7 / −1.7 | 6.2 | 2.1 | 1.7 |
+| **L20 Qwen2.5-7B** (unseen, addendum 6) | 235.7 | 11.4 / 32.5 / −10.9 | **2.31 / 6.5 / +1.7** | 20.0 | 2.0 | 1.8 |
 
 The first three rows are where the diagnosis was made, so they are not evidence for M2n. The
 last two are the test.
@@ -101,6 +104,10 @@ Pre-registered criteria on the two unseen campaigns:
 | 1. M2n MAE < M2 MAE (primary) | 1.75 < 23.89 ✓ | 1.23 < 16.98 ✓ |
 | 2. M2n MAE ≤ 5 ms and \|signed\| ≤ 5 ms | 1.75, −0.62 ✓ | 1.23, +0.88 ✓ |
 | 3. reverse split: M2n ≤ 1.5 × M2 | 2.16 ≤ 4.29 ✓ | 1.60 ≤ 3.48 ✓ |
+
+The same three criteria on the L20 Qwen2.5-7B campaign (addendum 6, run after the disk was freed):
+primary MAE 2.31 < 11.43 ✓; 2.31 ≤ 5 ms with signed +1.68 ✓; reverse 2.55 ≤ 4.67 ✓. The
+pre-registered slope and partition-gap ranges held as well (table above).
 
 Two further readings:
 
@@ -127,8 +134,9 @@ balanced (8×4096) at equal aggregate:
 | A100 | Qwen3-8B | 1.054 |
 | A100 | Qwen2.5-7B | 1.034 |
 | A100 | Qwen2.5-1.5B | 1.066 |
+| L20 | Qwen2.5-7B | 1.002 |
 
-Both L20 models: no effect. All four A100 models: 3–9% slower. The decode-skew sensitivity
+All three L20 models: no effect. All four A100 models: 3–9% slower. The decode-skew sensitivity
 belongs to the GPU, not to one model.
 
 ### Mechanism: not the attention kernel (open)
