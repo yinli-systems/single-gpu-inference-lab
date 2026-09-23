@@ -264,6 +264,8 @@ def main():
     ap.add_argument("--max-seqs", type=int, default=256)
     ap.add_argument("--max-requests", type=int, default=20000)
     ap.add_argument("--max-prompt", type=int, default=32768)
+    ap.add_argument("--window-s", type=float, default=None,
+                    help="only requests arriving within this many (scaled) seconds; off by default (whole trace)")
     ap.add_argument("--output", type=Path, required=True)
     args = ap.parse_args()
     pre, dec, rng = build_clock(args.steps)
@@ -283,7 +285,8 @@ def main():
         for c in args.configs.split(","):
             cn, b, thr = c.split(":")
             for s in map(float, args.rate_scales.split(",")):
-                st = simulate(reqs, budget=int(b), threshold=int(thr), max_seqs=args.max_seqs, kv_capacity=args.kv_capacity,
+                sreqs = reqs if args.window_s is None else [x for x in reqs if x[0] / s < args.window_s]
+                st = simulate(sreqs, budget=int(b), threshold=int(thr), max_seqs=args.max_seqs, kv_capacity=args.kv_capacity,
                               slope=args.slope, clock=(pre, dec), clock_range=rng, rate_scale=s)
                 sm = summarize(st)
                 out["results"][name]["runs"][f"{cn}@x{s:g}"] = sm

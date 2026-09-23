@@ -181,3 +181,16 @@ the best of the six stock arms in that phase (mean of repeats). Regret(arm) = Σ
   Prior: uncertain. On fixed workloads M2n matched the best fixed budget but did not beat it, so W2
   can only hold if the best fixed budget changes between phases (W1).
 - W3: regret(`ctl-m2n-fcfs`) < regret(`ctl-m0-fcfs`).
+
+## Addendum 6 (2026-09-24): Qwen2.5-7B-Instruct on the L20, before the campaign starts
+
+Disk was freed on the L20 so the 7B model fits. Same cells and filters as the other shape campaigns
+(`campaign29.sh` with the 32k cell at 32,640 tokens).
+
+- Predictions 1–3 (M2n) apply unchanged.
+- Slope: L20 constant 5.6–6.2 ms/M per 1,000 layer·query-head units (Qwen3-4B, Qwen2.5-1.5B at
+  budget 2048) × 0.784 = **4.4–4.9 ms/M at budget 2048, accepted range 4.0–5.6**. At budget 1024
+  the L20 1.5B came out 34% high, so the accepted range there is 4.0–6.6.
+- Partition gap at 12–16k, budget 2048 (1×2048 / 8×256): below the L20 Qwen3-4B's 1.88×,
+  because the 7B has a larger fixed cost per step (A100: 7B 1.48× vs 4B 2.02×). **Accepted range
+  1.3–1.7×.**
