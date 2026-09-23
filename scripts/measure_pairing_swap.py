@@ -8,8 +8,8 @@ changes. The attention-work difference is (q_a - q_b)(k_a - k_b); the q(q+1)/2 t
 
 Construction (exact, through vLLM's own scheduler): the prefixes of length k_a and k_b are put in
 the prefix cache first; then both requests (prefix + fresh suffix of length q) are submitted
-together with max_num_batched_tokens = q_a + q_b, so the first engine step executes exactly
-(q_a @ k_a, q_b @ k_b). The shallow request is always first in the batch. Every executed step
+together, while one background request is decoding, with max_num_batched_tokens = q_a + q_b + 1,
+so the next engine step executes exactly (q_a @ k_a, q_b @ k_b) plus the one decode row. The shallow request is always first in the batch. Every executed step
 is checked against the intended (chunks, depths) in the engine trace; mismatches are dropped and
 counted. States alternate A, B, B, A, ... and every trial uses fresh suffix tokens.
 
@@ -43,35 +43,60 @@ CONFIGS = [
 
 
 def run(args):
-    # keep the default multiprocess engine core: the tracer hooks sit in its busy loop
+    """AsyncLLM with one background decoder so the engine is mid-step when A and B are submitted
+    together; the next step is then exactly [decode x1] + (q1 @ k_a) + (q2 @ k_b) with budget
+    q_a + q_b + 1 (the decode row is identical in both states)."""
+    import asyncio
     rnd = random.Random(args.config_index)
     toks = lambda n: [rnd.randrange(1000, args.vocab) for _ in range(n)]
     label, ka, kb, qa, qb = CONFIGS[args.config_index]
     stem = f"pairswap-{args.config_index}"
     os.environ["VLLM_EXP_ITER_TRACE"] = str(args.trace_dir / f"{stem}.jsonl")
     os.environ["VLLM_EXP_STEP_TRACE"] = str(args.trace_dir / f"{stem}.steps.jsonl")
-    from vllm import LLM, SamplingParams
+    from vllm import SamplingParams
+    from vllm.engine.arg_utils import AsyncEngineArgs
+    from vllm.v1.engine.async_llm import AsyncLLM
 
-    sp = SamplingParams(max_tokens=1, temperature=0)
-    llm = LLM(model=args.model, max_model_len=args.max_model_len, gpu_memory_utilization=0.85,
-              enable_prefix_caching=True, max_num_batched_tokens=qa + qb, max_num_seqs=8,
-              enable_logging_iteration_details=True, disable_log_stats=False, seed=0)
-    # (iteration details, and so the engine iteration tracer, only run with stats logging on;
-    # the LLM class turns it off by default)
-    pa, pb = toks(ka), toks(kb)
-    warm = [{"prompt_token_ids": p} for p in (pa, pb) if p]
-    if warm:
-        llm.generate(warm, sp, use_tqdm=False)              # put the prefixes in the cache
-    for _ in range(4):                                       # warm-up of this batch shape, not recorded
-        llm.generate([{"prompt_token_ids": pa + toks(qa)}, {"prompt_token_ids": pb + toks(qb)}], sp, use_tqdm=False)
-    plan = []
-    for i in range(args.repeats):
-        plan += ["A", "B"] if i % 2 == 0 else ["B", "A"]
-    intended = []
-    for state in plan:
-        q1, q2 = (qa, qb) if state == "A" else (qb, qa)
-        llm.generate([{"prompt_token_ids": pa + toks(q1)}, {"prompt_token_ids": pb + toks(q2)}], sp, use_tqdm=False)
-        intended.append([state, [q1, q2], [ka, kb]])
+    async def go():
+        eng = AsyncLLM.from_engine_args(AsyncEngineArgs(
+            model=args.model, max_model_len=args.max_model_len, gpu_memory_utilization=0.85,
+            enable_prefix_caching=True, max_num_batched_tokens=qa + qb + 1, max_num_seqs=8,
+            enable_logging_iteration_details=True, disable_log_stats=False, seed=0))
+        n = [0]
+
+        async def gen(ids, max_tokens):
+            n[0] += 1
+            async for _ in eng.generate({"prompt_token_ids": ids}, SamplingParams(max_tokens=max_tokens, temperature=0, ignore_eos=True), f"r{n[0]}"):
+                pass
+
+        pa, pb = toks(ka), toks(kb)
+        for p in (pa, pb):
+            if p:
+                await gen(p, 1)                                  # put the prefixes in the cache
+        stop = asyncio.Event()
+
+        async def blocker():                                     # keeps exactly one decode running
+            while not stop.is_set():
+                await gen(toks(16), 4000)
+
+        bt = asyncio.create_task(blocker())
+        await asyncio.sleep(1.0)
+        plan = []
+        for i in range(args.repeats):
+            plan += ["A", "B"] if i % 2 == 0 else ["B", "A"]
+        for _ in range(4):                                       # warm-up of this batch shape, not recorded
+            await asyncio.gather(gen(pa + toks(qa), 1), gen(pb + toks(qb), 1))
+        intended = []
+        for state in plan:
+            q1, q2 = (qa, qb) if state == "A" else (qb, qa)
+            await asyncio.sleep(0.05)
+            await asyncio.gather(gen(pa + toks(q1), 1), gen(pb + toks(q2), 1))
+            intended.append([state, [q1, q2], [ka, kb]])
+        stop.set(); bt.cancel()
+        eng.shutdown()
+        return intended
+
+    intended = asyncio.run(go())
     (args.trace_dir / f"{stem}.plan.json").write_text(json.dumps(
         {"config_index": args.config_index, "label": label, "k": [ka, kb], "q": [qa, qb], "model": args.model, "intended": intended}) + "\n")
 
@@ -83,7 +108,7 @@ def analyze(args):
         pl = json.load(open(plan_path))
         (ka, kb), (qa, qb), intended = pl["k"], pl["q"], pl["intended"]
         rows, info = load_joined(plan_path.with_name(plan_path.name.replace(".plan.json", ".jsonl")))
-        pre = [r for r in rows if r["ctx_tokens"] == qa + qb and r["ctx_reqs"] == 2][-len(intended):]
+        pre = [r for r in rows if r["ctx_tokens"] == qa + qb and r["ctx_reqs"] == 2 and r["gen_reqs"] == 1][-len(intended):]
         got = {"A": [], "B": []}; mismatched = 0
         for (state, qs, ks), r in zip(intended, pre):
             if list(r["ctx_chunks"]) == qs and list(r.get("ctx_depths", [])) == ks and r["cuda_ms"] == r["cuda_ms"]:
