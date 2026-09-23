@@ -11,6 +11,10 @@ unless --no-prefix-caching). Outputs: max_tokens = the trace's output length, ig
 Per request: submit time, TTFT, end, output tokens, TPOT = (end - first token) / (tokens - 1).
 Goodput at (TTFT <= a, TPOT <= b) = requests meeting both / arrival window; several SLO pairs are
 reported. With --trace-dir the tracer v2 records every engine iteration and runner step.
+
+Non-stationary workloads: --phases "NAME=KIND:PATH[@JITTER]:SCALE:OFFSET_S:DUR_S;..." concatenates
+segments of several traces (OFFSET_S in the trace's own time, DUR_S in replayed seconds, arrivals
+time-scaled by SCALE); every request records its phase and the summary is also given per phase.
 """
 
 from __future__ import annotations
@@ -117,8 +121,9 @@ def main():
     ap.add_argument("--long-prefill-token-threshold", type=int, default=0)
     ap.add_argument("--no-prefix-caching", action="store_true")
     ap.add_argument("--startup-timeout", type=int, default=900)
-    ap.add_argument("--trace", required=True, help="KIND:PATH[@JITTER_S] (see simulate_geometry_prevalence.py)")
-    ap.add_argument("--rate-scale", type=float, required=True)
+    ap.add_argument("--trace", help="KIND:PATH[@JITTER_S] (see simulate_geometry_prevalence.py)")
+    ap.add_argument("--rate-scale", type=float)
+    ap.add_argument("--phases", help="NAME=KIND:PATH[@JITTER]:SCALE:OFFSET_S:DUR_S;... (replaces --trace/--rate-scale/--window-s)")
     ap.add_argument("--window-s", type=float, default=240.0)
     ap.add_argument("--max-prompt", type=int, default=32768)
     ap.add_argument("--vocab-size", type=int, default=151_000)
@@ -127,10 +132,26 @@ def main():
     ap.add_argument("--output", type=Path, required=True)
     args = ap.parse_args()
 
-    kind, path = args.trace.split(":", 1)
-    path, _, jit = path.partition("@")
-    allreqs, dropped = load_trace(kind, Path(path), 10**9, args.max_prompt, float(jit or 0))
-    reqs = [(t / args.rate_scale, p, o, h) for t, p, o, h in allreqs if t / args.rate_scale < args.window_s]
+    phase_of, phase_bounds = [], []
+    if args.phases:
+        reqs, dropped, t0 = [], 0, 0.0
+        for spec in args.phases.split(";"):
+            name, rest = spec.split("=", 1)
+            kind, rest = rest.split(":", 1)
+            path, scale, off, dur = rest.rsplit(":", 3)
+            path, _, jit = path.partition("@")
+            allr, d = load_trace(kind, Path(path), 10**9, args.max_prompt, float(jit or 0))
+            dropped += d
+            seg = [((t - float(off)) / float(scale) + t0, p, o, h) for t, p, o, h in allr
+                   if 0 <= (t - float(off)) / float(scale) < float(dur)]
+            reqs += seg; phase_of += [name] * len(seg); phase_bounds.append((name, t0, t0 + float(dur)))
+            t0 += float(dur)
+        args.window_s = t0
+    else:
+        kind, path = args.trace.split(":", 1)
+        path, _, jit = path.partition("@")
+        allreqs, dropped = load_trace(kind, Path(path), 10**9, args.max_prompt, float(jit or 0))
+        reqs = [(t / args.rate_scale, p, o, h) for t, p, o, h in allreqs if t / args.rate_scale < args.window_s]
     prompts = build_prompts(reqs, args.vocab_size, args.seed)
 
     flags = ["--max-num-batched-tokens", str(args.max_num_batched_tokens)]
@@ -153,8 +174,14 @@ def main():
         warm = [(0.0, 256, 8, None)] * 2   # compile / warm-up, not measured
         asyncio.run(replay(server.base_url, args.served_model_name, warm, build_prompts(warm, args.vocab_size, args.seed + 1), 0.1))
         recs = asyncio.run(replay(server.base_url, args.served_model_name, reqs, prompts, 1.0))
+    for r, ph in zip(recs, phase_of):
+        r["phase"] = ph
     report["requests"] = recs
     report["summary"] = summarize(recs, args.window_s)
+    if phase_bounds:
+        report["phases"] = [{"name": n, "start_s": a, "end_s": b,
+                             "summary": summarize([r for r in recs if a <= r["arrival_s"] < b], b - a)}
+                            for n, a, b in phase_bounds]
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(report) + "\n")
     s = report["summary"]
