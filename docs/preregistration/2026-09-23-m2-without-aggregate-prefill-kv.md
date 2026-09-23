@@ -84,3 +84,13 @@ Predictions (the replay's truth model is itself a fit, so these can fail):
 
 Gates reported as on L20: aggregate → geometry (M0 vs M2 and M0 vs M2n); geometry → best safe
 fixed budget (≥ 15%).
+
+## Addendum 3 (2026-09-23, during the live run): stronger fixed baselines
+
+The first live repeat showed fixed-512 at 0% violations of 65 ms (the replay had predicted 14%),
+so the best safe fixed budget may lie above the pre-registered fixed arms. That would make P3
+too easy. After the main 36-run block, a second block runs fixed-768 and fixed-1024 with fixed-512
+and M2n as anchors: N ∈ {4, 8}, 3 repeats, the four arms interleaved, same server settings. P3 is
+evaluated against the best fixed budget with violations ≤ 5% across **both** blocks. If an anchor
+differs by more than 5% in safe prefill tok/s between blocks, cross-block comparisons are
+reported as unreliable.
