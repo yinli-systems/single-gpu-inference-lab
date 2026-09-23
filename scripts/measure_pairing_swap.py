@@ -43,7 +43,7 @@ CONFIGS = [
 
 
 def run(args):
-    os.environ.setdefault("VLLM_ENABLE_V1_MULTIPROCESSING", "0")
+    # keep the default multiprocess engine core: the tracer hooks sit in its busy loop
     rnd = random.Random(args.config_index)
     toks = lambda n: [rnd.randrange(1000, args.vocab) for _ in range(n)]
     label, ka, kb, qa, qb = CONFIGS[args.config_index]
