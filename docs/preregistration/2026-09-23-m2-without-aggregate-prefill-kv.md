@@ -43,3 +43,16 @@ Also predicted before looking: on Qwen2.5-1.5B (28 layers, 12 query heads of dim
 attention-work slope in the partition fits is about (28·12)/(36·32) ≈ 0.29 of Qwen3-4B's L20
 slope (6.4–6.6 ms/M), i.e. **1.9 ms/M, accepted range 1.3–2.5 ms/M** (kernel efficiency at fewer
 heads per step may differ).
+
+## Addendum (2026-09-23, before the A100 Qwen2.5-7B-Instruct campaign starts)
+
+Outcome on Qwen2.5-1.5B (L20), for the record: predictions 1–3 held (primary MAE 1.75 vs M2
+23.89 ms, signed −0.62 ms; reverse 2.16 vs 2.86 ms). The slope prediction held at budget 2048
+(2.09–2.10 ms/M) and **missed** at budget 1024 (2.53–2.55 ms/M, above the 2.5 bound).
+
+New, for Qwen2.5-7B-Instruct on the A100 (28 layers, 28 query / 4 KV heads, dim 128), same cells:
+
+- Predictions 1–3 above apply unchanged.
+- Attention-work slope ≈ (28·28)/(36·32) × 3.3 ms/M (A100 Qwen3-4B) = **2.25 ms/M**. Given the
+  1.5B slope came out 10–35% above its head-count scaling, accepted range **2.0–3.0 ms/M** at both
+  budgets.
