@@ -128,6 +128,7 @@ def main():
     ap.add_argument("--max-prompt", type=int, default=32768)
     ap.add_argument("--vocab-size", type=int, default=151_000)
     ap.add_argument("--seed", type=int, default=113)
+    ap.add_argument("--jitter-seed", type=int, default=0, help="seed of the within-slot arrival spread (@JITTER traces)")
     ap.add_argument("--trace-dir", type=Path)
     ap.add_argument("--output", type=Path, required=True)
     args = ap.parse_args()
@@ -140,7 +141,7 @@ def main():
             kind, rest = rest.split(":", 1)
             path, scale, off, dur = rest.rsplit(":", 3)
             path, _, jit = path.partition("@")
-            allr, d = load_trace(kind, Path(path), 10**9, args.max_prompt, float(jit or 0))
+            allr, d = load_trace(kind, Path(path), 10**9, args.max_prompt, float(jit or 0), args.jitter_seed)
             dropped += d
             seg = [((t - float(off)) / float(scale) + t0, p, o, h) for t, p, o, h in allr
                    if 0 <= (t - float(off)) / float(scale) < float(dur)]
@@ -150,7 +151,7 @@ def main():
     else:
         kind, path = args.trace.split(":", 1)
         path, _, jit = path.partition("@")
-        allreqs, dropped = load_trace(kind, Path(path), 10**9, args.max_prompt, float(jit or 0))
+        allreqs, dropped = load_trace(kind, Path(path), 10**9, args.max_prompt, float(jit or 0), args.jitter_seed)
         reqs = [(t / args.rate_scale, p, o, h) for t, p, o, h in allreqs if t / args.rate_scale < args.window_s]
     prompts = build_prompts(reqs, args.vocab_size, args.seed)
 

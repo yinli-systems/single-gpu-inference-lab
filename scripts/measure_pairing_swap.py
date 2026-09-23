@@ -55,7 +55,9 @@ def run(args):
     sp = SamplingParams(max_tokens=1, temperature=0)
     llm = LLM(model=args.model, max_model_len=args.max_model_len, gpu_memory_utilization=0.85,
               enable_prefix_caching=True, max_num_batched_tokens=qa + qb, max_num_seqs=8,
-              enable_logging_iteration_details=True, seed=0)
+              enable_logging_iteration_details=True, disable_log_stats=False, seed=0)
+    # (iteration details, and so the engine iteration tracer, only run with stats logging on;
+    # the LLM class turns it off by default)
     pa, pb = toks(ka), toks(kb)
     warm = [{"prompt_token_ids": p} for p in (pa, pb) if p]
     if warm:
