@@ -107,3 +107,43 @@ reported as unreliable.
 
 Evidence: `benchmarks/results/prefill-geometry-attention-shape/`,
 `benchmarks/results/a100-prefill-live-controller/`.
+
+## Addendum 4 (2026-09-24): L20 live M2n arm and live trace-replay goodput, before launch
+
+### L20 live controller with M2n
+
+Same protocol as L20 campaign20 (100 ms, 8 decoders + N ∈ {4, 8} × 16k, fresh server per run,
+interleaved, 3 repeats). Arms: fixed-256, fixed-512, M0, M2, M2n. M2n was exported from the same
+L20 traces (campaigns 18+19) that reproduce the published `m2-one.json` to 3e-11, q95 11.42 ms.
+
+- L1: M2n ≥ M0 in safe prefill tok/s at both N, violations ≤ 5%.
+- L2: M2n within ±10% of M2 at both N (on the L20, M2 did not collapse at N=8).
+- L3: M2n ≥ 1.15 × the best fixed arm with ≤ 5% violations. **Predicted to fail** (L20 M2: +8–10%;
+  A100 M2n: −2…+7%).
+
+### Live trace replay (A100, Qwen3-4B)
+
+`scripts/replay_trace_serving.py` at de36031: prefix caching on, `max-num-seqs` 256, 240 s arrival
+window per run, 2 repeats, arms interleaved. GPU 0 replays Mooncake tool-agent (3 s slot spread) at
+×0.1 and ×0.2. GPU 1 replays Azure 2023 code at ×0.25 and ×0.5.
+
+Arms:
+- `default`: `--max-num-batched-tokens` 2048 (the A100 API-server default)
+- `agentx`: 2048 with `--long-prefill-token-threshold` 512
+- `b8192`: 8192
+- `ctl-m2n-fcfs`: controller D = 65 ms, M2n, fcfs partition, ceiling 8192
+- `ctl-m0-fcfs`: the same with M0
+- `ctl-m2n-equal`: the same as `ctl-m2n-fcfs` with equal partition
+
+Primary SLO: TTFT ≤ 5 s and TPOT ≤ 100 ms; goodput = requests meeting both ÷ 240 s. Other SLO
+pairs are reported.
+
+- R1: goodput(`ctl-m2n-fcfs`) ≥ goodput(`ctl-m0-fcfs`) in every (trace, load) cell.
+- R2: `ctl-m2n-equal` has a worse TTFT p90 than `ctl-m2n-fcfs` in every cell. Equal partition is
+  processor sharing, and the whole-horizon analysis shows sharing raises mean TTFT.
+- R3 (predicted null): no arm beats the best of {`default`, `agentx`, `b8192`} by ≥ 15% in primary
+  goodput in any cell. Per-step allocation cannot change total work, so any controller gain must
+  come from choosing the budget, which a good static setting already approximates.
+
+Known limitation: the controller prices waiting requests at depth 0 before their prefix-cache
+lookup, so it under-prices cache-hit first chunks.
