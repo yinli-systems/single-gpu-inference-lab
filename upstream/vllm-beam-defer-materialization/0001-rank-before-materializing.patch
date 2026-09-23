@@ -1,0 +1,370 @@
+From aa0faae4538ca4dcd6143f82e3922ec69826543f Mon Sep 17 00:00:00 2001
+From: Yin Li <kevinli.ai.work@gmail.com>
+Date: Wed, 23 Sep 2026 11:38:16 +0800
+Subject: [PATCH] [Perf][Beam Search] Rank beam candidates before building
+ their histories
+
+Each offline beam search step asks for 2 * beam_width logprobs per beam, so it
+produces 2 * beam_width**2 candidates, and _beam_search_step built a full
+BeamSearchSequence for every one of them - `tokens=current_beam.tokens +
+[token_id]`, `logprobs=current_beam.logprobs + [logprobs]` - before sorting and
+keeping beam_width. A beam's tokens start with the whole prompt
+(BeamSearchInstance seeds them with prompt_token_ids), so every candidate
+copied prompt + generated tokens, and almost all of those copies were thrown
+away.
+
+Rank first, build after: each candidate is scored from its parent's length
+plus one, its last token and its cumulative logprob via a new
+get_beam_search_score_from_length() (get_beam_search_score now delegates to
+it, so both are the same arithmetic), candidates are sorted with the same
+stable reverse sort, and only the survivors are materialized. EOS completions
+are still built and appended to `completed` immediately, in the original
+order. The engine calls, candidate count, scores and results are unchanged;
+only the discarded histories are no longer built.
+
+Measured on the real LLM.beam_search driven by a fake engine (CPU only, one
+pinned core, median of 5 runs, beam-logic time per step with the fake
+engine's own time subtracted):
+
+  beam  prompt   main      this change
+     4   4096    0.33 ms   0.08 ms
+     8   1024    0.50 ms   0.11 ms
+     8   4096    1.59 ms   0.17 ms
+    16   4096   14.20 ms   0.47 ms
+    32   1024   15.44 ms   1.25 ms
+    32   4096   52.77 ms   1.54 ms
+    64   1024   95.18 ms   6.05 ms
+
+On main the cost grows with prompt length; with the change it barely does,
+which is the copy being removed. This is CPU time between engine steps, on
+the critical path of every step; how much of end-to-end step time it is
+depends on the model and has not been measured here.
+
+Equivalence: 640 full beam_search runs (beam width 1-8, EOS rate up to 0.4,
+heavy logprob ties, ignore_eos, length_penalty 0/1/2) produce byte-identical
+outputs on main and on this change - tokens, scores as exact float bit
+patterns, every step's logprobs, finish reasons.
+
+Tests: get_beam_search_score_from_length matches get_beam_search_score, and
+_beam_search_step matches an eager build-then-sort reference including ties,
+EOS and ignore_eos; an off-by-one length or a changed tie order fails it.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ tests/samplers/test_beam_search.py            | 132 +++++++++++++++++-
+ .../generate/beam_search/offline.py           |  72 +++++++---
+ .../entrypoints/generate/beam_search/utils.py |  17 ++-
+ 3 files changed, 199 insertions(+), 22 deletions(-)
+
+diff --git a/tests/samplers/test_beam_search.py b/tests/samplers/test_beam_search.py
+index 8bcf4c48..0ce0a0b5 100644
+--- a/tests/samplers/test_beam_search.py
++++ b/tests/samplers/test_beam_search.py
+@@ -15,10 +15,21 @@ from transformers import AutoModelForSeq2SeqLM
+ 
+ from vllm import CompletionOutput, RequestOutput
+ from vllm.assets.audio import AudioAsset
++from vllm.entrypoints.generate.beam_search.utils import (
++    BeamSearchInstance,
++    BeamSearchSequence,
++    create_sort_beams_key_function,
++    get_beam_search_score,
++    get_beam_search_score_from_length,
++)
+ from vllm.entrypoints.llm import LLM
+ from vllm.logprobs import Logprob, SampleLogprobs
+ from vllm.platforms import current_platform
+-from vllm.sampling_params import BeamSearchParams, StructuredOutputsParams
++from vllm.sampling_params import (
++    BeamSearchParams,
++    SamplingParams,
++    StructuredOutputsParams,
++)
+ 
+ # Extra engine kwargs needed for numerically deterministic beam search.
+ # On ROCm, floating-point reductions in attention and GEMM kernels are
+@@ -359,3 +370,122 @@ def test_beam_search_structured_output(
+             print(f"Generated JSON: {generated!r}")
+             parsed = json.loads(generated)
+             jsonschema.validate(instance=parsed, schema=json_schema)
++
++
++@pytest.mark.parametrize(
++    ("tokens", "length_penalty"),
++    [
++        ([5, 6, 7], 1.0),
++        ([5, 6, 0], 1.0),  # ends in EOS: EOS is not counted
++        ([0], 1.0),  # an aborted beam may hold only an EOS prompt token
++        ([5, 6, 7, 8], 0.0),
++        ([5, 6, 7, 8], 2.0),
++    ],
++)
++def test_beam_search_score_from_length_matches_token_list(
++    tokens: list[int], length_penalty: float
++) -> None:
++    assert get_beam_search_score_from_length(
++        len(tokens), tokens[-1], -1.75, 0, length_penalty
++    ) == get_beam_search_score(tokens, -1.75, 0, length_penalty)
++
++
++@pytest.mark.parametrize("ignore_eos", [False, True])
++@pytest.mark.parametrize("length_penalty", [0.0, 1.0, 2.0])
++def test_beam_search_step_ranks_like_eager_materialization(
++    ignore_eos: bool, length_penalty: float
++) -> None:
++    """Candidates are ranked before their histories are built; the surviving
++    beams, their order (including ties) and the completed list must match
++    building every candidate first and sorting."""
++    eos, beam_width = 0, 3
++    # Parent beams of different lengths, several candidates tied on logprob,
++    # and EOS among the candidates.
++    parents = [
++        [9, 1, 2],
++        [9, 1, 3, 4],
++        [9, 5],
++    ]
++    step_logprobs = [
++        {11: Logprob(-0.5), 12: Logprob(-0.5), 0: Logprob(-0.1)},
++        {11: Logprob(-0.5), 13: Logprob(-1.0), 14: Logprob(-0.5)},
++        {15: Logprob(-0.25), 0: Logprob(-0.25), 16: Logprob(-2.0)},
++    ]
++    cum = [-1.0, -1.5, -0.75]
++
++    def make_instance() -> BeamSearchInstance:
++        instance = BeamSearchInstance({"type": "token", "prompt_token_ids": [9]})
++        instance.beams = [
++            BeamSearchSequence(
++                orig_prompt={"type": "token", "prompt_token_ids": [9]},
++                tokens=list(tokens),
++                logprobs=[{0: Logprob(0.0)}] * (len(tokens) - 1),
++                cum_logprob=c,
++            )
++            for tokens, c in zip(parents, cum)
++        ]
++        return instance
++
++    # Eager reference: the pre-change algorithm, spelled out.
++    reference = make_instance()
++    key = create_sort_beams_key_function(eos, length_penalty)
++    new_beams = []
++    for beam, lps in zip(reference.beams, step_logprobs):
++        for token_id, lp in lps.items():
++            seq = BeamSearchSequence(
++                beam.orig_prompt,
++                tokens=beam.tokens + [token_id],
++                logprobs=beam.logprobs + [lps],
++                cum_logprob=beam.cum_logprob + lp.logprob,
++            )
++            if token_id == eos and not ignore_eos:
++                reference.completed.append(seq)
++            else:
++                new_beams.append(seq)
++    reference.beams = sorted(new_beams, key=key, reverse=True)[:beam_width]
++
++    def run_requests(prompts, **kwargs):
++        by_tokens = {tuple(p): lps for p, lps in zip(parents, step_logprobs)}
++        return [
++            RequestOutput(
++                request_id="inner",
++                prompt=None,
++                prompt_token_ids=prompt["prompt_token_ids"],
++                prompt_logprobs=None,
++                finished=True,
++                outputs=[
++                    CompletionOutput(
++                        index=0,
++                        text="",
++                        token_ids=[1],
++                        cumulative_logprob=None,
++                        logprobs=[by_tokens[tuple(prompt["prompt_token_ids"])]],
++                        finish_reason="length",
++                    )
++                ],
++            )
++            for prompt in prompts
++        ]
++
++    llm = LLM.__new__(LLM)
++    llm._render_and_run_requests = run_requests
++    actual = make_instance()
++    llm._beam_search_step(
++        instances_batch=[actual],
++        base_sampling_params=SamplingParams(logprobs=2 * beam_width, max_tokens=1),
++        eos_token_id=eos,
++        ignore_eos=ignore_eos,
++        beam_width=beam_width,
++        length_penalty=length_penalty,
++        structured_output_backend=None,
++        structured_output_key=None,
++        structured_output_bitmask=None,
++    )
++
++    def view(seqs):
++        return [(s.tokens, s.cum_logprob, s.logprobs) for s in seqs]
++
++    assert view(actual.beams) == view(reference.beams)
++    assert view(actual.completed) == view(reference.completed)
++    # Each surviving beam owns its token list.
++    assert len({id(s.tokens) for s in actual.beams}) == len(actual.beams)
+diff --git a/vllm/entrypoints/generate/beam_search/offline.py b/vllm/entrypoints/generate/beam_search/offline.py
+index b7095131..905c5351 100644
+--- a/vllm/entrypoints/generate/beam_search/offline.py
++++ b/vllm/entrypoints/generate/beam_search/offline.py
+@@ -2,7 +2,7 @@
+ # SPDX-FileCopyrightText: Copyright contributors to the vLLM project
+ 
+ import itertools
+-from collections.abc import Callable, Sequence
++from collections.abc import Sequence
+ 
+ import torch
+ from tqdm import tqdm
+@@ -26,6 +26,7 @@ from .utils import (
+     BeamSearchOutput,
+     BeamSearchSequence,
+     create_sort_beams_key_function,
++    get_beam_search_score_from_length,
+ )
+ 
+ logger = init_logger(__name__)
+@@ -52,6 +53,25 @@ def _bitmask_to_token_ids(bitmask_row: torch.Tensor, vocab_size: int) -> list[in
+     return indices[mask].tolist()
+ 
+ 
++def _candidate_score(candidate: tuple) -> float:
++    return candidate[0]
++
++
++def _extend_beam(
++    parent: BeamSearchSequence,
++    token_id: int,
++    logprobs: dict,
++    cum_logprob: float,
++) -> BeamSearchSequence:
++    return BeamSearchSequence(
++        parent.orig_prompt,
++        tokens=parent.tokens + [token_id],
++        logprobs=parent.logprobs + [logprobs],
++        lora_request=parent.lora_request,
++        cum_logprob=cum_logprob,
++    )
++
++
+ class BeamSearchOfflineMixin(OfflineInferenceMixin):
+     """Offline inference for beam search."""
+ 
+@@ -166,7 +186,7 @@ class BeamSearchOfflineMixin(OfflineInferenceMixin):
+                         eos_token_id=eos_token_id,
+                         ignore_eos=ignore_eos,
+                         beam_width=beam_width,
+-                        sort_beams_key=sort_beams_key,
++                        length_penalty=length_penalty,
+                         structured_output_backend=structured_output_backend,
+                         structured_output_key=structured_output_key,
+                         structured_output_bitmask=structured_output_bitmask,
+@@ -201,7 +221,7 @@ class BeamSearchOfflineMixin(OfflineInferenceMixin):
+         eos_token_id: int | None,
+         ignore_eos: bool,
+         beam_width: int,
+-        sort_beams_key: Callable,
++        length_penalty: float,
+         structured_output_backend: StructuredOutputBackend | None,
+         structured_output_key: tuple | None,
+         structured_output_bitmask: torch.Tensor | None,
+@@ -305,7 +325,12 @@ class BeamSearchOfflineMixin(OfflineInferenceMixin):
+                 instance.beams = []
+                 continue
+ 
+-            instance_new_beams = []
++            # Rank candidates before building them: a candidate's history is
++            # its parent's (prompt included) plus one token, and at most
++            # `beam_width` of the 2 * beam_width**2 candidates survive, so
++            # copying every history up front is almost all wasted work. The
++            # ranking itself is unchanged: same score, same stable order.
++            candidates: list[tuple[float, BeamSearchSequence, int, dict, float]] = []
+             for i in range(start, end):
+                 current_beam = all_beams[i]
+                 result = output[i]
+@@ -316,27 +341,36 @@ class BeamSearchOfflineMixin(OfflineInferenceMixin):
+                 if result.outputs[0].logprobs is not None:
+                     logprobs = result.outputs[0].logprobs[0]
+                     allowed = allowed_sets[i]
++                    seq_len = len(current_beam.tokens) + 1
+                     for token_id, logprob_obj in logprobs.items():
+                         if allowed is not None and token_id not in allowed:
+                             continue
+-                        new_beam = BeamSearchSequence(
+-                            current_beam.orig_prompt,
+-                            tokens=current_beam.tokens + [token_id],
+-                            logprobs=current_beam.logprobs + [logprobs],
+-                            lora_request=current_beam.lora_request,
+-                            cum_logprob=current_beam.cum_logprob + logprob_obj.logprob,
+-                        )
++                        cum_logprob = current_beam.cum_logprob + logprob_obj.logprob
+ 
+                         if token_id == eos_token_id and not ignore_eos:
+-                            instance.completed.append(new_beam)
++                            instance.completed.append(
++                                _extend_beam(
++                                    current_beam, token_id, logprobs, cum_logprob
++                                )
++                            )
+                         else:
+-                            instance_new_beams.append(new_beam)
+-            sorted_beams = sorted(
+-                instance_new_beams,
+-                key=sort_beams_key,
+-                reverse=True,
+-            )
+-            instance.beams = sorted_beams[:beam_width]
++                            score = get_beam_search_score_from_length(
++                                seq_len,
++                                token_id,
++                                cum_logprob,
++                                eos_token_id,  # type: ignore[arg-type]
++                                length_penalty,
++                            )
++                            candidates.append(
++                                (score, current_beam, token_id, logprobs, cum_logprob)
++                            )
++            candidates.sort(key=_candidate_score, reverse=True)
++            instance.beams = [
++                _extend_beam(parent, token_id, logprobs, cum_logprob)
++                for _, parent, token_id, logprobs, cum_logprob in candidates[
++                    :beam_width
++                ]
++            ]
+ 
+         return False
+ 
+diff --git a/vllm/entrypoints/generate/beam_search/utils.py b/vllm/entrypoints/generate/beam_search/utils.py
+index 61f97963..03f00b4f 100644
+--- a/vllm/entrypoints/generate/beam_search/utils.py
++++ b/vllm/entrypoints/generate/beam_search/utils.py
+@@ -146,8 +146,21 @@ def get_beam_search_score(
+ 
+     https://github.com/huggingface/transformers/blob/ccb92be23def445f2afdea94c31286f84b89eb5b/src/transformers/generation/beam_search.py#L938
+     """
+-    seq_len = len(tokens)
+-    if tokens[-1] == eos_token_id:
++    return get_beam_search_score_from_length(
++        len(tokens), tokens[-1], cumulative_logprob, eos_token_id, length_penalty
++    )
++
++
++def get_beam_search_score_from_length(
++    seq_len: int,
++    last_token: int,
++    cumulative_logprob: float,
++    eos_token_id: int,
++    length_penalty: float = 1.0,
++) -> float:
++    """`get_beam_search_score` for a sequence known only by its length and
++    last token, so candidates can be ranked before their token lists exist."""
++    if last_token == eos_token_id:
+         seq_len -= 1
+ 
+     # An aborted beam may contain only an EOS prompt token.
+-- 
+2.54.0 (Apple Git-157)
+

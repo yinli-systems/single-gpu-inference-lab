@@ -1,9 +1,9 @@
 {
   "category_counts": {
-    "active": 5,
+    "active": 6,
     "analysis": 1,
-    "negative": 7,
-    "other": 11,
+    "negative": 9,
+    "other": 12,
     "path_proof": 14,
     "positive": 8,
     "superseded": 12
@@ -454,6 +454,54 @@
       "summary": "Request-free KV prefetch for agentic sessions: oracle timing halves resume TTFT (-52..58%, knee = load time); timing predictors fragile under lognormal tool waits (immediate prefetch recovers 95-100%); under sustained occupancy every admission policy incl. oracle-ordered raises aggregate resume latency +10..57% -> the lever is a slack gate on free blocks, not value-ranked admission."
     },
     {
+      "category": "negative",
+      "compact_file_count": 1,
+      "has_campaign_summary_json": false,
+      "has_evidence_status_json": false,
+      "has_readme": true,
+      "has_summary_json": false,
+      "path": "benchmarks/results/dp-ep-g1-padding",
+      "reference": "dp-ep-g1-padding/",
+      "status": "Negative result (2x RTX 4090, DP2/EP2)",
+      "summary": "Cross-rank DP padding amplification (CUDA-graph padding of every rank to the largest rank's token count) screened with a graph-vs-eager oracle on Qwen1.5-MoE: the oracle gain is 0.0% in all three regimes (q128, q512, q512 cap) -> killed on mechanism grounds."
+    },
+    {
+      "category": "other",
+      "compact_file_count": 1,
+      "has_campaign_summary_json": false,
+      "has_evidence_status_json": false,
+      "has_readme": true,
+      "has_summary_json": false,
+      "path": "benchmarks/results/dp-ep-c21-contagion",
+      "reference": "dp-ep-c21-contagion/",
+      "status": "Measured (2x RTX 4090, DP2/EP2)",
+      "summary": "Does a request-local feature on one DP rank slow the other rank's decoders through the per-step rendezvous? Logprobs and structured output <=2% (killed); the sampling-penalty bundle x1.09-1.13 (already reported upstream, vLLM #47540); the prefill train x1.33-1.92 is the synchronized-chunk straggler, not a feature effect."
+    },
+    {
+      "category": "active",
+      "compact_file_count": 1,
+      "has_campaign_summary_json": false,
+      "has_evidence_status_json": false,
+      "has_readme": true,
+      "has_summary_json": false,
+      "path": "benchmarks/results/dp-ep-c26-pcie",
+      "reference": "dp-ep-c26-pcie/",
+      "status": "Active (2x RTX 4090, DP2/EP2)",
+      "summary": "Bulk CPU<->GPU KV movement vs EP collectives: topology-gated (cross-socket pair + far-socket pinned buffer x1.45-1.48 peer ITL, same-socket x1.03-1.13); vLLM's CPU offload connector puts the storing rank's worker into a sustained CPU-side slow state (peer store-cell p95 x1.72, 5 repeats); per-rank core reservation removes the sustained state but leaves x1.2, and no CPU contention reading separates slow from fast samples."
+    },
+    {
+      "category": "negative",
+      "compact_file_count": 1,
+      "has_campaign_summary_json": false,
+      "has_evidence_status_json": false,
+      "has_readme": true,
+      "has_summary_json": false,
+      "path": "benchmarks/results/dp-ep-c27-spec-skew",
+      "reference": "dp-ep-c27-spec-skew/",
+      "status": "Negative result (2x RTX 4090, DP2/EP2)",
+      "summary": "Speculative-decoding acceptance skew across barrier-synchronized DP ranks: the low-acceptance regime runs at the same step period as the high-acceptance one, so lockstep has nothing to drag (ITL x1.02, <5% gate) -> killed; a symmetric throughput redistribution at B=8 is recorded."
+    },
+    {
       "category": "path_proof",
       "compact_file_count": 3,
       "has_campaign_summary_json": false,
@@ -706,7 +754,7 @@
       "summary": "Custom three-way serving path evidence; not yet a broad win."
     }
   ],
-  "entry_count": 58,
+  "entry_count": 62,
   "index_path": "benchmarks/results/README.md",
   "result_root": "benchmarks/results",
   "schema_version": 1

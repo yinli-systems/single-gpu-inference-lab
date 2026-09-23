@@ -1,0 +1,70 @@
+
+== A-on-shared: rank-0 chunk steps n=404 cuda p50 82.7 ms, slow(> 65 ms) fraction 0.83, sustained runs 15 of which slow 11 (35 s)
+   cell             n chunk n chunk p50  slow  r1 p50  r1 p95  r0 p50   ttft
+   store B=32 r0           48      50.5  0.17    39.0   102.1     nan 640.33
+   plain B=32 r0            1    1512.6  1.00    22.1    45.0    22.0   None
+   plain B=32 r1            1     101.6  1.00    22.4    45.7    22.1   None
+   store B=32 r1           80      79.0  0.89    40.8   164.8     nan 879.46
+   plain B=32 r2            1      82.0  1.00    21.8    44.4    22.1   None
+   store B=32 r2           80      83.3  1.00    40.1   169.4     nan 867.68
+   plain B=32 r3            1      74.3  1.00    22.2    45.0    22.3   None
+   store B=32 r3           72      88.1  1.00    43.1   180.4     nan 919.23
+   plain B=32 r4            0       nan   nan    22.1    44.8    22.0   None
+   store B=32 r4           80      82.4  1.00    38.4    96.5     nan 872.19
+   pooled plain  B=32  n=5 r1 p50 22.1 p95 45.0 chunk p50 91.8 slow cells 4/5
+   pooled store  B=32  n=5 r1 p50 40.1 p95 164.8 chunk p50 82.4 slow cells 4/5
+   B=32: store/plain rank-1 p95 x3.66 p50 x1.81 (chunk contagion, not the signal)
+
+== B-on-isolated: rank-0 chunk steps n=489 cuda p50 58.4 ms, slow(> 65 ms) fraction 0.39, sustained runs 11 of which slow 4 (10 s)
+   cell             n chunk n chunk p50  slow  r1 p50  r1 p95  r0 p50   ttft
+   store B=32 r0           96      55.4  0.29    39.5   123.4     nan 690.22
+   plain B=32 r0            8      55.3  0.12    21.0    43.0    20.5   None
+   plain B=32 r1            0       nan   nan    22.3    45.1    22.0   None
+   store B=32 r1           64     103.7  0.98    63.1   216.3     nan 1058.9
+   plain B=32 r2            0       nan   nan    22.1    44.8    22.5   None
+   store B=32 r2           96      55.6  0.26    40.1   111.8     nan 690.60
+   plain B=32 r3            0       nan   nan    22.1    44.8    22.2   None
+   store B=32 r3           96      56.0  0.33    40.4   115.0     nan 690.26
+   plain B=32 r4            0       nan   nan    22.2    45.1    22.1   None
+   store B=32 r4           96      56.2  0.24    38.9   101.8     nan 685.97
+   pooled plain  B=32  n=5 r1 p50 22.1 p95 44.8 chunk p50 55.3 slow cells 0/5
+   pooled store  B=32  n=5 r1 p50 40.1 p95 115.0 chunk p50 56.0 slow cells 1/5
+   B=32: store/plain rank-1 p95 x2.57 p50 x1.82 (chunk contagion, not the signal)
+
+== C-off-shared: rank-0 chunk steps n=600 cuda p50 47.0 ms, slow(> 65 ms) fraction 0.00, sustained runs 10 of which slow 0 (0 s)
+   cell             n chunk n chunk p50  slow  r1 p50  r1 p95  r0 p50   ttft
+   store B=32 r0          112      47.3  0.01    39.7    97.7     nan 583.64
+   plain B=32 r0            0       nan   nan    22.0    44.9    21.7   None
+   plain B=32 r1            0       nan   nan    22.0    44.9    22.1   None
+   store B=32 r1          112      47.2  0.00    38.8    97.0     nan 573.77
+   plain B=32 r2            0       nan   nan    21.7    44.0    22.1   None
+   store B=32 r2          112      47.1  0.00    38.6    96.0     nan 576.02
+   plain B=32 r3            0       nan   nan    22.1    45.0    22.2   None
+   store B=32 r3          112      46.9  0.00    39.1    94.6     nan 580.52
+   plain B=32 r4            0       nan   nan    22.2    44.7    22.1   None
+   store B=32 r4          112      47.0  0.00    36.6    90.0     nan 575.77
+   pooled plain  B=32  n=5 r1 p50 22.0 p95 44.9 chunk p50 nan slow cells 0/5
+   pooled store  B=32  n=5 r1 p50 38.8 p95 96.0 chunk p50 47.1 slow cells 0/5
+   B=32: store/plain rank-1 p95 x2.14 p50 x1.76 (chunk contagion, not the signal)
+
+== M-on-mainiso: rank-0 chunk steps n=521 cuda p50 54.7 ms, slow(> 65 ms) fraction 0.25, sustained runs 10 of which slow 0 (0 s)
+   cell             n chunk n chunk p50  slow  r1 p50  r1 p95  r0 p50   ttft
+   store B=32 r0           96      54.7  0.20    39.8   116.3     nan 682.40
+   plain B=32 r0            0       nan   nan    22.2    45.1    21.7   None
+   plain B=32 r1            0       nan   nan    22.2    45.2    22.0   None
+   store B=32 r1           96      54.5  0.31    39.4   123.9     nan 681.52
+   plain B=32 r2            0       nan   nan    22.0    44.5    22.4   None
+   store B=32 r2           96      54.8  0.24    40.2   112.1     nan 685.05
+   plain B=32 r3            0       nan   nan    22.5    45.5    22.5   None
+   store B=32 r3           96      56.1  0.27    40.3   116.9     nan 704.02
+   plain B=32 r4            0       nan   nan    22.3    45.1    22.1   None
+   store B=32 r4           96      54.4  0.23    36.6    91.3     nan 668.14
+   pooled plain  B=32  n=5 r1 p50 22.2 p95 45.1 chunk p50 nan slow cells 0/5
+   pooled store  B=32  n=5 r1 p50 39.8 p95 116.3 chunk p50 54.7 slow cells 0/5
+   B=32: store/plain rank-1 p95 x2.58 p50 x1.79 (chunk contagion, not the signal)
+
+== Q1-Q4 against the OFF arm C-off-shared (rank-1 store p95 ratio; chunk p50 ratio; slow fraction)
+   A-on-shared      B=32  store p95 x1.72 p50 x1.03 chunk p50 x1.75 slow frac 0.83 slow store cells 4/5 | Q1 reproduced True | Q2/Q3 cured False | Q4 clean False
+   B-on-isolated    B=32  store p95 x1.20 p50 x1.03 chunk p50 x1.19 slow frac 0.39 slow store cells 1/5 | Q1 reproduced False | Q2/Q3 cured False | Q4 clean False
+   C-off-shared     B=32  store p95 x1.00 p50 x1.00 chunk p50 x1.00 slow frac 0.00 slow store cells 0/5 | Q1 reproduced False | Q2/Q3 cured True | Q4 clean True
+   M-on-mainiso     B=32  store p95 x1.21 p50 x1.03 chunk p50 x1.16 slow frac 0.25 slow store cells 0/5 | Q1 reproduced False | Q2/Q3 cured False | Q4 clean False
