@@ -1,0 +1,349 @@
+From 5454c4a9d2f222e51e9b33aee32ad7eb031ee7c1 Mon Sep 17 00:00:00 2001
+From: Yin Li <kevinli.ai.work@gmail.com>
+Date: Wed, 23 Sep 2026 11:51:24 +0800
+Subject: [PATCH] [Perf][Beam Search] Don't materialize dense grammar
+ allowed-token sets
+
+With structured outputs, offline beam search fills a grammar bitmask per beam
+per step, turns it into a list of every allowed token ID
+(_bitmask_to_token_ids), and _beam_search_step turns that list into a set()
+only to test the ~2 * beam_width candidate tokens against it. Inside free-form
+strings a JSON grammar allows almost the whole vocabulary, so each beam built
+and hashed a ~147k-element list and set per step to answer ~64 lookups.
+
+Unpack the packed row once into a bool array over the vocabulary
+(np.unpackbits on its raw bytes on a little-endian CPU host, the previous
+gather/shift path otherwise) and answer membership by bit lookup through a
+small _AllowedTokens wrapper. The explicit ID list is built only when it is
+handed to the engine, i.e. when the grammar allows at most
+_MAX_NUM_ALLOWED_TOKEN_IDS tokens, as before. Dropping beams whose grammar is
+terminated or allows nothing is unchanged. The packed row is copied before it
+is viewed from NumPy so the caller's bitmask never shares storage with it.
+
+Measured with vLLM's XgrammarBackend, the Qwen1.5 tokenizer (vocab 151,936)
+and a JSON-schema grammar, 32 beams spread over a 53-token conforming
+trajectory (the real mix of structural and in-string positions; 36 of 56
+states along it allow > 1024 tokens, median 147,123), CPU only, one pinned
+core, `_build_beam_sampling_params` plus the step's candidate lookups:
+
+  main:         206.0 / 216.9 ms per step (two runs)
+  this change:    6.9 /   6.3 ms per step
+
+A faster unpack alone would not get there: on these masks it is only
+1.7-2.7x, because the dense case is dominated by building the Python list
+and set, which this change avoids.
+
+Equivalence on those 56 real grammar states (plus a terminated and an
+off-grammar beam): identical drop decisions, identical allowed_token_ids
+handed to the engine, and identical membership answers for every token ID,
+including IDs past the vocabulary.
+
+Tests cover the bit layout on both unpack paths (sign bits, padding bits and
+words past the vocabulary, vocab sizes around word boundaries), non-contiguous
+rows, the caller's row staying resizable and independent, membership bounds,
+the engine-list cap on both sides of 1024, and dropped beams; a wrong bit
+order, a missing bounds check, an off-by-one at the cap or keeping dead-end
+beams each fail them.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ .../samplers/test_beam_search_grammar_mask.py | 153 ++++++++++++++++++
+ .../generate/beam_search/offline.py           |  64 ++++++--
+ 2 files changed, 202 insertions(+), 15 deletions(-)
+ create mode 100644 tests/samplers/test_beam_search_grammar_mask.py
+
+diff --git a/tests/samplers/test_beam_search_grammar_mask.py b/tests/samplers/test_beam_search_grammar_mask.py
+new file mode 100644
+index 00000000..7ad86944
+--- /dev/null
++++ b/tests/samplers/test_beam_search_grammar_mask.py
+@@ -0,0 +1,153 @@
++# SPDX-License-Identifier: Apache-2.0
++# SPDX-FileCopyrightText: Copyright contributors to the vLLM project
++"""Grammar masks in offline beam search: unpacking and allowed-token lookup."""
++
++from types import SimpleNamespace
++
++import pytest
++import torch
++
++from vllm.entrypoints.generate.beam_search import offline
++from vllm.entrypoints.generate.beam_search.offline import (
++    _MAX_NUM_ALLOWED_TOKEN_IDS,
++    _AllowedTokens,
++    _bitmask_to_allowed,
++)
++from vllm.entrypoints.generate.beam_search.utils import BeamSearchSequence
++from vllm.entrypoints.llm import LLM
++from vllm.sampling_params import SamplingParams
++
++
++def _pack(allowed: set[int], vocab_size: int, extra_words: int = 0) -> torch.Tensor:
++    """Pack token IDs the way the structured-output backends do: token i is
++    bit i % 32 of int32 word i // 32."""
++    words = [0] * ((vocab_size + 31) // 32 + extra_words)
++    for i in allowed:
++        words[i // 32] |= 1 << (i % 32)
++    return torch.tensor(
++        [w - (1 << 32) if w >= 1 << 31 else w for w in words], dtype=torch.int32
++    )
++
++
++def _reference(row: torch.Tensor, vocab_size: int) -> list[bool]:
++    return [bool((int(row[i // 32]) >> (i % 32)) & 1) for i in range(vocab_size)]
++
++
++@pytest.mark.parametrize("little_endian_fast_path", [True, False])
++@pytest.mark.parametrize("vocab_size", [1, 31, 32, 33, 64, 1000])
++@pytest.mark.parametrize(
++    "allowed_fn",
++    [
++        lambda v: set(),
++        lambda v: set(range(v)),
++        lambda v: {0, v - 1},
++        lambda v: {i for i in range(v) if i % 32 == 31},  # int32 sign bits
++        lambda v: {i for i in range(v) if i % 7 == 3},
++    ],
++)
++def test_bitmask_to_allowed_matches_bit_layout(
++    monkeypatch, little_endian_fast_path, vocab_size, allowed_fn
++):
++    monkeypatch.setattr(offline, "_LITTLE_ENDIAN", little_endian_fast_path)
++    allowed = allowed_fn(vocab_size)
++    # Padding bits past the vocabulary and padding words must be ignored.
++    row = _pack(allowed | {vocab_size, vocab_size + 5}, vocab_size, extra_words=2)
++    assert _bitmask_to_allowed(row, vocab_size).tolist() == _reference(row, vocab_size)
++
++
++def test_bitmask_to_allowed_handles_views_and_leaves_the_row_alone():
++    vocab_size = 100
++    packed = _pack({1, 33, 99}, vocab_size)
++    wide = torch.zeros(packed.numel(), 2, dtype=torch.int32)
++    wide[:, 0] = packed
++    view = wide[:, 0]  # non-contiguous
++    assert _bitmask_to_allowed(view, vocab_size).nonzero()[0].tolist() == [1, 33, 99]
++    # The caller's tensor never shares storage with NumPy, so it stays
++    # resizable and later refills are not observed by earlier results.
++    result = _bitmask_to_allowed(packed, vocab_size)
++    packed.zero_()
++    packed.resize_(packed.numel() + 1)
++    assert result.nonzero()[0].tolist() == [1, 33, 99]
++
++
++def test_allowed_tokens_membership():
++    allowed = _AllowedTokens(_bitmask_to_allowed(_pack({0, 5, 63}, 64), 64))
++    assert [t for t in range(-2, 70) if t in allowed] == [0, 5, 63]
++
++
++class _FakeGrammar:
++    def __init__(self, allowed: set[int] | None):
++        self.allowed = allowed
++
++    def accept_tokens(self, request_id, tokens):
++        return True
++
++    def is_terminated(self):
++        return self.allowed is None
++
++    def fill_bitmask(self, bitmask, idx):
++        bitmask[idx] = _pack(self.allowed, VOCAB)
++
++
++VOCAB = 151_936
++
++
++@pytest.mark.parametrize(
++    ("allowed", "expect_engine_list"),
++    [
++        ({3, 70_000, 151_935}, True),  # sparse: the engine gets the list
++        (set(range(_MAX_NUM_ALLOWED_TOKEN_IDS)), True),  # at the cap
++        (set(range(_MAX_NUM_ALLOWED_TOKEN_IDS + 1)), False),  # past the cap
++        (set(range(VOCAB)) - {7}, False),  # dense, as inside a JSON string
++    ],
++)
++def test_build_beam_sampling_params(allowed, expect_engine_list):
++    llm = LLM.__new__(LLM)
++    llm.__dict__["model_config"] = SimpleNamespace(get_vocab_size=lambda: VOCAB)
++    backend = SimpleNamespace(
++        compile_grammar=lambda request_type, spec: _FakeGrammar(allowed)
++    )
++    beam = BeamSearchSequence(
++        orig_prompt={"type": "token", "prompt_token_ids": [1, 2]},
++        tokens=[1, 2, 9],
++        logprobs=[],
++    )
++    bitmask = torch.zeros(1, (VOCAB + 31) // 32, dtype=torch.int32)
++
++    [entry] = llm._build_beam_sampling_params(
++        [beam],
++        SamplingParams(logprobs=8, max_tokens=1),
++        backend,
++        ("json", "{}"),
++        bitmask,
++    )
++
++    params, allowed_tokens = entry
++    if expect_engine_list:
++        assert params.allowed_token_ids == sorted(allowed)
++    else:
++        assert params.allowed_token_ids is None
++    for token_id in (0, 3, 7, 1023, 1024, 70_000, VOCAB - 1, VOCAB, VOCAB + 1):
++        assert (token_id in allowed_tokens) == (token_id in allowed)
++
++
++@pytest.mark.parametrize("allowed", [set(), None])  # dead end, terminated
++def test_build_beam_sampling_params_drops_finished_beams(allowed):
++    llm = LLM.__new__(LLM)
++    llm.__dict__["model_config"] = SimpleNamespace(get_vocab_size=lambda: VOCAB)
++    backend = SimpleNamespace(
++        compile_grammar=lambda request_type, spec: _FakeGrammar(allowed)
++    )
++    beam = BeamSearchSequence(
++        orig_prompt={"type": "token", "prompt_token_ids": [1]},
++        tokens=[1, 9],
++        logprobs=[],
++    )
++    bitmask = torch.zeros(1, (VOCAB + 31) // 32, dtype=torch.int32)
++    assert llm._build_beam_sampling_params(
++        [beam],
++        SamplingParams(logprobs=8, max_tokens=1),
++        backend,
++        ("json", "{}"),
++        bitmask,
++    ) == [None]
+diff --git a/vllm/entrypoints/generate/beam_search/offline.py b/vllm/entrypoints/generate/beam_search/offline.py
+index b7095131..0d5fd0a7 100644
+--- a/vllm/entrypoints/generate/beam_search/offline.py
++++ b/vllm/entrypoints/generate/beam_search/offline.py
+@@ -2,8 +2,10 @@
+ # SPDX-FileCopyrightText: Copyright contributors to the vLLM project
+ 
+ import itertools
++import sys
+ from collections.abc import Callable, Sequence
+ 
++import numpy as np
+ import torch
+ from tqdm import tqdm
+ 
+@@ -36,10 +38,27 @@ _MAX_NUM_ALLOWED_TOKEN_IDS = 1024
+ 
+ 
+ _bitmask_cache: dict[int, tuple[torch.Tensor, torch.Tensor, torch.Tensor]] = {}
++_LITTLE_ENDIAN = sys.byteorder == "little"
++
++
++def _bitmask_to_allowed(bitmask_row: torch.Tensor, vocab_size: int) -> np.ndarray:
++    """Unpack a packed int32 grammar bitmask row into a bool array over the
++    vocabulary (token i is bit i % 32 of word i // 32)."""
++    if (
++        _LITTLE_ENDIAN
++        and bitmask_row.device.type == "cpu"
++        and bitmask_row.dtype == torch.int32
++        and bitmask_row.dim() == 1
++        and bitmask_row.numel() * 32 >= vocab_size
++    ):
++        # On a little-endian host that is bit i of the row's raw bytes in
++        # little-endian bit order, so unpack the bytes directly. The row
++        # (vocab_size / 32 words) is copied first so the caller's tensor never
++        # shares its storage with NumPy.
++        raw = bitmask_row.clone(memory_format=torch.contiguous_format).numpy()
++        bits = np.unpackbits(raw.view(np.uint8), count=vocab_size, bitorder="little")
++        return bits.view(np.bool_)
+ 
+-
+-def _bitmask_to_token_ids(bitmask_row: torch.Tensor, vocab_size: int) -> list[int]:
+-    """Convert a packed int32 bitmask row to a list of allowed token IDs."""
+     if vocab_size not in _bitmask_cache:
+         indices = torch.arange(vocab_size)
+         _bitmask_cache[vocab_size] = (
+@@ -47,9 +66,23 @@ def _bitmask_to_token_ids(bitmask_row: torch.Tensor, vocab_size: int) -> list[in
+             indices >> 5,  # i // 32
+             indices & 31,  # i % 32
+         )
+-    indices, word_indices, bit_indices = _bitmask_cache[vocab_size]
+-    mask = ((bitmask_row[word_indices] >> bit_indices) & 1).bool()
+-    return indices[mask].tolist()
++    _, word_indices, bit_indices = _bitmask_cache[vocab_size]
++    return ((bitmask_row[word_indices] >> bit_indices) & 1).bool().cpu().numpy()
++
++
++class _AllowedTokens:
++    """Grammar-allowed token IDs for one beam, answering `token_id in allowed`
++    by bit lookup. Inside free-form strings a grammar allows almost the whole
++    vocabulary, and only the ~2 * beam_width candidate tokens are ever
++    queried, so the full ID list is not built."""
++
++    __slots__ = ("_bits",)
++
++    def __init__(self, bits: np.ndarray):
++        self._bits = bits
++
++    def __contains__(self, token_id: int) -> bool:
++        return 0 <= token_id < len(self._bits) and bool(self._bits[token_id])
+ 
+ 
+ class BeamSearchOfflineMixin(OfflineInferenceMixin):
+@@ -286,11 +319,11 @@ class BeamSearchOfflineMixin(OfflineInferenceMixin):
+         # tokens outside the grammar's allowed set. This filtering is also
+         # the only grammar enforcement for beams whose allowed set exceeds
+         # the engine-side allowed_token_ids cap.
+-        allowed_sets: list[set[int] | None] = [None] * len(all_beams)
++        allowed_sets: list[_AllowedTokens | None] = [None] * len(all_beams)
+         if structured_output_backend is not None:
+             for i, entry in enumerate(beam_entries):
+                 if entry is not None:
+-                    allowed_sets[i] = set(entry[1])
++                    allowed_sets[i] = entry[1]
+ 
+         for (start, end), instance in zip(instance_start_and_end, instances_batch):
+             instance_output = output[start:end]
+@@ -417,14 +450,14 @@ class BeamSearchOfflineMixin(OfflineInferenceMixin):
+         backend: StructuredOutputBackend,
+         structured_output_key: tuple,
+         bitmask: torch.Tensor,
+-    ) -> list[tuple[SamplingParams, list[int]] | None]:
++    ) -> list[tuple[SamplingParams, _AllowedTokens] | None]:
+         """Build per-beam SamplingParams and allowed token IDs from grammar.
+ 
+         Returns None for beams where the grammar has terminated.
+         """
+         vocab_size = self.model_config.get_vocab_size()
+         request_type, grammar_spec = structured_output_key
+-        result: list[tuple[SamplingParams, list[int]] | None] = []
++        result: list[tuple[SamplingParams, _AllowedTokens] | None] = []
+ 
+         for beam in beams:
+             # Fresh grammar per beam, replaying generated tokens.
+@@ -443,9 +476,10 @@ class BeamSearchOfflineMixin(OfflineInferenceMixin):
+                 continue
+ 
+             grammar.fill_bitmask(bitmask, 0)
+-            allowed_ids = _bitmask_to_token_ids(bitmask[0], vocab_size)
++            allowed = _bitmask_to_allowed(bitmask[0], vocab_size)
++            num_allowed = int(np.count_nonzero(allowed))
+ 
+-            if not allowed_ids:
++            if num_allowed == 0:
+                 result.append(None)
+                 continue
+ 
+@@ -459,12 +493,12 @@ class BeamSearchOfflineMixin(OfflineInferenceMixin):
+                 temperature=base_params.temperature,
+                 detokenize=False,
+                 allowed_token_ids=(
+-                    allowed_ids
+-                    if len(allowed_ids) <= _MAX_NUM_ALLOWED_TOKEN_IDS
++                    np.flatnonzero(allowed).tolist()
++                    if num_allowed <= _MAX_NUM_ALLOWED_TOKEN_IDS
+                     else None
+                 ),
+                 skip_clone=True,
+             )
+-            result.append((beam_params, allowed_ids))
++            result.append((beam_params, _AllowedTokens(allowed)))
+ 
+         return result
+-- 
+2.54.0 (Apple Git-157)
+
