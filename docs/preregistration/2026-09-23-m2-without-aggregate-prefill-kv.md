@@ -208,3 +208,22 @@ Corrections (same arms, SLOs, predictions R1–R3 and W1–W3):
   2 repeats (one per A100 GPU), run after the BurstGPT control.
 - Workload-shift `code` phase: offset 120 s instead of 0 (Azure code ×0.5, 150 s). This is changed
   before any shift run starts.
+
+### Addendum 7b (same day, still before any affected run): window audit
+
+An audit of every replay window found that the Azure-code gap is longer than 60 s. Per minute, the
+first 20 minutes hold 63, 0, 0, 531, 187, 130, … requests, so `t120 ×0.25` would contain 0
+requests. The BurstGPT window at t = 0, ×100 holds only 86 requests (0.36 req/s; the trace is
+sparse for its first 8 hours). Final windows, each checked for request count and simulated
+stability (TTFT p50 < 1 s, clock in range) before launch:
+
+| cell | offset | scale | window | requests | req/s |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| azure-code-t180 | 180 s | ×0.25 | 240 s | 531 | 2.21 |
+| azure-code-t180 | 180 s | ×0.5 | 240 s | 718 | 2.99 |
+| shift `code` phase | 180 s | ×0.5 | 150 s | 531 | 3.54 |
+| burstgpt-t14h (replaces BurstGPT t = 0 ×100) | 14 h | ×60 | 240 s | 1,111 | 4.63 |
+
+The Mooncake tool-agent windows (130 / 245 requests) and the shift chat and agent phases (613 /
+156 requests) are unchanged. The two original Azure-code cells (t = 0) are kept and reported as
+unsaturated.
