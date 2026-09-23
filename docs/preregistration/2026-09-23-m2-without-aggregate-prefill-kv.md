@@ -1,0 +1,45 @@
+# Pre-registration: M2 without the aggregate prefill-KV term (2026-09-23)
+
+Written and committed **before** any analysis of the Qwen2.5-1.5B-Instruct L20 campaign
+(`campaign29`, started 17:27 CST, still running at time of writing) or of any later model/GPU.
+
+## Finding that motivates it (post hoc, on already-published data)
+
+The published M2 over-predicts multi-prefill steps, and the error grows with prefill count:
+−7 / −15 / −30 ms mean signed error at 2 / 4 / 8 prefills on A100 Qwen3-4B, and −4 / −9 / −16 ms
+on L20. Trained on train+test together, the same form fits the test rows to ~2 ms MAE, so the form
+is not the problem. Extrapolation is. The linear aggregate prefill-KV feature `ctx_kv_sum` spans
+0–32k in training (one prefill per step) and 0–128k in test, and on one-prefill data it is
+correlated with the attention-work proxy (r = 0.65).
+
+Dropping that one feature (primary geometry split, same Ridge, same filters):
+
+| data | M2 MAE / P95 | M2 − ctx_kv_sum MAE / P95 |
+| --- | --- | --- |
+| L20 Qwen3-4B, unfiltered (published setting) | 8.3 / 17.6 | 3.2 / 10.5 |
+| A100 Qwen3-4B, clean filters | 18.5 / 47.5 | 1.9 / 4.0 |
+| A100 Qwen3-8B, clean filters | 18.0 / 50.8 | 1.7 / 3.3 |
+
+Because this variant was chosen after seeing these test sets, the numbers above are **not**
+evidence for it.
+
+## Frozen prediction
+
+Model `M2-noaggkv` = `analyze_step_cost_v2.features(r, 2)` with index 2 (`ctx_kv_sum / 1e4`)
+removed; everything else unchanged (Ridge, lambda 1e-2, primary split definition, filters
+`--exclude-over-median-x 10 --exclude-first-iteration`).
+
+On every new (model, GPU) campaign run with the same cells, starting with Qwen2.5-1.5B on L20:
+
+1. `M2-noaggkv` primary-split MAE is lower than the published `M2` MAE.
+2. `M2-noaggkv` primary-split MAE is at most 5 ms, and its mean signed error is within ±5 ms.
+3. On the reverse split, `M2-noaggkv` MAE is no more than 1.5× the published `M2` MAE (removing the
+   term must not break the other direction).
+
+A failure of any of these on new data is reported as a failure. The published `M2` stays the
+reference in all existing artifacts either way.
+
+Also predicted before looking: on Qwen2.5-1.5B (28 layers, 12 query heads of dim 128) the
+attention-work slope in the partition fits is about (28·12)/(36·32) ≈ 0.29 of Qwen3-4B's L20
+slope (6.4–6.6 ms/M), i.e. **1.9 ms/M, accepted range 1.3–2.5 ms/M** (kernel efficiency at fewer
+heads per step may differ).
