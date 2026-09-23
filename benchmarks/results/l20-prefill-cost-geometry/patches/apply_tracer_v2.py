@@ -33,12 +33,13 @@ if "_EXP_STEP_TIMER" not in s:
     anchor = "\nlogger = init_logger(__name__)\n"
     assert s.count(anchor) == 1; s = s.replace(anchor, anchor + helper, 1)
     # anchor: right after the zero-token early return that follows dispatch_cg_and_sync_dp
-    old = ("            return self._merge_ec_connector_no_forward(scheduler_output, empty_output)\n\n"
-           "        if not dummy_run:\n            # Common case.\n")
-    assert s.count(old) == 1, s.count(old)
-    s = s.replace(old, ("            return self._merge_ec_connector_no_forward(scheduler_output, empty_output)\n\n"
-                        "        if not dummy_run and _EXP_STEP_TIMER is not None:\n            _EXP_STEP_TIMER.begin(scheduler_output, batch_desc)\n"
-                        "        if not dummy_run:\n            # Common case.\n"))
+    # vLLM 0.30 adds `cudagraph_stats = None` between the early return and the common case
+    ret = "            return self._merge_ec_connector_no_forward(scheduler_output, empty_output)\n\n"
+    mid = next((m for m in ("", "        cudagraph_stats = None\n") if s.count(ret + m + "        if not dummy_run:\n            # Common case.\n") == 1), None)
+    assert mid is not None, "execute_model anchor not found"
+    old = ret + mid + "        if not dummy_run:\n            # Common case.\n"
+    s = s.replace(old, ret + mid + "        if not dummy_run and _EXP_STEP_TIMER is not None:\n            _EXP_STEP_TIMER.begin(scheduler_output, batch_desc)\n"
+                  "        if not dummy_run:\n            # Common case.\n")
     m = re.search(r"    def sample_tokens\(\n        self, grammar_output: GrammarOutput \| None\n    \) -> AsyncOutput \| ModelRunnerOutput \| None:\n", s)
     assert m, "sample_tokens signature not found"
     wrapper = ('    def sample_tokens(\n        self, grammar_output: GrammarOutput | None\n    ) -> AsyncOutput | ModelRunnerOutput | None:\n'
