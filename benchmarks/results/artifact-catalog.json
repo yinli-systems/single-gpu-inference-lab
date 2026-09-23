@@ -2,7 +2,7 @@
   "category_counts": {
     "active": 6,
     "analysis": 1,
-    "negative": 9,
+    "negative": 10,
     "other": 12,
     "path_proof": 14,
     "positive": 8,
@@ -424,6 +424,18 @@
       "has_evidence_status_json": false,
       "has_readme": true,
       "has_summary_json": false,
+      "path": "benchmarks/results/a100-prefill-cost-geometry",
+      "reference": "a100-prefill-cost-geometry/",
+      "status": "Cross-hardware replication (A100)",
+      "summary": "Same harness as `l20-prefill-cost-geometry/` on A100-SXM4-80GB, Qwen3-4B and Qwen3-8B: same-aggregate partition gap up to 2.02x (4B) / 1.62x (8B), one attention-work slope for both models, geometry-OOD MAE 171 -> 18 ms / 170 -> 18 ms; context/load controls replicate; decode-KV skew at equal aggregate is 5-9% slower on A100 (not on L20). One-off compile and first-iteration steps excluded by opt-in flags (all three variants kept)."
+    },
+    {
+      "category": "negative",
+      "compact_file_count": 1,
+      "has_campaign_summary_json": false,
+      "has_evidence_status_json": false,
+      "has_readme": true,
+      "has_summary_json": false,
       "path": "benchmarks/results/l20-spec-decode-geometry",
       "reference": "l20-spec-decode-geometry/",
       "status": "Negative result (L20)",
@@ -754,7 +766,7 @@
       "summary": "Custom three-way serving path evidence; not yet a broad win."
     }
   ],
-  "entry_count": 62,
+  "entry_count": 63,
   "index_path": "benchmarks/results/README.md",
   "result_root": "benchmarks/results",
   "schema_version": 1

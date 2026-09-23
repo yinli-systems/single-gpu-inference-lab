@@ -26,6 +26,10 @@ else:
 p = SP / "vllm/v1/worker/gpu/model_runner.py"; s = p.read_text()
 if "_EXP_STEP_TIMER" not in s:
     helper = "\n" + block(src, "import json as _json\nimport os as _os\nimport time as _time", "_EXP_STEP_TIMER = _ExpStepTimer(_EXP_STEP_TRACE) if _EXP_STEP_TRACE else None") + "_EXP_STEP_TIMER = _ExpStepTimer(_EXP_STEP_TRACE) if _EXP_STEP_TRACE else None\n"
+    # Some vLLM 0.29.0 installs have no BatchExecutionDescriptor.uniform_decode; record the field that
+    # exists instead (the analysis never reads it - it uses cg_mode and padded_tokens).
+    helper = helper.replace('"uniform_decode": bool(batch_desc.uniform_decode),',
+                            '"uniform_token_count": getattr(batch_desc, "uniform_token_count", None),')
     anchor = "\nlogger = init_logger(__name__)\n"
     assert s.count(anchor) == 1; s = s.replace(anchor, anchor + helper, 1)
     # anchor: right after the zero-token early return that follows dispatch_cg_and_sync_dp
