@@ -1,0 +1,793 @@
+From f7086ab41e650cfd363b9fe678c4361e6a3f15f5 Mon Sep 17 00:00:00 2001
+From: Yin Li <kevinli.ai.work@gmail.com>
+Date: Wed, 23 Sep 2026 02:00:03 +0800
+Subject: [PATCH] [KV Offload] Request-free CPU->GPU prefetch primitive
+
+A paused agentic session's KV is stored on finish and loaded back only when a
+later request's prefix lookup hits the offloaded tier, which puts the load on
+that request's critical path. Measurements posted on #57103 put that at
+34/65/104 ms for 4k/8k/16k prefixes on one L20 (6.4 us per prefix token), i.e.
+1.2-1.4x the resume's own prefill, and show a request-free prefetch during the
+tool wait recovering 52-57% of resume TTFT.
+
+This adds the execution primitive for that, and nothing else:
+
+  OffloadingConnector.request_free_prefetch(block_hashes, group_idx)
+      -> ACCEPTED | DEFERRED | COMPLETED | UNSUPPORTED
+
+resolve the chunk keys for a prefix -> check free GPU blocks behind a reserve
+-> reserve destination blocks -> submit the existing async load -> publish the
+blocks into the prefix cache on completion.
+
+It is deliberately not a policy. The same measurements showed that "prefetch at
+pause" keeps 95-100% of the oracle gain while fixed-lead and EWMA predictors
+keep 5-50%, so there is no lead time and no predictor; and that under sustained
+occupancy every admission policy, including one that knows the true resume
+order, raised aggregate resume latency (+10..57%), so there is no ranking and
+nothing is ever evicted to make room - a prefetch that does not fit behind the
+reserve is DEFERRED.
+
+Implementation notes:
+
+- The worker side is unchanged: OffloadingWorker.submit_load() already takes a
+  job id and a GPU destination spec with no request attached.
+- Destination blocks are ordinary allocated blocks (ref_cnt == 1, no hash)
+  while the transfer is in flight, so nothing can read a half-filled block.
+- On completion they go through the new BlockPool.cache_prefetched_blocks(),
+  which inserts the caller-supplied per-block hashes and then releases them via
+  the existing unpin_blocks() path: readable, but last-resort eviction
+  candidates. That is what makes a wrong prefetch cheap - it is evicted before
+  any block a request still references.
+- reset_cache() drops in-flight prefetch destinations instead of publishing
+  data that may never arrive.
+- Off by default: requires prefix caching plus
+  extra_config["enable_request_free_prefetch"], with
+  extra_config["prefetch_reserve_blocks"] as the free-block reserve.
+- Three counters: prefetch_accepted, prefetch_deferred,
+  prefetch_blocks_published.
+
+Ingress is out of scope: kv_hints (#53421 / #53423) is the transport and lands
+separately, so this PR exposes the primitive to in-engine callers and tests
+only.
+
+Co-authored-by: Claude <noreply@anthropic.com>
+Signed-off-by: Yin Li <kevinli.ai.work@gmail.com>
+---
+ .../offloading_connector/test_prefetch.py     | 258 ++++++++++++++++++
+ .../kv_connector/v1/offloading/metrics.py     |  21 ++
+ .../kv_connector/v1/offloading/prefetch.py    | 100 +++++++
+ .../kv_connector/v1/offloading/scheduler.py   | 176 ++++++++++++
+ .../kv_connector/v1/offloading_connector.py   |  26 +-
+ vllm/v1/core/block_pool.py                    |  35 +++
+ 6 files changed, 615 insertions(+), 1 deletion(-)
+ create mode 100644 tests/v1/kv_connector/unit/offloading_connector/test_prefetch.py
+ create mode 100644 vllm/distributed/kv_transfer/kv_connector/v1/offloading/prefetch.py
+
+diff --git a/tests/v1/kv_connector/unit/offloading_connector/test_prefetch.py b/tests/v1/kv_connector/unit/offloading_connector/test_prefetch.py
+new file mode 100644
+index 00000000..976f9296
+--- /dev/null
++++ b/tests/v1/kv_connector/unit/offloading_connector/test_prefetch.py
+@@ -0,0 +1,258 @@
++# SPDX-License-Identifier: Apache-2.0
++# SPDX-FileCopyrightText: Copyright contributors to the vLLM project
++"""Request-free prefetch: reservation, deferral and publication."""
++
++import pytest
++import torch
++
++from tests.v1.kv_connector.unit.offloading_connector.test_config import (
++    _make_vllm_config,
++)
++from tests.v1.kv_connector.unit.offloading_connector.utils import MockOffloadingSpec
++from vllm.distributed.kv_transfer.kv_connector.v1.offloading.common import (
++    OffloadingWorkerMetadata,
++)
++from vllm.distributed.kv_transfer.kv_connector.v1.offloading.config import (
++    build_offloading_config,
++)
++from vllm.distributed.kv_transfer.kv_connector.v1.offloading.metrics import (
++    _ConnectorMetricName,
++)
++from vllm.distributed.kv_transfer.kv_connector.v1.offloading.prefetch import (
++    PrefetchOutcome,
++)
++from vllm.distributed.kv_transfer.kv_connector.v1.offloading.scheduler import (
++    OffloadingConnectorScheduler,
++)
++from vllm.v1.core.block_pool import BlockPool
++from vllm.v1.core.kv_cache_utils import BlockHash, make_block_hash_with_group_id
++from vllm.v1.kv_cache_interface import (
++    FullAttentionSpec,
++    KVCacheConfig,
++    KVCacheGroupSpec,
++)
++from vllm.v1.kv_offload.base import LookupResult
++from vllm.v1.outputs import KVConnectorOutput
++
++BLOCK_SIZE = 16
++# One GPU block per offloaded chunk in this fixture's geometry; asserted in
++# test_fixture_geometry so the expectations below stay honest if it changes.
++BLOCKS_PER_CHUNK = 1
++
++
++def _kv_cache_config() -> KVCacheConfig:
++    return KVCacheConfig(
++        num_blocks=256,
++        kv_cache_tensors=[],
++        kv_cache_groups=[
++            KVCacheGroupSpec(
++                ["layer"],
++                FullAttentionSpec(
++                    block_size=BLOCK_SIZE,
++                    num_kv_heads=4,
++                    head_size=64,
++                    dtype=torch.float16,
++                ),
++            )
++        ],
++    )
++
++
++def _make_scheduler(
++    *,
++    enabled: bool = True,
++    reserve_blocks: int = 0,
++    num_gpu_blocks: int = 64,
++    enable_caching: bool = True,
++) -> tuple[OffloadingConnectorScheduler, MockOffloadingSpec, BlockPool]:
++    extra_config = {
++        "enable_request_free_prefetch": enabled,
++        "prefetch_reserve_blocks": reserve_blocks,
++    }
++    vllm_config = _make_vllm_config(extra_config=extra_config)
++    vllm_config.cache_config.enable_prefix_caching = enable_caching
++    vllm_config.speculative_config = None
++    kv_cache_config = _kv_cache_config()
++    spec = MockOffloadingSpec(build_offloading_config(vllm_config, kv_cache_config))
++    sched = OffloadingConnectorScheduler(spec, vllm_config, kv_cache_config)
++    pool = BlockPool(
++        num_gpu_blocks, enable_caching=enable_caching, hash_block_size=BLOCK_SIZE
++    )
++    sched.bind_gpu_block_pool(pool)
++    return sched, spec, pool
++
++
++def _hashes(num_blocks: int) -> list[BlockHash]:
++    return [BlockHash(f"h{i}".encode().ljust(32, b"\0")) for i in range(num_blocks)]
++
++
++def _complete(sched: OffloadingConnectorScheduler, job_id: int) -> None:
++    meta = OffloadingWorkerMetadata()
++    meta.mark_completed(job_id)
++    sched.update_connector_output(KVConnectorOutput(kv_connector_worker_meta=meta))
++
++
++def test_prefetch_is_unsupported_unless_enabled():
++    sched, _, _ = _make_scheduler(enabled=False)
++    assert sched.request_free_prefetch(_hashes(8)) is PrefetchOutcome.UNSUPPORTED
++
++
++def test_prefetch_is_unsupported_without_prefix_caching():
++    sched, _, _ = _make_scheduler(enable_caching=False)
++    assert sched.request_free_prefetch(_hashes(8)) is PrefetchOutcome.UNSUPPORTED
++
++
++def test_prefetch_completes_when_nothing_is_resident():
++    sched, spec, pool = _make_scheduler()
++    spec.manager.lookup.return_value = LookupResult.MISS
++    free_before = pool.get_num_free_blocks()
++
++    assert sched.request_free_prefetch(_hashes(8)) is PrefetchOutcome.COMPLETED
++
++    assert pool.get_num_free_blocks() == free_before
++    assert not sched._current_batch_load_jobs
++
++
++def test_fixture_geometry():
++    """The expectations below assume one GPU block per offloaded chunk."""
++    sched, _, _ = _make_scheduler()
++    group = sched.config.kv_group_configs[0]
++    assert group.hashes_per_chunk == BLOCKS_PER_CHUNK
++    assert group.tokens_per_chunk // group.tokens_per_block == BLOCKS_PER_CHUNK
++
++
++def test_prefetch_completes_on_a_partial_chunk():
++    sched, spec, _ = _make_scheduler()
++    spec.manager.lookup.return_value = LookupResult.HIT
++    # Fewer blocks than one chunk: no whole chunk was ever offloaded, so
++    # there is nothing that could be resolved.
++    assert (
++        sched.request_free_prefetch(_hashes(BLOCKS_PER_CHUNK - 1))
++        is PrefetchOutcome.COMPLETED
++    )
++    spec.manager.lookup.assert_not_called()
++
++
++def test_prefetch_reserves_blocks_and_submits_a_load():
++    sched, spec, pool = _make_scheduler()
++    spec.manager.lookup.return_value = LookupResult.HIT
++    hashes = _hashes(2 * BLOCKS_PER_CHUNK)
++    free_before = pool.get_num_free_blocks()
++
++    assert sched.request_free_prefetch(hashes) is PrefetchOutcome.ACCEPTED
++
++    # Destinations are held, so nothing can read them mid-transfer.
++    assert pool.get_num_free_blocks() == free_before - 2 * BLOCKS_PER_CHUNK
++    assert len(sched._current_batch_load_jobs) == 1
++    job_id, job = next(iter(sched._current_batch_load_jobs.items()))
++    assert job.req_id.startswith("__kv_prefetch_")
++    assert len(job.dst_spec.block_ids) == 2 * BLOCKS_PER_CHUNK
++    # The load is not attributed to any request.
++    assert job.req_id not in sched._req_status
++    for block_id in job.dst_spec.block_ids:
++        assert pool.blocks[block_id].block_hash is None
++
++
++def test_prefetch_stops_at_the_first_missing_chunk():
++    sched, spec, pool = _make_scheduler()
++    spec.manager.lookup.side_effect = [LookupResult.HIT, LookupResult.MISS]
++    free_before = pool.get_num_free_blocks()
++
++    assert (
++        sched.request_free_prefetch(_hashes(2 * BLOCKS_PER_CHUNK))
++        is PrefetchOutcome.ACCEPTED
++    )
++
++    # Only the first chunk is loaded: a hole would not serve a prefix lookup.
++    assert pool.get_num_free_blocks() == free_before - BLOCKS_PER_CHUNK
++
++
++def test_prefetch_defers_behind_the_reserve():
++    num_blocks = 16
++    sched, spec, pool = _make_scheduler(
++        num_gpu_blocks=num_blocks, reserve_blocks=num_blocks - 1
++    )
++    spec.manager.lookup.return_value = LookupResult.HIT
++    free_before = pool.get_num_free_blocks()
++
++    assert (
++        sched.request_free_prefetch(_hashes(BLOCKS_PER_CHUNK))
++        is PrefetchOutcome.DEFERRED
++    )
++
++    # Deferral is free: nothing reserved, nothing submitted, nothing evicted.
++    assert pool.get_num_free_blocks() == free_before
++    assert not sched._current_batch_load_jobs
++    stats = sched.get_stats()
++    assert stats is not None
++    assert stats.reduce()[_ConnectorMetricName.PREFETCH_DEFERRED] == 1
++
++
++def test_completed_prefetch_publishes_blocks_into_the_prefix_cache():
++    sched, spec, pool = _make_scheduler()
++    spec.manager.lookup.return_value = LookupResult.HIT
++    hashes = _hashes(BLOCKS_PER_CHUNK)
++    free_before = pool.get_num_free_blocks()
++
++    assert sched.request_free_prefetch(hashes) is PrefetchOutcome.ACCEPTED
++    job_id = next(iter(sched._current_batch_load_jobs))
++    _complete(sched, job_id)
++
++    # Published blocks are readable by a later request's prefix lookup...
++    for i, block_hash in enumerate(hashes):
++        cached = pool.get_cached_block(block_hash, kv_cache_group_ids=[0])
++        assert cached is not None, i
++    # ...and count as free again, as last-resort eviction candidates.
++    assert pool.get_num_free_blocks() == free_before
++    assert not sched._prefetch_jobs
++    assert not sched._jobs
++    spec.manager.complete_load.assert_called_once()
++
++
++def test_reset_cache_drops_in_flight_prefetch_blocks():
++    sched, spec, pool = _make_scheduler()
++    spec.manager.lookup.return_value = LookupResult.HIT
++    hashes = _hashes(BLOCKS_PER_CHUNK)
++    free_before = pool.get_num_free_blocks()
++
++    assert sched.request_free_prefetch(hashes) is PrefetchOutcome.ACCEPTED
++    sched._current_batch_load_jobs.clear()
++    sched.reset_cache()
++
++    assert pool.get_num_free_blocks() == free_before
++    assert not sched._prefetch_jobs
++    for block_hash in hashes:
++        assert (
++            pool.cached_block_hash_to_block.get_one_block(
++                make_block_hash_with_group_id(block_hash, 0)
++            )
++            is None
++        )
++
++
++@pytest.mark.parametrize("num_chunks", [1, 3])
++def test_prefetched_blocks_are_the_last_to_be_reused(num_chunks: int):
++    """An unused prefetch must be the cheapest thing in the pool to lose."""
++    sched, spec, pool = _make_scheduler(num_gpu_blocks=32)
++    spec.manager.lookup.return_value = LookupResult.HIT
++    hashes = _hashes(num_chunks * BLOCKS_PER_CHUNK)
++
++    assert sched.request_free_prefetch(hashes) is PrefetchOutcome.ACCEPTED
++    job_id = next(iter(sched._current_batch_load_jobs))
++    _complete(sched, job_id)
++
++    prefetched = {
++        pool.get_cached_block(h, kv_cache_group_ids=[0])[0].block_id for h in hashes
++    }
++    # Every other free block is handed out before any prefetched one, and the
++    # prefetched blocks are still readable meanwhile.
++    others = pool.get_new_blocks(pool.get_num_free_blocks() - len(prefetched))
++    assert prefetched.isdisjoint(block.block_id for block in others)
++    for block_hash in hashes:
++        assert pool.get_cached_block(block_hash, kv_cache_group_ids=[0]) is not None
++
++    # Only once nothing else is left do they go, leaving the prefix cache.
++    last = pool.get_new_blocks(len(prefetched))
++    assert {block.block_id for block in last} == prefetched
++    for block_hash in hashes:
++        assert pool.get_cached_block(block_hash, kv_cache_group_ids=[0]) is None
+diff --git a/vllm/distributed/kv_transfer/kv_connector/v1/offloading/metrics.py b/vllm/distributed/kv_transfer/kv_connector/v1/offloading/metrics.py
+index 0a4ac96b..da02014d 100644
+--- a/vllm/distributed/kv_transfer/kv_connector/v1/offloading/metrics.py
++++ b/vllm/distributed/kv_transfer/kv_connector/v1/offloading/metrics.py
+@@ -36,6 +36,9 @@ class _ConnectorMetricName:
+     LOOKUP_SYNC_DELAY = "vllm:kv_offload_lookup_sync_delay_seconds"
+     LOOKUP_ASYNC_DELAY = "vllm:kv_offload_lookup_async_delay_seconds"
+     ALLOCATION_FAILURE = "vllm:kv_offload_allocation_failure"
++    PREFETCH_ACCEPTED = "vllm:kv_offload_prefetch_accepted"
++    PREFETCH_DEFERRED = "vllm:kv_offload_prefetch_deferred"
++    PREFETCH_BLOCKS_PUBLISHED = "vllm:kv_offload_prefetch_blocks_published"
+ 
+ 
+ class _TransferType:
+@@ -126,6 +129,24 @@ def get_connector_metric_definitions() -> dict[str, OffloadingMetricMetadata]:
+                 "Number of KV offload store allocation attempts that failed."
+             ),
+         ),
++        _ConnectorMetricName.PREFETCH_ACCEPTED: OffloadingCounterMetadata(
++            documentation=(
++                "Number of request-free KV prefetches that reserved "
++                "destination blocks and submitted a load."
++            ),
++        ),
++        _ConnectorMetricName.PREFETCH_DEFERRED: OffloadingCounterMetadata(
++            documentation=(
++                "Number of request-free KV prefetches refused because the "
++                "free GPU blocks behind the reserve were insufficient."
++            ),
++        ),
++        _ConnectorMetricName.PREFETCH_BLOCKS_PUBLISHED: OffloadingCounterMetadata(
++            documentation=(
++                "Number of GPU blocks published into the prefix cache by a "
++                "completed request-free KV prefetch."
++            ),
++        ),
+     }
+ 
+ 
+diff --git a/vllm/distributed/kv_transfer/kv_connector/v1/offloading/prefetch.py b/vllm/distributed/kv_transfer/kv_connector/v1/offloading/prefetch.py
+new file mode 100644
+index 00000000..8cc6b442
+--- /dev/null
++++ b/vllm/distributed/kv_transfer/kv_connector/v1/offloading/prefetch.py
+@@ -0,0 +1,100 @@
++# SPDX-License-Identifier: Apache-2.0
++# SPDX-FileCopyrightText: Copyright contributors to the vLLM project
++"""Request-free CPU -> GPU prefetch of offloaded KV.
++
++A paused agentic session's KV is stored on finish and loaded again only when a
++later request's prefix lookup hits the offloaded tier, which puts the load on
++that request's critical path. This module holds the state for bringing those
++blocks back *before* a request exists: it is an execution primitive, not a
++policy. It takes no lead time, predicts nothing, ranks nothing and never
++evicts to make room - a prefetch either fits in the free pool behind a reserve
++or it is deferred.
++"""
++
++from dataclasses import dataclass
++from enum import Enum, auto
++
++from vllm.v1.core.block_pool import BlockPool
++from vllm.v1.core.kv_cache_utils import BlockHash, KVCacheBlock
++from vllm.v1.kv_offload.base import OffloadKey
++
++
++class PrefetchOutcome(Enum):
++    """Result of a request-free prefetch attempt."""
++
++    # Destination blocks were reserved and a load was submitted. The blocks
++    # enter the prefix cache when the transfer completes.
++    ACCEPTED = auto()
++    # Not enough free GPU blocks behind the reserve. Nothing was reserved and
++    # nothing was submitted; the caller may try again later.
++    DEFERRED = auto()
++    # Nothing to do: none of the requested blocks are resident in an offloaded
++    # tier, or they are already in the GPU prefix cache.
++    COMPLETED = auto()
++    # The deployment cannot serve request-free prefetches (feature disabled,
++    # prefix caching off, or no GPU block pool bound).
++    UNSUPPORTED = auto()
++
++
++@dataclass
++class PrefetchJob:
++    """A submitted request-free prefetch, tracked until the load finishes."""
++
++    # Offload keys being loaded, for OffloadingManager.complete_load().
++    keys: set[OffloadKey]
++    # Destination blocks, held with a reference until the load completes.
++    blocks: list[KVCacheBlock]
++    # Per-block prefix-cache hash, parallel to `blocks`.
++    block_hashes: list[BlockHash]
++    group_idx: int
++    tokens_per_block: int
++    # Set when a destination block is handed to a request while the load is in
++    # flight: the data landing in it can no longer be published.
++    invalidated: bool = False
++
++
++class GPUPrefetchReservation:
++    """Destination-block bookkeeping for request-free prefetches.
++
++    Reserved blocks are ordinary allocated blocks (`ref_cnt == 1`, no hash), so
++    nothing can read them while the transfer is in flight. On completion they
++    are published into the prefix cache and released as last-resort eviction
++    candidates, which is what makes a prefetch cheap to be wrong about: an
++    unused prefetched block is evicted before any block a request still wants.
++    """
++
++    def __init__(self, block_pool: BlockPool, reserve_blocks: int):
++        self.block_pool = block_pool
++        # Free blocks kept out of reach of prefetches, so a prefetch can never
++        # consume the last blocks a running request needs to grow.
++        self.reserve_blocks = reserve_blocks
++
++    def can_reserve(self, num_blocks: int) -> bool:
++        free = self.block_pool.get_num_free_blocks()
++        return free - self.reserve_blocks >= num_blocks
++
++    def reserve(self, num_blocks: int) -> list[KVCacheBlock] | None:
++        if not self.can_reserve(num_blocks):
++            return None
++        return self.block_pool.get_new_blocks(num_blocks)
++
++    def publish(self, job: PrefetchJob) -> int:
++        """Insert the loaded blocks into the prefix cache and release them.
++
++        Returns the number of blocks published.
++        """
++        if job.invalidated:
++            self.release(job)
++            return 0
++        self.block_pool.cache_prefetched_blocks(
++            job.blocks,
++            job.block_hashes,
++            job.group_idx,
++            job.tokens_per_block,
++            on_reuse=lambda block: None,
++        )
++        return len(job.blocks)
++
++    def release(self, job: PrefetchJob) -> None:
++        """Give the destination blocks back without publishing them."""
++        self.block_pool.free_blocks(job.blocks)
+diff --git a/vllm/distributed/kv_transfer/kv_connector/v1/offloading/scheduler.py b/vllm/distributed/kv_transfer/kv_connector/v1/offloading/scheduler.py
+index 47aa8654..adb2cb71 100644
+--- a/vllm/distributed/kv_transfer/kv_connector/v1/offloading/scheduler.py
++++ b/vllm/distributed/kv_transfer/kv_connector/v1/offloading/scheduler.py
+@@ -26,9 +26,16 @@ from vllm.distributed.kv_transfer.kv_connector.v1.offloading.metrics import (
+     _ConnectorMetricName,
+     _TransferMetricName,
+ )
++from vllm.distributed.kv_transfer.kv_connector.v1.offloading.prefetch import (
++    GPUPrefetchReservation,
++    PrefetchJob,
++    PrefetchOutcome,
++)
+ from vllm.logger import init_logger
+ from vllm.utils.math_utils import cdiv, round_down
++from vllm.v1.core.block_pool import BlockPool
+ from vllm.v1.core.kv_cache_manager import KVCacheBlocks
++from vllm.v1.core.kv_cache_utils import BlockHash
+ from vllm.v1.core.sched.output import SchedulerOutput
+ from vllm.v1.core.single_type_kv_cache_manager import SingleTypeKVCacheManager
+ from vllm.v1.kv_cache_interface import (
+@@ -633,6 +640,157 @@ class OffloadingConnectorScheduler:
+ 
+         self._events_tracker = OffloadingEventsTracker(spec.kv_events_config)
+ 
++        # Request-free prefetch (off unless explicitly enabled). Bound to a
++        # block pool by bind_gpu_block_pool(); until then, and when prefix
++        # caching is off, prefetches are reported UNSUPPORTED.
++        # Specs built by tests may not carry options at all; no options means
++        # the feature stays off.
++        extra_config = getattr(spec, "extra_config", None) or {}
++        self._prefetch_enabled: bool = (
++            bool(extra_config.get("enable_request_free_prefetch", False))
++            and vllm_config.cache_config.enable_prefix_caching
++        )
++        self._prefetch_reserve_blocks: int = int(
++            extra_config.get("prefetch_reserve_blocks", 0)
++        )
++        self._prefetch_reservation: GPUPrefetchReservation | None = None
++        self._prefetch_jobs: dict[int, PrefetchJob] = {}
++        self._prefetch_contexts: dict[int, ReqContext] = {}
++        # Destination block id -> prefetch job id, so a block handed to a
++        # request mid-flight invalidates the transfer landing in it.
++        self._prefetch_block_ids: dict[int, int] = {}
++        self._prefetch_counter: int = 0
++
++    def bind_gpu_block_pool(self, gpu_block_pool: BlockPool) -> None:
++        """Take the scheduler's block pool, which prefetches allocate from."""
++        if not self._prefetch_enabled:
++            return
++        self._prefetch_reservation = GPUPrefetchReservation(
++            gpu_block_pool, self._prefetch_reserve_blocks
++        )
++
++    def request_free_prefetch(
++        self,
++        block_hashes: Sequence[BlockHash],
++        group_idx: int = 0,
++    ) -> PrefetchOutcome:
++        """Load offloaded KV for `block_hashes` with no request attached.
++
++        `block_hashes` is the prefix-cache hash of each GPU block, in order
++        from the start of the prefix - the same sequence a request would
++        produce, and what a caller holding BlockStored events already has. The
++        offloaded tier is keyed per chunk, so the chunk keys are derived here
++        the way a request's are.
++
++        The engine keeps ownership of the decision: the outcome says whether
++        the load was submitted (ACCEPTED), did not fit behind the free-block
++        reserve (DEFERRED), was unnecessary (COMPLETED), or is unavailable in
++        this deployment (UNSUPPORTED). Nothing is evicted to make room.
++        """
++        reservation = self._prefetch_reservation
++        if reservation is None:
++            return PrefetchOutcome.UNSUPPORTED
++        if group_idx >= len(self.config.kv_group_configs):
++            return PrefetchOutcome.UNSUPPORTED
++
++        group_config = self.config.kv_group_configs[group_idx]
++        hashes_per_chunk = group_config.hashes_per_chunk
++        if group_config.tokens_per_block != self.config.tokens_per_hash:
++            # `block_hashes` is one hash per GPU block of this group; when the
++            # hash unit and the group's block size differ, that mapping needs
++            # the caller's token positions, which this primitive does not take.
++            return PrefetchOutcome.UNSUPPORTED
++        blocks_per_chunk = (
++            group_config.tokens_per_chunk // group_config.tokens_per_block
++        )
++
++        # Whole chunks only: a partial trailing chunk was never offloaded
++        # under this key scheme, so it cannot be resolved here.
++        num_chunks = len(block_hashes) // hashes_per_chunk
++        if num_chunks == 0:
++            return PrefetchOutcome.COMPLETED
++
++        req_context = ReqContext(req_id=self._next_prefetch_id())
++        keys: list[OffloadKey] = []
++        for chunk_idx in range(num_chunks):
++            key = make_offload_key(
++                block_hashes[(chunk_idx + 1) * hashes_per_chunk - 1], group_idx
++            )
++            if self.manager.lookup(key, req_context) != LookupResult.HIT:
++                # Prefix order matters: stop at the first chunk that is not
++                # resident rather than loading a hole.
++                break
++            keys.append(key)
++            req_context.set_offload_key_position(
++                key, (chunk_idx + 1) * group_config.tokens_per_chunk
++            )
++
++        if not keys:
++            return PrefetchOutcome.COMPLETED
++
++        num_blocks = len(keys) * blocks_per_chunk
++        blocks = reservation.reserve(num_blocks)
++        if blocks is None:
++            self._connector_stats.increase_counter(
++                _ConnectorMetricName.PREFETCH_DEFERRED, 1
++            )
++            return PrefetchOutcome.DEFERRED
++
++        src_spec = self.manager.prepare_load(keys, req_context)
++        dst_spec = GPULoadStoreSpec(
++            [block.block_id for block in blocks],
++            group_sizes=[num_blocks],
++            block_indices=[0],
++        )
++
++        job_id = self._generate_job_id()
++        self._current_batch_load_jobs[job_id] = TransferJob(
++            req_id=req_context.req_id,
++            src_spec=src_spec,
++            dst_spec=dst_spec,
++        )
++        self._jobs[job_id] = TransferJobStatus(
++            req_id=req_context.req_id,
++            pending_count=self.config.num_workers,
++            keys=set(keys),
++            is_store=False,
++        )
++        self._prefetch_jobs[job_id] = PrefetchJob(
++            keys=set(keys),
++            blocks=blocks,
++            block_hashes=list(block_hashes[:num_blocks]),
++            group_idx=group_idx,
++            tokens_per_block=group_config.tokens_per_block,
++        )
++        for block in blocks:
++            self._prefetch_block_ids[block.block_id] = job_id
++        self._prefetch_contexts[job_id] = req_context
++        if self._chunks_being_loaded is not None:
++            self._chunks_being_loaded.update(keys)
++        self._connector_stats.increase_counter(
++            _ConnectorMetricName.PREFETCH_ACCEPTED, 1
++        )
++        return PrefetchOutcome.ACCEPTED
++
++    def _next_prefetch_id(self) -> str:
++        self._prefetch_counter += 1
++        return f"__kv_prefetch_{self._prefetch_counter}"
++
++    def _complete_prefetch_job(self, job_id: int, keys: set[OffloadKey]) -> None:
++        """Publish (or drop) the destination blocks of a finished prefetch."""
++        job = self._prefetch_jobs.pop(job_id)
++        req_context = self._prefetch_contexts.pop(job_id)
++        assert self._prefetch_reservation is not None
++        self.manager.complete_load(keys, req_context)
++        if self._chunks_being_loaded:
++            self._chunks_being_loaded.difference_update(keys)
++        for block in job.blocks:
++            self._prefetch_block_ids.pop(block.block_id, None)
++        num_published = self._prefetch_reservation.publish(job)
++        self._connector_stats.increase_counter(
++            _ConnectorMetricName.PREFETCH_BLOCKS_PUBLISHED, num_published
++        )
++
+     def _maybe_observe_lookup_async_delay(
+         self, req_status: RequestOffloadState
+     ) -> None:
+@@ -1895,6 +2053,13 @@ class OffloadingConnectorScheduler:
+                 continue
+             assert job_status.pending_count == 0
+ 
++            if job_id in self._prefetch_jobs:
++                # Request-free prefetch: no request state to advance, the
++                # destination blocks are published (or dropped) instead.
++                self._complete_prefetch_job(job_id, job_status.keys)
++                del self._jobs[job_id]
++                continue
++
+             req_status = self._req_status[job_status.req_id]
+             if job_status.is_store:
+                 self.manager.complete_store(job_status.keys, req_status.req_context)
+@@ -1998,6 +2163,17 @@ class OffloadingConnectorScheduler:
+         # Flush all in-flight jobs
+         self._current_batch_jobs_to_flush.update(self._jobs.keys())
+ 
++        # In-flight prefetches lose their source: drop the destination blocks
++        # instead of publishing data that may never arrive.
++        for job_id, job in list(self._prefetch_jobs.items()):
++            job.invalidated = True
++            assert self._prefetch_reservation is not None
++            self._prefetch_reservation.release(job)
++            for block in job.blocks:
++                self._prefetch_block_ids.pop(block.block_id, None)
++            self._prefetch_contexts.pop(job_id, None)
++            del self._prefetch_jobs[job_id]
++
+         for req_id, status in list(self._req_status.items()):
+             if status.req.is_finished():
+                 if not status.finished_signaled:
+diff --git a/vllm/distributed/kv_transfer/kv_connector/v1/offloading_connector.py b/vllm/distributed/kv_transfer/kv_connector/v1/offloading_connector.py
+index 73570881..78d7efa6 100644
+--- a/vllm/distributed/kv_transfer/kv_connector/v1/offloading_connector.py
++++ b/vllm/distributed/kv_transfer/kv_connector/v1/offloading_connector.py
+@@ -1,6 +1,6 @@
+ # SPDX-License-Identifier: Apache-2.0
+ # SPDX-FileCopyrightText: Copyright contributors to the vLLM project
+-from collections.abc import Iterable
++from collections.abc import Iterable, Sequence
+ from functools import cached_property
+ from typing import Any
+ 
+@@ -32,6 +32,9 @@ from vllm.distributed.kv_transfer.kv_connector.v1.offloading.metrics import (
+     OffloadingConnectorStats,
+     OffloadPromMetrics,
+ )
++from vllm.distributed.kv_transfer.kv_connector.v1.offloading.prefetch import (
++    PrefetchOutcome,
++)
+ from vllm.distributed.kv_transfer.kv_connector.v1.offloading.scheduler import (
+     OffloadingConnectorScheduler,
+ )
+@@ -40,8 +43,10 @@ from vllm.distributed.kv_transfer.kv_connector.v1.offloading.worker import (
+ )
+ from vllm.forward_context import ForwardContext
+ from vllm.v1.attention.backend import AttentionMetadata
++from vllm.v1.core.block_pool import BlockPool
+ from vllm.v1.core.kv_cache_coordinator import HybridKVCacheCoordinator
+ from vllm.v1.core.kv_cache_manager import KVCacheBlocks
++from vllm.v1.core.kv_cache_utils import BlockHash
+ from vllm.v1.core.sched.output import SchedulerOutput
+ from vllm.v1.kv_cache_interface import KVCacheConfig
+ from vllm.v1.kv_offload.factory import OffloadingSpecFactory
+@@ -104,6 +109,25 @@ class OffloadingConnector(KVConnectorBase_V1, SupportsHMA):
+         if self.connector_scheduler is not None:
+             self.connector_scheduler.shutdown()
+ 
++    def bind_gpu_block_pool(self, gpu_block_pool: "BlockPool") -> None:
++        # Only the scheduler role allocates destination blocks.
++        if self.connector_scheduler is not None:
++            self.connector_scheduler.bind_gpu_block_pool(gpu_block_pool)
++
++    def request_free_prefetch(
++        self,
++        block_hashes: Sequence[BlockHash],
++        group_idx: int = 0,
++    ) -> PrefetchOutcome:
++        """Load offloaded KV for a prefix with no request attached.
++
++        See `OffloadingConnectorScheduler.request_free_prefetch`. Returns
++        UNSUPPORTED outside the scheduler role.
++        """
++        if self.connector_scheduler is None:
++            return PrefetchOutcome.UNSUPPORTED
++        return self.connector_scheduler.request_free_prefetch(block_hashes, group_idx)
++
+     def register_kv_caches(self, kv_caches: dict[str, torch.Tensor]):
+         assert self.connector_worker is not None
+         self.connector_worker.register_kv_caches(kv_caches)
+diff --git a/vllm/v1/core/block_pool.py b/vllm/v1/core/block_pool.py
+index b4c9dcaa..f8c0e24c 100644
+--- a/vllm/v1/core/block_pool.py
++++ b/vllm/v1/core/block_pool.py
+@@ -699,6 +699,41 @@ class BlockPool:
+             if watcher is not None:
+                 watcher(block)
+ 
++    def cache_prefetched_blocks(
++        self,
++        blocks: Sequence[KVCacheBlock],
++        block_hashes: Sequence[BlockHash],
++        group_id: int,
++        num_tokens: int,
++        on_reuse: Callable[[KVCacheBlock], None],
++    ) -> None:
++        """Publish blocks filled outside any request into the prefix cache.
++
++        Used by a request-free prefetch: the blocks were reserved with
++        `get_new_blocks` and filled by a connector transfer, so unlike
++        `cache_full_blocks` there is no request whose tokens produced them and
++        no partial tail to consider - the hashes are supplied by the caller
++        that resolved them. The blocks are released to `unpin_blocks`
++        afterwards, which makes them readable but last-resort eviction
++        candidates: an unused prefetch is evicted before anything a request
++        still references.
++        """
++        assert len(blocks) == len(block_hashes)
++        if not self.enable_caching:
++            # Without prefix caching nothing could look these blocks up again.
++            self.free_blocks(blocks)
++            return
++        for block, block_hash in zip(blocks, block_hashes):
++            assert block.ref_cnt == 1, (
++                "a prefetched block must still be held by its reservation"
++            )
++            self._insert_block_hash(
++                make_block_hash_with_group_id(block_hash, group_id),
++                block,
++                num_tokens=num_tokens,
++            )
++        self.unpin_blocks(blocks, on_reuse)
++
+     def unpin_blocks(
+         self,
+         blocks: Iterable[KVCacheBlock],
+-- 
+2.54.0 (Apple Git-157)
+
