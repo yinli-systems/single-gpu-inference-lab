@@ -21,6 +21,18 @@ Pre-registration: addendum 4 of
 [`docs/preregistration/2026-09-23-m2-without-aggregate-prefill-kv.md`](../../../docs/preregistration/2026-09-23-m2-without-aggregate-prefill-kv.md)
 (017bd22, committed before launch).
 
+![live Pareto view](../a100-prefill-live-controller/figures/live_pareto.png)
+
+Every live controller run on both GPUs as safe prefill throughput against the share of prefill
+steps over the deadline ([`scripts/plot_live_pareto.py`](../../../scripts/plot_live_pareto.py);
+the numbers are in [`figures/live_pareto.json`](../a100-prefill-live-controller/figures/live_pareto.json)). The fixed budgets trace
+a frontier: throughput rises with the budget until the budget starts to break the deadline. M2n
+lands at the safe end of that frontier on both GPUs, without tuning. On the A100 that point is
+fixed-512. On the L20, where fixed-512 already violates 5–11%, M2n sits above fixed-384 at 0%
+violations. The best fixed budget differs between the two GPUs (≈384 vs 512), so no single global
+fixed budget is right for both. M0 sits at the bottom of every panel, and the published M2
+collapses at A100 N=8.
+
 ## Setup
 
 - **Protocol:** as L20 campaign20 ([`l20-prefill-cost-geometry/` §5](../l20-prefill-cost-geometry/README.md)).
