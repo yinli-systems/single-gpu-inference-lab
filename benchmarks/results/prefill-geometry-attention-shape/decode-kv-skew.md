@@ -18,3 +18,7 @@
   skew-bal-chunk512    decode 11.74/11.82 (thirds 11.74, 11.75, 11.75) | 512@8k 53.4/57.3 (n=12) | 512@12k 58.6/60.5 (n=12)
   skew-skew-chunk512   decode 12.14/12.21 (thirds 12.14, 12.14, 12.14) | 512@8k 52.7/56.3 (n=12) | 512@12k 58.5/60.7 (n=12)
   decode skewed/balanced p50: 1.034
+## A100-Qwen2.5-1.5B
+  skew-bal-chunk512    decode 4.56/4.65 (thirds 4.56, 4.56, 4.56) | 512@8k 20.5/23.9 (n=12) | 512@12k 23.1/24.6 (n=12)
+  skew-skew-chunk512   decode 4.86/4.92 (thirds 4.86, 4.86, 4.86) | 512@8k 20.6/23.8 (n=12) | 512@12k 23.2/24.6 (n=12)
+  decode skewed/balanced p50: 1.066
