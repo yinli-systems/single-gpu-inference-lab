@@ -21,6 +21,28 @@ budget 2048: median step CUDA ms by aggregate KV bin (n)
 fits on the attention-work proxy alone: 1x2048: 55.7 + 2.10·M (n=24), 4x512: 55.8 + 2.09·M (n=94), 8x256: 56.3 + 2.09·M (n=188)
 excluded (>10x cell median): 8x256: [3907.8]
 
+## A100-Qwen2.5-1.5B
+
+budget 1024: median step CUDA ms by aggregate KV bin (n)
+| aggregate KV | 1x1024 | 2x512 | 4x256 | 1x1024/4x256 |
+| --- | ---: | ---: | ---: | ---: |
+| 0-4k | 17.7 (9) | 16.9 (9) | 16.4 (7) | 1.08x |
+| 4-8k | 21.2 (12) | 18.5 (12) | 17.1 (12) | 1.24x |
+| 8-12k | 25.3 (12) | 20.6 (12) | 18.1 (12) | 1.40x |
+| 12-16k | 29.4 (12) | 22.6 (12) | 19.2 (12) | 1.53x |
+| 16-20k | 31.9 (3) | 24.7 (12) | 20.3 (12) | 1.57x |
+fits on the attention-work proxy alone: 1x1024: 16.2 + 0.98·M (n=48), 2x512: 16.0 + 0.99·M (n=96), 4x256: 15.8 + 1.02·M (n=189)
+
+budget 2048: median step CUDA ms by aggregate KV bin (n)
+| aggregate KV | 1x2048 | 4x512 | 8x256 | 1x2048/8x256 |
+| --- | ---: | ---: | ---: | ---: |
+| 0-4k | 32.5 (6) | 29.0 (3) | 28.6 (4) | 1.14x |
+| 4-8k | 40.6 (6) | 30.6 (6) | 29.3 (6) | 1.39x |
+| 8-12k | 48.8 (6) | 32.7 (6) | 30.1 (6) | 1.62x |
+| 12-16k | 56.9 (6) | 34.8 (6) | 31.3 (6) | 1.82x |
+| 16-20k | — | 36.9 (6) | 32.2 (6) | — |
+fits on the attention-work proxy alone: 1x2048: 28.4 + 0.98·M (n=24), 4x512: 28.0 + 0.99·M (n=93), 8x256: 27.8 + 1.00·M (n=190)
+
 ## A100-Qwen2.5-7B
 
 budget 1024: median step CUDA ms by aggregate KV bin (n)

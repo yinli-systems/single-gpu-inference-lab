@@ -119,9 +119,11 @@ p50 / p95 CUDA ms ([`decode-kv-skew.md`](decode-kv-skew.md); same script and sel
 
 The decode difference is stable across all three repeats. Per-step spread is ±0.05 ms, well
 below the 0.8–0.9 ms gap. Aggregate decode KV is matched (median 35.2k vs 35.1k). The steps run
-under the same full CUDA graph (padded to 8). A plausible cause, **not measured here**: on the
-A100's faster, shorter decode step, the longest sequence's split-KV work becomes the critical path
-(8.2k max KV vs 4.4k). On the slower L20 it is hidden. Prefill steps show no skew penalty
+under the same full CUDA graph (padded to 8). A first guess was that the longest sequence's split-KV work becomes the critical path on the
+A100; later kernel tests **ruled that out** (the FA2 decode kernel shows no penalty in any
+setting; see
+[`prefill-geometry-attention-shape/` §3](../prefill-geometry-attention-shape/README.md)). The
+mechanism is open. Prefill steps show no skew penalty
 (differences are inside the p95 spread, n=12).
 
 Consequence for the L20 conclusion: *"Killed: decode KV max/variance as a scheduling feature"* is

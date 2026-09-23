@@ -43,3 +43,12 @@
     M0   MAE  13.44  P95  44.81  signed +11.35  [by prefill count 1:+11.3]  in-sample MAE 12.11
     M2   MAE   2.32  P95   7.80  signed  -0.10  [by prefill count 1:-0.1]  in-sample MAE 1.63
     M2n  MAE   1.60  P95   7.22  signed  +0.16  [by prefill count 1:+0.2]  in-sample MAE 1.43
+## A100-Qwen2.5-1.5B
+  primary_geometry_one_to_multi (train 2505, test 592)
+    M0   MAE  55.85  P95 183.15  signed -55.69  [by prefill count 2:-12.9, 4:-37.5, 7:+3.9, 8:-109.9]  in-sample MAE 6.24
+    M2   MAE  17.36  P95  45.91  signed -17.18  [by prefill count 2:-7.0, 4:-14.2, 7:+4.3, 8:-28.5]  in-sample MAE 2.05
+    M2n  MAE   2.13  P95   3.70  signed  -1.73  [by prefill count 2:-3.0, 4:-2.2, 7:+4.1, 8:-0.7]  in-sample MAE 1.66
+  reverse_geometry_multi_to_one (train 592, test 93)
+    M0   MAE   6.32  P95  20.12  signed  +5.28  [by prefill count 1:+5.3]  in-sample MAE 5.64
+    M2   MAE   1.90  P95   8.67  signed  +0.27  [by prefill count 1:+0.3]  in-sample MAE 1.45
+    M2n  MAE   1.48  P95   8.92  signed  +0.47  [by prefill count 1:+0.5]  in-sample MAE 1.40

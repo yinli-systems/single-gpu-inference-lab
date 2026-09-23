@@ -243,5 +243,54 @@
    }
   },
   "decode_skewed_over_balanced_p50": 1.033886760323542
+ },
+ "A100-Qwen2.5-1.5B": {
+  "skew-bal-chunk512": {
+   "decode": {
+    "p50_ms": 4.56,
+    "p95_ms": 4.652,
+    "n": 2192
+   },
+   "decode_gen_kv_sum_p50": 36689.0,
+   "decode_p50_by_third": [
+    4.564,
+    4.5585,
+    4.5575
+   ],
+   "prefill512_at_8k": {
+    "p50_ms": 20.5235,
+    "p95_ms": 23.8905,
+    "n": 12
+   },
+   "prefill512_at_12k": {
+    "p50_ms": 23.063499999999998,
+    "p95_ms": 24.6086,
+    "n": 12
+   }
+  },
+  "skew-skew-chunk512": {
+   "decode": {
+    "p50_ms": 4.859,
+    "p95_ms": 4.92315,
+    "n": 2078
+   },
+   "decode_gen_kv_sum_p50": 36509.0,
+   "decode_p50_by_third": [
+    4.857,
+    4.86,
+    4.859
+   ],
+   "prefill512_at_8k": {
+    "p50_ms": 20.65,
+    "p95_ms": 23.81585,
+    "n": 12
+   },
+   "prefill512_at_12k": {
+    "p50_ms": 23.2225,
+    "p95_ms": 24.62845,
+    "n": 12
+   }
+  },
+  "decode_skewed_over_balanced_p50": 1.0655701754385967
  }
 }
