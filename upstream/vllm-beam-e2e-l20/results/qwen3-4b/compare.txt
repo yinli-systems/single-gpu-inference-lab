@@ -1,0 +1,14 @@
+arms: ['stock1', 'stock2'] vs ['patched1', 'patched2'] (wall = median of 5 calls per arm)
+cell                      stock1    stock2  patched1  patched2   speedup  stock=stock  stock=patched
+plain p128 w4             996.0    1019.4    1012.2     980.7     1.02x        False          False
+plain p128 w8            1097.0    1096.0    1045.9    1076.9     1.05x         True           True
+plain p128 w16           1316.0    1321.0    1207.6    1214.2     1.09x        False          False
+plain p128 w32           2127.3    2172.6    1746.6    1764.9     1.22x        False          False
+plain p2048 w4           1347.1    1250.5    1214.0    1219.6     1.03x        False          False
+plain p2048 w8           1643.9    1757.2    1518.9    1667.5     1.08x        False          False
+plain p2048 w16          2618.2    2610.1    1977.3    2108.4     1.32x        False          False
+plain p2048 w32          4708.9    4804.0    3210.3    3291.6     1.47x        False          False
+json p26 w4              2734.9    2702.3    2229.9    2349.9     1.21x        False          False
+json p26 w8              5154.6    4985.4    4207.5    4084.3     1.22x        False          False
+json p26 w16             6870.2    6958.9    5032.1    4953.2     1.39x        False          False
+json p26 w32            11743.0   11654.9    6836.3    6912.5     1.70x        False          False

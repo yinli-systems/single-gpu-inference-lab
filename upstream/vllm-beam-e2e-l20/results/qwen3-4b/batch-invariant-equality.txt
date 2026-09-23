@@ -1,0 +1,13 @@
+VLLM_BATCH_INVARIANT=1, Qwen3-4B, L20; tokens and cumulative-logprob float bits
+run order: stock1 (first process for this model under BI), stock2, patched1, stock3
+cell                  s2=s3  s2=patched  s3=patched  s1=s2
+plain p128   w4       True        True        True  False
+plain p128   w8       True        True        True  False
+plain p128   w16      True        True        True  False
+plain p128   w32      True        True        True  False
+plain p2048  w8       True        True        True  False
+plain p2048  w32      True        True        True  False
+json  p26    w4       True        True        True  False
+json  p26    w8       True        True        True  False
+json  p26    w16      True        True        True  False
+stock2 = stock3 = patched1 in all cells (stock1, the first process, differs)
