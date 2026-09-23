@@ -302,3 +302,28 @@ p50 15 µs at 1 active and 133 µs at 256 on an M-series CPU; to be repeated on 
 Partition cells (1×2048 / 4×512 / 8×256) and the pairing swap on vLLM 0.30.0, with the tracer
 re-anchored. Pass criterion: 12–16k ratio 1×2048/8×256 within ±15% of the 0.29 value (2.02×),
 and PS1 holds.
+
+## Addendum 9 (2026-09-24): outcomes so far and the vLLM 0.30 replication moved to the L20; before 0.30 runs
+
+- **A. Pairing swap, L20: held.** PS1: measured / predicted = 0.89, 0.88, 0.91, 0.86 and 1.01 for the
+  five non-control configs, all with the right sign and within ±25%. PS2: the control Δ was −0.09 ms.
+  (Three earlier attempts produced no usable data: the in-process engine skips the iteration tracer,
+  the LLM class turns stats logging off, and sequential submission split the two prefills across
+  steps. The measurement ran with AsyncLLM and one background decoder. The failed directories are
+  kept.)
+- **B. Learned baseline: LB1 and LB2 held.** MLP primary MAE 40–232 ms vs M2n 1.2–3.1 ms. M2n
+  reaches ≤ 5 ms at N = 64; M0 and the MLP never do.
+- **D. Window rule.** The Mooncake primary windows meet it. The BurstGPT primary window meets it but
+  is not the earliest (that one is at 7.15 h). No Azure-code window meets the 20 s gap limit (the
+  trace arrives in minute-long bursts). With the gap relaxed to 60 s for Azure code only (a reported
+  deviation), the primary window t = 180 s is the earliest rule window.
+- **E (simulation).** Across 10 jitter seeds, Mooncake prevalence moves by ≤ 0.7 percentage points
+  in every stable cell.
+
+**H moved to the L20** (the A100 queue runs for many more hours). vLLM 0.30.0 in its own venv,
+tracer v2 re-anchored (0.30 adds `cudagraph_stats = None` before the common case; the installer
+accepts both). Every cell of the shape campaigns runs on Qwen3-4B, plus the pairing swap, with
+`--enable-scale-out` (0.30 makes `/inference/v1/generate` opt-in).
+- H1: 12–16k ratio 1×2048 / 8×256 within ±15% of the L20 0.29 value (1.88×), i.e. 1.60–2.16×.
+- H2: pairing swap PS1 and PS2 hold on 0.30.
+- H3: M2n primary-split MAE ≤ 5 ms and below M2's, as in addendum 1.
