@@ -2,141 +2,96 @@
 
 [![CI](https://github.com/yinli-systems/single-gpu-inference-lab/actions/workflows/ci.yml/badge.svg)](https://github.com/yinli-systems/single-gpu-inference-lab/actions/workflows/ci.yml)
 
-Custom CUDA and Triton operators carried through PyTorch dispatcher
-registration, guarded vLLM integration, and paired HTTP serving evaluation.
-The project is designed to answer a systems question that microbenchmarks
-alone cannot:
+Falsifiable systems results on LLM inference, measured end to end on one NVIDIA
+L20 with vLLM, from the API server through the scheduler to the GPU and the KV
+memory hierarchy. Every claim links to a checked-in artifact with raw data,
+exact commands, provenance hashes and the negative results that bound it.
 
-> Which kernel optimizations still matter after framework overhead, scheduling,
-> CUDA Graph behavior, and production baselines are included?
+The question the lab keeps asking has moved outward over time:
 
-The primary target is NVIDIA L20 (SM89, 48 GB GDDR6). A100 measurements are
-used as controls, and Apple M4 experiments provide a CPU deployment boundary.
+> Where does inference performance actually come from once the framework,
+> the scheduler, CUDA graphs and production baselines are included — and
+> which plausible optimizations survive a pre-registered kill gate?
 
-**Start here:** [reviewer guide](docs/reviewer-guide.md) ·
-[featured case study](docs/l20-sparse-penalty-case-study.md) ·
-[correctness notices](docs/sampling-correctness-notice-2026-07.md) ([2026-09](docs/top-logprobs-correctness-notice-2026-09.md)) ·
+**Start here:** [When Token Budgets Lie](docs/when-token-budgets-lie.md) (technical report) ·
 [result index](benchmarks/results/README.md) ·
-[experiment status](docs/experiment-status.md) ·
+[experiment status ledger](docs/experiment-status.md) ·
+[reviewer guide](docs/reviewer-guide.md) ·
 [repository map](docs/repo-map.md)
 
-## 60-Second Technical Review
+## Research lines (2026-09)
 
-| Boundary | Implementation | Measured result | Scope |
+| Line | Question | Result | Evidence |
 | --- | --- | --- | --- |
-| [Fused top-logprobs](src/l20_stack/ops/triton_sampling.py) | Two-stage Triton selection that avoids full-vocabulary log-softmax materialization | [**8.39x–9.45x** paired median speedup versus composed PyTorch baselines](benchmarks/results/a100-fused-top-logprobs/README.md) on A100 (pre-fix source); [**7.33x–8.25x**](benchmarks/results/l20-fused-top-logprobs-2026-09/README.md) on L20 after the [2026-09 masked-tile fix](docs/top-logprobs-correctness-notice-2026-09.md); 3 independent seeded inputs per shape pass tie-aware correctness with at most `4.768e-7` error | Repeated, steady-state GEMM-conditioned operator microbenchmarks; not a serving-speed claim |
-| [Sparse repetition penalty](integrations/vllm/cuda/l20_sparse_repetition_penalty.cu) | Custom CUDA kernel plus [PyTorch `TORCH_LIBRARY` registration](integrations/vllm/cuda/l20_sparse_repetition_penalty.cpp) and measured dispatch gate | [**39/39** correct L20 cases; **1.26x** median and **4.09x** best kernel speedup](benchmarks/results/l20-sparse-repetition-penalty/README.md); 0/39 measured policy regressions | Standalone kernel matrix |
-| [Residual RMSNorm](src/l20_stack/ops/triton_rmsnorm.py) | Triton fused residual-add + RMSNorm paths against PyTorch and FlashInfer | [**24/24** shapes correct; custom in-place path fastest on **14/24** shapes; best **2.412x**](benchmarks/results/l20-residual-rmsnorm-v3/README.md) | L20 FP16 microbenchmark; large prefill mostly approaches parity |
-| [Compact sampling mask: independent replication of vLLM #54901](benchmarks/results/l20-vllm-sampling-mask-ab/README.md) | vLLM 0.29.0's `--return-sampling-mask` unpacked a full-vocabulary bitmap on the host every step; upstream [#54901](https://github.com/vllm-project/vllm/pull/54901) (merged 2026-09-04, in 0.29.1) replaced it with `top_k`-bounded compact IDs. This repository reproduced the diagnosis and the fix independently on an L20 before finding the upstream change, and keeps the replication as evidence | [**0.085x → 0.77x** (0.5B) and **0.45x → 0.97x** (4B) of native throughput](benchmarks/results/l20-vllm-sampling-mask-ab/README.md) on a different GPU family, host and models than upstream's GB200 numbers; [**39x–457x** faster output path per step](benchmarks/results/l20-support-pack-path/README.md); identical tokens under batch-invariant mode | Replication on one L20 host, vLLM 0.29.0; not a novelty claim — the shipped patch targets 0.29.0 only and is superseded by 0.29.1 |
-| [Flat `token_logprobs` for RL rollouts](benchmarks/results/l20-flat-token-logprobs/README.md) | Diagnosed `logprobs` cost on vLLM's token-in/token-out endpoint to per-token object construction on the API server (not the kernel, not detokenization) and replaced it with an exact flat float array read from the engine's existing `flat_logprobs` buffer | [**0.73x → 0.89x** of native on Qwen2.5-0.5B; mask+logprob RL contract **0.94x → 0.98x** on Qwen3-4B](benchmarks/results/l20-flat-token-logprobs/README.md); max abs diff vs the object path 0.0 | L20 serving A/B on vLLM 0.29.0+#54901; opt-in, one endpoint, not yet upstream |
-| [Serving-path correctness audit](docs/sampling-correctness-notice-2026-07.md) | Corrected nucleus threshold semantics, removed a hot-path host sync, hardened CUDA device checks, and disabled unsafe deferred-penalty fusion | Historical custom-sampler serving numbers are **excluded from current performance claims** until GPU remeasurement | Correctness takes precedence over retaining a favorable result |
+| **A · RL rollout data path** | Why does asking vLLM for one logprob per token cost 30% of throughput, and where does the cost sit? | Located layer by layer: not the kernels, not detokenization, but per-request `LogprobsLists` slicing → IPC → output processor → Pydantic objects. An exact flat `token_logprobs` fast path restores **0.67× → 0.95–0.96×** of native on Qwen2.5-0.5B and **0.99×** on Qwen3-4B; max abs diff vs the object path 0.0. Upstream: [vllm-project/vllm#57442](https://github.com/vllm-project/vllm/pull/57442). | [`l20-flat-token-logprobs/`](benchmarks/results/l20-flat-token-logprobs/README.md), [`l20-logprob-engine-decomposition/`](benchmarks/results/l20-logprob-engine-decomposition/README.md), [`l20-vllm-sampling-mask-ab/`](benchmarks/results/l20-vllm-sampling-mask-ab/README.md) (independent replication of [#54901](https://github.com/vllm-project/vllm/pull/54901)) |
+| **B · Prefill cost geometry** | Is the aggregate coordinate used by deadline-aware chunked-prefill schedulers (decode batch, aggregate KV, prefill tokens) sufficient on a real engine? | No, in one specific way: it aliases partitions of the same prefill budget whose measured step costs differ **up to 1.9×** (1×2048 vs 8×256 tokens at equal batch, context and token count). One per-request attention-work term Σqᵢ(kvᵢ+(qᵢ+1)/2) explains it; geometry-OOD prediction error **341 ms → 8.3 ms** MAE; a live 100 ms-deadline controller carrying it delivers **+49–180%** safe prefill progress over the aggregate controller at zero violations — and only **+5–12%** over a hindsight-tuned fixed budget. Context shift, load shift, decode-KV skew, CUDA-graph boundaries and FCFS short-prompt bursts are all handled by the aggregate coordinate (negative results, recorded). | [`l20-prefill-cost-geometry/`](benchmarks/results/l20-prefill-cost-geometry/README.md), report [`docs/when-token-budgets-lie.md`](docs/when-token-budgets-lie.md); precursors [`l20-prefill-interference/`](benchmarks/results/l20-prefill-interference/README.md), [`l20-step-cost-shift/`](benchmarks/results/l20-step-cost-shift/README.md) |
+| **C · Heterogeneous pre-draft K** (speculative decoding) | Does choosing K per request *before* drafting recover draft work that adaptive verification only trims afterwards? | **Killed.** The DSpark draft pass is per-row-fixed (K=2→7 costs +5–20%), DSpark blocks are not prefix-invariant (small K loses 14–16% of positions), and the composed oracle is 0.94–1.00× of shipped adaptive verification. | [PR #13](https://github.com/yinli-systems/single-gpu-inference-lab/pull/13) (`l20-spec-decode-geometry/`) |
+| **D · Adaptive-verification cost profile** | Does the startup-static synthetic cost profile mis-price real context, and does that change the verification budget? | **Killed.** The profile is wrong by +6…+55 ms per step (2.3× at 6k context, even with a matched profile context), but the ratio-argmax budget is insensitive: one-tier shift for low-acceptance content only, hindsight regret 0–3%. A cost model can be wrong by 2× and the controller still nearly regret-free. | [PR #13](https://github.com/yinli-systems/single-gpu-inference-lab/pull/13) (`l20-adaptive-verification-profile/`) |
+| **E · Request-free KV prefetch for paused agent sessions** | How much of an agent's resume latency is the CPU→GPU KV reload, can it be hidden during the tool wait, and what does that cost the rest of the engine? | Oracle prefetch cuts resume TTFT **−52…−58%** for 4k–16k prefixes (load 6.4 µs/token; the useful lead is exactly the load time). Timing predictors are fragile under lognormal tool waits — *prefetch immediately* recovers 95–100% of the oracle. Under sustained occupancy every admission policy, even oracle-ordered, is worse than reactive (+10…+57%): prefetch pays only into slack, so the right gate is `free_blocks − reserve ≥ session_blocks`, not a utility ranking. | [PR #14](https://github.com/yinli-systems/single-gpu-inference-lab/pull/14) (`l20-kv-prefetch-oracle/`) |
 
-Every performance number above links directly to a checked-in artifact.
-Claims are deliberately separated into microbenchmark, integration-path, and
-end-to-end serving evidence.
+![same aggregate geometry](benchmarks/results/l20-prefill-cost-geometry/figures/same_aggregate_geometry.png)
 
-## Featured Engineering and Validation Loop
+*Line B, figure 1: six partitions of the same prefill budget against the aggregate KV coordinate (left) and against the per-request attention-work proxy (right).*
 
-The sparse repetition-penalty work is the clearest end-to-end example:
+## How the lab works
+
+Each line follows the same protocol, and the artifact records where it stopped:
 
 ```text
-full-vocabulary PyTorch baseline
-    -> sparse CUDA kernel
-    -> measured dispatch policy
-    -> PyTorch custom operator
-    -> vLLM request-level integration
-    -> fused Triton sampler boundary
-    -> semantic parity audit
-    -> historical serving claims withdrawn pending remeasurement
+measurement contract          trace coverage, on/off overhead, host wait ≠ GPU time,
+                              direct CUDA timing agreement — before any conclusion
+       ↓
+upper bound / falsification   oracle or composed bound with coverage labels
+                              (measured / interpolated / extrapolated); pre-registered gate
+       ↓
+minimal implementation        env-gated experiment patch, never a framework
+       ↓
+live A/B                      fresh server per condition, interleaved, ≥3 repeats,
+                              strongest safe baseline (hindsight-tuned where that is stronger)
+       ↓
+record                        positive, negative and superseded results with the same care
 ```
 
-### 1. Isolate the wasted work
+Lines C and D are as much a product of this protocol as A, B and E: each was
+screened in under a day with an explicit kill line, and each left a mechanism
+finding that the survivors rely on (why adaptive verification is robust, what
+the draft pass actually costs). The
+[experiment status ledger](docs/experiment-status.md) keeps every line, dead or
+alive, and the [result index](benchmarks/results/README.md) plus
+[machine-readable catalog](benchmarks/results/artifact-catalog.json) bind each
+number to its artifact.
 
-Repetition penalty only changes logits for tokens in the active history, while
-a dense baseline scans the full `[batch, vocab]` tensor. The custom CUDA path
-updates deduplicated token IDs and keeps a dense fallback outside its measured
-win regime.
+## Instrumentation and harnesses
 
-- [CUDA kernel](integrations/vllm/cuda/l20_sparse_repetition_penalty.cu)
-- [PyTorch dispatcher registration](integrations/vllm/cuda/l20_sparse_repetition_penalty.cpp)
-- [Standalone benchmark](cuda/sparse_repetition_penalty/)
-- [Measured evidence](benchmarks/results/l20-sparse-repetition-penalty/README.md)
+Reusable pieces built for the lines above; all opt-in, all reversible:
 
-### 2. Integrate through PyTorch and vLLM
-
-The CUDA implementation is registered as the mutating dispatcher op
-`l20_stack::sparse_repetition_penalty_out`. The vLLM path is opt-in, validates
-tensor contracts, preserves a fallback, and records trace coverage separately
-from latency runs.
-
-- [Opt-in processor](integrations/vllm/l20_sparse_repetition_penalty_logits_processor.py)
-- [Serving runner](scripts/run_vllm_l20_sparse_repetition_penalty_serving_ab.sh)
-
-### 3. Let correctness change the claim
-
-The standalone CUDA result remains valid, but a later semantic audit found two
-problems in the experimental fused serving route: the nucleus mask excluded the
-token that first crossed `top_p`, and the penalty-history path could truncate a
-long prompt. The code now keeps the threshold-crossing token and refuses fused
-penalty execution unless the full, supported history is available. Historical
-custom-sampler serving artifacts remain for traceability, but are not current
-performance evidence. The vLLM installer now leaves native penalties enabled;
-only the corrected sampling boundary may run experimentally, so an ineligible
-request can fall back safely.
-
-The [correctness notice](docs/sampling-correctness-notice-2026-07.md) defines
-the revalidation gate. This is the intended engineering loop: hypothesis,
-kernel implementation, framework integration, measurement, adversarial
-semantic review, correction, and honest claim revision.
-
-## What Is Implemented
-
-| Area | Work in this repository | Representative entry points |
+| Piece | What it gives | Entry point |
 | --- | --- | --- |
-| CUDA / PyTorch | Sparse repetition-penalty operator; experimental paged-decode prototypes; stream-aware launches, dispatcher schemas, fake registration, and guarded loading | [`integrations/vllm/cuda/`](integrations/vllm/cuda/), [`cuda/sparse_repetition_penalty/`](cuda/sparse_repetition_penalty/) |
-| Triton kernels | Sampling, top-logprobs, RMSNorm, RoPE/KV writes, decode/tree attention, dequant GEMV, and LM-head boundary prototypes | [`src/l20_stack/ops/`](src/l20_stack/ops/) |
-| vLLM integration | Opt-in installers, fallback-first hooks, trace instrumentation, and experimental serving runners | [`integrations/vllm/`](integrations/vllm/) |
-| Measurement | Correctness matrices, CUDA-event timing, NSYS/NCU summaries, TTFT/ITL/throughput A/Bs, and machine-readable artifacts | [`scripts/`](scripts/), [`benchmarks/results/`](benchmarks/results/) |
-| CPU control track | Transformer mechanics, M4 Q4×Q8 NEON, real GGUF Q4_K parsing, and bounded CPU/GPU comparisons | [`cpp/`](cpp/), [`benchmarks/results/cpu-real-model/`](benchmarks/results/cpu-real-model/) |
+| Engine iteration + runner step tracer (v2–v4) | Per-iteration scheduler geometry (per-request chunks and KV depths), engine wait, direct CUDA step time, draft-pass time, adaptive-verification decisions; joined by sequence, not timestamp | [`benchmarks/results/l20-prefill-cost-geometry/patches/`](benchmarks/results/l20-prefill-cost-geometry/patches/), [`scripts/step_trace_join.py`](scripts/step_trace_join.py) |
+| Prefill interference / deadline controller | Background decoders + injected long prefills; env-gated per-step prefill budget chooser with M0 / M2 cost models, online margin, equal or FCFS partition | [`scripts/measure_prefill_interference.py`](scripts/measure_prefill_interference.py), [`scripts/analyze_step_cost_v2.py`](scripts/analyze_step_cost_v2.py), [`scripts/replay_prefill_controller.py`](scripts/replay_prefill_controller.py), [`scripts/analyze_live_controller.py`](scripts/analyze_live_controller.py) |
+| Speculative-decoding geometry | Closed batches by prompt class and batch size; draft vs verify split; per-request acceptance | [`scripts/measure_spec_geometry.py`](scripts/measure_spec_geometry.py), [`scripts/analyze_spec_geometry.py`](scripts/analyze_spec_geometry.py) |
+| Feature-cost serving A/B | One server per condition, `/proc` CPU split per process, output dumps, port guard | [`scripts/measure_vllm_feature_cost.py`](scripts/measure_vllm_feature_cost.py) |
 
-The repository contains experimental paths as well as confirmed results.
-Nothing is default-enabled from a microbenchmark win alone.
+## Operator-level work (earlier)
 
-## System Shape
+The lab began one layer down, asking which kernel optimizations still matter
+after framework overhead. Those results stand and are kept to the same
+evidence standard:
 
-```mermaid
-flowchart LR
-    Workload["Prompt traces and serving workloads"]
-    Baseline["PyTorch / FlashInfer / native vLLM"]
-    Kernel["CUDA and Triton candidates"]
-    Dispatch["Measured gates and fallbacks"]
-    Integration["PyTorch dispatcher and vLLM hooks"]
-    Evidence["Correctness, latency, traces, and serving A/B"]
-    Decision["Enable, redesign, or reject"]
-
-    Workload --> Baseline
-    Workload --> Kernel
-    Kernel --> Dispatch
-    Dispatch --> Integration
-    Baseline --> Evidence
-    Integration --> Evidence
-    Evidence --> Decision
-```
-
-## Selected Evidence
-
-| Result | Evidence | Interpretation |
+| Boundary | Measured result | Scope |
 | --- | --- | --- |
-| A100 fused top-logprobs | [artifact](benchmarks/results/a100-fused-top-logprobs/README.md) | Current controlled Triton operator result; the clean vLLM path proof is flat in total request time |
-| L20 sparse repetition penalty | [artifact](benchmarks/results/l20-sparse-repetition-penalty/README.md) | Current CUDA operator result and measured dispatch regime |
-| L20 residual RMSNorm | [artifact](benchmarks/results/l20-residual-rmsnorm-v3/README.md) | Current Triton fusion result; shape-dependent rather than universal |
-| Custom top-p serving paths | [correctness notice](docs/sampling-correctness-notice-2026-07.md) | Historical only; excluded until corrected, native-equivalent reruns exist |
-| Negative and superseded paths | [status ledger](docs/experiment-status.md) | Failed or invalidated paths remain visible and constrain current claims |
+| [Fused top-logprobs selection](src/l20_stack/ops/triton_sampling.py) | [**8.39x–9.45x**](benchmarks/results/a100-fused-top-logprobs/README.md) paired median speedup on A100 (pre-fix source) and [7.33x–8.25x](benchmarks/results/l20-fused-top-logprobs-2026-09/README.md) on L20 after the [2026-09 masked-tile fix](docs/top-logprobs-correctness-notice-2026-09.md); tie-aware correctness within `4.768e-7` | Steady-state, GEMM-conditioned operator microbenchmark; both dirty and clean A100 path-proof artifacts exist ([dirty](benchmarks/results/a100-vllm-top-logprobs-smoke/dirty-qwen25-05b-r2/README.md), [clean](benchmarks/results/a100-vllm-top-logprobs-clean/qwen25-05b-r30/README.md)); only the clean run is used for interpretation and its total request time is flat |
+| [Sparse repetition penalty](integrations/vllm/cuda/l20_sparse_repetition_penalty.cu) | [39/39 correct; 1.26x median, 4.09x best](benchmarks/results/l20-sparse-repetition-penalty/README.md) with a measured dispatch gate | Standalone kernel matrix; [case study](docs/l20-sparse-penalty-case-study.md) |
+| [Residual RMSNorm](src/l20_stack/ops/triton_rmsnorm.py) | [24/24 correct; fastest on 14/24 shapes, best 2.412x](benchmarks/results/l20-residual-rmsnorm-v3/README.md) | L20 FP16 microbenchmark |
+| [Serving-path correctness audit](docs/sampling-correctness-notice-2026-07.md) | Historical custom-sampler serving numbers withdrawn until GPU remeasurement | Correctness takes precedence over a favorable number |
 
-The curated catalog is in the [result index](benchmarks/results/README.md) and
-[machine-readable catalog](benchmarks/results/artifact-catalog.json).
+The hardware boundary is one L20 (SM89, 48 GB); A100 measurements are
+controls and Apple M4 experiments mark the CPU deployment edge
+([hardware policy](docs/hardware-scope.md)).
 
-## Further Review Entry Points
+Operator-era review entry points (kept for the record; the logits-boundary
+work is what first showed that the sampling kernels were not the serving
+bottleneck and led to lines A–B):
 
 | Topic | Path |
 | --- | --- |
@@ -148,120 +103,52 @@ The curated catalog is in the [result index](benchmarks/results/README.md) and
 | Trace summarizer | [`scripts/summarize_l20_logits_boundary_trace.py`](scripts/summarize_l20_logits_boundary_trace.py) |
 | Trace campaign | [`scripts/run_vllm_l20_logits_boundary_trace_campaign.sh`](scripts/run_vllm_l20_logits_boundary_trace_campaign.sh) |
 | Standalone top-k/top-p benchmark | [`scripts/benchmark_l20_topk_topp_sampling.py`](scripts/benchmark_l20_topk_topp_sampling.py) |
+| Compact systems thesis | [`docs/where-optimizations-stop-mattering.md`](docs/where-optimizations-stop-mattering.md) |
 
-Fused top-logprobs selection has both
-[dirty and clean A100 path-proof artifacts](benchmarks/results/a100-vllm-top-logprobs-clean/);
-only the clean run is used for interpretation, and its total request time is
-flat.
+## Reproduce and validate
 
-## Reproduce and Validate
-
-The default CI is CPU-safe: it installs CPU PyTorch, validates public artifact
-links, builds the result catalog, runs the test suite, and compiles Python
-sources. On a clean Linux environment:
+CI is CPU-safe: it installs CPU PyTorch, validates artifact links, builds the
+result catalog, runs the test suite and compiles the sources.
 
 ```bash
-python -m venv .venv
-source .venv/bin/activate
+python -m venv .venv && source .venv/bin/activate
 python -m pip install --upgrade pip
 python -m pip install -e ".[dev]" numpy
 python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
-
 python -m pytest -q
-single-gpu-infer artifact-index --strict-warnings
 single-gpu-infer doc-links
 single-gpu-infer artifact-catalog --output /tmp/artifact-catalog.json
 ```
 
-GPU results require the hardware and versions named in each artifact. The most
-direct standalone CUDA reproduction is:
+GPU results need the hardware, model and vLLM version named in each artifact;
+every campaign's exact server and harness command is checked in next to its
+raw data (`benchmarks/results/<artifact>/raw/campaign*.sh`). Kernel builds
+additionally need `python -m pip install -e ".[dev,kernels]"` and target SM89
+by default (`TORCH_CUDA_ARCH_LIST=8.0` for A100 portability checks; A100
+numbers are never presented as L20 results).
 
-```bash
-scripts/run_l20_sparse_repetition_penalty.sh
-```
+## Claim policy
 
-CUDA extension reproduction requires the kernel dependencies, including the
-Ninja backend used by `torch.utils.cpp_extension.load`:
-
-```bash
-python -m pip install -e ".[dev,kernels]"
-```
-
-PyTorch extension build, smoke, stress, and benchmark entry points use
-`TORCH_CUDA_ARCH_LIST` and default it to `8.9`, preserving the L20/SM89 target.
-To compile and run the same operator sources on an A100 for portability and
-correctness checks, set the native PyTorch override explicitly:
-
-```bash
-TORCH_CUDA_ARCH_LIST=8.0 PYTHONPATH=src \
-  python scripts/smoke_cuda_sparse_repetition_penalty_op.py
-
-TORCH_CUDA_ARCH_LIST=8.0 PYTHONPATH=src \
-  python scripts/smoke_cuda_paged_decode_op.py
-```
-
-`CUDA_ARCH=80` is also accepted as a single-architecture compatibility alias
-when `TORCH_CUDA_ARCH_LIST` is unset.
-
-The architecture override only changes the nvcc code-generation target.
-L20-specific runtime gates and dispatch policy remain unchanged, and A100
-measurements must not be presented as reproductions of L20 performance claims.
-
-The corrected sampler can be remeasured with:
-
-```bash
-scripts/run_vllm_l20_sparse_penalty_triangle_matrix.sh
-```
-
-That command does not reinstate the historical serving claim by itself; the
-[revalidation gate](docs/sampling-correctness-notice-2026-07.md) also requires
-native-equivalent semantic parity, repeated runs, raw samples, and provenance.
-These commands are not advertised as hardware-portable defaults.
-
-For an L20 vLLM server-path smoke of the GEMM epilogue hook:
-
-```bash
-PYTHONPATH=src python scripts/smoke_vllm_l20_gemm_epilogue_server.py \
-  --python /path/to/vllm-venv/bin/python \
-  --vllm-source /path/to/vllm-checkout \
-  --model /path/to/Qwen2.5-0.5B-snapshot \
-  --output-dir /tmp/single-gpu-inference-lab/vllm-gemm-smoke
-```
-
-This smoke starts an OpenAI-compatible vLLM server, sends one
-`/v1/completions` request, and requires every GEMM epilogue trace event to
-return a sampled token without full logits and match the baseline argmax.
-
-## Claim Policy
-
-- Name the hardware, model, workload, baseline, and artifact for every
-  performance claim.
-- Treat microbenchmark, path-proof, and serving results as different evidence
-  levels.
-- Keep trace runs separate from latency runs.
-- Report negative and mixed rows; do not summarize a partial win as universal.
-- Withdraw a performance claim when a later semantic audit invalidates its
-  comparator, even if the historical number was favorable.
+- Name the hardware, model, workload, baseline and artifact for every number.
+- Separate microbenchmark, path-proof and serving evidence; keep trace runs
+  separate from latency runs.
+- Pre-register the kill gate; report negative and mixed rows; never summarize
+  a partial win as universal or a research margin as a product claim.
+- Withdraw a claim when a later audit invalidates its comparator.
 - Do not extrapolate L20 or A100 measurements to other GPU families.
-- Keep model weights, datasets, raw profiler databases, caches, and secrets out
-  of git.
+- Keep weights, datasets, raw profiler databases, caches and secrets out of git.
 
-See the [hardware policy](docs/hardware-scope.md) and
-[compact systems thesis](docs/where-optimizations-stop-mattering.md).
-
-## Repository Map
+## Repository map
 
 | Path | Purpose |
 | --- | --- |
-| `src/l20_stack/ops/` | Triton kernels and launch/dispatch policies |
-| `integrations/vllm/` | PyTorch custom ops, vLLM hooks, and reversible installers |
-| `cuda/` | Standalone CUDA experiments |
-| `scripts/` | Benchmarks, profilers, serving campaigns, and summarizers |
-| `benchmarks/results/` | Compact JSON/CSV/Markdown evidence |
-| `docs/` | Case studies, status ledger, hardware scope, and research decisions |
-| `tests/` | CPU-safe behavioral, integration-contract, and source-level tests |
-| `cpp/` | CPU and Apple M4 control experiments |
+| `benchmarks/results/` | One directory per artifact: README, raw JSON/JSONL, figures, patches, commands |
+| `docs/` | Technical reports, status ledger, correctness notices, hardware scope |
+| `scripts/` | Harnesses, analyzers, campaign runners, summarizers |
+| `src/l20_stack/ops/` | Triton kernels and dispatch policies |
+| `integrations/vllm/` | PyTorch custom ops, vLLM hooks, reversible installers |
+| `cuda/`, `cpp/` | Standalone CUDA experiments; CPU / Apple M4 control track |
+| `tests/` | CPU-safe behavioral, contract and source-level tests |
 
-The public project name is **Single-GPU Inference Lab**. The Python namespace
-remains `l20_stack` for compatibility with existing scripts and checked-in
-artifacts.
+The public project name is **Single-GPU Inference Lab**; the Python namespace
+remains `l20_stack` for compatibility with existing scripts and artifacts.

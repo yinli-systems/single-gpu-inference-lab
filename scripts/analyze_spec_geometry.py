@@ -64,21 +64,32 @@ def main():
                         continue
                     B = b["B"]
                     t0 = b["t_all_first"]; t1 = b["t_end"]
-                    win = [r for r in rows if t0 <= r["t"] <= t1 and r["ctx_tokens"] == 0 and r["gen_reqs"] == B and np.isfinite(r["cuda_ms"])]
-                    if len(win) < 5:
-                        continue
+                    dec = [r for r in rows if t0 <= r["t"] <= t1 and r["ctx_tokens"] == 0 and np.isfinite(r["cuda_ms"])]
+                    win = [r for r in dec if r["gen_reqs"] == B]
+                    B_eff = B
+                    if len(win) < 10:
+                        # rows finish at different times (high acceptance vs prefill stagger): use the
+                        # largest co-decoding batch that has enough steps, and report it as B_eff
+                        counts = defaultdict(int)
+                        for r in dec:
+                            counts[r["gen_reqs"]] += 1
+                        cands = [g for g, n in counts.items() if n >= 10]
+                        if not cands:
+                            continue
+                        B_eff = max(cands)
+                        win = [r for r in dec if r["gen_reqs"] == B_eff]
                     step = np.array([r["cuda_ms"] for r in win])
                     draft = np.array([r.get("draft_ms", 0.0) or 0.0 for r in win])
                     # accepted tokens per step from the spec trace inside the window
                     if len(spec_t):
-                        sel = [s for s, t in zip(spec, spec_t) if t0 <= t <= t1 and len(s["acc"]) == B]
+                        sel = [s for s, t in zip(spec, spec_t) if t0 <= t <= t1 and len(s["acc"]) == B_eff]
                     else:
                         sel = []
                     acc_rows_all = [a for s in sel for a in s["acc"]] if sel else []
                     if sel:
                         acc_per_step = np.array([sum(a[3] for a in s["acc"]) for s in sel])
-                        tokens_per_step = float(np.mean(acc_per_step)) + B
-                        acc_row = float(np.mean(acc_per_step)) / B
+                        tokens_per_step = float(np.mean(acc_per_step)) + B_eff
+                        acc_row = float(np.mean(acc_per_step)) / B_eff
                         # per-row acceptance by prompt class (long vs short by depth at window start)
                         by_depth = defaultdict(list)
                         for s in sel:
@@ -86,25 +97,25 @@ def main():
                                 by_depth["long" if a[1] > 3000 else "short"].append(a[3])
                         cls_acc = {k: float(np.mean(v)) for k, v in by_depth.items()}
                     else:
-                        tokens_per_step = float(B); acc_row = 0.0; cls_acc = {}
+                        tokens_per_step = float(B_eff); acc_row = 0.0; cls_acc = {}
                     good = tokens_per_step / (np.median(step) / 1e3)
                     key = (cond, b["class"], B, rep)
                     accs = np.array([a[3] for a in acc_rows_all]) if acc_rows_all else np.array([0.0])
                     depth_bins = defaultdict(list)
                     for a in acc_rows_all:
                         depth_bins[int(a[1] // 1024)].append(a[3])
-                    table[key] = {"n_steps": len(win), "step_ms_p50": float(np.median(step)), "step_ms_p95": float(np.quantile(step, .95)),
+                    table[key] = {"n_steps": len(win), "B_eff": B_eff, "step_ms_p50": float(np.median(step)), "step_ms_p95": float(np.quantile(step, .95)),
                                   "acc_quantiles": {q: float(np.quantile(accs, q / 100)) for q in (25, 50, 75, 90)}, "acc_frac_zero": float(np.mean(accs == 0)),
                                   "acc_by_depth_k": {str(k): [len(v), float(np.mean(v))] for k, v in sorted(depth_bins.items())},
                                   "draft_ms_p50": float(np.median(draft)), "draft_share": float(np.median(draft) / np.median(step)),
                                   "tokens_per_step": tokens_per_step, "goodput": good, "acc_per_row": acc_row, "class_acc": cls_acc,
                                   "wall_tok_per_s": b["tok_per_s"], "prompt_tokens_p50": float(np.median([r["prompt_tokens"] for r in b["requests"]]))}
-                    print(f"| {cond} | {b['class']} | {B} | {len(win)} | {np.median(step):.1f} | {np.median(draft):.1f} ({np.median(draft)/np.median(step)*100:.0f}%) | "
+                    print(f"| {cond} | {b['class']} | {B}{'' if B_eff == B else f' (eff {B_eff})'} | {len(win)} | {np.median(step):.1f} | {np.median(draft):.1f} ({np.median(draft)/np.median(step)*100:.0f}%) | "
                           f"{tokens_per_step:.1f} | {good:.0f} | {acc_row:.2f} | {' '.join(f'{k}:{v:.2f}' for k, v in cls_acc.items())} |")
 
     def cell(cond, cls, B):
-        vals = [v for (c, k, b, r), v in table.items() if c == cond and k == cls and b == B]
-        return vals
+        # only windows where the full batch co-decodes; reduced-batch fallbacks are excluded from the tables
+        return [v for (c, k, b, r), v in table.items() if c == cond and k == cls and b == B and v["B_eff"] == B]
 
     print("\n## T1. draft share of the step (median over co-decode steps; mean over repeats)")
     conds_sorted = sorted({k[0] for k in table})
@@ -124,7 +135,7 @@ def main():
     print("\n## T2. accepted-prefix length per row per step: P25 / P50 / P75 / P90, and share of rows with 0 accepted")
     print("| condition | class | B | P25 | P50 | P75 | P90 | zero | mean |"); print("| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |")
     for (cond, cls, B, rep), v in sorted(table.items()):
-        if rep != 0 or v["draft_ms_p50"] == 0:
+        if rep != 0 or v["draft_ms_p50"] == 0 or v["B_eff"] != B:
             continue
         q = v["acc_quantiles"]
         print(f"| {cond} | {cls} | {B} | {q[25]:.0f} | {q[50]:.0f} | {q[75]:.0f} | {q[90]:.0f} | {v['acc_frac_zero']*100:.0f}% | {v['acc_per_row']:.2f} |")
