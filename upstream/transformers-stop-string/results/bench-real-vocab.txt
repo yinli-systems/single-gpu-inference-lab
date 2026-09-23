@@ -1,0 +1,11 @@
+real vocab: 151665 tokens (0 not byte-level), mean token length 6.44 bytes
+
+suite                                 upstream ms  candidate ms   ratio  identical
+single short stop ('<|im_end|>')            419.3         83.08    5.0x  True
+                                     upstream samples [419.9, 419.3, 407.0]  candidate [83.68, 83.08, 82.33]
+4 stops (agent-style)                      1598.4        319.54    5.0x  True
+                                     upstream samples [1600.5, 1581.6, 1598.4]  candidate [319.54, 321.55, 317.65]
+1 long stop (40 chars)                      980.7         80.55   12.2x  True
+                                     upstream samples [990.0, 978.4, 980.7]  candidate [80.55, 80.61, 80.39]
+8 stops (max_model 'stop' list)            2849.0        613.56    4.6x  True
+                                     upstream samples [2849.0, 2820.2, 2858.9]  candidate [617.71, 613.56, 607.72]

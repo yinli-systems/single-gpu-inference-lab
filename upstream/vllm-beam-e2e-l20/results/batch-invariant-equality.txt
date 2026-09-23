@@ -1,0 +1,12 @@
+VLLM_BATCH_INVARIANT=1, Qwen2.5-0.5B-Instruct, L20; tokens and cumulative-logprob float bits
+cell                  stock=stock  stock=patched  beams
+plain p128   w4             True           True      4
+plain p128   w8             True           True      8
+plain p128   w16            True           True     16
+plain p128   w32            True           True     32
+plain p2048  w8             True           True      8
+plain p2048  w32            True           True     32
+json  p47    w4             True           True      4
+json  p47    w8             True           True      8
+json  p47    w16            True           True     16
+ALL IDENTICAL
