@@ -147,3 +147,37 @@ pairs are reported.
 
 Known limitation: the controller prices waiting requests at depth 0 before their prefix-cache
 lookup, so it under-prices cache-hit first chunks.
+
+## Addendum 5 (2026-09-24): BurstGPT control, simulator-vs-live check, workload shift; before launch
+
+The decode-KV-skew mechanism is recorded as **measured but unexplained** and paused (it is not in
+the FA2 decode kernel; see `prefill-geometry-attention-shape/` §3).
+
+### BurstGPT negative control (live)
+Same six arms and harness as addendum 4. BurstGPT (first 20k non-failed requests) at ×100, 240 s
+window, 2 repeats.
+
+### Simulator vs live
+For the `default` arm of every live replay (Mooncake tool-agent ×0.1/×0.2, Azure code ×0.25/×0.5,
+BurstGPT ×100), compute from the engine trace P(prefills per step > 1) and P(geometry error > 5 ms)
+over prefill steps, with the same formula and slope as `trace-geometry-prevalence/` (3.3 ms/M).
+Compare with the simulator run on the same window and scale.
+- V1: P(geo > 5 ms) is higher for Mooncake tool-agent and Azure code than for BurstGPT in live data,
+  as in the simulator.
+- V2: each live P(geo > 5 ms) is within a factor of 2 of the simulator's for the same cell.
+
+### Workload shift (live)
+One 600 s run: chat (Azure conv ×1, 0–150 s) → code (Azure code ×0.5, 0–150 s) → agent (Mooncake
+tool-agent, 3 s spread, ×0.2, 0–150 s) → chat (the same Azure conv segment again). Arms: stock
+`--max-num-batched-tokens` 512 / 1024 / 2048 / 4096 / 8192, `agentx` (2048 + cap 512),
+`ctl-m2n-fcfs`, `ctl-m0-fcfs` (D = 65 ms, ceiling 8192). 2 repeats: repeat 1 on A100 GPU 0,
+repeat 2 on GPU 1 (same host, same model of GPU).
+
+Per phase: primary goodput (TTFT ≤ 5 s, TPOT ≤ 100 ms) by arrival. The per-phase hindsight best is
+the best of the six stock arms in that phase (mean of repeats). Regret(arm) = Σ_phases (best − arm)
+/ Σ_phases best.
+- W1: no single stock arm is within 5% of the per-phase hindsight best in every phase.
+- W2 (the claim under test): regret(`ctl-m2n-fcfs`) ≤ the smallest regret among the six stock arms.
+  Prior: uncertain. On fixed workloads M2n matched the best fixed budget but did not beat it, so W2
+  can only hold if the best fixed budget changes between phases (W1).
+- W3: regret(`ctl-m2n-fcfs`) < regret(`ctl-m0-fcfs`).
