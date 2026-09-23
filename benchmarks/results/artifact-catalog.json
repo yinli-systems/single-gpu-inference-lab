@@ -3,8 +3,8 @@
     "active": 6,
     "analysis": 1,
     "negative": 10,
-    "other": 12,
-    "path_proof": 14,
+    "other": 14,
+    "path_proof": 15,
     "positive": 8,
     "superseded": 12
   },
@@ -430,6 +430,42 @@
       "summary": "Same harness as `l20-prefill-cost-geometry/` on A100-SXM4-80GB, Qwen3-4B and Qwen3-8B: same-aggregate partition gap up to 2.02x (4B) / 1.62x (8B), one attention-work slope for both models, geometry-OOD MAE 171 -> 18 ms / 170 -> 18 ms; context/load controls replicate; decode-KV skew at equal aggregate is 5-9% slower on A100 (not on L20). One-off compile and first-iteration steps excluded by opt-in flags (all three variants kept)."
     },
     {
+      "category": "other",
+      "compact_file_count": 1,
+      "has_campaign_summary_json": false,
+      "has_evidence_status_json": false,
+      "has_readme": true,
+      "has_summary_json": false,
+      "path": "benchmarks/results/prefill-geometry-attention-shape",
+      "reference": "prefill-geometry-attention-shape/",
+      "status": "Cross-shape replication + pre-registered model fix",
+      "summary": "Qwen2.5-1.5B (L20) and Qwen2.5-7B (A100): partition gap 1.83x / 1.48x; attention-work slope scales with layers x query heads within 4-11% at budget 2048 (1.5B budget-1024 slope missed its pre-registered bound). M2's over-prediction is extrapolation of the aggregate prefill-KV term; M2n (term dropped, pre-registered before these campaigns) passes every pre-registered criterion on both: MAE 1.75 / 1.23 ms vs M2 23.9 / 17.0. Decode-KV skew: 3-9% on all three A100 models, none on L20."
+    },
+    {
+      "category": "other",
+      "compact_file_count": 1,
+      "has_campaign_summary_json": false,
+      "has_evidence_status_json": false,
+      "has_readme": true,
+      "has_summary_json": false,
+      "path": "benchmarks/results/a100-prefill-live-controller",
+      "reference": "a100-prefill-live-controller/",
+      "status": "Pre-registered live replication (A100)",
+      "summary": "Live env-gated deadline controller, Qwen3-4B, 65 ms, 8 decoders + 4/8 x 16k prefills, 3 interleaved repeats: M2n delivers 2.4x / 4.8x M0's safe prefill throughput at <=0.6% violations (TTFT 13.7 -> 5.7 s, 56.0 -> 11.5 s); the published M2 collapses to 64-token budgets at N=8 as predicted; against the best safe fixed budget (512; 768/1024 violate 23-59%) M2n is -2..+7%, failing the pre-registered 15% gate as on L20."
+    },
+    {
+      "category": "path_proof",
+      "compact_file_count": 1,
+      "has_campaign_summary_json": false,
+      "has_evidence_status_json": false,
+      "has_readme": true,
+      "has_summary_json": false,
+      "path": "benchmarks/results/trace-geometry-prevalence",
+      "reference": "trace-geometry-prevalence/",
+      "status": "Simulation (trace replay of vLLM 0.29 budget rules)",
+      "summary": "Azure 2023, BurstGPT and Mooncake traces on one A100 / Qwen3-4B: steps with >5 ms aggregate-coordinate mispricing are 0-7% of prefill steps on short-prompt chat but 6-28% on long-prompt and prefix-cached (agent / long-context) traffic, P95 170-270 ms at budget 8192 on Mooncake; a per-request chunk cap raises it everywhere. Mooncake conversation/tool-agent timestamps are 3 s-quantized (recorded)."
+    },
+    {
       "category": "negative",
       "compact_file_count": 1,
       "has_campaign_summary_json": false,
@@ -766,7 +802,7 @@
       "summary": "Custom three-way serving path evidence; not yet a broad win."
     }
   ],
-  "entry_count": 63,
+  "entry_count": 66,
   "index_path": "benchmarks/results/README.md",
   "result_root": "benchmarks/results",
   "schema_version": 1
