@@ -62,11 +62,14 @@ def main():
             "itl_during_p50": r["background"]["during"]["p50_ms"], "itl_during_p95": r["background"]["during"]["p95_ms"], "itl_during_p99": r["background"]["during"]["p99_ms"],
             "itl_max": r["background"]["during"]["max_ms"], "bg_tok_per_s_during": r["background_tok_per_s_during"],
             "budget_p50": float(np.median(budgets)) if budgets else None,
+            # realised prefill tokens per prefill step (the chosen budget as executed; available
+            # even when the trace carries no controller decision records)
+            "prefill_tokens_p50": float(np.median([x["ctx_tokens"] for x in ppre])),
             "margin_last_ms": next((x["exp"].get("margin_ms") for x in reversed(ppre) if x.get("exp")), None),
             "online_frac": float(np.mean([bool(x["exp"].get("online")) for x in ppre if x.get("exp")])) if budgets else None, "budget_hist": {str(k): int(v) for k, v in zip(*np.unique(budgets, return_counts=True))} if budgets else None,
         })
-    print(f"| condition | reps | prefill steps | violations >{args.deadline_ms:.0f} ms | prefill step p95 / max | safe prefill tok/s | TTFT mean / max | bg ITL p95 / p99 / max | budget p50 | final margin |")
-    print("| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |")
+    print(f"| condition | reps | prefill steps | violations >{args.deadline_ms:.0f} ms | prefill step p95 / max | safe prefill tok/s | TTFT mean / max | bg ITL p95 / p99 / max | budget p50 | prefill tokens/step p50 | final margin |")
+    print("| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |")
     summary = {}
     def mr(xs, f="{:.1f}"):
         return f.format(np.mean(xs)) + " (" + f.format(min(xs)) + "–" + f.format(max(xs)) + ")"
@@ -76,7 +79,7 @@ def main():
         summary[cond] = {"runs": rs, "mean": {k: float(np.mean(g(k))) for k in rs[0] if isinstance(rs[0][k], (int, float)) and rs[0][k] is not None}}
         print(f"| {cond} | {len(rs)} | {mr(g('prefill_steps'), '{:.0f}')} | {mr([100*v for v in g('violation_rate')])}% | {mr(g('prefill_cuda_p95'))} / {mr(g('prefill_cuda_max'), '{:.0f}')} | "
               f"{mr(g('safe_tok_per_s'), '{:.0f}')} | {mr(g('ttft_mean_s'), '{:.2f}')} / {mr(g('ttft_max_s'), '{:.2f}')} | {mr(g('itl_during_p95'), '{:.0f}')} / {mr(g('itl_during_p99'), '{:.0f}')} / {mr(g('itl_max'), '{:.0f}')} | "
-              f"{np.mean([x['budget_p50'] for x in rs if x['budget_p50']]) if any(x['budget_p50'] for x in rs) else '—'} | "
+              f"{np.mean([x['budget_p50'] for x in rs if x['budget_p50']]) if any(x['budget_p50'] for x in rs) else '—'} | {mr(g('prefill_tokens_p50'), '{:.0f}')} | "
               f"{mr([x['margin_last_ms'] for x in rs]) if all(x['margin_last_ms'] is not None for x in rs) else '—'} |")
     args.output.write_text(json.dumps(summary, indent=2) + "\n")
 

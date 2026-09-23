@@ -1,0 +1,174 @@
+{
+  "schema_version": 1,
+  "result_type": "prefill_interference",
+  "generated_at_utc": "2026-09-23T11:20:17Z",
+  "provenance": {
+    "commit": "8ce9c7aa4dec35fcd79fea711d0336bdc82ed5b0",
+    "dirty": false
+  },
+  "model": "/root/lab/models/Qwen3-4B",
+  "workload": {
+    "background": 8,
+    "background_prompt_tokens": 128,
+    "background_prompt_tokens_list": "",
+    "background_tokens": 4096,
+    "settle_tokens": 64,
+    "inject": 8,
+    "long_tokens": 16384,
+    "long_output_tokens": 32,
+    "repeats": 1,
+    "seed": 113,
+    "max_model_len": 40960,
+    "max_num_seqs": 64,
+    "long_prefill_token_threshold": 0
+  },
+  "trace": true,
+  "conditions": {
+    "chunk8192": {
+      "flags": [
+        "--max-num-batched-tokens",
+        "8192",
+        "--no-enable-prefix-caching",
+        "--enable-logging-iteration-details"
+      ],
+      "repeats": [
+        {
+          "background": {
+            "before": {
+              "count": 528,
+              "p50_ms": 7.337413961067796,
+              "p95_ms": 7.7994950115680695,
+              "p99_ms": 7.863663951866329,
+              "max_ms": 7.872804068028927,
+              "slo_attainment": {
+                "10ms": 1.0,
+                "25ms": 1.0,
+                "50ms": 1.0
+              }
+            },
+            "during": {
+              "count": 1368,
+              "p50_ms": 60.57659396901727,
+              "p95_ms": 95.53132310975343,
+              "p99_ms": 99.2533250246197,
+              "max_ms": 184.72920497879386,
+              "slo_attainment": {
+                "10ms": 0.06432748538011696,
+                "25ms": 0.23391812865497075,
+                "50ms": 0.3742690058479532
+              }
+            },
+            "after": {
+              "count": 3144,
+              "p50_ms": 7.624899037182331,
+              "p95_ms": 7.870892994105816,
+              "p99_ms": 8.360545034520328,
+              "max_ms": 14.431601972319186,
+              "slo_attainment": {
+                "10ms": 0.996501272264631,
+                "25ms": 1.0,
+                "50ms": 1.0
+              }
+            }
+          },
+          "long_requests": [
+            {
+              "ttft_s": 9.154919227934442,
+              "e2e_s": 9.713143297936767,
+              "output_tokens": 32
+            },
+            {
+              "ttft_s": 9.152479402953759,
+              "e2e_s": 9.710541145992465,
+              "output_tokens": 32
+            },
+            {
+              "ttft_s": 9.151062299031764,
+              "e2e_s": 9.709177070995793,
+              "output_tokens": 32
+            },
+            {
+              "ttft_s": 9.149357011076063,
+              "e2e_s": 9.707343555986881,
+              "output_tokens": 32
+            },
+            {
+              "ttft_s": 9.147731182049029,
+              "e2e_s": 9.705817934009247,
+              "output_tokens": 32
+            },
+            {
+              "ttft_s": 9.146357466932386,
+              "e2e_s": 9.704514698009007,
+              "output_tokens": 32
+            },
+            {
+              "ttft_s": 9.145043830969371,
+              "e2e_s": 9.703244721982628,
+              "output_tokens": 32
+            },
+            {
+              "ttft_s": 9.157907042070292,
+              "e2e_s": 9.707282337010838,
+              "output_tokens": 32
+            }
+          ],
+          "injection_window_s": 9.718820401933044,
+          "background_output_tokens_total": 5048,
+          "background_tok_per_s_overall": 382.21269073880717,
+          "background_tok_per_s_during": 140.7578228040832
+        }
+      ],
+      "command": [
+        "/root/lab/venv-ctl/bin/vllm",
+        "serve",
+        "/root/lab/models/Qwen3-4B",
+        "--port",
+        "8124",
+        "--max-model-len",
+        "40960",
+        "--gpu-memory-utilization",
+        "0.9",
+        "--max-num-seqs",
+        "64",
+        "--seed",
+        "0",
+        "--max-num-batched-tokens",
+        "8192",
+        "--no-enable-prefix-caching",
+        "--enable-logging-iteration-details",
+        "--served-model-name",
+        "m"
+      ]
+    }
+  },
+  "nvidia_smi_before": {
+    "available": true,
+    "fields": [
+      "name",
+      "driver_version",
+      "clocks.current.sm",
+      "memory.used",
+      "temperature.gpu",
+      "power.draw"
+    ],
+    "rows": [
+      [
+        "NVIDIA A100-SXM4-80GB",
+        "595.91.07",
+        "1410 MHz",
+        "0 MiB",
+        "49",
+        "136.20 W"
+      ],
+      [
+        "NVIDIA A100-SXM4-80GB",
+        "595.91.07",
+        "210 MHz",
+        "0 MiB",
+        "33",
+        "69.95 W"
+      ]
+    ]
+  }
+}
