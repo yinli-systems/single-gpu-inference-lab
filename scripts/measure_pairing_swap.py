@@ -108,17 +108,27 @@ def analyze(args):
         pl = json.load(open(plan_path))
         (ka, kb), (qa, qb), intended = pl["k"], pl["q"], pl["intended"]
         rows, info = load_joined(plan_path.with_name(plan_path.name.replace(".plan.json", ".jsonl")))
-        pre = [r for r in rows if r["ctx_tokens"] == qa + qb and r["ctx_reqs"] == 2 and r["gen_reqs"] == 1][-len(intended):]
-        got = {"A": [], "B": []}; mismatched = 0
-        for (state, qs, ks), r in zip(intended, pre):
-            if list(r["ctx_chunks"]) == qs and list(r.get("ctx_depths", [])) == ks and r["cuda_ms"] == r["cuda_ms"]:
-                got[state].append(r["cuda_ms"])
-            else:
-                mismatched += 1
+        # Each executed step identifies its own state by its (chunks, depths); order-independent, so a
+        # trial whose two prefills landed in different steps simply does not appear. The first 4
+        # A-shaped steps are the warm-up.
+        pre = [r for r in rows if r["ctx_reqs"] == 2 and r["gen_reqs"] == 1 and list(r.get("ctx_depths", [])) == [ka, kb]
+               and r["cuda_ms"] == r["cuda_ms"]]
+        got = {"A": [], "B": []}; warm = 4
+        for r in pre:
+            ch = list(r["ctx_chunks"])
+            if ch == [qa, qb] and warm:
+                warm -= 1; continue
+            if ch == [qa, qb]:
+                got["A"].append(r["cuda_ms"])
+            elif ch == [qb, qa]:
+                got["B"].append(r["cuda_ms"])
+        if qa == qb:                       # control: A and B are the same shape; split by order
+            allr = got["A"]; got = {"A": allr[0::2], "B": allr[1::2]}
+        mismatched = len(intended) - len(got["A"]) - len(got["B"])
         wa = qa * ka + qb * kb; wb = qb * ka + qa * kb
         cfg = {"label": pl["label"], "model": pl["model"], "k": [ka, kb], "q_state_A": [qa, qb], "q_state_B": [qb, qa],
                "cross_work_A_M": wa / 1e6, "cross_work_B_M": wb / 1e6, "dW_A_minus_B_M": (wa - wb) / 1e6,
-               "cuda_ms_A": got["A"], "cuda_ms_B": got["B"], "mismatched_steps": mismatched,
+               "cuda_ms_A": got["A"], "cuda_ms_B": got["B"], "trials_not_in_one_step": mismatched,
                "steps_found": len(pre), "join_match_frac": info["match_frac"]}
         if got["A"] and got["B"]:
             cfg["median_A_ms"] = statistics.median(got["A"]); cfg["median_B_ms"] = statistics.median(got["B"])
