@@ -104,6 +104,8 @@ def _exp_features(kind, chunks, depths, gen_reqs, gen_kv_sum):
     else:
         proxy = sum(q * (kv + (q + 1) / 2) for q, kv in zip(chunks, depths)) + gen_kv_sum
         f += [len(chunks), 1.0 if total > 128 else 0.0, padded / 1e3, proxy / 1e6]
+        if kind == "m2n":  # M2 without the aggregate prefill-KV sum (pre-registered 2026-09-23)
+            del f[2]
     return f
 
 

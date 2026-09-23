@@ -84,6 +84,13 @@ def m2_feats(r):
     return m0_feats(r)[:4] + [r["ctx_reqs"], 1.0 if r["cg_mode"] == "NONE" else 0.0, r["padded_tokens"] / 1e3, r["attn_proxy"] / 1e6]
 
 
+def m2n_feats(r):
+    """M2 without the aggregate prefill-KV sum (index 2): pre-registered 2026-09-23
+    (docs/preregistration/2026-09-23-m2-without-aggregate-prefill-kv.md)."""
+    f = m2_feats(r)
+    return f[:2] + f[3:]
+
+
 class Ridge:
     def fit(self, X, y):
         X = np.asarray(X, float); y = np.asarray(y, float); self.mu, self.sd = X.mean(0), X.std(0); self.sd[self.sd == 0] = 1
@@ -185,6 +192,7 @@ def make_controllers(truth_rows_one, truth_rows_multi, mode):
     def fit(rows, feats):
         return Ridge().fit([feats(r) for r in rows], [r["cuda_ms"] for r in rows])
     models = {"m0-one": (fit(truth_rows_one, m0_feats), m0_feats), "m1-one": (fit(truth_rows_one, m1_feats), m1_feats), "m2-one": (fit(truth_rows_one, m2_feats), m2_feats),
+              "m2n-one": (fit(truth_rows_one, m2n_feats), m2n_feats),
               "m0-multi": (fit(truth_rows_multi, m0_feats), m0_feats), "m1-multi": (fit(truth_rows_multi, m1_feats), m1_feats), "m2-multi": (fit(truth_rows_multi, m2_feats), m2_feats)}
 
     def deadline_ctl(model, feats):
@@ -210,7 +218,7 @@ def make_controllers(truth_rows_one, truth_rows_multi, mode):
     ctls["ppas-style"] = ppas
     for name, (model, feats) in models.items():
         ctls[name] = deadline_ctl(model, feats)
-    export = {k: {"features": "m0" if feats is m0_feats else "m1" if feats is m1_feats else "m2", "mu": m.mu.tolist(), "sd": m.sd.tolist(),
+    export = {k: {"features": "m0" if feats is m0_feats else "m1" if feats is m1_feats else "m2n" if feats is m2n_feats else "m2", "mu": m.mu.tolist(), "sd": m.sd.tolist(),
                   "w": m.w.tolist(), "b": m.b, "q95": m.q95} for k, (m, feats) in models.items()}
     return ctls, export
 
@@ -225,6 +233,9 @@ def main():
     ap.add_argument("--B", type=int, default=8)
     ap.add_argument("--output", type=Path, required=True)
     ap.add_argument("--export-models", type=Path, help="directory: write <name>.json per fitted controller model (for the live env-gated scheduler)")
+    ap.add_argument("--exclude-over-median-x", type=float, default=None,
+                    help="drop prefill steps slower than this multiple of their cell's median (off by default; one-off compile steps on a fresh machine)")
+    ap.add_argument("--exclude-first-iteration", action="store_true", help="drop each server's engine iteration 0 (off by default)")
     args = ap.parse_args()
 
     rows = []
@@ -233,7 +244,13 @@ def main():
             if f.endswith(".steps.jsonl") or "graph-" in f:
                 continue
             rs, _ = load_joined(Path(f))
-            rows += [dict(cell=Path(f).stem, **r) for r in rs if r["ctx_tokens"] > 0 and np.isfinite(r["cuda_ms"])]
+            pre = [r for r in rs if r["ctx_tokens"] > 0 and np.isfinite(r["cuda_ms"])]
+            if args.exclude_first_iteration:
+                pre = [r for r in pre if r["i"] != 0]
+            if pre and args.exclude_over_median_x:
+                med = float(np.median([r["cuda_ms"] for r in pre]))
+                pre = [r for r in pre if r["cuda_ms"] <= args.exclude_over_median_x * med]
+            rows += [dict(cell=Path(f).stem, **r) for r in pre]
     truth = Truth(rows)
     one = [r for r in rows if r["ctx_reqs"] == 1 and not (r["cell"].startswith("part") and "x" in r["cell"] and not r["cell"].startswith(("part-1x", "part2-1x")))]
     multi = [r for r in rows if r["ctx_reqs"] >= 2 and r["cell"].startswith("part")]

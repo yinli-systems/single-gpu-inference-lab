@@ -56,3 +56,31 @@ New, for Qwen2.5-7B-Instruct on the A100 (28 layers, 28 query / 4 KV heads, dim 
 - Attention-work slope ≈ (28·28)/(36·32) × 3.3 ms/M (A100 Qwen3-4B) = **2.25 ms/M**. Given the
   1.5B slope came out 10–35% above its head-count scaling, accepted range **2.0–3.0 ms/M** at both
   budgets.
+
+## Addendum 2 (2026-09-23): live deadline controller on the A100 (Qwen3-4B), before launch
+
+Protocol = L20 campaign20 (§5 of `l20-prefill-cost-geometry`): 8 decoders (4096 output tokens) +
+N ∈ {4, 8} × 16k prefills injected together, `--max-num-batched-tokens 8192`, one fresh server per
+run, conditions interleaved, 3 repeats; A100 GPU 0; controller models fit on A100 one-prefill
+steps only (`replay_prefill_controller.py --export-models --exclude-over-median-x 10
+--exclude-first-iteration`, q95 margins M0 10.69, M2 10.44, M2n 10.32 ms).
+
+Arms: fixed-128, fixed-256, fixed-512, M0 (`m0-one`), M2 (`m2-one`, as published), M2n (`m2n-one`,
+this pre-registration's variant; scheduler feature vector checked identical to the replay's on
+6,000 random steps).
+
+Deadline **65 ms**, chosen from the offline A100 replay (`--deadlines 50…100`) as the value
+closest to the L20 regime (L20 at 100 ms: fixed-256 safe, fixed-512 4–10% violations). At 50 ms
+every model controller is infeasible (fixed step cost ~38 ms + margin ~10 ms).
+
+Predictions (the replay's truth model is itself a fit, so these can fail):
+
+- P1. M2 (published) under-performs at N = 8: its aggregate prefill-KV term over-prices
+  8 × 16k-deep prefills and the replay has it stalling. Live, the scheduler falls back to the
+  smallest candidate (64), so expected: M2 progress well below fixed-256 at N = 8.
+- P2. M2n ≥ M0 in safe prefill progress at both N, with violations ≤ 5%.
+- P3. M2n ≥ 1.15 × the best fixed budget with violations ≤ 5%, at both N (the L20 gate; L20's
+  M2 missed it with +7–8%).
+
+Gates reported as on L20: aggregate → geometry (M0 vs M2 and M0 vs M2n); geometry → best safe
+fixed budget (≥ 15%).
