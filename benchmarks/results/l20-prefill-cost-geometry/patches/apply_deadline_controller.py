@@ -12,6 +12,12 @@ Env (all read at import):
   VLLM_EXP_PARTITION      equal (default; per-request cap = budget // n) or fcfs (vLLM's
                           fill-in-order chunking; the controller prices that partition and
                           sets no cap)
+  VLLM_EXP_PPAS           1: P-PAS (arXiv 2608.15171) instead of a cost model: prefill tokens
+                          capped at VLLM_EXP_PPAS_BCAP (2048) when N_p >= VLLM_EXP_PPAS_NTH (2)
+                          running+waiting prefills and N_d > 0 running decodes, else at
+                          VLLM_EXP_PPAS_BMAX (16384); no per-request cap
+  VLLM_EXP_CACHE_AWARE    1: price the first VLLM_EXP_CACHE_AWARE_K (16) waiting requests at
+                          their prefix-cache hit depth (pure coordinator lookup) instead of 0
   VLLM_EXP_ONLINE_MARGIN  1: replace the static q95 by the online (1-alpha) quantile of
                           realised residuals per prefill-count bucket (VLLM_EXP_ALPHA,
                           VLLM_EXP_WINDOW, VLLM_EXP_MIN_SAMPLES); the realised step time is
@@ -42,6 +48,26 @@ _EXP_RESID = {}  # bucket -> list of recent residuals (ms)
 # Partition assumed when pricing a candidate budget: "equal" (per-request cap = budget // n, set
 # via the long-prefill threshold) or "fcfs" (vLLM default fill-in-order; no cap is set).
 _EXP_PARTITION = _os.environ.get("VLLM_EXP_PARTITION", "equal")
+# P-PAS baseline (arXiv 2608.15171, Algorithm 1): cap on aggregate prefill tokens per iteration.
+_EXP_PPAS = bool(int(_os.environ.get("VLLM_EXP_PPAS", "0") or 0))
+_EXP_PPAS_NTH = int(_os.environ.get("VLLM_EXP_PPAS_NTH", "2"))
+_EXP_PPAS_BMAX = int(_os.environ.get("VLLM_EXP_PPAS_BMAX", "16384"))
+_EXP_PPAS_BCAP = int(_os.environ.get("VLLM_EXP_PPAS_BCAP", "2048"))
+# Price waiting requests at their prefix-cache hit depth (the scheduler only learns it later).
+_EXP_CACHE_AWARE = bool(int(_os.environ.get("VLLM_EXP_CACHE_AWARE", "0") or 0))
+_EXP_CACHE_AWARE_K = int(_os.environ.get("VLLM_EXP_CACHE_AWARE_K", "16"))
+
+
+def _exp_cached_depth(sched, r):
+    """Prefix-cache hit length of a waiting request (0 if unknown); read-only lookup."""
+    try:
+        mgr = sched.kv_cache_manager
+        if r.num_computed_tokens or not mgr.prefix_cache_lookup_enabled(r):
+            return r.num_computed_tokens
+        _, n, _ = mgr.coordinator.find_longest_cache_hit(r.block_hashes, r.num_tokens - 1)
+        return int(n)
+    except Exception:
+        return r.num_computed_tokens
 
 
 def _exp_chunks(c, pre):
@@ -123,11 +149,15 @@ def _exp_choose_budget(sched, token_budget):
         else:
             gen_reqs += 1
             gen_kv_sum += r.num_computed_tokens
-    for r in sched.waiting:
-        pre.append((r.num_tokens - r.num_computed_tokens, r.num_computed_tokens))
+    for i, r in enumerate(sched.waiting):
+        d = _exp_cached_depth(sched, r) if _EXP_CACHE_AWARE and i < _EXP_CACHE_AWARE_K else r.num_computed_tokens
+        pre.append((r.num_tokens - d, d))
     sched._exp_threshold = 0
     if not pre:
         return token_budget, None
+    if _EXP_PPAS:
+        cap = _EXP_PPAS_BCAP if (len(pre) >= _EXP_PPAS_NTH and gen_reqs > 0) else _EXP_PPAS_BMAX
+        return min(token_budget, cap + gen_reqs), {"budget": cap, "cap": 0, "n_prefill": len(pre), "ppas": True}
     n = len(pre)
     best, best_pred = 0, None
     margin, online = (0.0, False) if _EXP_FIXED_BUDGET else _exp_margin(n)
@@ -157,7 +187,7 @@ src = src.replace(anchor, anchor + MODULE, 1)
 
 a2 = "        token_budget = self.max_num_scheduled_tokens\n        spec = self.vllm_config.speculative_config\n"
 assert src.count(a2) == 1
-src = src.replace(a2, "        token_budget = self.max_num_scheduled_tokens\n        exp_decision = None\n        if _EXP_DEADLINE_MS or _EXP_FIXED_BUDGET:\n            token_budget, exp_decision = _exp_choose_budget(self, token_budget)\n        spec = self.vllm_config.speculative_config\n", 1)
+src = src.replace(a2, "        token_budget = self.max_num_scheduled_tokens\n        exp_decision = None\n        if _EXP_DEADLINE_MS or _EXP_FIXED_BUDGET or _EXP_PPAS:\n            token_budget, exp_decision = _exp_choose_budget(self, token_budget)\n        spec = self.vllm_config.speculative_config\n", 1)
 
 a3 = "            if 0 < self.scheduler_config.long_prefill_token_threshold < num_new_tokens:\n                num_new_tokens = self.scheduler_config.long_prefill_token_threshold\n"
 assert src.count(a3) == 1
