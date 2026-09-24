@@ -3,7 +3,7 @@
     "active": 6,
     "analysis": 1,
     "negative": 10,
-    "other": 14,
+    "other": 19,
     "path_proof": 15,
     "positive": 8,
     "superseded": 12
@@ -466,6 +466,66 @@
       "summary": "Azure 2023, BurstGPT and Mooncake traces on one A100 / Qwen3-4B: steps with >5 ms aggregate-coordinate mispricing are 0-7% of prefill steps on short-prompt chat but 6-28% on long-prompt and prefix-cached (agent / long-context) traffic, P95 170-270 ms at budget 8192 on Mooncake; a per-request chunk cap raises it everywhere. Mooncake conversation/tool-agent timestamps are 3 s-quantized (recorded)."
     },
     {
+      "category": "other",
+      "compact_file_count": 1,
+      "has_campaign_summary_json": false,
+      "has_evidence_status_json": false,
+      "has_readme": true,
+      "has_summary_json": false,
+      "path": "benchmarks/results/prefill-pairing-swap",
+      "reference": "prefill-pairing-swap/",
+      "status": "Pre-registered counterexample (L20, A100; vLLM 0.29, 0.30)",
+      "summary": "Two prefills with identical count, token sum, KV sum and chunk/depth multisets, differing only in which chunk goes with which depth: step time differs by 7-55 ms, 0.86-1.01x of prediction on L20 (both releases), 0.65-0.89x on A100 (PS1 failed there); controls <= 0.09 ms. Any aggregate-state predictor has an error floor of |delta|/2."
+    },
+    {
+      "category": "other",
+      "compact_file_count": 1,
+      "has_campaign_summary_json": false,
+      "has_evidence_status_json": false,
+      "has_readme": true,
+      "has_summary_json": false,
+      "path": "benchmarks/results/prefill-geometry-learned-baseline",
+      "reference": "prefill-geometry-learned-baseline/",
+      "status": "Pre-registered learned baseline (offline, 7 datasets)",
+      "summary": "LPRS-style MLP on 16 aggregate/marginal features: geometry-OOD MAE 40-232 ms vs M2n 1.2-3.1 ms; M2n reaches <= 5 ms with 64 one-prefill samples, the MLP and M0 never do; with 25% multi-prefill training data the MLP still misses unseen partitions by 10-49 ms."
+    },
+    {
+      "category": "other",
+      "compact_file_count": 1,
+      "has_campaign_summary_json": false,
+      "has_evidence_status_json": false,
+      "has_readme": true,
+      "has_summary_json": false,
+      "path": "benchmarks/results/l20-prefill-live-controller-m2n",
+      "reference": "l20-prefill-live-controller-m2n/",
+      "status": "Pre-registered live replication (L20)",
+      "summary": "M2n live at 100 ms: 1.59x / 3.46x M0, +6% / +24% over the published M2, 0% violations; +16% / +32% over the pre-registered fixed arms but only +11% / +3% over fixed-384 from the earlier block."
+    },
+    {
+      "category": "other",
+      "compact_file_count": 1,
+      "has_campaign_summary_json": false,
+      "has_evidence_status_json": false,
+      "has_readme": true,
+      "has_summary_json": false,
+      "path": "benchmarks/results/vllm030-replication",
+      "reference": "vllm030-replication/",
+      "status": "Pre-registered release replication (L20, vLLM 0.30.0)",
+      "summary": "Partition gap 1.87x (0.29: 1.88x) and pairing swap reproduce to <1%; M2n misses its 5 ms bound (6.30 ms) because 0.30 adds 2.2-4 s mid-run stalls in 8 of 19 cells (post-hoc 5x exclusion: 2.80 ms)."
+    },
+    {
+      "category": "other",
+      "compact_file_count": 1,
+      "has_campaign_summary_json": false,
+      "has_evidence_status_json": false,
+      "has_readme": true,
+      "has_summary_json": false,
+      "path": "benchmarks/results/live-trace-replay",
+      "reference": "live-trace-replay/",
+      "status": "Pre-registered live serving study (A100)",
+      "summary": "Azure 2023, Mooncake tool-agent and BurstGPT replayed live: mispriced-geometry prevalence matches the simulator (12-18% / 4-9% / <= 0.1% of prefill steps), but per-step deadline controllers do not raise TTFT+TPOT goodput (0.06 vs 0.98 req/s on agent traffic at 65 ms, 0.24 at 100 ms); a fixed 1024 budget is best in every phase of a workload shift, P-PAS within 5%; M2n >= M0 in every controller comparison."
+    },
+    {
       "category": "negative",
       "compact_file_count": 1,
       "has_campaign_summary_json": false,
@@ -802,7 +862,7 @@
       "summary": "Custom three-way serving path evidence; not yet a broad win."
     }
   ],
-  "entry_count": 66,
+  "entry_count": 71,
   "index_path": "benchmarks/results/README.md",
   "result_root": "benchmarks/results",
   "schema_version": 1

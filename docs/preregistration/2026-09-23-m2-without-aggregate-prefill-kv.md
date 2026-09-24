@@ -350,3 +350,24 @@ equal to the TPOT SLO (D = 100 ms)**, added after stage 3 on each GPU:
   objective for SLO goodput.
 - R6: goodput(`ctl-m2n-fcfs-D100`) ≥ goodput(`ctl-m0-fcfs-D100`) on Mooncake ×0.2.
 - W5: regret(`ctl-m2n-fcfs-D100`) ≤ the smallest regret among the stock arms (the claim under test).
+
+## Addendum 11 (2026-09-24): outcomes of addenda 4–10, recorded after all runs
+
+| item | outcome |
+| --- | --- |
+| Pairing swap, L20 0.29 / L20 0.30 (PS1, PS2) | held / held (measured / predicted 0.86–1.01; control ≤ 0.09 ms) |
+| Pairing swap, A100 (PS1, PS2) | **PS1 failed** (0.65–0.89; 2 of 5 within ±25%, sign always right); PS2 held (+0.01 ms) |
+| Learned baseline LB1, LB2 | held (MLP 40–232 ms vs M2n 1.2–3.1 ms; M2n ≤ 5 ms at N = 64, MLP and M0 never) |
+| L20 Qwen2.5-7B (addendum 6) | all held (M2n 2.31 ms; slope 4.21–4.30; gap 1.37×) |
+| L20 live M2n (L1, L2, L3) | L1 held; L2 failed (+24%, better than predicted); L3 held against the pre-registered arms, but only +3…+11% over fixed-384 from the earlier block |
+| vLLM 0.30 (H1, H2, H3) | H1, H2 held; **H3 failed** (M2n 6.30 ms). 0.30 has 2.2–4 s mid-run stalls (17 steps, 8 of 19 cells) under the 10× exclusion; a post-hoc 5× diagnostic gives 2.80 ms |
+| Live replay R1–R6 | R1 held / tie; R2 held at ×0.2, failed at ×0.1; R3 held; R4 tie / not better; **R5 failed** (0.24 vs 0.98); R6 held |
+| Simulator vs live V1, V2 | V1 held; V2 held in 10 of 13 cells, failed in 1 (BurstGPT 0.1% vs 0.5%), 2 too close to zero |
+| Workload shift W1–W5 | **W1 failed** (b1024 best in every phase); W2, W4, W5 failed; W3 held (M2n 31% < M0 39% regret) |
+| E (jitter) | robust: ≤ 0.7 points across 10 simulated seeds; live seed 1 matches seed 0 |
+| G (overhead) | p50 28–214 µs, p99 ≤ 231 µs at 1–256 active requests (EPYC 7513) |
+| Decode-skew mechanism | not the FA2 decode kernel (five tests); recorded as measured but unexplained |
+
+Evidence: `benchmarks/results/{prefill-pairing-swap, prefill-geometry-learned-baseline,
+prefill-geometry-attention-shape, l20-prefill-live-controller-m2n, vllm030-replication,
+live-trace-replay, trace-geometry-prevalence}/`.

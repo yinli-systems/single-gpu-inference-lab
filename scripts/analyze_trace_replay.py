@@ -106,6 +106,8 @@ def main():
             continue
         phases = list(next(iter(conds.values()))["phases"])
         stock = [c for c in conds if STOCK.match(c)]
+        if len(phases) < 2 or not stock:
+            continue  # regret vs a per-phase hindsight best only means something for multi-phase runs
         best = {p: max(conds[c]["phases"][p]["goodput_primary"] for c in stock) for p in phases}
         best_arm = {p: max(stock, key=lambda c: conds[c]["phases"][p]["goodput_primary"]) for p in phases}
         tot = sum(best.values())

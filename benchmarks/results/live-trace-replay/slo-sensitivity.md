@@ -1,0 +1,40 @@
+## shift-a0538ee: best arm per SLO pair (goodput req/s)
+  2s/50ms      best b512                       2.82 | ppas=2.63, ppas-8k=2.62, ctl-m2n-fcfs-D100=2.40, ctl-m2n-fcfs-cache-D100=2.40, ctl-m0-fcfs-D100=2.39, ctl-m2n-fcfs-cache=1.85, ctl-m2n-fcfs=1.85, ctl-m0-fcfs=1.67
+  2s/100ms     best b2048                      3.00 | ppas-8k=2.95, ppas=2.95, ctl-m2n-fcfs-D100=2.80, ctl-m2n-fcfs-cache-D100=2.80, ctl-m0-fcfs-D100=2.78, ctl-m2n-fcfs=1.88, ctl-m2n-fcfs-cache=1.88, ctl-m0-fcfs=1.67
+  2s/200ms     best b4096                      3.05 | ppas=3.02, ppas-8k=3.02, ctl-m2n-fcfs-D100=2.80, ctl-m2n-fcfs-cache-D100=2.80, ctl-m0-fcfs-D100=2.78, ctl-m2n-fcfs=1.88, ctl-m2n-fcfs-cache=1.88, ctl-m0-fcfs=1.67
+  5s/50ms      best b512                       2.97 | ppas=2.68, ppas-8k=2.68, ctl-m2n-fcfs-D100=2.45, ctl-m2n-fcfs-cache-D100=2.44, ctl-m0-fcfs-D100=2.41, ctl-m2n-fcfs-cache=2.12, ctl-m2n-fcfs=2.12, ctl-m0-fcfs=1.94
+  5s/100ms     best b1024                      3.18 | ppas-8k=3.04, ppas=3.02, ctl-m2n-fcfs-D100=2.99, ctl-m2n-fcfs-cache-D100=2.99, ctl-m0-fcfs-D100=2.94, ctl-m2n-fcfs=2.18, ctl-m2n-fcfs-cache=2.18, ctl-m0-fcfs=1.95
+  5s/200ms     best b2048                      3.19 | ppas-8k=3.18, ppas=3.18, ctl-m2n-fcfs-D100=2.99, ctl-m2n-fcfs-cache-D100=2.99, ctl-m0-fcfs-D100=2.94, ctl-m2n-fcfs=2.18, ctl-m2n-fcfs-cache=2.18, ctl-m0-fcfs=1.95
+  10s/50ms     best b512                       3.06 | ppas=2.68, ppas-8k=2.68, ctl-m2n-fcfs-D100=2.45, ctl-m2n-fcfs-cache-D100=2.45, ctl-m0-fcfs-D100=2.44, ctl-m2n-fcfs=2.29, ctl-m2n-fcfs-cache=2.29, ctl-m0-fcfs=2.24
+  10s/100ms    best b1024                      3.19 | ctl-m2n-fcfs-D100=3.09, ctl-m2n-fcfs-cache-D100=3.09, ctl-m0-fcfs-D100=3.07, ppas-8k=3.04, ppas=3.02, ctl-m2n-fcfs=2.35, ctl-m2n-fcfs-cache=2.35, ctl-m0-fcfs=2.25
+  10s/200ms    best agentx                     3.19 | ppas-8k=3.18, ppas=3.18, ctl-m2n-fcfs-D100=3.09, ctl-m2n-fcfs-cache-D100=3.09, ctl-m0-fcfs-D100=3.07, ctl-m2n-fcfs=2.35, ctl-m2n-fcfs-cache=2.35, ctl-m0-fcfs=2.25
+## replay-mooncake-toolagent-017bd22: best arm per SLO pair (goodput req/s)
+  2s/50ms      best ppas                       0.88 | ppas=0.88, ppas-8k=0.86, x0.1-ctl-m2n-equal=0.42, x0.1-ctl-m2n-fcfs=0.39, x0.1-ctl-m0-fcfs=0.38, ctl-m2n-fcfs-D100=0.03, ctl-m2n-fcfs-cache-D100=0.02, x0.2-ctl-m2n-equal=0.02, ctl-m0-fcfs-D100=0.02, x0.2-ctl-m0-fcfs=0.01, ctl-m2n-fcfs-cache=0.01, x0.2-ctl-m2n-fcfs=0.01
+  2s/100ms     best ppas                       0.90 | ppas=0.90, ppas-8k=0.88, x0.1-ctl-m2n-equal=0.47, x0.1-ctl-m2n-fcfs=0.39, x0.1-ctl-m0-fcfs=0.38, x0.2-ctl-m2n-equal=0.18, ctl-m2n-fcfs-D100=0.07, ctl-m2n-fcfs-cache-D100=0.06, ctl-m0-fcfs-D100=0.05, x0.2-ctl-m2n-fcfs=0.03, ctl-m2n-fcfs-cache=0.03, x0.2-ctl-m0-fcfs=0.03
+  2s/200ms     best ppas                       0.92 | ppas=0.92, ppas-8k=0.91, x0.1-ctl-m2n-equal=0.47, x0.1-ctl-m2n-fcfs=0.39, x0.1-ctl-m0-fcfs=0.38, x0.2-ctl-m2n-equal=0.21, ctl-m2n-fcfs-D100=0.07, ctl-m2n-fcfs-cache-D100=0.06, ctl-m0-fcfs-D100=0.05, x0.2-ctl-m2n-fcfs=0.03, ctl-m2n-fcfs-cache=0.03, x0.2-ctl-m0-fcfs=0.03
+  5s/50ms      best ppas                       0.95 | ppas=0.95, ppas-8k=0.95, x0.1-ctl-m2n-fcfs=0.48, x0.1-ctl-m0-fcfs=0.47, x0.1-ctl-m2n-equal=0.46, ctl-m2n-fcfs-D100=0.04, ctl-m2n-fcfs-cache-D100=0.04, ctl-m0-fcfs-D100=0.03, x0.2-ctl-m0-fcfs=0.03, x0.2-ctl-m2n-equal=0.03, ctl-m2n-fcfs-cache=0.01, x0.2-ctl-m2n-fcfs=0.01
+  5s/100ms     best ppas                       0.98 | ppas=0.98, ppas-8k=0.98, x0.1-ctl-m2n-equal=0.52, x0.1-ctl-m2n-fcfs=0.51, x0.1-ctl-m0-fcfs=0.49, x0.2-ctl-m2n-equal=0.30, ctl-m2n-fcfs-D100=0.24, ctl-m2n-fcfs-cache-D100=0.21, ctl-m0-fcfs-D100=0.13, ctl-m2n-fcfs-cache=0.06, x0.2-ctl-m0-fcfs=0.06, x0.2-ctl-m2n-fcfs=0.06
+  5s/200ms     best x0.2-default               1.02 | ppas-8k=1.01, ppas=1.00, x0.1-ctl-m2n-equal=0.52, x0.1-ctl-m2n-fcfs=0.51, x0.1-ctl-m0-fcfs=0.49, x0.2-ctl-m2n-equal=0.36, ctl-m2n-fcfs-D100=0.24, ctl-m2n-fcfs-cache-D100=0.21, ctl-m0-fcfs-D100=0.13, ctl-m2n-fcfs-cache=0.06, x0.2-ctl-m0-fcfs=0.06, x0.2-ctl-m2n-fcfs=0.06
+  10s/50ms     best ppas                       0.95 | ppas=0.95, ppas-8k=0.95, x0.1-ctl-m2n-fcfs=0.51, x0.1-ctl-m0-fcfs=0.50, x0.1-ctl-m2n-equal=0.48, ctl-m2n-fcfs-cache-D100=0.05, ctl-m2n-fcfs-D100=0.05, ctl-m0-fcfs-D100=0.04, x0.2-ctl-m0-fcfs=0.03, x0.2-ctl-m2n-equal=0.03, ctl-m2n-fcfs-cache=0.01, x0.2-ctl-m2n-fcfs=0.01
+  10s/100ms    best ppas                       0.98 | ppas=0.98, ppas-8k=0.98, ctl-m2n-fcfs-D100=0.62, ctl-m2n-fcfs-cache-D100=0.61, x0.1-ctl-m0-fcfs=0.54, x0.1-ctl-m2n-fcfs=0.54, x0.1-ctl-m2n-equal=0.54, ctl-m0-fcfs-D100=0.47, x0.2-ctl-m2n-equal=0.42, ctl-m2n-fcfs-cache=0.06, x0.2-ctl-m2n-fcfs=0.06, x0.2-ctl-m0-fcfs=0.06
+  10s/200ms    best x0.2-agentx                1.02 | ppas-8k=1.01, ppas=1.00, ctl-m2n-fcfs-D100=0.62, ctl-m2n-fcfs-cache-D100=0.61, x0.2-ctl-m2n-equal=0.54, x0.1-ctl-m0-fcfs=0.54, x0.1-ctl-m2n-fcfs=0.54, x0.1-ctl-m2n-equal=0.54, ctl-m0-fcfs-D100=0.47, ctl-m2n-fcfs-cache=0.06, x0.2-ctl-m2n-fcfs=0.06, x0.2-ctl-m0-fcfs=0.06
+## replay-azure-code-t180-a0538ee: best arm per SLO pair (goodput req/s)
+  2s/50ms      best x0.5-ctl-m0-fcfs           2.38 | x0.5-ctl-m0-fcfs=2.38, x0.5-ctl-m2n-fcfs=2.36, x0.5-ctl-m2n-equal=2.24, x0.25-ctl-m0-fcfs=2.20, x0.25-ctl-m2n-fcfs=2.20, x0.25-ctl-m2n-equal=2.14
+  2s/100ms     best x0.5-agentx                2.66 | x0.5-ctl-m2n-equal=2.61, x0.5-ctl-m2n-fcfs=2.43, x0.5-ctl-m0-fcfs=2.38, x0.25-ctl-m2n-fcfs=2.21, x0.25-ctl-m0-fcfs=2.21, x0.25-ctl-m2n-equal=2.19
+  2s/200ms     best x0.5-agentx                2.67 | x0.5-ctl-m2n-equal=2.61, x0.5-ctl-m2n-fcfs=2.43, x0.5-ctl-m0-fcfs=2.38, x0.25-ctl-m2n-fcfs=2.21, x0.25-ctl-m0-fcfs=2.21, x0.25-ctl-m2n-equal=2.19
+  5s/50ms      best x0.5-ctl-m0-fcfs           2.78 | x0.5-ctl-m0-fcfs=2.78, x0.5-ctl-m2n-fcfs=2.70, x0.5-ctl-m2n-equal=2.41, x0.25-ctl-m0-fcfs=2.21, x0.25-ctl-m2n-fcfs=2.20, x0.25-ctl-m2n-equal=2.16
+  5s/100ms     best x0.5-agentx                2.96 | x0.5-ctl-m2n-equal=2.86, x0.5-ctl-m2n-fcfs=2.81, x0.5-ctl-m0-fcfs=2.78, x0.25-ctl-m0-fcfs=2.21, x0.25-ctl-m2n-equal=2.21, x0.25-ctl-m2n-fcfs=2.21
+  5s/200ms     best x0.5-agentx                2.99 | x0.5-ctl-m2n-equal=2.86, x0.5-ctl-m2n-fcfs=2.81, x0.5-ctl-m0-fcfs=2.78, x0.25-ctl-m0-fcfs=2.21, x0.25-ctl-m2n-equal=2.21, x0.25-ctl-m2n-fcfs=2.21
+  10s/50ms     best x0.5-ctl-m0-fcfs           2.99 | x0.5-ctl-m0-fcfs=2.99, x0.5-ctl-m2n-fcfs=2.88, x0.5-ctl-m2n-equal=2.49, x0.25-ctl-m0-fcfs=2.21, x0.25-ctl-m2n-fcfs=2.20, x0.25-ctl-m2n-equal=2.16
+  10s/100ms    best x0.5-ctl-m0-fcfs           2.99 | x0.5-ctl-m0-fcfs=2.99, x0.5-ctl-m2n-fcfs=2.99, x0.5-ctl-m2n-equal=2.98, x0.25-ctl-m0-fcfs=2.21, x0.25-ctl-m2n-equal=2.21, x0.25-ctl-m2n-fcfs=2.21
+  10s/200ms    best x0.5-agentx                2.99 | x0.5-ctl-m0-fcfs=2.99, x0.5-ctl-m2n-fcfs=2.99, x0.5-ctl-m2n-equal=2.98, x0.25-ctl-m0-fcfs=2.21, x0.25-ctl-m2n-equal=2.21, x0.25-ctl-m2n-fcfs=2.21
+## replay-burstgpt-t14h-a0538ee: best arm per SLO pair (goodput req/s)
+  2s/50ms      best x60-agentx                 4.63 | x60-ctl-m0-fcfs=4.63, x60-ctl-m2n-equal=4.63, x60-ctl-m2n-fcfs=4.63
+  2s/100ms     best x60-agentx                 4.63 | x60-ctl-m0-fcfs=4.63, x60-ctl-m2n-equal=4.63, x60-ctl-m2n-fcfs=4.63
+  2s/200ms     best x60-agentx                 4.63 | x60-ctl-m0-fcfs=4.63, x60-ctl-m2n-equal=4.63, x60-ctl-m2n-fcfs=4.63
+  5s/50ms      best x60-agentx                 4.63 | x60-ctl-m0-fcfs=4.63, x60-ctl-m2n-equal=4.63, x60-ctl-m2n-fcfs=4.63
+  5s/100ms     best x60-agentx                 4.63 | x60-ctl-m0-fcfs=4.63, x60-ctl-m2n-equal=4.63, x60-ctl-m2n-fcfs=4.63
+  5s/200ms     best x60-agentx                 4.63 | x60-ctl-m0-fcfs=4.63, x60-ctl-m2n-equal=4.63, x60-ctl-m2n-fcfs=4.63
+  10s/50ms     best x60-agentx                 4.63 | x60-ctl-m0-fcfs=4.63, x60-ctl-m2n-equal=4.63, x60-ctl-m2n-fcfs=4.63
+  10s/100ms    best x60-agentx                 4.63 | x60-ctl-m0-fcfs=4.63, x60-ctl-m2n-equal=4.63, x60-ctl-m2n-fcfs=4.63
+  10s/200ms    best x60-agentx                 4.63 | x60-ctl-m0-fcfs=4.63, x60-ctl-m2n-equal=4.63, x60-ctl-m2n-fcfs=4.63
