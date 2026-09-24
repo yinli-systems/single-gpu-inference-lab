@@ -1,0 +1,101 @@
+{
+ "mooncake-toolagent-x0.2": {
+  "scale": 0.2,
+  "max_gap_s": 20.0,
+  "primary_offset_s": 0.0,
+  "primary_meets_rule": true,
+  "primary_stats": {
+   "requests": 245,
+   "max_gap_s": 5.006218540855542,
+   "sim_ttft_p50": 0.2049782338527848,
+   "beyond_clock": 0.0
+  },
+  "earliest_rule_window_offset_s": 0.0,
+  "robustness_windows": [
+   {
+    "offset_s": 60.0,
+    "requests": 260,
+    "max_gap_s": 9.165429885972713,
+    "sim_ttft_p50": 0.1601265055448451,
+    "beyond_clock": 0.0
+   },
+   {
+    "offset_s": 150.0,
+    "requests": 313,
+    "max_gap_s": 6.621749132281565,
+    "sim_ttft_p50": 0.19786177925692527,
+    "beyond_clock": 0.0
+   }
+  ]
+ },
+ "azure-code-x0.5": {
+  "scale": 0.5,
+  "max_gap_s": 20.0,
+  "primary_offset_s": 180.0,
+  "primary_meets_rule": false,
+  "primary_stats": {
+   "requests": 718,
+   "max_gap_s": 50.295379638671875
+  },
+  "earliest_rule_window_offset_s": null,
+  "robustness_windows": []
+ },
+ "azure-code-x0.5-gap60": {
+  "scale": 0.5,
+  "max_gap_s": 60.0,
+  "primary_offset_s": 180.0,
+  "primary_meets_rule": true,
+  "primary_stats": {
+   "requests": 718,
+   "max_gap_s": 50.295379638671875,
+   "sim_ttft_p50": 0.32263664561174465,
+   "beyond_clock": 0.0
+  },
+  "earliest_rule_window_offset_s": 180.0,
+  "robustness_windows": [
+   {
+    "offset_s": 540.0,
+    "requests": 897,
+    "max_gap_s": 35.274643898010254,
+    "sim_ttft_p50": 0.3162244561387979,
+    "beyond_clock": 0.0
+   },
+   {
+    "offset_s": 1050.0,
+    "requests": 448,
+    "max_gap_s": 48.51884984970093,
+    "sim_ttft_p50": 0.1705138706749807,
+    "beyond_clock": 0.0
+   }
+  ]
+ },
+ "burstgpt-x60": {
+  "scale": 60.0,
+  "max_gap_s": 20.0,
+  "primary_offset_s": 50400.0,
+  "primary_meets_rule": true,
+  "primary_stats": {
+   "requests": 1111,
+   "max_gap_s": 1.5166666666666657,
+   "sim_ttft_p50": 0.03989998158536423,
+   "beyond_clock": 0.0
+  },
+  "earliest_rule_window_offset_s": 25740.0,
+  "robustness_windows": [
+   {
+    "offset_s": 25740.0,
+    "requests": 464,
+    "max_gap_s": 19.9,
+    "sim_ttft_p50": 0.02952578258663152,
+    "beyond_clock": 0.0
+   },
+   {
+    "offset_s": 64800.0,
+    "requests": 776,
+    "max_gap_s": 2.816666666666677,
+    "sim_ttft_p50": 0.03702836840389523,
+    "beyond_clock": 0.0
+   }
+  ]
+ }
+}
