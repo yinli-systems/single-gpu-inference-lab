@@ -1,4 +1,9 @@
-# When Token Budgets Lie: Request Geometry in Chunked LLM Prefill
+# L20 prefill cost geometry (original campaign)
+
+*This is the first campaign of the prefill-geometry line (L20, Qwen3-4B, vLLM 0.29), kept as it was
+frozen. The full result across GPUs, models and releases, and the later M2n model, is in the
+technical report [`docs/when-token-budgets-lie.md`](../../../docs/when-token-budgets-lie.md). The
+numbers below use the published M2 without the later pre-registered filters.*
 
 **Problem.** Deadline-aware prefill schedulers price an iteration from an aggregate coordinate
 (decode batch, aggregate KV depth, prefill tokens). On a real engine that coordinate can hide up to
