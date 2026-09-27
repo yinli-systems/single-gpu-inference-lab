@@ -133,3 +133,31 @@ model **W** is kernel time = a + b · W fitted on the same grid.
   FA2 and for FA3.
 - **HK5.** The W model over-predicts the kernel pairing Δ (measured / predicted < 0.9) for at least
   3 of 5 configurations on FA3; the TS model is within ±25% for at least 4 of 5.
+
+## Addendum 2 (2026-09-27): a second engine (SGLang) and two published predictors; before any of it runs
+
+**Prior art found in a literature check today** (it narrows claim C3; the report is updated either way):
+- KernelSight-LM (arXiv 2606.28565) already prices chunked-prefill attention *per request* ("the
+  prefill chunk over its cached history plus its own causal triangle"). Per-request attention work
+  as a feature is therefore not new; what is tested here is that the *aggregate* states used by
+  schedulers and simulators cannot see it.
+- Vidur (MLSys 2024; microsoft/vidur @ 8383d29, `sklearn_execution_time_predictor.py` l. 852–870)
+  looks up batch prefill-attention time at (Σ kv_cache_size, round(√Σ chunk²)²).
+- LLMVisor (arXiv 2608.08382): T = β + a₁Σpᵢ + a₂Σcᵢ + a₃Σpᵢ² + a₄|B|.
+Both are exactly invariant under a pairing swap.
+
+**SGLang pairing swap** (`scripts/measure_pairing_swap_sglang.py`, tracer
+`integrations/sglang_step_tracer`; SGLang 0.5.20, torch 2.13.0+cu130, default attention backend,
+H100, Qwen3-4B, same six configurations, 20 trials per state). SGLang runs extend batches without
+decode rows, so its pair step is the two prefills alone.
+- **SG1.** Δ = median(A) − median(B) > 0 for every configuration with |ΔW| ≥ 3M.
+- **SG2.** Control |Δ| ≤ 1 ms.
+- **SG3.** For at least 4 of 5 configurations, the SGLang Δ is within ±30% of the vLLM H100 Δ of the
+  same configuration.
+
+**Published predictors** (`scripts/analyze_published_predictors.py`):
+- **VL1.** The Vidur prefill-attention key is identical for A and B in all six configurations, so
+  its error floor on each measured pair is |Δ|/2. Reported for L20, A100, H100 (vLLM) and SGLang.
+- **VL2.** The LLMVisor formula, fitted by least squares on the primary-split training steps, has
+  primary-split MAE ≥ 5× the M2n MAE on every dataset with shape cells (L20, A100, H100). The
+  L20 and A100 values are computed after this addendum is committed.
