@@ -246,3 +246,34 @@ the verdict and the GPU time goes to the addendum-5 heavy cells instead. O1–O5
 are reported from the runs that exist, labelled "repeat 0 only". One request per affected run
 (the same request index in every arm, including fcfs; ~20k-token prompts) ends with a client-side
 `ServerDisconnectedError` with nothing in the server log; it is kept in the counts and reported.
+
+## Addendum 7 (2026-09-27): fix the cache-depth estimate and bound the tail (aging); before any run
+
+**Diagnosis of O3, from the addendum-5 runs (post hoc).** `uncached` and `cost` estimated each
+request's cached depth k₀ assuming nothing is evicted. At rate scale 1 that estimate gives a
+token-weighted prefix hit of 51.4%, but vLLM's own log reports **40.6%** (KV cache 455,008 tokens,
+93–97% used at peak). A block-level LRU of the logged capacity, with no tuning, gives **42.6%**
+(×0.5: 40.4% vs 40.3% measured). The cache-aware arms were ranking by an over-optimistic k₀, which
+can explain why cache-unaware `prompt` did not lose (O3 failed).
+
+**New arms** (H100, Qwen3-4B, Mooncake tool-agent @3 s, rate scale 1, same server settings and
+cost coefficients as addendum 3; `--cache-capacity-tokens 455008`):
+- `uncached-lru`, `cost-lru`: as `uncached` and `cost`, with k₀ from the LRU.
+- `cost-lru-age(β)`: priority = cost-lru + β · arrival time (both µs), which at every instant orders
+  requests by cost − β · time already waited (aging). No engine change.
+
+Offline, before any run: with the LRU, `cost-lru` and `uncached-lru` disagree on 2.2% of pairs
+arriving within 5 s; the median cost is 13.7 ms and the P90 259 ms.
+
+**β is chosen on a separate window.** Tuning window: the same trace, trace time 240–480 s, rate
+scale 1 (1,308 requests vs 1,361 in the primary window). One run each of `fcfs` and
+`cost-lru-age(β)` for β ∈ {0.01, 0.05, 0.25}. Frozen rule: β* = the β with the highest goodput among
+those whose TTFT p99 ≤ the tuning-window `fcfs` p99; if none, the β with the lowest p99. The primary
+window is then run with `uncached-lru`, `cost-lru` and `cost-lru-age(β*)`, 2 repeats each, and
+compared with the existing `fcfs` and `prompt` runs (2 repeats each) of addendum 5.
+
+**Predictions** (primary window, means of 2 repeats; goodput at TTFT ≤ 5 s, TPOT ≤ 100 ms):
+- **I1.** `uncached-lru` mean TTFT ≤ `prompt` mean TTFT (a correct k₀ makes cache-awareness help).
+- **I2.** `cost-lru` mean TTFT within ±5% of `uncached-lru` (geometry still adds little to ordering).
+- **I3.** `cost-lru-age(β*)`: TTFT p99 ≤ `fcfs` p99 **and** goodput ≥ 1.8× `fcfs`.
+- **I4 (descriptive).** Goodput and p99 of every arm, including the addendum-5 arms.

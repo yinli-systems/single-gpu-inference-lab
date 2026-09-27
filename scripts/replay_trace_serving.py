@@ -59,34 +59,43 @@ def build_prompts(reqs, vocab: int, seed: int):
     return out
 
 
-def cached_depths(reqs):
-    """Prefix-cache hit depth each request would see if nothing were evicted: the leading run of its
-    512-token blocks already sent by an earlier arrival, capped at prompt - 1 (vLLM always computes the
-    last prompt token). Traces without block hashes have depth 0."""
-    seen, out = set(), []
+def cached_depths(reqs, capacity_tokens=None):
+    """Prefix-cache hit depth each request is expected to see: the leading run of its 512-token blocks
+    still cached when it arrives, capped at prompt - 1 (vLLM always computes the last prompt token).
+    capacity_tokens=None assumes nothing is ever evicted; otherwise blocks are kept in an LRU of that
+    many tokens, touched in arrival order. Traces without block hashes have depth 0."""
+    from collections import OrderedDict
+    cache, out = OrderedDict(), []
+    cap = None if capacity_tokens is None else capacity_tokens // BLOCK
     for _, p, _, hashes in reqs:
         if hashes is None:
             out.append(0); continue
         n = 0
         for h in hashes:
-            if h not in seen:
+            if h not in cache:
                 break
             n += 1
         out.append(min(n * BLOCK, p - 1))
-        seen.update(hashes)
+        for h in hashes:
+            cache[h] = None
+            cache.move_to_end(h)
+        while cap is not None and len(cache) > cap:
+            cache.popitem(last=False)
     return out
 
 
-def priorities(reqs, policy, coef):
+def priorities(reqs, policy, coef, capacity_tokens=None, age_beta=0.0):
     """Client-side priority for vLLM --scheduling-policy priority (lower runs first; ties by arrival).
     prompt: prompt tokens. uncached: tokens left after the cached prefix. cost: the geometry price of
-    the uncached part at its cached depth k0, a * L + b * (L * k0 + L (L + 1) / 2), in microseconds."""
+    the uncached part at its cached depth k0, a * L + b * (L * k0 + L (L + 1) / 2), in microseconds.
+    age_beta (cost only) adds beta * arrival time in microseconds: ordering by cost + beta * arrival is,
+    at every instant, the same as ordering by cost - beta * time already waited."""
     a, b = coef
     out = []
-    for (_, p, _, _), k0 in zip(reqs, cached_depths(reqs)):
+    for (t, p, _, _), k0 in zip(reqs, cached_depths(reqs, capacity_tokens)):
         L = p - k0
-        out.append({"prompt": p, "uncached": L,
-                    "cost": round(1000 * (a * L / 1e3 + b * (L * k0 + L * (L + 1) / 2) / 1e6))}[policy])
+        cost = 1000 * (a * L / 1e3 + b * (L * k0 + L * (L + 1) / 2) / 1e6)
+        out.append({"prompt": p, "uncached": L, "cost": round(cost + age_beta * t * 1e6)}[policy])
     return out
 
 
@@ -171,6 +180,8 @@ def main():
     ap.add_argument("--priority", choices=["none", "prompt", "uncached", "cost"], default="none",
                     help="client-side request priority; anything but none also starts vLLM with --scheduling-policy priority")
     ap.add_argument("--cost-coef", default="0,0", help="a,b for --priority cost: ms per 1k tokens, ms per million attention work")
+    ap.add_argument("--cache-capacity-tokens", type=int, help="estimate k0 with an LRU prefix cache of this many tokens (default: never evicted)")
+    ap.add_argument("--age-beta", type=float, default=0.0, help="--priority cost only: add beta x arrival time (aging)")
     args = ap.parse_args()
 
     phase_of, phase_bounds = [], []
@@ -203,7 +214,8 @@ def main():
     prio = None
     if args.priority != "none":
         flags += ["--scheduling-policy", "priority"]
-        prio = priorities(reqs, args.priority, tuple(float(x) for x in args.cost_coef.split(",")))
+        prio = priorities(reqs, args.priority, tuple(float(x) for x in args.cost_coef.split(",")),
+                          args.cache_capacity_tokens, args.age_beta)
     if args.trace_dir:
         args.trace_dir.mkdir(parents=True, exist_ok=True)
         flags.append("--enable-logging-iteration-details")
@@ -221,7 +233,7 @@ def main():
         recs = asyncio.run(replay(server.base_url, args.served_model_name, reqs, prompts, 1.0, prio))
     for r, ph in zip(recs, phase_of):
         r["phase"] = ph
-    for r, k0 in zip(recs, cached_depths(reqs)):
+    for r, k0 in zip(recs, cached_depths(reqs, args.cache_capacity_tokens)):
         r["cached_depth_est"] = k0
     report["requests"] = recs
     report["summary"] = summarize(recs, args.window_s)
