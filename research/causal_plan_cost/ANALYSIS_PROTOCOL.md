@@ -20,3 +20,8 @@ Fit run-time and cycle-time models separately; compare on their declared endpoin
 
 ## Causal and novelty scope
 Within each shape keep Q/K/V tensors fixed while intervening on public split controls. Compare equal-work contrasts under auto versus common fixed modes, retaining failed/negative contrasts. Planner matching verifies metadata, not the entire physical mechanism. FA2 split-KV, plan/run separation, FLOPs-vs-latency, and LPT/load balancing are prior art. Candidate contribution is a validated, decision-useful causal execution-plan representation; reject it if strong-baseline/cost gates fail.
+
+## Pre-full-run amendment after the canary
+Two canaries (1632585/1632586) exposed undersized 128MiB scratch, not numerical failures. Allocate the checked backend-required maximum scratch once per geometry and share it serially across all policies; record policy-required and actual allocated bytes. This is equal reserved workspace, not a serving KV-capacity claim. Correct a missing canary fixture and add a large TRAIN fixture; no test timings selected these changes.
+
+Add a stronger fixed baseline: pick the best fixed policy separately for each hardware/head configuration using TRAIN data only. Primary dispatch ratios and promotion gates must beat this head-conditioned fixed baseline, not only the global policy. Preserve the global selection as a secondary result.

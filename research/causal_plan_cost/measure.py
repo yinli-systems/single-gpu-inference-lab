@@ -10,7 +10,7 @@ import random
 import statistics
 import time
 import traceback
-from geometry import POLICIES, corpus, corpus_json, plan
+from geometry import POLICIES, corpus, corpus_json, plan, workspace_bytes
 
 
 def sha(path):
@@ -37,8 +37,9 @@ def main():
     hw=torch.cuda.get_device_properties(0);sms=hw.multi_processor_count
     all_shapes=corpus()
     if a.stage=='canary':
-        all_shapes=[s for s in all_shapes if s.name in
-            ('discovery-eq255-A','discovery-eq255-B','Q512-K1536-eq63-A','Q512-K1536-n8-A')]
+        wanted={'discovery-eq255-A','discovery-eq255-B','Q512-K1536-eq127-A','Q512-K1536-n8-A','Q2048-K6144-n8-A'}
+        all_shapes=[s for s in all_shapes if s.name in wanted]
+        assert {s.name for s in all_shapes}==wanted, 'Missing canary fixture'
     suite=[(s,hq,hkv) for s in all_shapes for hq,hkv in ((16,4),(32,8))]
     random.Random(seed).shuffle(suite)
     metadata=dict(kind='causal_plan_operator_study',stage=a.stage,seed=seed,
@@ -63,6 +64,8 @@ def main():
         qptr=torch.tensor(qoff,device='cuda',dtype=torch.int32)
         kptr=torch.tensor(koff,device='cuda',dtype=torch.int32)
         wrappers={};permode={};auto_output=None
+        required={p:workspace_bytes(shape,hq,hkv,sms,p) for p in POLICIES}
+        workspace=torch.empty(max(1024*1024,max(required.values())),device='cuda',dtype=torch.uint8)
         # Auto first only for correctness; all timing orders are randomized.
         for policy in POLICIES:
             rec=dict(shape=shape.record(),hq=hq,hkv=hkv,sms=sms,policy=policy,
@@ -70,7 +73,8 @@ def main():
             try:
                 if policy != "auto" and auto_output is None:
                     raise RuntimeError("stock auto correctness reference unavailable")
-                workspace=torch.empty(128*1024*1024,device='cuda',dtype=torch.uint8)
+                rec['workspace_required_bytes']=required[policy]
+                rec['workspace_allocated_bytes']=workspace.numel()
                 w=flashinfer.BatchPrefillWithRaggedKVCacheWrapper(workspace,kv_layout='NHD',backend='fa2')
                 opts=dict(causal=True,q_data_type=torch.float16,kv_data_type=torch.float16)
                 if policy=='none':opts['disable_split_kv']=True

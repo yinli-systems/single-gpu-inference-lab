@@ -1,10 +1,19 @@
 """CPU contract tests; these are not GPU correctness or performance results."""
 import math
 import unittest
-from geometry import Shape, POLICIES, corpus, corpus_json, features, plan
+from geometry import Shape, POLICIES, corpus, corpus_json, features, plan, workspace_bytes
 
 
 class GeometryTests(unittest.TestCase):
+    def test_workspace_no_split(self):
+        self.assertEqual(workspace_bytes(corpus()[0],16,4,128,'none'),16)
+    def test_workspace_covers_partial_rows(self):
+        s=next(s for s in corpus() if s.name=='discovery-eq255-A')
+        p=plan(s,32,8,128,'s512')
+        self.assertGreaterEqual(workspace_bytes(s,32,8,128,'s512'),32*p['grid_x']*p['tile']*129*4)
+    def test_canary_names_exist(self):
+        names={s.name for s in corpus()}
+        self.assertTrue({'Q512-K1536-eq127-A','Q2048-K6144-n8-A'}<=names)
     def test_empty(self):
         with self.assertRaises(ValueError):Shape('x','x','train',(),())
     def test_alignment(self):

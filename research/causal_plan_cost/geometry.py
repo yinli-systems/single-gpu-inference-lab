@@ -111,6 +111,21 @@ def plan(shape: Shape, hq: int, hkv: int, sms: int, policy: str) -> dict:
                 rectangular_iterations=rect,merge_rows=merge if split else 0)
 
 
+def workspace_bytes(shape: Shape, hq: int, hkv: int, sms: int, policy: str) -> int:
+    """Installed FA2 PrefillPlanImpl float workspace; bytes, D=128, no graphs.
+
+    The public planner allocates FP32 partial outputs and LSE for every padded
+    CTA row. This is not merely the number of valid output elements. Shared
+    workspace is safe only when the wrappers run serially on one stream.
+    """
+    p = plan(shape, hq, hkv, sms, policy)
+    if not p['split']:
+        return 16
+    value = hq * p['grid_x'] * p['tile'] * 128 * 4
+    scale = hq * p['grid_x'] * p['tile'] * 4
+    return ceildiv(value, 16) * 16 + ceildiv(scale, 16) * 16 + 32
+
+
 def features(shape: Shape, hq: int, hkv: int, sms: int, policy: str, kind: str) -> list[float]:
     q,k=shape.q,shape.k;n=len(q)
     triangle=sum(x*(x+1)/2 for x in q)
