@@ -17,7 +17,7 @@ import re
 import statistics
 from pathlib import Path
 
-NAME = re.compile(r"^(?P<trace>[a-z]+)-x(?P<scale>[0-9.]+)-(?P<arm>fcfs|prompt|uncached|cost)-r(?P<rep>\d+)$")
+NAME = re.compile(r"^(?P<trace>[a-z]+)-x(?P<scale>[0-9.]+)-(?P<arm>fcfs|prompt|uncached-lru|cost-lru-age|cost-lru|uncached|cost)-r(?P<rep>\d+)$")
 GOOD = "ttft<=5s,tpot<=100ms"
 
 
@@ -56,16 +56,20 @@ def main():
                 cell["O2"] = abs(mean["cost"]["ttft_mean"] / mean["uncached"]["ttft_mean"] - 1) <= 0.05
                 cell["O3"] = mean["prompt"]["ttft_mean"] > mean["uncached"]["ttft_mean"]
                 cell["O4_best_goodput_vs_fcfs"] = max(rel[a]["goodput_vs_fcfs"] or 0 for a in ("prompt", "uncached", "cost"))
+            if {"uncached-lru", "cost-lru", "cost-lru-age", "prompt"} <= mean.keys():
+                cell["I1"] = mean["uncached-lru"]["ttft_mean"] <= mean["prompt"]["ttft_mean"]
+                cell["I2"] = abs(mean["cost-lru"]["ttft_mean"] / mean["uncached-lru"]["ttft_mean"] - 1) <= 0.05
+                cell["I3"] = (mean["cost-lru-age"]["ttft_p99"] <= f["ttft_p99"]) and (rel["cost-lru-age"]["goodput_vs_fcfs"] >= 1.8)
         out[f"{trace}-x{scale:g}"] = cell
         print(f"## {trace} x{scale:g}")
-        for a in ("fcfs", "prompt", "uncached", "cost"):
+        for a in ("fcfs", "prompt", "uncached", "cost", "uncached-lru", "cost-lru", "cost-lru-age"):
             if a in mean:
                 v = mean[a]
                 r = cell.get("relative", {}).get(a, {})
                 print(f"   {a:9s} n{v['repeats']} req {v['requests']:.0f} err {v['errors']:.0f} | TTFT mean {v['ttft_mean']:7.3f} p50 {v['ttft_p50']:6.3f} "
                       f"p99 {v['ttft_p99']:7.3f} s | goodput {v['goodput']:.3f}/{v['offered']:.3f} rps"
                       + (f" | vs fcfs: TTFT mean {r['ttft_mean_vs_fcfs']:.2f}x, p99 {r['ttft_p99_vs_fcfs']:.2f}x, goodput {r['goodput_vs_fcfs']:.3f}x" if r else ""))
-        for k in ("O1", "O2", "O3", "O4_best_goodput_vs_fcfs"):
+        for k in ("O1", "O2", "O3", "O4_best_goodput_vs_fcfs", "I1", "I2", "I3"):
             if k in cell:
                 print(f"   {k}: {cell[k]}")
     if args.output:

@@ -277,3 +277,37 @@ compared with the existing `fcfs` and `prompt` runs (2 repeats each) of addendum
 - **I2.** `cost-lru` mean TTFT within ±5% of `uncached-lru` (geometry still adds little to ordering).
 - **I3.** `cost-lru-age(β*)`: TTFT p99 ≤ `fcfs` p99 **and** goodput ≥ 1.8× `fcfs`.
 - **I4 (descriptive).** Goodput and p99 of every arm, including the addendum-5 arms.
+
+## Addendum 8 (2026-09-27): engine-side SLO-aware ordering (online Moore–Hodgson); before any run
+
+Client-side static priorities cannot use the queue state, and aging traded almost all of the goodput
+gain for the tail (addendum 7 tuning window: β = 0.25 gives p99 13.6 s vs fcfs 14.6 s but goodput
+1.06× fcfs). Goodput counts requests whose TTFT meets a deadline, which is the objective of
+1‖ΣUⱼ, for which Moore–Hodgson is optimal on one machine with known processing times.
+
+**Arm `slo-mh`** (engine patch, `benchmarks/results/h100-request-ordering/patches/exp_slo_scheduler.py`,
+appended to vLLM 0.29's `scheduler.py` by `apply_slo_scheduler.py`, inert unless
+`VLLM_EXP_SLO_ORDER=1`). At every `schedule()` call:
+- each waiting request gets deadline = engine arrival + 5 s − 0.1 s and processing time
+  κ · (a·L + b·(L·k₀ + L(L+1)/2)) with a, b as in addendum 3 and k₀ its **exact** current prefix-cache
+  hit from the KV cache manager (read-only lookup, refreshed at most once per second per request);
+- requests are taken in deadline order (= arrival order) after the remaining prefill of running
+  requests; whenever the running total misses a deadline, the most expensive accepted request (latest
+  arrival on ties) moves to the late class; requests past their deadline are late;
+- on-time requests get priority 0 and late ones 1; the queue's tie-break is arrival time, so each
+  class is FCFS; running requests get priority 0, so preemption picks the latest arrival as usual;
+- κ converts predicted prefill ms into wall time and is re-estimated online (wall time over
+  predicted prefill ms of the last ~2 s of backlogged steps, EWMA 0.2, start 1.5). No parameter is
+  tuned on either trace window.
+
+**Cells:** Mooncake tool-agent @3 s at rate scale 1 (the addendum-5 primary window): `slo-mh`, 2
+repeats, compared with every existing arm there. Rate scale 1.5 (robustness, 1 repeat each):
+`fcfs`, `prompt`, `uncached-lru`, `slo-mh`.
+
+**Predictions:**
+- **M1.** At scale 1, `slo-mh` goodput is the highest of all arms (fcfs, prompt, uncached, cost,
+  uncached-lru, cost-lru, cost-lru-age).
+- **M2.** `slo-mh` goodput ≥ 1.8× `fcfs` at scale 1 and at scale 1.5.
+- **M3.** Reorder overhead: the median over logged seconds of the per-second maximum is ≤ 2 ms.
+- **M4 (descriptive).** Mean, p50 and p99 TTFT of `slo-mh`; the late class is expected to wait, so
+  p99 is expected to be worse than `fcfs`.

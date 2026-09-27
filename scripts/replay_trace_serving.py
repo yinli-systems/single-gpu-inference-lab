@@ -182,6 +182,8 @@ def main():
     ap.add_argument("--cost-coef", default="0,0", help="a,b for --priority cost: ms per 1k tokens, ms per million attention work")
     ap.add_argument("--cache-capacity-tokens", type=int, help="estimate k0 with an LRU prefix cache of this many tokens (default: never evicted)")
     ap.add_argument("--age-beta", type=float, default=0.0, help="--priority cost only: add beta x arrival time (aging)")
+    ap.add_argument("--server-priority-policy", action="store_true",
+                    help="start vLLM with --scheduling-policy priority without sending client priorities (engine-side ordering)")
     args = ap.parse_args()
 
     phase_of, phase_bounds = [], []
@@ -212,8 +214,9 @@ def main():
     if args.no_prefix_caching:
         flags += ["--no-enable-prefix-caching"]
     prio = None
-    if args.priority != "none":
+    if args.priority != "none" or args.server_priority_policy:
         flags += ["--scheduling-policy", "priority"]
+    if args.priority != "none":
         prio = priorities(reqs, args.priority, tuple(float(x) for x in args.cost_coef.split(",")),
                           args.cache_capacity_tokens, args.age_beta)
     if args.trace_dir:
