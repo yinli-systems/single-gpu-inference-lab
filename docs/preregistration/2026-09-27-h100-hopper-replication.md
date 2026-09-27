@@ -234,3 +234,15 @@ registered and are reported as registered. Added, after them:
 - **Heavy cells:** Mooncake at S* and S*/2, all four arms, 2 repeats, arms rotated per repeat.
 - O1–O5 are evaluated on the heavy cells exactly as written in addendum 3, and reported
   separately from the registered light cells.
+
+## Addendum 6 (2026-09-27): light ordering cells stopped after repeat 0; before any heavy-cell run
+
+Deviation, decided with the repository owner after the first repeat of the addendum-3 cells:
+Mooncake ×0.2 and ×0.4 completed repeat 0 for all four arms (plus `uncached` and `cost` of
+repeat 1 at ×0.2); the remaining repeat-1 runs and the Azure-code control were not run. At these
+loads the H100 does not queue (fcfs TTFT p50 0.07–0.08 s, goodput equal to the offered rate in every
+arm, 24/245 and ~56/490 requests above 0.5 s TTFT in every arm), so further repeats cannot change
+the verdict and the GPU time goes to the addendum-5 heavy cells instead. O1–O5 on the light cells
+are reported from the runs that exist, labelled "repeat 0 only". One request per affected run
+(the same request index in every arm, including fcfs; ~20k-token prompts) ends with a client-side
+`ServerDisconnectedError` with nothing in the server log; it is kept in the counts and reported.
