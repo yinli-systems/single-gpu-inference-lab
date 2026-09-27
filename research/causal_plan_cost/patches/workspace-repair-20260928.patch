@@ -1,0 +1,108 @@
+diff --git a/research/causal_plan_cost/ANALYSIS_PROTOCOL.md b/research/causal_plan_cost/ANALYSIS_PROTOCOL.md
+index ed50837..c780699 100644
+--- a/research/causal_plan_cost/ANALYSIS_PROTOCOL.md
++++ b/research/causal_plan_cost/ANALYSIS_PROTOCOL.md
+@@ -20,3 +20,8 @@ Fit run-time and cycle-time models separately; compare on their declared endpoin
+ 
+ ## Causal and novelty scope
+ Within each shape keep Q/K/V tensors fixed while intervening on public split controls. Compare equal-work contrasts under auto versus common fixed modes, retaining failed/negative contrasts. Planner matching verifies metadata, not the entire physical mechanism. FA2 split-KV, plan/run separation, FLOPs-vs-latency, and LPT/load balancing are prior art. Candidate contribution is a validated, decision-useful causal execution-plan representation; reject it if strong-baseline/cost gates fail.
++
++## Pre-full-run amendment after the canary
++Two canaries (1632585/1632586) exposed undersized 128MiB scratch, not numerical failures. Allocate the checked backend-required maximum scratch once per geometry and share it serially across all policies; record policy-required and actual allocated bytes. This is equal reserved workspace, not a serving KV-capacity claim. Correct a missing canary fixture and add a large TRAIN fixture; no test timings selected these changes.
++
++Add a stronger fixed baseline: pick the best fixed policy separately for each hardware/head configuration using TRAIN data only. Primary dispatch ratios and promotion gates must beat this head-conditioned fixed baseline, not only the global policy. Preserve the global selection as a secondary result.
+diff --git a/research/causal_plan_cost/geometry.py b/research/causal_plan_cost/geometry.py
+index 5d04075..5f391b7 100644
+--- a/research/causal_plan_cost/geometry.py
++++ b/research/causal_plan_cost/geometry.py
+@@ -111,6 +111,21 @@ def plan(shape: Shape, hq: int, hkv: int, sms: int, policy: str) -> dict:
+                 rectangular_iterations=rect,merge_rows=merge if split else 0)
+ 
+ 
++def workspace_bytes(shape: Shape, hq: int, hkv: int, sms: int, policy: str) -> int:
++    """Installed FA2 PrefillPlanImpl float workspace; bytes, D=128, no graphs.
++
++    The public planner allocates FP32 partial outputs and LSE for every padded
++    CTA row. This is not merely the number of valid output elements. Shared
++    workspace is safe only when the wrappers run serially on one stream.
++    """
++    p = plan(shape, hq, hkv, sms, policy)
++    if not p['split']:
++        return 16
++    value = hq * p['grid_x'] * p['tile'] * 128 * 4
++    scale = hq * p['grid_x'] * p['tile'] * 4
++    return ceildiv(value, 16) * 16 + ceildiv(scale, 16) * 16 + 32
++
++
+ def features(shape: Shape, hq: int, hkv: int, sms: int, policy: str, kind: str) -> list[float]:
+     q,k=shape.q,shape.k;n=len(q)
+     triangle=sum(x*(x+1)/2 for x in q)
+diff --git a/research/causal_plan_cost/measure.py b/research/causal_plan_cost/measure.py
+index c6b4f10..ef9f840 100644
+--- a/research/causal_plan_cost/measure.py
++++ b/research/causal_plan_cost/measure.py
+@@ -10,7 +10,7 @@ import random
+ import statistics
+ import time
+ import traceback
+-from geometry import POLICIES, corpus, corpus_json, plan
++from geometry import POLICIES, corpus, corpus_json, plan, workspace_bytes
+ 
+ 
+ def sha(path):
+@@ -37,8 +37,9 @@ def main():
+     hw=torch.cuda.get_device_properties(0);sms=hw.multi_processor_count
+     all_shapes=corpus()
+     if a.stage=='canary':
+-        all_shapes=[s for s in all_shapes if s.name in
+-            ('discovery-eq255-A','discovery-eq255-B','Q512-K1536-eq63-A','Q512-K1536-n8-A')]
++        wanted={'discovery-eq255-A','discovery-eq255-B','Q512-K1536-eq127-A','Q512-K1536-n8-A','Q2048-K6144-n8-A'}
++        all_shapes=[s for s in all_shapes if s.name in wanted]
++        assert {s.name for s in all_shapes}==wanted, 'Missing canary fixture'
+     suite=[(s,hq,hkv) for s in all_shapes for hq,hkv in ((16,4),(32,8))]
+     random.Random(seed).shuffle(suite)
+     metadata=dict(kind='causal_plan_operator_study',stage=a.stage,seed=seed,
+@@ -63,6 +64,8 @@ def main():
+         qptr=torch.tensor(qoff,device='cuda',dtype=torch.int32)
+         kptr=torch.tensor(koff,device='cuda',dtype=torch.int32)
+         wrappers={};permode={};auto_output=None
++        required={p:workspace_bytes(shape,hq,hkv,sms,p) for p in POLICIES}
++        workspace=torch.empty(max(1024*1024,max(required.values())),device='cuda',dtype=torch.uint8)
+         # Auto first only for correctness; all timing orders are randomized.
+         for policy in POLICIES:
+             rec=dict(shape=shape.record(),hq=hq,hkv=hkv,sms=sms,policy=policy,
+@@ -70,7 +73,8 @@ def main():
+             try:
+                 if policy != "auto" and auto_output is None:
+                     raise RuntimeError("stock auto correctness reference unavailable")
+-                workspace=torch.empty(128*1024*1024,device='cuda',dtype=torch.uint8)
++                rec['workspace_required_bytes']=required[policy]
++                rec['workspace_allocated_bytes']=workspace.numel()
+                 w=flashinfer.BatchPrefillWithRaggedKVCacheWrapper(workspace,kv_layout='NHD',backend='fa2')
+                 opts=dict(causal=True,q_data_type=torch.float16,kv_data_type=torch.float16)
+                 if policy=='none':opts['disable_split_kv']=True
+diff --git a/research/causal_plan_cost/test_geometry.py b/research/causal_plan_cost/test_geometry.py
+index 5ac225c..55ad855 100644
+--- a/research/causal_plan_cost/test_geometry.py
++++ b/research/causal_plan_cost/test_geometry.py
+@@ -1,10 +1,19 @@
+ """CPU contract tests; these are not GPU correctness or performance results."""
+ import math
+ import unittest
+-from geometry import Shape, POLICIES, corpus, corpus_json, features, plan
++from geometry import Shape, POLICIES, corpus, corpus_json, features, plan, workspace_bytes
+ 
+ 
+ class GeometryTests(unittest.TestCase):
++    def test_workspace_no_split(self):
++        self.assertEqual(workspace_bytes(corpus()[0],16,4,128,'none'),16)
++    def test_workspace_covers_partial_rows(self):
++        s=next(s for s in corpus() if s.name=='discovery-eq255-A')
++        p=plan(s,32,8,128,'s512')
++        self.assertGreaterEqual(workspace_bytes(s,32,8,128,'s512'),32*p['grid_x']*p['tile']*129*4)
++    def test_canary_names_exist(self):
++        names={s.name for s in corpus()}
++        self.assertTrue({'Q512-K1536-eq127-A','Q2048-K6144-n8-A'}<=names)
+     def test_empty(self):
+         with self.assertRaises(ValueError):Shape('x','x','train',(),())
+     def test_alignment(self):
