@@ -220,3 +220,17 @@ B_q = 128, 32 query heads, 132 SMs: 1 wave of deep CTAs up to q = 512, 2 waves f
 - **ST3 (control).** At K = 4096 no increment is ≥ 3× the median of the others.
 If the staircase sits elsewhere (e.g. because FA3 packs GQA heads or uses a different B_q), ST1
 fails as registered; the observed positions are then reported as exploratory.
+
+## Addendum 5 (2026-09-27): heavier ordering cells chosen by a frozen load rule; before any priority arm is seen
+
+The only ordering run finished so far is `mooncake-x0.2-fcfs-r0`: 245 requests, TTFT p50/p90/p99
+0.07/0.48/0.86 s, goodput equal to the offered rate. The H100 is not queueing at the A100's rate
+scale, so ordering cannot matter there; ×0.4 is only twice that. The addendum-3 cells run as
+registered and are reported as registered. Added, after them:
+
+- **Load probe (fcfs only):** Mooncake tool-agent at rate scale 1, 2 and 4, one run each.
+- **Frozen rule:** S* = the smallest probed scale whose fcfs TTFT p50 ≥ 1 s; if none, the largest.
+  Only the fcfs arm is used to choose the load.
+- **Heavy cells:** Mooncake at S* and S*/2, all four arms, 2 repeats, arms rotated per repeat.
+- O1–O5 are evaluated on the heavy cells exactly as written in addendum 3, and reported
+  separately from the registered light cells.
