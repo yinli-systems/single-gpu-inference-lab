@@ -58,18 +58,24 @@ def run(args):
             while not stop.is_set():
                 await gen(toks(16), 4000)
 
+        async def pair(ids1, ids2):
+            # one batched request: both reach the scheduler in the same message, so they cannot be split
+            # across extend batches by arrival timing (separate submissions were, in the harness smoke)
+            await eng.async_generate(input_ids=[ids1, ids2],
+                                     sampling_params=[{"max_new_tokens": 1, "temperature": 0, "ignore_eos": True}] * 2)
+
         bt = asyncio.create_task(blocker())
         await asyncio.sleep(1.0)
         plan = []
         for i in range(args.repeats):
             plan += ["A", "B"] if i % 2 == 0 else ["B", "A"]
         for _ in range(4):
-            await asyncio.gather(gen(pa + toks(qa), 1), gen(pb + toks(qb), 1))
+            await pair(pa + toks(qa), pb + toks(qb))
         intended = []
         for state in plan:
             q1, q2 = (qa, qb) if state == "A" else (qb, qa)
             await asyncio.sleep(0.05)
-            await asyncio.gather(gen(pa + toks(q1), 1), gen(pb + toks(q2), 1))
+            await pair(pa + toks(q1), pb + toks(q2))
             intended.append([state, [q1, q2], [ka, kb]])
         stop.set(); bt.cancel()
         return intended

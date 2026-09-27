@@ -229,10 +229,10 @@ def analyze(args):
             rows.append(row)
         non = [r for r in rows if "control" not in r["label"]]
         ctl = [r for r in rows if "control" in r["label"]][0]
-        rep = {"W_fit": {"a_ms": aW, "ms_per_M": bW}, "split_fit": {"a_ms": coef[0], "c_X": coef[1], "c_S": coef[2], "c_S_over_c_X": coef[2] / coef[1]},
+        rep = {"W_fit": {"a_ms": aW, "ms_per_M": bW}, "split_fit": {"a_ms": float(coef[0]), "c_X": float(coef[1]), "c_S": float(coef[2]), "c_S_over_c_X": float(coef[2] / coef[1])},
                "TS_fit": {"bq": bq, "bk": bk, "a_ms": aT, "ms_per_tile": cT, "grid_mae_ms": best[0]}, "pair": rows,
                "HK1": all(r["measured_ms"] > 0 for r in non) and abs(ctl["measured_ms"]) <= 0.02 * ctl["median_A"],
-               "HK3": coef[2] / coef[1] > 1.2,
+               "HK3": bool(coef[2] / coef[1] > 1.2),
                "HK4_mae_W": statistics.mean(abs(r["measured_ms"] - r["pred_W_ms"]) for r in non),
                "HK4_mae_TS": statistics.mean(abs(r["measured_ms"] - r["pred_TS_ms"]) for r in non),
                "HK5_W_over": sum(r.get("ratio_W", 9) < 0.9 for r in non), "HK5_TS_within": sum(0.75 <= r.get("ratio_TS", 0) <= 1.25 for r in non)}
