@@ -98,3 +98,38 @@ interleaved A/B, 200 timed calls per state after warm-up.
   traces and reported as **post hoc** in every table.
 - Harness smoke runs (one config, few trials) are allowed to validate that scripts run; their
   numbers are discarded and not reported.
+
+## Addendum 1 (2026-09-27): post hoc split-term check on L20/A100, and a tile-schedule hypothesis; before any H100 data is analyzed
+
+The H100 shape queue had started when this was written; no H100 output file has been opened.
+
+**Post hoc, on already-published L20 and A100 data** (`scripts/analyze_split_term.py`):
+
+| data | c_X (ms/M) | c_S (ms/M) | c_S / c_X | single slope | pairing measured / (c_X·ΔX) | M2n / M2s primary MAE |
+| --- | ---: | ---: | ---: | ---: | --- | --- |
+| L20 Qwen3-4B | 6.33 | 8.81 | 1.39 | 6.50 | 0.89–1.03 | 3.07 / 19.86 |
+| A100 Qwen3-4B | 3.23 | 5.70 | 1.76 | 3.30 | 0.67–0.91 | 1.92 / 9.14 |
+| A100 Qwen3-8B | 3.26 | 6.15 | 1.89 | 3.32 | — | 1.66 / 11.84 |
+
+- A unit of self work does cost more than a unit of cross work (HP5's direction), but the fitted
+  c_X is within 3% of the single slope, because X dominates the shape-cell steps. **The split term
+  does not explain the A100 PS1 failure.** On these data HP4 would fail exactly like PS1, and HM4
+  would fail (M2s extrapolates badly: on one-prefill training data S is nearly a function of the
+  token count). HP4 and HM4 stay registered as written and will be reported as they come out.
+
+**New hypothesis (tile schedule).** The pairing-swap steps are small (budget q_a + q_b + 1, one
+decode row). A varlen prefill kernel launches one CTA per (request, query tile, query head); a
+CTA's work is its number of key tiles, n = ceil((k + end of its query tile) / B_k). With few CTAs
+per SM the step is bounded by how the CTAs pack onto SMs, not by total work: state B (large chunk
+shallow, small chunk deep) has fewer but longer deep CTAs. Total work then over-predicts Δ, more
+so on a GPU with more SMs per unit of work.
+
+Tile-schedule model **TS**: kernel time = a + c · makespan, where makespan is the longest-first
+(LPT) packing of all CTA works (in key tiles) onto `num_SMs` slots; (B_q, B_k) is chosen from
+{64, 128} × {64, 128, 176} and (a, c) fitted, on the single-request grid of HK3 only. The work
+model **W** is kernel time = a + b · W fitted on the same grid.
+
+- **HK4.** On the isolated-kernel pairing configurations, TS predicts Δ with lower MAE than W, for
+  FA2 and for FA3.
+- **HK5.** The W model over-predicts the kernel pairing Δ (measured / predicted < 0.9) for at least
+  3 of 5 configurations on FA3; the TS model is within ±25% for at least 4 of 5.
