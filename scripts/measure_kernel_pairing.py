@@ -203,7 +203,8 @@ def analyze(args):
         coef, *_ = np.linalg.lstsq(A, np.array(gy), rcond=None)
         # TS model: choose tile sizes on the grid
         best = None
-        for bq, bk in itertools.product((64, 128), (64, 128, 176)):
+        tiles = [tuple(args.ts_tiles)] if args.ts_tiles else itertools.product((64, 128), (64, 128, 176))
+        for bq, bk in tiles:
             xs = [makespan(ctas(b, bq, bk, hq), sms) for b in gb]
             a, c = fit(xs, gy)
             mae = sum(abs(a + c * x - y) for x, y in zip(xs, gy)) / len(gy)
@@ -260,6 +261,8 @@ def main():
     ap.add_argument("--analyze", type=Path)
     ap.add_argument("--model-pairswap", type=Path)
     ap.add_argument("--layers", type=int, default=36)
+    ap.add_argument("--ts-tiles", type=int, nargs=2, metavar=("BQ", "BK"),
+                    help="fix the TS tile sizes instead of choosing them on the grid (exploratory, not the registered HK4 test)")
     args = ap.parse_args()
     analyze(args) if args.analyze else run(args)
 

@@ -1,0 +1,233 @@
+{
+  "schema_version": 1,
+  "result_type": "prefill_interference",
+  "generated_at_utc": "2026-09-27T15:26:09Z",
+  "provenance": {
+    "commit": "c68a67df65144a1d5228694a2c62f7500a4feeb3",
+    "dirty": false
+  },
+  "model": "/root/lab/models/Qwen2.5-7B-Instruct",
+  "workload": {
+    "background": 8,
+    "background_prompt_tokens": 128,
+    "background_prompt_tokens_list": "",
+    "background_tokens": 4096,
+    "settle_tokens": 64,
+    "inject": 1,
+    "long_tokens": 16384,
+    "long_output_tokens": 32,
+    "repeats": 3,
+    "seed": 113,
+    "max_model_len": 40960,
+    "max_num_seqs": 64,
+    "long_prefill_token_threshold": 0
+  },
+  "trace": true,
+  "conditions": {
+    "chunk1024": {
+      "flags": [
+        "--max-num-batched-tokens",
+        "1024",
+        "--no-enable-prefix-caching",
+        "--enable-logging-iteration-details"
+      ],
+      "repeats": [
+        {
+          "background": {
+            "before": {
+              "count": 545,
+              "p50_ms": 6.436080671846867,
+              "p95_ms": 6.64830207824707,
+              "p99_ms": 7.938910275697708,
+              "max_ms": 8.115884847939014,
+              "slo_attainment": {
+                "10ms": 1.0,
+                "25ms": 1.0,
+                "50ms": 1.0
+              }
+            },
+            "during": {
+              "count": 432,
+              "p50_ms": 7.20512680709362,
+              "p95_ms": 34.020911902189255,
+              "p99_ms": 41.423434391617775,
+              "max_ms": 41.616566479206085,
+              "slo_attainment": {
+                "10ms": 0.6296296296296297,
+                "25ms": 0.7222222222222222,
+                "50ms": 1.0
+              }
+            },
+            "after": {
+              "count": 3704,
+              "p50_ms": 6.457899697124958,
+              "p95_ms": 6.701954640448093,
+              "p99_ms": 7.386757060885429,
+              "max_ms": 15.212541446089745,
+              "slo_attainment": {
+                "10ms": 0.9956803455723542,
+                "25ms": 1.0,
+                "50ms": 1.0
+              }
+            }
+          },
+          "long_requests": [
+            {
+              "ttft_s": 0.5506414882838726,
+              "e2e_s": 0.7386807752773166,
+              "output_tokens": 32
+            }
+          ],
+          "injection_window_s": 0.7390462625771761,
+          "background_output_tokens_total": 4689,
+          "background_tok_per_s_overall": 1123.4096118081545,
+          "background_tok_per_s_during": 584.5371553514726
+        },
+        {
+          "background": {
+            "before": {
+              "count": 545,
+              "p50_ms": 6.448519416153431,
+              "p95_ms": 6.661403924226761,
+              "p99_ms": 7.465600967407227,
+              "max_ms": 8.133643306791782,
+              "slo_attainment": {
+                "10ms": 1.0,
+                "25ms": 1.0,
+                "50ms": 1.0
+              }
+            },
+            "during": {
+              "count": 424,
+              "p50_ms": 7.020927965641022,
+              "p95_ms": 34.29761249572039,
+              "p99_ms": 46.903545036911964,
+              "max_ms": 46.90883029252291,
+              "slo_attainment": {
+                "10ms": 0.6415094339622641,
+                "25ms": 0.7547169811320755,
+                "50ms": 1.0
+              }
+            },
+            "after": {
+              "count": 3712,
+              "p50_ms": 6.455174647271633,
+              "p95_ms": 6.718287244439125,
+              "p99_ms": 7.211972028017044,
+              "max_ms": 9.0400455519557,
+              "slo_attainment": {
+                "10ms": 1.0,
+                "25ms": 1.0,
+                "50ms": 1.0
+              }
+            }
+          },
+          "long_requests": [
+            {
+              "ttft_s": 0.541157248429954,
+              "e2e_s": 0.7227311432361603,
+              "output_tokens": 32
+            }
+          ],
+          "injection_window_s": 0.7232222696766257,
+          "background_output_tokens_total": 4689,
+          "background_tok_per_s_overall": 1124.8016441075456,
+          "background_tok_per_s_during": 586.2651328333446
+        },
+        {
+          "background": {
+            "before": {
+              "count": 545,
+              "p50_ms": 6.441399455070496,
+              "p95_ms": 6.648221053183079,
+              "p99_ms": 6.988941691815853,
+              "max_ms": 7.079312577843666,
+              "slo_attainment": {
+                "10ms": 1.0,
+                "25ms": 1.0,
+                "50ms": 1.0
+              }
+            },
+            "during": {
+              "count": 432,
+              "p50_ms": 7.036706432700157,
+              "p95_ms": 34.381408244371414,
+              "p99_ms": 41.5686359629035,
+              "max_ms": 41.85237269848585,
+              "slo_attainment": {
+                "10ms": 0.6481481481481481,
+                "25ms": 0.75,
+                "50ms": 1.0
+              }
+            },
+            "after": {
+              "count": 3712,
+              "p50_ms": 6.460248492658138,
+              "p95_ms": 6.670776754617691,
+              "p99_ms": 7.223326712846756,
+              "max_ms": 11.206801049411297,
+              "slo_attainment": {
+                "10ms": 0.9956896551724138,
+                "25ms": 1.0,
+                "50ms": 1.0
+              }
+            }
+          },
+          "long_requests": [
+            {
+              "ttft_s": 0.5442660888656974,
+              "e2e_s": 0.7313509183004498,
+              "output_tokens": 32
+            }
+          ],
+          "injection_window_s": 0.7318828767165542,
+          "background_output_tokens_total": 4697,
+          "background_tok_per_s_overall": 1123.9610059621746,
+          "background_tok_per_s_during": 590.258378414428
+        }
+      ],
+      "command": [
+        "/root/lab/venv/bin/vllm",
+        "serve",
+        "/root/lab/models/Qwen2.5-7B-Instruct",
+        "--port",
+        "8123",
+        "--max-model-len",
+        "40960",
+        "--gpu-memory-utilization",
+        "0.9",
+        "--max-num-seqs",
+        "64",
+        "--seed",
+        "0",
+        "--max-num-batched-tokens",
+        "1024",
+        "--no-enable-prefix-caching",
+        "--enable-logging-iteration-details",
+        "--served-model-name",
+        "m"
+      ]
+    }
+  },
+  "nvidia_smi_before": {
+    "available": true,
+    "fields": [
+      "name",
+      "driver_version",
+      "clocks.current.sm",
+      "memory.used",
+      "temperature.gpu",
+      "power.draw"
+    ],
+    "rows": [
+      [
+        "NVIDIA H100 80GB HBM3",
+        "580.126.09",
+        "1980 MHz",
+        "0 MiB",
+        "51",
+        "143.28 W"
+      ]
+    ]
+  }
+}

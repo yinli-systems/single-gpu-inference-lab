@@ -31,21 +31,29 @@ def pairing_swap():
               ("H100, vLLM 0.29", H100 / "raw/pairswap-Qwen3-4B", h_slope, "D", "C1"),
               ("H100, SGLang 0.5", H100 / "raw/sglang-pairswap-Qwen3-4B", h_slope, "^", "C4")]
     fig, (ax, bx) = plt.subplots(1, 2, figsize=(12, 4.6))
+    ins = ax.inset_axes([0.46, 0.58, 0.25, 0.33])
     top = 0
     for label, d, slope, mk, col in setups:
         cfgs = [c for c in json.load(open(d / "pairswap.json"))["configs"] if "delta_A_minus_B_ms" in c]
         xs = [slope * c["dW_A_minus_B_M"] for c in cfgs]
         ys = [c["delta_A_minus_B_ms"] for c in cfgs]
         ax.scatter(xs, ys, marker=mk, color=col, s=45, label=label, zorder=3)
+        ins.scatter(xs, ys, marker=mk, color=col, s=25, zorder=3)
         top = max(top, max(xs), max(ys))
         # per-setup swap: median A and B of the headline config
         c = cfgs[0]
-        short = label.replace(", vLLM ", "\n")
+        short = label.replace(", vLLM ", "\n").replace(", SGLang 0.5", "\nSGLang")
         bx.bar([f"{short}\nA", f"{short}\nB"], [c["median_A_ms"], c["median_B_ms"]],
                color=[col, "0.75"], edgecolor="black", linewidth=0.5)
     ax.plot([0, top * 1.05], [0, top * 1.05], "k--", lw=1, label="measured = predicted")
     ax.fill_between([0, top * 1.05], [0, 0.75 * top * 1.05], [0, 1.25 * top * 1.05], color="0.9", zorder=0,
                     label="±25% (pre-registered)")
+    ins.plot([0, 12], [0, 12], "k--", lw=1)
+    ins.fill_between([0, 12], [0, 9], [0, 15], color="0.9", zorder=0)
+    ins.set_xlim(-0.5, 12); ins.set_ylim(-0.5, 12)
+    ins.set_title("H100 (FA3), zoom", fontsize=7)
+    ins.tick_params(labelsize=6)
+    ins.grid(alpha=.3)
     ax.set_xlabel("predicted Δ = slope × (q_a − q_b)(k_a − k_b)  [ms]")
     ax.set_ylabel("measured Δ = median(A) − median(B)  [ms]")
     ax.set_title("Same aggregate state, different pairing (Qwen3-4B, 6 configs per setup)", fontsize=10)
