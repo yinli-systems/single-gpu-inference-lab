@@ -8,7 +8,7 @@
 #SBATCH --job-name=sgi-causal-plan
 #SBATCH --output=/ssd/scxi253/single-gpu-inference-plan-cost-20260928/logs/%x-%A_%a.log
 set -euo pipefail
-P=/ssd/scxi253/single-gpu-inference-plan-cost-20260928
+P=${SGI_CAMPAIGN_ROOT:-/ssd/scxi253/single-gpu-inference-plan-cost-20260928}
 E=/ssd/scxi253/q7b-engines-20260925T1247Z/envs/sglang312
 STAGE=${1:?canary or full required}
 REP=${2:-${SLURM_ARRAY_TASK_ID:-0}}
