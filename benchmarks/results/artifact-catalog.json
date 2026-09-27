@@ -3,7 +3,7 @@
     "active": 6,
     "analysis": 1,
     "negative": 10,
-    "other": 19,
+    "other": 20,
     "path_proof": 15,
     "positive": 8,
     "superseded": 12
@@ -520,6 +520,18 @@
       "has_evidence_status_json": false,
       "has_readme": true,
       "has_summary_json": false,
+      "path": "benchmarks/results/h100-prefill-cost-geometry",
+      "reference": "h100-prefill-cost-geometry/",
+      "status": "Pre-registered Hopper replication + second engine (H100, FA3; vLLM 0.29, SGLang 0.5.20)",
+      "summary": "Four models x 15 cells: partition gap 1.80x (4B) / 1.48x (8B), M2n geometry-OOD MAE 1.7-2.5 ms vs M0 19-57, MLP 23-53, LLMVisor formula 5-20 ms. Pairing swap +5.3-10.5 ms in 10/10 configs, controls <= 0.11 ms; SGLang agrees with vLLM to 2-5%; every isolated kernel (FA2, FA3, FlashInfer) shows the swap, FA3 x 36 layers = 72-102% of the step. FA3 prices a chunk in waves of deep tiles (512->640 tokens at 16k: +7.3 ms, 640->1024: +4.8 ms), so the single slope over- and under-predicts (HP3, HP4, HG2, HM4, HK3-5, VL2 failed)."
+    },
+    {
+      "category": "other",
+      "compact_file_count": 1,
+      "has_campaign_summary_json": false,
+      "has_evidence_status_json": false,
+      "has_readme": true,
+      "has_summary_json": false,
       "path": "benchmarks/results/live-trace-replay",
       "reference": "live-trace-replay/",
       "status": "Pre-registered live serving study (A100)",
@@ -862,7 +874,7 @@
       "summary": "Custom three-way serving path evidence; not yet a broad win."
     }
   ],
-  "entry_count": 71,
+  "entry_count": 72,
   "index_path": "benchmarks/results/README.md",
   "result_root": "benchmarks/results",
   "schema_version": 1

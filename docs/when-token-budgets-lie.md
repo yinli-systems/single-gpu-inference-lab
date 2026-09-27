@@ -134,11 +134,18 @@ once produced a spurious −25 ms discrepancy. Over 28 cells the match fraction 
 
 **Environment.**
 
-| | L20 | A100 |
-| --- | --- | --- |
-| GPU | NVIDIA L20 48 GB | A100-SXM4-80GB (RunPod) |
-| engine | vLLM 0.29.0; 0.30.0 for the replication | vLLM 0.29.0 |
-| models | Qwen3-4B, Qwen2.5-1.5B-Instruct, Qwen2.5-7B-Instruct | Qwen3-4B, Qwen3-8B, Qwen2.5-1.5B-Instruct, Qwen2.5-7B-Instruct |
+| | L20 | A100 | H100 |
+| --- | --- | --- | --- |
+| GPU | NVIDIA L20 48 GB | A100-SXM4-80GB (RunPod) | H100 80GB HBM3 SXM, 132 SMs (RunPod) |
+| attention kernel | FA2 | FA2 | FA3 (vLLM and SGLang defaults on Hopper) |
+| engine | vLLM 0.29.0; 0.30.0 for the replication | vLLM 0.29.0 | vLLM 0.29.0; SGLang 0.5.20 for the pairing swap |
+| models | Qwen3-4B, Qwen2.5-1.5B-Instruct, Qwen2.5-7B-Instruct | Qwen3-4B, Qwen3-8B, Qwen2.5-1.5B-Instruct, Qwen2.5-7B-Instruct | Qwen3-4B, Qwen3-8B, Qwen2.5-1.5B-Instruct, Qwen2.5-7B-Instruct |
+
+The H100 work is pre-registered separately in
+[`docs/preregistration/2026-09-27-h100-hopper-replication.md`](preregistration/2026-09-27-h100-hopper-replication.md)
+(five addenda, each pushed before the data it concerns). SGLang is instrumented with an
+experiment-only step tracer loaded through `sitecustomize`
+([`integrations/sglang_step_tracer`](../integrations/sglang_step_tracer/sitecustomize.py)).
 
 **Shape campaigns.**
 - Background decoders (128-token prompts, 4096 output tokens) plus N long prefills injected
@@ -187,16 +194,63 @@ of the headline configuration. Qwen3-4B, one background decoder, 20 trials per s
 | L20, vLLM 0.29 | +18.6 … +54.9 | 0.86 – 1.01 | −0.09 ms | held | held |
 | L20, vLLM 0.30 | +18.5 … +55.0 | 0.86 – 1.01 | −0.05 ms | held | held |
 | A100, vLLM 0.29 | +7.0 … +27.6 | 0.65 – 0.89 | +0.01 ms | **failed** (2/5) | held |
+| H100 (FA3), vLLM 0.29, Qwen3-4B | +5.3 … +10.2 | 0.76 – 1.58 | −0.11 ms | **failed** (2/5) | held |
+| H100 (FA3), vLLM 0.29, Qwen3-8B | +5.4 … +10.5 | 0.73 – 1.53 | −0.02 ms | **failed** (2/5) | held |
+| H100 (FA3), **SGLang 0.5.20**, Qwen3-4B | +5.6 … +10.7 | 0.77 – 1.66 | −0.03 ms | — | held |
 
-- **The counterexample holds on every setup.** It has the predicted sign in every configuration
-  and a flat control.
-- **The implied error floor** for any aggregate predictor is |Δ|/2: 9–27 ms on the L20 and
-  3.5–14 ms on the A100.
-- **PS1 failed on the A100.** The cross term costs 65–89% of what the partition-fit slope
-  predicts there, against 86–101% on the L20. The single-slope proxy is therefore an
-  approximation whose cross-term coefficient depends on the GPU. The sign and existence of the
-  effect do not.
+- **The counterexample holds on every setup, on three GPUs, two kernel families and two
+  engines.** It has the predicted sign in all 30 non-control configurations and a flat control.
+  SGLang, with its own scheduler and runtime and no decode row in the pair step, agrees with vLLM
+  on the H100 to **2–5%** per configuration: the cost is in the attention computation, not in the
+  engine.
+- **The implied error floor** for any aggregate predictor is |Δ|/2: 9–27 ms on the L20,
+  3.5–14 ms on the A100 and 2.7–5.3 ms on the H100 (10–20% of a 21–48 ms step).
+- **The single slope fails differently on each GPU.** The cross term costs 86–101% of the
+  partition-fit slope on the L20 and a consistent 65–89% on the A100. On the H100 the ratio
+  scatters on both sides of 1 (0.73–1.58), because the cost is quantized (§5.1). The sign and
+  existence of the effect do not depend on the GPU; its magnitude per unit of ΔW does.
 - vLLM 0.30 reproduces 0.29 to within 0.7 ms per configuration.
+- **Isolated kernels.** The same swap on one attention layer, called as vLLM calls it (paged KV,
+  varlen, causal), gives +200…+435 µs (vLLM FA2 on the H100), +148…+208 µs (FA3) and
+  +97…+226 µs (FlashInfer), for the Qwen3-4B and Qwen2.5-7B head shapes; controls ≤ 2 µs.
+  36 layers × the FA3 Δ account for 72–102% of the model-step Δ (pre-registered 70–130%: held).
+  Script: [`scripts/measure_kernel_pairing.py`](../scripts/measure_kernel_pairing.py).
+
+### 5.1 Hopper: the cost of a chunk comes in waves
+
+![hopper waves](figures/fig_hopper_waves.png)
+
+*Figure 1b. Left: model-step CUDA time of one prefill chunk of q tokens at a cached depth of
+4k, 16k and 32k, H100, vLLM 0.29, FA3, Qwen3-4B, 20 trials per point. Dotted lines: where
+ceil(q/128) × 32 query heads crosses 132 and 264 SMs. Right: the isolated-kernel pairing swap
+against a work model and a tile-schedule model, both fitted on single-request kernel timings.*
+
+On the H100 the pairing Δ does not scale with ΔW: ΔW = 9.4M costs the same as 6.3M, and state A
+takes 30.9–31.2 ms for deep chunks of 640, 768 and 896 tokens. The explanation was registered
+before a dedicated sweep ran (addendum 4) and held:
+- One chunk at 16k depth costs **18.8 ms at 512 tokens and 26.1 ms at 640**; from 640 to 1024 it
+  rises only 4.8 ms; at 1152 it jumps **8.3 ms** again. At 32k both jumps double (**14.3, 14.9 ms**);
+  at 4k they almost vanish (1.1 and 3.5 ms).
+- The jumps sit exactly where the number of deep query tiles (128 rows × 32 heads) crosses one
+  and two waves of 132 SMs, and one wave of deep tiles costs ≈ 0.45 ms per 1k of depth across 36
+  layers. A chunk's attention cost on FA3 is a step function of its tile count and a linear
+  function of its depth, not of q·k.
+- In the pairing swap, state A (deep chunk 640–896 tokens) runs two waves of deep tiles and
+  state B (128–384) one. Δ is about one wave, whatever ΔW is.
+- FA2 on the same GPU tracks work much more closely. The quantization belongs to FA3's
+  scheduling on this GPU, not to the H100 alone.
+
+What did **not** survive:
+- *A costlier self term* (pre-registered after the A100 PS1 failure): the regression coefficient of
+  Σq(q+1)/2 is 5–15× that of Σqk at model level, but 0.34–1.21× in the isolated kernels. The
+  model-level ratio is collinearity with per-token costs, not attention.
+- *A tile-schedule model* (LPT packing of every CTA onto the SMs, fitted on a single-request grid):
+  worse than plain work on 4 of 6 (kernel, shape) pairs, and no better with the tile size fixed.
+  The waves are real; this model of them is not quantitatively right.
+- Not predicted: a +6.2 ms step between 256 and 384 tokens at 32k.
+
+For a scheduler this means the right feature on Hopper is not one number. Attention work
+identifies the pairing (§3) on every GPU; on FA3 its price is set per wave of deep tiles.
 
 Three harness designs produced no data before this one; they are documented in
 [`prefill-pairing-swap/`](../benchmarks/results/prefill-pairing-swap/README.md).
@@ -222,20 +276,29 @@ equal decode batch, equal prefill tokens and aggregate KV 12–16k.
 | A100 | Qwen3-8B | 0.29 | 1.62× | [`a100-prefill-cost-geometry`](../benchmarks/results/a100-prefill-cost-geometry/README.md) |
 | A100 | Qwen2.5-1.5B | 0.29 | 1.82× | [`prefill-geometry-attention-shape`](../benchmarks/results/prefill-geometry-attention-shape/README.md) |
 | A100 | Qwen2.5-7B | 0.29 | 1.48× | [`prefill-geometry-attention-shape`](../benchmarks/results/prefill-geometry-attention-shape/README.md) |
+| H100 (FA3) | Qwen3-4B | 0.29 | 1.80× | [`h100-prefill-cost-geometry`](../benchmarks/results/h100-prefill-cost-geometry/README.md) |
+| H100 (FA3) | Qwen3-8B | 0.29 | 1.48× | [`h100-prefill-cost-geometry`](../benchmarks/results/h100-prefill-cost-geometry/README.md) |
+| H100 (FA3) | Qwen2.5-1.5B | 0.29 | 1.75× | [`h100-prefill-cost-geometry`](../benchmarks/results/h100-prefill-cost-geometry/README.md) |
+| H100 (FA3) | Qwen2.5-7B | 0.29 | 1.37× | [`h100-prefill-cost-geometry`](../benchmarks/results/h100-prefill-cost-geometry/README.md) |
 
-- **Collapse.** In every dataset, the partitions of one budget regress on attention work alone
-  with one slope (within 1–4%). Intercepts are set by the token count.
-- **Slope scaling.** Normalized per 1,000 layer·query-heads, the slope is 5.4–6.2 on the L20 and
-  2.8–2.9 on the A100 at budget 2048. At budget 1024 the smaller models come out 11–34% above
-  that, and that part of the slope prediction missed for 1.5B.
+- **Collapse.** On FA2 (L20, A100), the partitions of one budget regress on attention work alone
+  with one slope (within 1–4%). Intercepts are set by the token count. On FA3 the collapse is
+  looser: within 8% for most (model, budget) pairs, but 8.8–11.1% off at budget 1024 for 8B and 7B
+  (pre-registered HG2 failed), as the wave quantization of §5.1 predicts for mixed tile counts.
+- **Slope scaling.** Normalized per 1,000 layer·query-heads, the slope is 5.4–6.2 on the L20,
+  2.8–2.9 on the A100 and 0.90–1.18 on the H100 at budget 2048. At budget 1024 the smaller models
+  come out 11–34% above that on FA2, and that part of the slope prediction missed for 1.5B. In
+  absolute terms the H100 gap at budget 2048 is 25 ms (4B), against 82 ms on the A100 and 157 ms on
+  the L20.
 - **What does not move the cost** on the L20 (controls):
   - context length 4k → 32k is large but an aggregate quantity;
   - decode batch 4 → 32 at fixed prefill: +4%;
   - CUDA-graph capture boundaries: ≤ 0.7 ms;
   - decode-KV skew at equal total: ≤ 1.5%.
 - **Decode-KV skew on the A100.** At equal total, skewed decode KV costs 3–9% more on all four
-  models; on the L20 there is no effect on any of three models. Five tests ruled out the FA2
-  decode kernel. The effect is recorded as measured but unexplained
+  models; on the L20 there is no effect on any of three models; on the H100 only Qwen3-4B shows
+  it (6.3%), the other three are within 0.4%. Five tests ruled out the FA2 decode kernel. The
+  effect is recorded as measured but unexplained
   ([`scripts/analyze_decode_kv_skew.py`](../scripts/analyze_decode_kv_skew.py)).
 
 ## 7. Out-of-distribution prediction: M0, M2, M2n and a learned baseline
@@ -249,16 +312,20 @@ published M2. The M2n numbers are in the table below.*
 **Primary split** (train on single prefills, test on multi-prefill steps), MAE in ms, with the
 pre-registered filters:
 
-| dataset | M0 | M2 (published) | M2n | MLP (5 seeds) |
-| --- | ---: | ---: | ---: | ---: |
-| L20 Qwen3-4B | 339.8 | 10.4 | **3.07** | 232.0 |
-| L20 Qwen2.5-1.5B | 116.4 | 23.9 | **1.75** | 89.7 |
-| L20 Qwen2.5-7B | 235.7 | 11.4 | **2.31** | 147.1 |
-| A100 Qwen3-4B | 171.5 | 18.6 | **1.92** | 130.5 |
-| A100 Qwen3-8B | 170.0 | 18.0 | **1.66** | 124.2 |
-| A100 Qwen2.5-1.5B | 55.9 | 17.4 | **2.13** | 39.6 |
-| A100 Qwen2.5-7B | 122.7 | 17.0 | **1.23** | 89.1 |
-| L20 Qwen3-4B, vLLM 0.30 | — | 14.9 | 6.30 (H3 failed) | — |
+| dataset | M0 | LLMVisor formula | M2 (published) | M2n | MLP (5 seeds) |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| L20 Qwen3-4B | 339.8 | 15.8 | 10.4 | **3.07** | 232.0 |
+| L20 Qwen2.5-1.5B | 116.4 | 5.8 | 23.9 | **1.75** | 89.7 |
+| L20 Qwen2.5-7B | 235.7 | 18.2 | 11.4 | **2.31** | 147.1 |
+| A100 Qwen3-4B | 171.5 | 6.9 | 18.6 | **1.92** | 130.5 |
+| A100 Qwen3-8B | 170.0 | 7.1 | 18.0 | **1.66** | 124.2 |
+| A100 Qwen2.5-1.5B | 55.9 | 3.0 | 17.4 | **2.13** | 39.6 |
+| A100 Qwen2.5-7B | 122.7 | 5.5 | 17.0 | **1.23** | 89.1 |
+| H100 Qwen3-4B | 56.1 | 13.0 | 9.1 | **2.10** | 52.7 |
+| H100 Qwen3-8B | 56.8 | 20.1 | 6.9 | **2.53** | 47.6 |
+| H100 Qwen2.5-1.5B | 18.9 | 5.3 | 5.6 | **1.68** | 23.0 |
+| H100 Qwen2.5-7B | 44.4 | 18.6 | 6.5 | **2.04** | 37.8 |
+| L20 Qwen3-4B, vLLM 0.30 | — | — | 14.9 | 6.30 (H3 failed) | — |
 
 **What the table shows.**
 - **The aggregate model aliases geometry in whichever direction its data pushes it.** Fit on
@@ -283,6 +350,21 @@ pre-registered filters:
   - **Exposure (exploratory).** With 25% of its training set drawn from other multi-prefill
     partitions, the MLP still misses unseen partitions by 10–49 ms, and M0 by 22–119 ms. M2n gets
     1.4–2.9 ms.
+- **Two published predictors** ([`scripts/analyze_published_predictors.py`](../scripts/analyze_published_predictors.py)):
+  - *Vidur* looks up batch prefill-attention time at (Σ kv, round(√Σq²)²) (microsoft/vidur @
+    8383d29, `sklearn_execution_time_predictor.py` l. 852–870). Both states of every pairing swap
+    map to the same key, so its error on each measured pair is at least |Δ|/2 (§5).
+  - *LLMVisor* (T = β + a₁Σp + a₂Σc + a₃Σp² + a₄|B|), fitted on the same splits, is far better
+    than M0 (3–20 ms on the primary split): it has no Σq·Σk interaction to extrapolate. It is still
+    1.4–9.1× M2n on the primary split and 3.3–29× on the reverse split, and blind to the swap.
+    The pre-registered "≥ 5× M2n" held on only 5 of 11 datasets (VL2 failed). The claim is
+    therefore not that every aggregate model is off by hundreds of milliseconds; it is that each
+    has an irreducible floor on steps that differ only in pairing, and that the size of its
+    extrapolation error depends on which aggregate interaction it happens to include.
+- **Hopper.** On all four H100 datasets M2n is 1.7–2.5 ms, reaching ≤ 5 ms with 32 training steps
+  (pre-registered HM1–HM3 held). Splitting attention work into separate cross and self terms (M2s)
+  makes OOD prediction worse on all four (8–15 ms; HM4 failed): on one-prefill data the self term is
+  nearly a function of chunk size.
 - **vLLM 0.30 (H3 failed).** 0.30 adds 2.2–4.0 s stalls to 17 prefill steps in 8 of 19 cells.
   Several fall under the pre-registered 10× exclusion and stay in the fit. A post-hoc 5×
   diagnostic gives M2n 2.80 ms, the 0.29 value; it is labelled post hoc, and H3 stays failed.
@@ -396,8 +478,21 @@ pricing for admission or TTFT-aware ordering was not built or tested here.
 
 ## 10. Related work and positioning
 
-- **Aggregate deadline schedulers (SLOWeave-style).** We keep their control structure and replace
-  the state. Our M0 is deliberately the strongest aggregate coordinate such a scheduler could
+- **Per-request attention pricing is not new.** KernelSight-LM (arXiv 2606.28565) prices a mixed
+  step kernel by kernel, with "the prefill chunk over its cached history plus its own causal
+  triangle". Our C3 is consistent with it and does not claim the feature first. What is added
+  here is the identifiability argument, a measurement that isolates the pairing term with every
+  aggregate held fixed on three GPUs and two engines, the observation that on FA3 the price of
+  that term is quantized in waves of deep tiles (§5.1), and the scheduler-facing consequence (§9).
+- **Aggregate predictors in simulators and schedulers.** Vidur (MLSys 2024) keys batch
+  prefill-attention time on (Σkv, √Σq²); LLMVisor (arXiv 2608.08382)
+  fits T = β + a₁Σp + a₂Σc + a₃Σp² + a₄|B|. Both are exactly invariant under the pairing swap (§7).
+  LLMVisor extrapolates far better than an aggregate model with a Σq·Σk term, which narrows the
+  practical size of the problem to the |Δ|/2 floor plus a model-dependent extrapolation error.
+- **Aggregate deadline schedulers (SLOWeave, arXiv 2609.07883).** SLOWeave picks the largest chunk
+  whose predicted iteration cost meets the earliest decode deadline; its predictor "can be a lookup
+  table profiled by the runtime, a fitted regressor, or a conservative analytical model". We keep
+  that control structure and replace the state. Our M0 is deliberately the strongest aggregate coordinate such a scheduler could
   use, not (decode batch, chunk). The failure is in the representation: calibration margins
   cannot recover it. On the L20 an online residual quantile given to M0 turned into a −59 ms bias
   correction and was unstable at N = 8.
@@ -414,18 +509,20 @@ pricing for admission or TTFT-aware ordering was not built or tested here.
 
 ## 11. Limitations
 
-- **Engines and models.** vLLM only (0.29.0, and 0.30.0 for one replication); Qwen3 and
-  Qwen2.5 dense models, 1.5B–8B, bf16; single GPU. No tensor parallelism, MoE, FP8 KV or
-  speculative decoding.
+- **Engines and models.** vLLM (0.29.0, and 0.30.0 for one replication) for every experiment;
+  SGLang 0.5.20 for the H100 pairing swap only. Qwen3 and Qwen2.5 dense models, 1.5B–8B, bf16;
+  single GPU. No tensor parallelism, MoE, FP8 KV, speculative decoding, H200 or Blackwell.
 - **Shape campaigns are synthetic.** They use random-token prompts, fixed decoders and prefills
   injected together, and the multi-request geometry is created with
   `--long-prefill-token-threshold`. The live traces use real lengths and arrival times but
   synthetic tokens and trace-given output lengths.
-- **The single-slope proxy is approximate.** On the A100 the cross term costs 65–89% of the
-  fitted slope (PS1 failed). The slope's scaling with layers × query heads missed at budget 1024
-  for the smallest model.
-- **Unexplained effects.** The A100 decode-KV skew (3–9%) and the vLLM 0.30 stalls are measured
-  but not explained.
+- **The single-slope proxy is approximate, and on FA3 it is the wrong shape.** On the A100 the
+  cross term costs 65–89% of the fitted slope (PS1 failed); on the H100 the ratio scatters 0.73–1.58
+  because the cost is quantized in waves (§5.1). Two proposed mechanisms (a costlier self term, an
+  LPT tile-packing model) were tested and refuted; no model here predicts the FA3 pairing Δ to
+  ±25%. The slope's scaling with layers × query heads missed at budget 1024 for the smallest model.
+- **Unexplained effects.** The decode-KV skew (3–9% on the A100, only Qwen3-4B on the H100), the
+  vLLM 0.30 stalls and the extra 256→384 step at 32k on FA3 are measured but not explained.
 - **Fixed-budget baselines are chosen in hindsight.** Each is the best for its workload.
   Practitioners do not know them in advance; that is the controller's only demonstrated
   advantage in the synthetic setting.
@@ -456,6 +553,21 @@ addendum 11.
 | Workload shift W1–W5 | **W1, W2, W4, W5 failed**; W3 held |
 | Jitter robustness; controller overhead | robust; ≤ 231 µs p99 |
 
+H100 file ([`2026-09-27-h100-hopper-replication.md`](preregistration/2026-09-27-h100-hopper-replication.md), 5 addenda):
+
+| item | outcome |
+| --- | --- |
+| Pairing swap HP1 existence / HP2 control (vLLM 4B, 8B) | held / held |
+| HP3 single slope fails as on the A100 (0.50–0.95) | **failed**: 2/5 per model, ratios on both sides of 1 |
+| HP4 split cross/self term predicts Δ ±25%, HP5 c_S/c_X > 1.2 | **HP4 failed** (4B 3/5); HP5 held at model level, refuted by the kernels |
+| Partition HG1 gap / HG2 collapse ≤ 8% / HG3 slope | held / **failed** (8B, 7B at budget 1024) / held |
+| OOD HM1–HM3 (M2n ≤ 5 ms, M0 ≥ 10×, MLP > M2n) / HM4 (M2s) | held on 4 models / **failed** on 4 |
+| Kernels HK1 swap / HK2 closure 70–130% / HK3 kernel c_S/c_X / HK4–HK5 tile model | held / held (72–102%) / **failed** / **failed** |
+| SGLang SG1–SG3 | held (2–5% of vLLM) |
+| Published predictors VL1 Vidur invariant / VL2 LLMVisor ≥ 5× M2n | held / **failed** (5 of 11) |
+| Wave staircase ST1–ST3 | held (ST3 narrowly) |
+| Request ordering O1–O5 (addenda 3, 5) | §9.1 |
+
 ## 13. Conclusion and reproduction
 
 Aggregate prefill cost models are missing one piece of information: which chunk is paired with
@@ -473,9 +585,9 @@ The contribution is the cost representation. Using it in admission or ordering i
 | section | scripts | artifacts |
 | --- | --- | --- |
 | §4 | `step_trace_join.py`, `analyze_measurement_contract.py` | `l20-prefill-cost-geometry` |
-| §5 | `measure_pairing_swap.py`, `plot_paper_figures.py` | `prefill-pairing-swap` |
-| §6 | `analyze_partition_geometry.py`, `analyze_decode_kv_skew.py` | `l20-prefill-cost-geometry`, `a100-prefill-cost-geometry`, `prefill-geometry-attention-shape`, `vllm030-replication` |
-| §7 | `analyze_step_cost_v2.py`, `analyze_m2_variants.py`, `analyze_learned_baseline.py` | same, and `prefill-geometry-learned-baseline` |
+| §5 | `measure_pairing_swap.py`, `measure_pairing_swap_sglang.py`, `measure_kernel_pairing.py`, `measure_chunk_staircase.py`, `plot_paper_figures.py` | `prefill-pairing-swap`, `h100-prefill-cost-geometry` |
+| §6 | `analyze_partition_geometry.py`, `analyze_decode_kv_skew.py` | `l20-prefill-cost-geometry`, `a100-prefill-cost-geometry`, `prefill-geometry-attention-shape`, `vllm030-replication`, `h100-prefill-cost-geometry` |
+| §7 | `analyze_step_cost_v2.py`, `analyze_m2_variants.py`, `analyze_learned_baseline.py`, `analyze_split_term.py`, `analyze_published_predictors.py` | same, `prefill-geometry-learned-baseline`, `h100-prefill-cost-geometry` |
 | §8 | `simulate_geometry_prevalence.py`, `replay_trace_serving.py`, `select_replay_windows.py` | `trace-geometry-prevalence`, `live-trace-replay` |
 | §9 | `analyze_live_controller.py`, `plot_live_pareto.py`, `analyze_trace_replay.py`, `analyze_slo_sensitivity.py`, `analyze_allocation_horizon.py` | `a100-prefill-live-controller`, `l20-prefill-live-controller-m2n`, `live-trace-replay` |
 
