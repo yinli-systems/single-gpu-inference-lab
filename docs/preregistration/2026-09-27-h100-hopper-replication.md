@@ -198,3 +198,25 @@ repeats averaged):
 - **O4.** Goodput of the best priority arm ≥ 1.05× `fcfs` on at least one Mooncake cell.
 - **O5 (descriptive).** p99 TTFT of every priority arm against `fcfs` is reported (SJF can
   starve long requests).
+
+## Addendum 4 (2026-09-27): wave staircase of a deep chunk (engine level, H100); before it runs
+
+**Post hoc observation that motivates it** (H100 Qwen3-4B pairing swap, already analyzed): the
+state-A step time is 30.9–31.2 ms for deep chunks of 640, 768 and 896 tokens at 16k (configs 2, 0,
+1). The pairing Δ does not scale with ΔW (7.5 ms at ΔW 6.3M, 7.6 ms at 9.4M, 5.3 ms at 3.1M), and
+the single-slope ratio scatters on both sides of 1 (0.76–1.58). This is what the tile-schedule
+hypothesis of addendum 1 implies: a query tile of a request at depth K is one CTA per query head
+whose length grows with K, and a chunk of q tokens launches ceil(q/128) × 32 of them on 132 SMs.
+
+**Test** (`scripts/measure_chunk_staircase.py`; vLLM 0.29 FA3, Qwen3-4B, one decode row, one
+prefill of q tokens at cached depth K, q ∈ {128, 256, …, 1280}, 20 trials per q in shuffled
+rounds). Depths K = 16384 and 32768 (long CTAs), and K = 4096 as control. Predicted with
+B_q = 128, 32 query heads, 132 SMs: 1 wave of deep CTAs up to q = 512, 2 waves for 640–1024,
+3 waves from 1152.
+- **ST1.** At K = 16384 and at K = 32768, the increments 512→640 and 1024→1152 are each ≥ 3× the
+  median of the other seven increments.
+- **ST2.** At K = 16384 and at K = 32768, the total rise over the plateau 640→1024 is smaller than
+  the single jump 512→640.
+- **ST3 (control).** At K = 4096 no increment is ≥ 3× the median of the others.
+If the staircase sits elsewhere (e.g. because FA3 packs GQA heads or uses a different B_q), ST1
+fails as registered; the observed positions are then reported as exploratory.
