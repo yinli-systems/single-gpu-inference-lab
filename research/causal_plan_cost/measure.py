@@ -68,6 +68,8 @@ def main():
             rec=dict(shape=shape.record(),hq=hq,hkv=hkv,sms=sms,policy=policy,
                      gpu=hw.name,replicate=a.replicate,status='starting')
             try:
+                if policy != "auto" and auto_output is None:
+                    raise RuntimeError("stock auto correctness reference unavailable")
                 workspace=torch.empty(128*1024*1024,device='cuda',dtype=torch.uint8)
                 w=flashinfer.BatchPrefillWithRaggedKVCacheWrapper(workspace,kv_layout='NHD',backend='fa2')
                 opts=dict(causal=True,q_data_type=torch.float16,kv_data_type=torch.float16)
@@ -113,6 +115,7 @@ def main():
                     tick=time.perf_counter();do_plan();torch.cuda.synchronize()
                     plan_ms.append((time.perf_counter()-tick)*1000)
                 rec['plan_wall_ms']=plan_ms
+                rec['cycle_wall_ms']=[]
                 rec['cuda_ms']=[];rec['status']='ready';wrappers[policy]=w
             except Exception as exc:
                 rec.update(status='error',error=type(exc).__name__+': '+str(exc)[:1500])
@@ -130,10 +133,23 @@ def main():
                 end.record();end.synchronize()
                 values[mode].append(beg.elapsed_time(end)/a.inner)
             for mode,xs in values.items():permode[mode]['cuda_ms'].append(statistics.mean(xs))
+        # Complete public-API cycles include actual planning and dispatch overhead.
+        for block in range(3):
+            order=list(wrappers);random.Random(f'cycle:{seed}:{shape.name}:{hq}:{block}').shuffle(order)
+            for mode in order+order[::-1]:
+                w=wrappers[mode]
+                opts=dict(causal=True,q_data_type=torch.float16,kv_data_type=torch.float16)
+                if mode=='none':opts['disable_split_kv']=True
+                elif mode!='auto':opts['fixed_split_size']=int(mode[1:])
+                torch.cuda.synchronize();tick=time.perf_counter()
+                w.plan(qptr,kptr,hq,hkv,128,**opts)
+                w.run(q,k,v,out=out);torch.cuda.synchronize()
+                permode[mode]['cycle_wall_ms'].append((time.perf_counter()-tick)*1000)
         for mode,rec in permode.items():
             if rec['status']=='ready':
                 rec.update(status='complete',median_ms=statistics.median(rec['cuda_ms']),
-                           mean_plan_ms=statistics.mean(rec['plan_wall_ms']))
+                           mean_plan_ms=statistics.mean(rec['plan_wall_ms']),
+                           median_cycle_ms=statistics.median(rec['cycle_wall_ms']))
             records.append(rec)
             with (a.out/'measurements.jsonl').open('a') as f:f.write(json.dumps(rec)+'\n')
         print('CASE',shape.name,hq,{m:round(r.get('median_ms',-1),5) for m,r in permode.items()},flush=True)
