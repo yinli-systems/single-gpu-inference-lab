@@ -59,10 +59,43 @@ def build_prompts(reqs, vocab: int, seed: int):
     return out
 
 
-async def one(session, url, model, ids, max_tokens, delay, t_start, rec):
+def cached_depths(reqs):
+    """Prefix-cache hit depth each request would see if nothing were evicted: the leading run of its
+    512-token blocks already sent by an earlier arrival, capped at prompt - 1 (vLLM always computes the
+    last prompt token). Traces without block hashes have depth 0."""
+    seen, out = set(), []
+    for _, p, _, hashes in reqs:
+        if hashes is None:
+            out.append(0); continue
+        n = 0
+        for h in hashes:
+            if h not in seen:
+                break
+            n += 1
+        out.append(min(n * BLOCK, p - 1))
+        seen.update(hashes)
+    return out
+
+
+def priorities(reqs, policy, coef):
+    """Client-side priority for vLLM --scheduling-policy priority (lower runs first; ties by arrival).
+    prompt: prompt tokens. uncached: tokens left after the cached prefix. cost: the geometry price of
+    the uncached part at its cached depth k0, a * L + b * (L * k0 + L (L + 1) / 2), in microseconds."""
+    a, b = coef
+    out = []
+    for (_, p, _, _), k0 in zip(reqs, cached_depths(reqs)):
+        L = p - k0
+        out.append({"prompt": p, "uncached": L,
+                    "cost": round(1000 * (a * L / 1e3 + b * (L * k0 + L * (L + 1) / 2) / 1e6))}[policy])
+    return out
+
+
+async def one(session, url, model, ids, max_tokens, delay, t_start, rec, priority=None):
     await asyncio.sleep(max(0.0, t_start + delay - time.perf_counter()))
     payload = {"model": model, "token_ids": ids, "stream": True,
                "sampling_params": {"max_tokens": max_tokens, "ignore_eos": True, "temperature": 0.0}}
+    if priority is not None:
+        payload["priority"] = priority
     t0 = time.perf_counter(); first = None; n = 0
     try:
         async with session.post(url, json=payload) as resp:
@@ -86,14 +119,18 @@ async def one(session, url, model, ids, max_tokens, delay, t_start, rec):
                tpot_s=(end - first) / (n - 1) if first and n > 1 else None)
 
 
-async def replay(base_url, model, reqs, prompts, t_zero_lag):
+async def replay(base_url, model, reqs, prompts, t_zero_lag, prio=None):
     import aiohttp
     url = f"{base_url}/inference/v1/generate"
     recs = [{"i": i, "arrival_s": r[0], "prompt_tokens": r[1], "max_tokens": r[2]} for i, r in enumerate(reqs)]
+    if prio is not None:
+        for rec, p in zip(recs, prio):
+            rec["priority"] = p
     timeout = aiohttp.ClientTimeout(total=None, sock_read=3600)
     async with aiohttp.ClientSession(timeout=timeout, connector=aiohttp.TCPConnector(limit=0)) as s:
         t_start = time.perf_counter() + t_zero_lag
-        await asyncio.gather(*(one(s, url, model, prompts[i], r[2], r[0], t_start, recs[i]) for i, r in enumerate(reqs)))
+        await asyncio.gather(*(one(s, url, model, prompts[i], r[2], r[0], t_start, recs[i], None if prio is None else prio[i])
+                               for i, r in enumerate(reqs)))
     return recs
 
 
@@ -131,6 +168,9 @@ def main():
     ap.add_argument("--jitter-seed", type=int, default=0, help="seed of the within-slot arrival spread (@JITTER traces)")
     ap.add_argument("--trace-dir", type=Path)
     ap.add_argument("--output", type=Path, required=True)
+    ap.add_argument("--priority", choices=["none", "prompt", "uncached", "cost"], default="none",
+                    help="client-side request priority; anything but none also starts vLLM with --scheduling-policy priority")
+    ap.add_argument("--cost-coef", default="0,0", help="a,b for --priority cost: ms per 1k tokens, ms per million attention work")
     args = ap.parse_args()
 
     phase_of, phase_bounds = [], []
@@ -160,6 +200,10 @@ def main():
         flags += ["--long-prefill-token-threshold", str(args.long_prefill_token_threshold)]
     if args.no_prefix_caching:
         flags += ["--no-enable-prefix-caching"]
+    prio = None
+    if args.priority != "none":
+        flags += ["--scheduling-policy", "priority"]
+        prio = priorities(reqs, args.priority, tuple(float(x) for x in args.cost_coef.split(",")))
     if args.trace_dir:
         args.trace_dir.mkdir(parents=True, exist_ok=True)
         flags.append("--enable-logging-iteration-details")
@@ -174,9 +218,11 @@ def main():
         report["command"] = server.cmd
         warm = [(0.0, 256, 8, None)] * 2   # compile / warm-up, not measured
         asyncio.run(replay(server.base_url, args.served_model_name, warm, build_prompts(warm, args.vocab_size, args.seed + 1), 0.1))
-        recs = asyncio.run(replay(server.base_url, args.served_model_name, reqs, prompts, 1.0))
+        recs = asyncio.run(replay(server.base_url, args.served_model_name, reqs, prompts, 1.0, prio))
     for r, ph in zip(recs, phase_of):
         r["phase"] = ph
+    for r, k0 in zip(recs, cached_depths(reqs)):
+        r["cached_depth_est"] = k0
     report["requests"] = recs
     report["summary"] = summarize(recs, args.window_s)
     if phase_bounds:

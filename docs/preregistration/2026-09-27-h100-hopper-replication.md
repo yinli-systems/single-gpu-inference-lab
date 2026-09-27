@@ -161,3 +161,40 @@ decode rows, so its pair step is the two prefills alone.
 - **VL2.** The LLMVisor formula, fitted by least squares on the primary-split training steps, has
   primary-split MAE ≥ 5× the M2n MAE on every dataset with shape cells (L20, A100, H100). The
   L20 and A100 values are computed after this addendum is committed.
+
+## Addendum 3 (2026-09-27): request ordering with geometry pricing (live, H100); before any run
+
+The report's negative result says per-step budgeting cannot change total work and that TTFT +
+TPOT goodput is set by admission and ordering. This tests ordering directly, using vLLM 0.29's
+own `--scheduling-policy priority` and a client-side priority (`scripts/replay_trace_serving.py
+--priority`); no engine change.
+
+**Arms** (H100, Qwen3-4B, vLLM 0.29.0, prefix caching on, MBT 2048, `max-num-seqs` 256, 240 s window):
+- `fcfs`: default policy.
+- `prompt`: priority = prompt tokens (cache-unaware SJF).
+- `uncached`: priority = prompt tokens minus the estimated prefix-cache depth k₀ (cache-aware SJF).
+- `cost`: priority = a·L + b·(L·k₀ + L(L+1)/2) with L = uncached tokens: the geometry price of the
+  remaining prefill at its cached depth. (a, b) = OLS of step `cuda_ms` on (ctx_tokens/1e3, W/1e6)
+  over the H100 Qwen3-4B one-prefill shape steps (filtered), fixed before the first run.
+- k₀ is estimated client-side as the leading run of 512-token blocks already sent by an earlier
+  arrival (no eviction model).
+
+**Cells:** Mooncake tool-agent (@3 s jitter, seed 0) at rate scale 0.2 and 0.4, 2 repeats each;
+Azure 2023 code at rate scale 0.5 (no shared prefixes, so k₀ = 0 and `uncached` = `prompt`),
+1 repeat. Order of arms is rotated per repeat.
+
+**Offline, before any run:** on the Mooncake windows, `cost` and `uncached` orders are discordant
+on only 4.4–4.6% of pairs of requests arriving within 5 s (Kendall τ 0.91–0.92), while `prompt`
+vs `cost` has τ 0.64. The geometry term therefore changes few ordering decisions beyond
+cache-awareness.
+
+**Predictions** (goodput = requests with TTFT ≤ 5 s and TPOT ≤ 100 ms per second of window;
+repeats averaged):
+- **O1.** On both Mooncake cells, `uncached` and `cost` each have mean TTFT ≤ 0.8× `fcfs`.
+- **O2.** On both Mooncake cells, `cost` mean TTFT is within ±5% of `uncached` (geometry adds
+  little to ordering beyond cache-awareness, as the offline discordance suggests).
+- **O3.** On both Mooncake cells, `prompt` mean TTFT is higher than `uncached` (cache-unaware
+  ordering is worse).
+- **O4.** Goodput of the best priority arm ≥ 1.05× `fcfs` on at least one Mooncake cell.
+- **O5 (descriptive).** p99 TTFT of every priority arm against `fcfs` is reported (SJF can
+  starve long requests).
