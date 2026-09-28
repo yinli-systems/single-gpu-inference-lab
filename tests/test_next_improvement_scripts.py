@@ -63,7 +63,7 @@ def test_next_improvement_doc_tracks_all_five_workstreams():
 
 def test_top_tier_gap_doc_tracks_profiling_cuda_and_upstream():
     doc = Path("docs/l20-top-tier-kernel-gaps.md").read_text()
-    readme = Path("README.md").read_text()
+    readme = Path("RESEARCH.md").read_text()
     assert "Complete Profiling Package" in doc
     assert "Nsight Systems timeline" in doc
     assert "Nsight Compute roofline" in doc
@@ -197,7 +197,7 @@ def test_flashinfer_sparse_ab_runner_supports_logprobs_workload():
 def test_top_logprobs_benchmark_tracks_fused_logprob_boundary():
     source = Path("scripts/benchmark_l20_top_logprobs.py").read_text()
     ops = Path("src/l20_stack/ops/triton_sampling.py").read_text()
-    readme = Path("README.md").read_text()
+    readme = Path("RESEARCH.md").read_text()
     status = Path("docs/experiment-status.md").read_text()
     results_index = Path("benchmarks/results/README.md").read_text()
     artifact = Path("benchmarks/results/a100-fused-top-logprobs/README.md").read_text()
@@ -230,7 +230,7 @@ def test_serving_optimization_ceiling_tracks_next_target():
         "scripts/summarize_l20_logits_boundary_campaign.py"
     ).read_text()
     topk_topp_bench = Path("scripts/benchmark_l20_topk_topp_sampling.py").read_text()
-    readme = Path("README.md").read_text()
+    readme = Path("RESEARCH.md").read_text()
     doc = Path("docs/l20-next-improvements.md").read_text()
     research = Path("docs/l20-operator-research.md").read_text()
     report = Path("benchmarks/results/l20-serving-optimization-ceiling/README.md").read_text()

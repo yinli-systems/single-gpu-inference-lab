@@ -8,6 +8,7 @@ PUBLIC_DOCS = [
     Path("docs/experiment-status.md"),
     Path("docs/logits-boundary-rfc.md"),
     Path("README.md"),
+    Path("RESEARCH.md"),
     Path("benchmarks/results/README.md"),
 ]
 
@@ -32,7 +33,7 @@ def test_public_summaries_link_the_ab_plan_once():
         "[`docs/logits-boundary-ab.md`](docs/logits-boundary-ab.md) |"
     )
     summary_link = "[`docs/logits-boundary-ab.md`](logits-boundary-ab.md)"
-    assert read(Path("README.md")).count(readme_link) == 1
+    assert read(Path("RESEARCH.md")).count(readme_link) == 1
     assert read(Path("docs/where-optimizations-stop-mattering.md")).count(
         summary_link
     ) == 1

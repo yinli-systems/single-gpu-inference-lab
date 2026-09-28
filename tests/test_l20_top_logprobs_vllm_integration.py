@@ -117,7 +117,7 @@ def test_l20_top_logprobs_helper_is_guarded_and_vllm_shaped():
 
 def test_a100_top_logprobs_ab_runner_targets_real_logprobs_workload():
     source = Path("scripts/run_vllm_a100_top_logprobs_ab.sh").read_text()
-    readme = Path("README.md").read_text()
+    readme = Path("RESEARCH.md").read_text()
     status = Path("docs/experiment-status.md").read_text()
     results = Path("benchmarks/results/README.md").read_text()
     smoke = Path(
