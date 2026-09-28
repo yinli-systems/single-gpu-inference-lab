@@ -1,0 +1,52 @@
+{
+  "project": "yinli-systems/single-gpu-inference-lab",
+  "branch": "research/causal-plan-cost-20260928",
+  "captured_utc": "2026-09-28T07:04:34Z",
+  "captured_dubai": "2026-09-28T11:04:34+04:00",
+  "collector_finished_utc": "2026-09-28T07:04:34Z",
+  "collector_process_id": 14955,
+  "collector_exit_code": 0,
+  "collector_runtime_seconds": 486.30,
+  "queue_returncode": 0,
+  "queue": "1634020|PENDING|0:00|(Priority)\n1634042_[0-5%3]|PENDING|0:00|(Dependency)\n",
+  "queue_error": "",
+  "accounting_returncode": 0,
+  "accounting": "1634020|PENDING|0:0|0\n1634042_[0-5%3]|PENDING|0:0|0\n",
+  "complete_markers": [],
+  "new_GPU_jobs_submitted_this_continuation": 0,
+  "jobs_cancelled_this_continuation": 0,
+  "measurement_sources_modified": false,
+  "performance_result_exists": false,
+  "full_model_metrics": {
+    "throughput": null,
+    "TTFT": null,
+    "TPOT": null,
+    "tail_latency": null,
+    "SLO_goodput": null,
+    "greedy_output_parity": null
+  },
+  "status_interpretation": "Real external scheduler allocation bottleneck. Qualification is pending for priority; the formal matrix is pending on its existing dependency. Pending accounting 0:0 is NOT a successful model run. The read-only collector finished; the queued Slurm jobs remain untouched.",
+  "tests": {
+    "previous_CPU_tests": 26,
+    "new_observation_contract_tests": 26,
+    "new_whole_job_tests": 10,
+    "combined_ParaCloud_CPU_tests_passed": 62,
+    "combined_test_runtime_seconds": 0.361,
+    "test_log_sha256": "ee637e4da557362119beb24ce2d0628815b31fe3670d23274179f24e1d073ab3",
+    "synthetic_test_fixtures_are_not_inference_results": true
+  },
+  "source_sha256": {
+    "audit_observations.py": "c379e14b2887d1552155b31bb29f74ff6f79cfe2d261cbe5495881733c0a1eea",
+    "test_audit_observations.py": "88cab328f123dcece43c3733de52e3f4d6b4e7a739a2c7dfb11a0e83badb05d3",
+    "test_audit_job.py": "aaef424a7eb8780261cb8bf2266ec1174179df8dbda8f0ea2e3f45230237a910"
+  },
+  "measurement_commit": "7b480e2905456aafce3ef99cb5a6110162270ef5",
+  "audit_implementation_commit": "19c4c254182a5f8a1ca6cf932fe0389d85b90896",
+  "audit_tests_commits": ["90b95fe65d4aa2256874e6474e3121fed9189945", "a3d94d417ca9034e7dbf2847b53c4c347edd19cd"],
+  "audit_report_commit": "b93e6f30174e6d8d0308cb55ce73f1032b9fb60a",
+  "remote_campaign": "/ssd/scxi253/single-gpu-inference-plan-cost-20260928/campaigns/full-engine-v2",
+  "remote_independent_audit": "/ssd/scxi253/single-gpu-inference-plan-cost-20260928/artifacts/full-engine-observation-audit-90b95fe",
+  "remote_final_collection": "/ssd/scxi253/single-gpu-inference-plan-cost-20260928/artifacts/full-engine-observation-audit-90b95fe/collection_final.json",
+  "minimum_resume": "Read existing jobs 1634020 and 1634042 and their actual receipts. Do not resubmit. Audit completed three-arm outputs and exact greedy-token parity before any performance promotion. Preserve failure logs and dependent cancellation if qualification fails.",
+  "prior_claim_boundaries_preserved": ["660d128 unamortized dispatcher not promoted", "attention-stack positive scope remains RTX4090/512MiB only", "no operator-to-full-model speedup projection", "no academic-award or global-novelty guarantee"]
+}
