@@ -1,0 +1,11 @@
+# Independent full-engine audit coordination — 2026-09-28 06:44 UTC
+
+This audit session independently recovered job1632883 (FAILED1:0, missingcurand.h) and verified the576paged/128FP32 checks. It prepared dependency-only scripts through commit1a714c5, but has NOT submitted any new GPU job.
+
+We then discovered a concurrently active full_engine_v2 execution effort (protocolde8be3da801381786029f328a1d341ecd7b1426e) on the same research branch. Its buffered timing and full-workload warmup address genuine weaknesses in the previous screen. To avoid duplicate experiments, this audit session will NOT launch run_engine_resumed.sbatch or create a competing GPU campaign. The prepared archive is only source, not an executed result. The three-order dependency-only plan is superseded for performance claims by the full_engine_v2 six-permutation protocol, before new timing is opened.
+
+This session focuses on independent source/contract review, recomputing request metrics from raw token timestamps, exact output equality, resource and workload identity, complete-matrix checks, and independent job-paired uncertainty. No test-set or performance-driven tuning. The active full_engine_v2 runner remains the execution owner; healthy jobs must remain untouched. Main and unrelated worktrees must be preserved.
+
+Acceptance checks for this audit: every planned request is present exactly once; cumulative tokens never shrink or change prefix; final lengths equal planned lengths; admission is no earlier than offered arrival; timestamps are ordered and bounded by the actual experiment; emitted tokens are not counted as independent experimental repetitions; all three arms use the same numerical prompts/model/config/capacity and unchanged frozen policy weights. Cold JIT/model setup and complete-workload warmup must be separately recorded, not charged only to the first method. No per-step disk writes inside the timed interval.
+
+For full_engine_v2 confirmation, preserve its six process-order triplets, both workloads, nominal20000 bootstrap seed20260928, exact-output gate and SLO thresholds. Failures or missing cells cannot be silently excluded. Do not reinterpret in-process engine measurements as HTTP serving. Audit of profiler-free raw output and fresh CPU tests is independent work, not a claim that this session submitted the discovered GPU jobs.
