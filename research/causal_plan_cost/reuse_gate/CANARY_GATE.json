@@ -1,0 +1,20 @@
+{
+  "status": "correctness_screen_passed_not_performance_promotion",
+  "measurement_commit": "ddfd23a9e3aa5661457f2c4626b7d9e899042963",
+  "source_sha256": {"contracts.py":"079765f94363d49e4d0ae2e03e049d3ce0aea351c9f51376d80dc70c34d7bd66","measure_reuse.py":"c509a3309d8d974f4b5e63a899d20fcad32e563ed9377efa8dc242184dab2bf5"},
+  "corpus_sha256": "fe9181cfd74609c0e98c5570a3ef8dc68ec538f817d30114d8a116d915241869",
+  "fresh_design": {"families":9,"base_geometries":18,"states_per_base":3,"all_exact_geometries":54,"heads":[32,8],"layers_per_segment":[1,2,4,8,16,36],"segments_per_episode":4,"sequences":["unchanged","alternating","eviction"],"scratch_MiB":[128,512]},
+  "canaries": [
+    {"job":"1632714","GPU":"RTX4090","rows":32,"complete":true,"correctness_pass":true,"seconds_inside_runner":180.1401284597814,"raw_sha256":"58025a3d58d0c7397c2cf07fa59ca82b6c79a665f12278c5cfa149120371c0e7"},
+    {"job":"1632715","GPU":"RTX5090","rows":32,"complete":true,"correctness_pass":true,"seconds_inside_runner":152.6982723493129,"raw_sha256":"a58b06952720ab89bbbdcbff9fabab8a679d9428af60da2ceb22f153c899518a"}
+  ],
+  "canary_scope": "Four training/discovery base shapes only; 1/36 layers per segment, unchanged and eviction sequences, both memory ceilings. No fresh-test outcome used.",
+  "mixed_canary_results_retained": "128MiB often collapses arms to identical feasible plans. At512MiB, one4090 training case has about1.11x fixed/native_cycle ratio at36 layers, and one5090 training case about1.10x unchanged/about1.08x eviction. Other cases tie or regress. Those are not heldout results and not universal gains.",
+  "CPU_contract_tests_passed":20,
+  "fresh_metadata_parity": {"models":4,"geometries_per_model":54,"choices_identical":216,"max_feature_error":0.0,"max_prediction_error":1.3100631690576847e-14,"timing_labels_read":false,"artifact_sha256":"08df28b233846438f7d050b31714074bd1a99c5cd1360e6bd9eb7414a9027cda"},
+  "full_test_plan": "Unchanged measurement source and frozen model weights. Three process/seed repeats per GPU; bounded parallel array. Primary endpoint36-layer native_cycle versus TRAIN-budget fixed with equal plan and cache reuse. Check stock auto separately; report all regressions. No official autotuner result is claimed for this unregistered0.6.18 FA2 surface.",
+  "baseline_selection_caveat": "Budget/head/reuse fixed options are selected from TRAIN-only prior policy measurements using cycle+(r-1)*CUDA-run as a training proxy. This proxy is not reported as direct reuse performance; every arm is scored on fresh direct wall-clock episodes.",
+  "boundary": "Attention-stack replay has36 distinct layer tensors but no model weights/MLPs/network/scheduler; it is NOT full-model serving. Four identical-geometry segments permit144 attention calls per plan at36 layers, while changed-geometry sequences require replanning per segment. All arms get identical opportunities.",
+  "previous_unamortized_dispatch_verdict": "NOT_PROMOTED",
+  "safety": "Current two submissions succeeded through the normal Remote Desktop Commander terminal action; no alternate launcher or approval setting was used. Existing unrelated jobs were left unchanged. This does not erase prior safety refusals."
+}
