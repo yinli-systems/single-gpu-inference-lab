@@ -1,213 +1,81 @@
 # Single-GPU Inference Lab
 
+**LLM inference systems research, from request scheduling to GPU execution.**
+
 [![CI](https://github.com/yinli-systems/single-gpu-inference-lab/actions/workflows/ci.yml/badge.svg)](https://github.com/yinli-systems/single-gpu-inference-lab/actions/workflows/ci.yml)
 
-Falsifiable systems results on LLM inference, measured end to end with vLLM on an
-NVIDIA L20 and A100s (plus 2× RTX 4090 for multi-GPU synchronization), from the API
-server through the scheduler to the GPU and the KV memory hierarchy. Every claim links to a checked-in artifact with raw data,
-exact commands, provenance hashes and the negative results that bound it.
+[Technical report](docs/when-token-budgets-lie.md) · [Results](benchmarks/results/README.md) · [Research record](RESEARCH.md) · [Reviewer guide](docs/reviewer-guide.md)
 
-The question the lab keeps asking has moved outward over time:
+I investigate where inference time is spent, build the smallest change that addresses
+the measured bottleneck, and test it against the unmodified runtime. The evidence
+covers NVIDIA L20 and A100 systems, with a separate 2× RTX 4090 DP/EP track.
 
-> Where does inference performance actually come from once the framework,
-> the scheduler, CUDA graphs and production baselines are included — and
-> which plausible optimizations survive a pre-registered kill gate?
+## Selected results
 
-**Start here:** [When Token Budgets Lie](docs/when-token-budgets-lie.md) (technical report) ·
-[result index](benchmarks/results/README.md) ·
-[experiment status ledger](docs/experiment-status.md) ·
-[reviewer guide](docs/reviewer-guide.md) ·
-[repository map](docs/repo-map.md)
+| Work | Finding | Evidence and boundary |
+|---|---|---|
+| **Prefill cost geometry** | Swapping request-level chunk/KV pairings while preserving aggregate state changes measured step time by **7–55 ms**. Aggregate token counts alone cannot identify that cost. | [Report](docs/when-token-budgets-lie.md) · [pairing-swap experiments](benchmarks/results/prefill-pairing-swap/README.md). Dense Qwen models on the recorded hardware; not a universal latency law. |
+| **Sampled-token logprob transport** | On the measured L20/Qwen2.5-0.5B workloads, a flat-output path restores throughput from **0.67× to 0.95–0.96×** of the no-logprobs baseline. | [Serving A/B and exactness checks](benchmarks/results/l20-flat-token-logprobs/README.md) · [vLLM #57442](https://github.com/vllm-project/vllm/pull/57442), **open**. These are workload-specific serving measurements. |
+| **When better prediction does not help** | The geometry-aware cost model improves step pricing, but the tested controller does **not** improve real-trace TTFT/TPOT SLO goodput. | [Live trace replay](benchmarks/results/live-trace-replay/README.md). The negative queue-level result is retained alongside the positive cost-model result. |
 
-## Flagship: request geometry in chunked-prefill cost models
+The implementation, raw measurements, commands, environment records, and failed
+hypotheses are linked from each result. The [expanded research record](RESEARCH.md)
+contains the remaining kernel, beam-search, KV-prefetch, and multi-GPU studies.
 
-**Question.** Chunked-prefill schedulers price an iteration from an aggregate state: decode
-batch, total prefill tokens, aggregate KV. When several partial prefills share one iteration,
-is that state enough to determine what the iteration costs?
+## Upstream work
 
-**Answer.** No. The missing variable is the request-level pairing of chunk size and KV depth.
-Attention work is W = Σᵢ qᵢkᵢ + Σᵢ qᵢ(qᵢ+1)/2. An aggregate state sees (Σq)(Σk), which fixes
-Σᵢ qᵢkᵢ only up to n·Cov(q, k). The table below is the result, pre-registered where marked, with
-the predictions that failed recorded next to the ones that held
-([pre-registration](docs/preregistration/2026-09-23-m2-without-aggregate-prefill-kv.md), report
-[When Token Budgets Lie](docs/when-token-budgets-lie.md)).
+| Change | Status at the 2026-09-28 review | Entry point |
+|---|---|---|
+| Sampled-token logprob fast path | Open PR; measured local serving result, not a merged feature | [vLLM #57442](https://github.com/vllm-project/vllm/pull/57442) |
+| Integer token IDs for generate logprobs | Open PR; protocol/correctness change, not a speed claim | [vLLM #58181](https://github.com/vllm-project/vllm/pull/58181) |
+| Request-free CPU→GPU KV prefetch | Open PR; reserve-gated execution primitive, not a universal admission policy | [vLLM #58198](https://github.com/vllm-project/vllm/pull/58198) |
 
-| # | Finding | Key numbers | Evidence |
-| --- | --- | --- | --- |
-| 1 | **The same aggregate state hides large cost differences.** Swapping only which chunk goes with which depth changes the step time; every count, sum and multiset is identical. | **7–55 ms** per step. Any aggregate-state predictor has an error floor of \|Δ\|/2. On the A100 the magnitude is 0.65–0.89× the single-slope prediction (pre-registered PS1 failed there). | [`prefill-pairing-swap/`](benchmarks/results/prefill-pairing-swap/README.md) |
-| 2 | **The physical q–KV term generalizes.** | Same-aggregate partitions differ up to **2.02×**. One slope per (GPU, attention shape) across 4 models, 2 GPUs and 2 vLLM releases. The pre-registered **M2n** predicts unseen geometry at **1.2–3.1 ms** MAE on vLLM 0.29 (6.3 ms on 0.30, where mid-run stalls inflate every model), against 56–347 ms for the aggregate model. | [`l20-prefill-cost-geometry/`](benchmarks/results/l20-prefill-cost-geometry/README.md), [`a100-prefill-cost-geometry/`](benchmarks/results/a100-prefill-cost-geometry/README.md), [`prefill-geometry-attention-shape/`](benchmarks/results/prefill-geometry-attention-shape/README.md), [`vllm030-replication/`](benchmarks/results/vllm030-replication/README.md) |
-| 3 | **A learned aggregate predictor cannot recover it.** | An LPRS-style MLP on 16 aggregate features: **40–232 ms** OOD. M2n reaches ≤ 5 ms from **64** samples; the MLP and M0 never do. | [`prefill-geometry-learned-baseline/`](benchmarks/results/prefill-geometry-learned-baseline/README.md) |
-| 4 | **It occurs in real code and agent traffic, not in short chat.** | Share of prefill steps mispriced by > 5 ms, live: Azure code **12–18%**, Mooncake tool-agent **4–9%**, BurstGPT **≤ 0.1%**. The simulator matches live within a few points. | [`live-trace-replay/`](benchmarks/results/live-trace-replay/README.md), [`trace-geometry-prevalence/`](benchmarks/results/trace-geometry-prevalence/README.md) |
-| 5 | **Better pricing alone does not make a better queue-level scheduler.** | On synthetic bursts, the same deadline controller with M2n gives **1.6–4.8×** M0's safe prefill throughput, near the best fixed budget chosen in hindsight. On real traces, per-step deadline control does **not** raise TTFT + TPOT goodput. A fixed 1024 budget is best in every phase of a workload shift, and P-PAS is within 5%. M2n ≥ M0 in every controller comparison. | [`a100-prefill-live-controller/`](benchmarks/results/a100-prefill-live-controller/README.md), [`l20-prefill-live-controller-m2n/`](benchmarks/results/l20-prefill-live-controller-m2n/README.md), [`live-trace-replay/`](benchmarks/results/live-trace-replay/README.md) |
-
-**How it relates to adaptive chunked-prefill scheduling.** The work is complementary, not
-competing:
-- *Deadline-aware chunk selection* (SLOWeave-style) decides how much prefill fits in a step. This
-  work is about the cost function that decision assumes.
-- *P-PAS* adapts the budget to pressure (prefill and decode counts). Two states with the same
-  counts can differ in cost. P-PAS is used here as a baseline, not a target.
-- *Learned latency predictors* (LPRS-style) map aggregate features to latency. Finding 3 shows
-  that some of those maps are not identifiable from those features.
-
-**Not claimed.**
-- A new scheduler (finding 5 is a negative result).
-- Hopper / FlashAttention-3: only Ampere and Ada with FA2 were tested.
-- Models other than dense Qwen 1.5–8B.
-- A mechanism for the A100 decode-KV-skew effect, which is measured but unexplained.
-
-## Research lines (2026-09)
-
-| Line | Question | Result | Evidence |
-| --- | --- | --- | --- |
-| **A · RL rollout data path** | Why does asking vLLM for one logprob per token cost 30% of throughput, and where does the cost sit? | Located layer by layer: not the kernels, not detokenization, but per-request `LogprobsLists` slicing → IPC → output processor → Pydantic objects. An exact flat `token_logprobs` fast path restores **0.67× → 0.95–0.96×** of native on Qwen2.5-0.5B and **0.99×** on Qwen3-4B; max abs diff vs the object path 0.0. Upstream: [vllm-project/vllm#57442](https://github.com/vllm-project/vllm/pull/57442). | [`l20-flat-token-logprobs/`](benchmarks/results/l20-flat-token-logprobs/README.md), [`l20-logprob-engine-decomposition/`](benchmarks/results/l20-logprob-engine-decomposition/README.md), [`l20-vllm-sampling-mask-ab/`](benchmarks/results/l20-vllm-sampling-mask-ab/README.md) (independent replication of [#54901](https://github.com/vllm-project/vllm/pull/54901)) |
-| **B · Prefill cost geometry** | Is the aggregate coordinate used by deadline-aware chunked-prefill schedulers (decode batch, aggregate KV, prefill tokens) sufficient on a real engine? | Not sufficient: the same aggregate state hides 7–55 ms differences, because the missing variable is request-level chunk–KV pairing. A physical per-request attention-work term generalizes across GPUs, models and vLLM releases (pre-registered M2n); a learned aggregate MLP does not. The mispriced geometry is common in live code and agent traffic and rare in short chat. A per-step deadline controller using it does not raise real-trace SLO goodput (negative result). See [Flagship](#flagship-request-geometry-in-chunked-prefill-cost-models). | Δ |
-| **C · Heterogeneous pre-draft K** (speculative decoding) | Does choosing K per request *before* drafting recover draft work that adaptive verification only trims afterwards? | **Killed.** The DSpark draft pass is per-row-fixed (K=2→7 costs +5–20%), DSpark blocks are not prefix-invariant (small K loses 14–16% of positions), and the composed oracle is 0.94–1.00× of shipped adaptive verification. | [`l20-spec-decode-geometry/`](benchmarks/results/l20-spec-decode-geometry/README.md) (merged in #13) |
-| **D · Adaptive-verification cost profile** | Does the startup-static synthetic cost profile mis-price real context, and does that change the verification budget? | **Killed.** The profile is wrong by +6…+55 ms per step (2.3× at 6k context, even with a matched profile context), but the ratio-argmax budget is insensitive: one-tier shift for low-acceptance content only, hindsight regret 0–3%. A cost model can be wrong by 2× and the controller still nearly regret-free. | [`l20-adaptive-verification-profile/`](benchmarks/results/l20-adaptive-verification-profile/README.md) (merged in #13) |
-| **E · Request-free KV prefetch for paused agent sessions** | How much of an agent's resume latency is the CPU→GPU KV reload, can it be hidden during the tool wait, and what does that cost the rest of the engine? | Oracle prefetch cuts resume TTFT **−52…−58%** for 4k–16k prefixes (load 6.4 µs/token; the useful lead is exactly the load time). Timing predictors are fragile under lognormal tool waits — *prefetch immediately* recovers 95–100% of the oracle. Under sustained occupancy every admission policy, even oracle-ordered, is worse than reactive (+10…+57%): prefetch pays only into slack, so the right gate is `free_blocks − reserve ≥ session_blocks`, not a utility ranking. | [`l20-kv-prefetch-oracle/`](benchmarks/results/l20-kv-prefetch-oracle/README.md) (merged in #14); upstream primitive in [`upstream/vllm-kv-request-free-prefetch/`](upstream/vllm-kv-request-free-prefetch/) |
-| **F · Multi-GPU DP/EP synchronization** (2× RTX 4090) | When data-parallel ranks rendezvous every step (DP coordination, per-layer expert-parallel collectives), which per-rank costs leak to the other rank? | Four pre-registered screens. **Killed:** cross-rank CUDA-graph padding amplification (graph-vs-eager oracle gain 0.0%), spec-decode acceptance skew (ITL ×1.02 — equal step periods, nothing to drag), and logprobs / structured output contagion (≤2%). **Measured:** bulk KV offload traffic hurts the peer rank only through host topology (cross-socket pair + far-socket buffer ×1.45–1.48 peer ITL; same socket ×1.03–1.13); vLLM's CPU offload connector puts the storing rank into a sustained CPU-side slow state that lockstep exports to the peer (store-cell p95 ×1.72, 5 repeats) — core reservation removes the sustained state but leaves ×1.2, so the mechanism is still open. | [`dp-ep-g1-padding/`](benchmarks/results/dp-ep-g1-padding/README.md), [`dp-ep-c21-contagion/`](benchmarks/results/dp-ep-c21-contagion/README.md), [`dp-ep-c26-pcie/`](benchmarks/results/dp-ep-c26-pcie/README.md), [`dp-ep-c27-spec-skew/`](benchmarks/results/dp-ep-c27-spec-skew/README.md), ledger [`docs/multigpu-opportunity-ledger.md`](docs/multigpu-opportunity-ledger.md) |
-
-![same aggregate geometry](benchmarks/results/l20-prefill-cost-geometry/figures/same_aggregate_geometry.png)
-
-*Line B, figure 1: six partitions of the same prefill budget against the aggregate KV coordinate (left) and against the per-request attention-work proxy (right).*
-
-## Upstream optimizations (2026-09)
-
-Changes to vLLM and Transformers found and measured here. Each is a patch plus the harness and
-raw results behind it in [`upstream/`](upstream/README.md); equivalence is always tested against
-the unmodified code in the same environment, never asserted.
-
-| Optimization | Where | Measured effect | Equivalence evidence | Status |
-| --- | --- | --- | --- | --- |
-| Sampled-token logprob fast path — one float per token instead of per-token `Logprob` objects from scheduler to response | vLLM `/inference/v1/generate` | Throughput with logprobs **0.67× → 0.95–0.96×** of no-logprobs (Qwen2.5-0.5B), **0.99×** (Qwen3-4B); response 41 → 6.8 KB per request | Max abs diff 0.0 vs the object path (batch-invariant) | [vllm#57442](https://github.com/vllm-project/vllm/pull/57442) open |
-| Integer token IDs for generate logprobs (`GenerateLogProbs`: `token_id`, `rank`, rank-ordered `top_logprobs`) | vLLM generate API, Python + Rust frontends, derender | Removes the `"token_id:N"` string round trip; protocol change, not a speed claim | Rust 9/9, Python 7/7 | [vllm#58181](https://github.com/vllm-project/vllm/pull/58181) open; shape agreed on [#57574](https://github.com/vllm-project/vllm/issues/57574) |
-| Request-free CPU→GPU KV prefetch primitive (reserve-gated, never evicts, no predictor) | vLLM `OffloadingConnector` | Hides the resume reload measured in line E (resume TTFT **−52…−58%** oracle) | 12 new tests; offloading suite failure set identical to unmodified main | Invited on [vllm#57103](https://github.com/vllm-project/vllm/issues/57103); pushed to fork |
-| Beam search: rank the 2·B² candidates before building their token/logprob histories | vLLM offline beam search | CPU per step B=32, 4096-token prompt **52.8 → 1.5 ms**; end to end (L20, Qwen2.5-0.5B) prompt 2048 B=32 **3.20 → 1.64 s (1.95×)**, prompt 128 B=32 **1.85×**; Qwen3-4B prompt 2048 B=32 **1.47×** | 640 runs byte-identical (CPU); GPU **bit-identical** under batch invariance | Local patch |
-| Beam search + grammars: no dense allowed-token list/set per beam per step | vLLM offline beam search, structured outputs | Grammar work per step B=32 **206–217 → 6.3–6.9 ms**; end to end JSON schema B=32 **15.6 → 4.1 s (3.76×)**, B=16 **2.29×**, B=8 **1.53×**; Qwen3-4B B=32 **1.70×**, B=16 1.39× | 56 real xgrammar states identical; GPU **bit-identical** under batch invariance | Local patch |
-| Stop-string preprocessing via native `find` | Transformers `StopStringCriteria` | Real 151k vocab: helper **4.6–12.2×**, full cache miss **2.1–3.8×** (8 stops 3.18 → 0.84 s); cache holds only 8 stop-string sets | 336/336 differential checks | Measured, not submitted |
-
-Beam end-to-end numbers alternate stock and patched vLLM 0.29.0 runs on the L20 (5 timed calls
-per cell, stock-vs-stock agreement shown); at beam width ≤ 8 without grammars the effect is within
-noise. The same A/B on Qwen3-4B gives smaller gains (the GPU share of each step is larger) with
-stock = patched bit-identical under batch invariance. Not yet measured: models above 4B, and a server-backed run of the #58181 / prefetch tests on
-a real `main` build.
-
-## How the lab works
-
-Each line follows the same protocol, and the artifact records where it stopped:
-
-```text
-measurement contract          trace coverage, on/off overhead, host wait ≠ GPU time,
-                              direct CUDA timing agreement — before any conclusion
-       ↓
-upper bound / falsification   oracle or composed bound with coverage labels
-                              (measured / interpolated / extrapolated); pre-registered gate
-       ↓
-minimal implementation        env-gated experiment patch, never a framework
-       ↓
-live A/B                      fresh server per condition, interleaved, ≥3 repeats,
-                              strongest safe baseline (hindsight-tuned where that is stronger)
-       ↓
-record                        positive, negative and superseded results with the same care
-```
-
-Lines C and D are as much a product of this protocol as A, B and E: each was
-screened in under a day with an explicit kill line, and each left a mechanism
-finding that the survivors rely on (why adaptive verification is robust, what
-the draft pass actually costs). The
-[experiment status ledger](docs/experiment-status.md) keeps every line, dead or
-alive, and the [result index](benchmarks/results/README.md) plus
-[machine-readable catalog](benchmarks/results/artifact-catalog.json) bind each
-number to its artifact.
-
-## Instrumentation and harnesses
-
-Reusable pieces built for the lines above; all opt-in, all reversible:
-
-| Piece | What it gives | Entry point |
-| --- | --- | --- |
-| Engine iteration + runner step tracer (v2–v4) | Per-iteration scheduler geometry (per-request chunks and KV depths), engine wait, direct CUDA step time, draft-pass time, adaptive-verification decisions; joined by sequence, not timestamp | [`benchmarks/results/l20-prefill-cost-geometry/patches/`](benchmarks/results/l20-prefill-cost-geometry/patches/), [`scripts/step_trace_join.py`](scripts/step_trace_join.py) |
-| Prefill interference / deadline controller | Background decoders + injected long prefills; env-gated per-step prefill budget chooser with M0 / M2 cost models, online margin, equal or FCFS partition | [`scripts/measure_prefill_interference.py`](scripts/measure_prefill_interference.py), [`scripts/analyze_step_cost_v2.py`](scripts/analyze_step_cost_v2.py), [`scripts/replay_prefill_controller.py`](scripts/replay_prefill_controller.py), [`scripts/analyze_live_controller.py`](scripts/analyze_live_controller.py) |
-| Speculative-decoding geometry | Closed batches by prompt class and batch size; draft vs verify split; per-request acceptance | [`scripts/measure_spec_geometry.py`](scripts/measure_spec_geometry.py), [`scripts/analyze_spec_geometry.py`](scripts/analyze_spec_geometry.py) |
-| Feature-cost serving A/B | One server per condition, `/proc` CPU split per process, output dumps, port guard | [`scripts/measure_vllm_feature_cost.py`](scripts/measure_vllm_feature_cost.py) |
-
-## Operator-level work (earlier)
-
-The lab began one layer down, asking which kernel optimizations still matter
-after framework overhead. Those results stand and are kept to the same
-evidence standard:
-
-| Boundary | Measured result | Scope |
-| --- | --- | --- |
-| [Fused top-logprobs selection](src/l20_stack/ops/triton_sampling.py) | [**8.39x–9.45x**](benchmarks/results/a100-fused-top-logprobs/README.md) paired median speedup on A100 (pre-fix source) and [7.33x–8.25x](benchmarks/results/l20-fused-top-logprobs-2026-09/README.md) on L20 after the [2026-09 masked-tile fix](docs/top-logprobs-correctness-notice-2026-09.md); tie-aware correctness within `4.768e-7` | Steady-state, GEMM-conditioned operator microbenchmark; both dirty and clean A100 path-proof artifacts exist ([dirty](benchmarks/results/a100-vllm-top-logprobs-smoke/dirty-qwen25-05b-r2/README.md), [clean](benchmarks/results/a100-vllm-top-logprobs-clean/qwen25-05b-r30/README.md)); only the clean run is used for interpretation and its total request time is flat |
-| [Sparse repetition penalty](integrations/vllm/cuda/l20_sparse_repetition_penalty.cu) | [39/39 correct; 1.26x median, 4.09x best](benchmarks/results/l20-sparse-repetition-penalty/README.md) with a measured dispatch gate | Standalone kernel matrix; [case study](docs/l20-sparse-penalty-case-study.md) |
-| [Residual RMSNorm](src/l20_stack/ops/triton_rmsnorm.py) | [24/24 correct; fastest on 14/24 shapes, best 2.412x](benchmarks/results/l20-residual-rmsnorm-v3/README.md) | L20 FP16 microbenchmark |
-| [Serving-path correctness audit](docs/sampling-correctness-notice-2026-07.md) | Historical custom-sampler serving numbers withdrawn until GPU remeasurement | Correctness takes precedence over a favorable number |
-
-The hardware boundary is one L20 (SM89, 48 GB); A100 measurements are
-controls and Apple M4 experiments mark the CPU deployment edge
-([hardware policy](docs/hardware-scope.md)).
-
-Operator-era review entry points (kept for the record; the logits-boundary
-work is what first showed that the sampling kernels were not the serving
-bottleneck and led to lines A–B):
-
-| Topic | Path |
-| --- | --- |
-| Logits-boundary A/B plan | [`docs/logits-boundary-ab.md`](docs/logits-boundary-ab.md) |
-| Top-tier kernel and profiling gaps | [`docs/l20-top-tier-kernel-gaps.md`](docs/l20-top-tier-kernel-gaps.md) |
-| Serving optimization ceiling | [`benchmarks/results/l20-serving-optimization-ceiling/`](benchmarks/results/l20-serving-optimization-ceiling/) |
-| vLLM logits-boundary scout | [`benchmarks/results/l20-vllm-logits-boundary-scout/`](benchmarks/results/l20-vllm-logits-boundary-scout/) |
-| Logits-boundary trace installer | [`integrations/vllm/install_l20_logits_boundary_trace.py`](integrations/vllm/install_l20_logits_boundary_trace.py) |
-| Trace summarizer | [`scripts/summarize_l20_logits_boundary_trace.py`](scripts/summarize_l20_logits_boundary_trace.py) |
-| Trace campaign | [`scripts/run_vllm_l20_logits_boundary_trace_campaign.sh`](scripts/run_vllm_l20_logits_boundary_trace_campaign.sh) |
-| Standalone top-k/top-p benchmark | [`scripts/benchmark_l20_topk_topp_sampling.py`](scripts/benchmark_l20_topk_topp_sampling.py) |
-| Compact systems thesis | [`docs/where-optimizations-stop-mattering.md`](docs/where-optimizations-stop-mattering.md) |
+[All local upstream artifacts](upstream/README.md) · [Current experiment status](docs/experiment-status.md)
 
 ## Reproduce and validate
 
-CI is CPU-safe: it installs CPU PyTorch, validates artifact links, builds the
-result catalog, runs the test suite and compiles the sources.
+CPU-only validation checks the public artifact index, documentation paths, catalog,
+and tests. It does **not** regenerate GPU measurements.
 
 ```bash
-python -m venv .venv && source .venv/bin/activate
-python -m pip install --upgrade pip
+python3 -m venv .venv
+source .venv/bin/activate
 python -m pip install -e ".[dev]" numpy
 python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
 python -m pytest -q
+single-gpu-infer artifact-index --strict-warnings
 single-gpu-infer doc-links
 single-gpu-infer artifact-catalog --output /tmp/artifact-catalog.json
+cmp benchmarks/results/artifact-catalog.json /tmp/artifact-catalog.json
 ```
 
-GPU results need the hardware, model and vLLM version named in each artifact;
-every campaign's exact server and harness command is checked in next to its
-raw data (`benchmarks/results/<artifact>/raw/campaign*.sh`). Kernel builds
-additionally need `python -m pip install -e ".[dev,kernels]"` and target SM89
-by default (`TORCH_CUDA_ARCH_LIST=8.0` for A100 portability checks; A100
-numbers are never presented as L20 results).
+The CPU PyTorch index above is the Linux CI path; macOS users should install the
+platform's supported CPU PyTorch wheel instead. GPU reproduction requires the exact
+hardware, model, runtime revision, and commands recorded in the selected artifact.
+There is no single environment that reproduces every historical campaign.
 
-## Claim policy
+## Evidence standard
 
-- Name the hardware, model, workload, baseline and artifact for every number.
-- Separate microbenchmark, path-proof and serving evidence; keep trace runs
-  separate from latency runs.
-- Pre-register the kill gate; report negative and mixed rows; never summarize
-  a partial win as universal or a research margin as a product claim.
-- Withdraw a claim when a later audit invalidates its comparator.
-- Do not extrapolate L20 or A100 measurements to other GPU families.
-- Keep weights, datasets, raw profiler databases, caches and secrets out of git.
+Measured speedups keep their hardware, model, workload, and baseline attached.
+Kernel timing, diagnostic traces, full-engine serving, and oracle bounds are
+separate evidence categories. Negative results and correctness withdrawals remain
+public; stronger presentation does not change the underlying claims.
 
-## Repository map
+The prefill study is **not a new scheduler**. KV-prefetch gains under slack do not
+establish gains under sustained occupancy. Local patches and open PRs are not
+presented as upstream releases. See the [claim policy](RESEARCH.md#claim-policy)
+and [hardware scope](docs/hardware-scope.md).
 
-| Path | Purpose |
-| --- | --- |
-| `benchmarks/results/` | One directory per artifact: README, raw JSON/JSONL, figures, patches, commands |
-| `upstream/` | Patches aimed at vLLM / Transformers with their harnesses and raw results |
-| `docs/` | Technical reports, status ledger, correctness notices, hardware scope |
-| `scripts/` | Harnesses, analyzers, campaign runners, summarizers |
-| `src/l20_stack/ops/` | Triton kernels and dispatch policies |
-| `integrations/vllm/` | PyTorch custom ops, vLLM hooks, reversible installers |
-| `cuda/`, `cpp/` | Standalone CUDA experiments; CPU / Apple M4 control track |
-| `tests/` | CPU-safe behavioral, contract and source-level tests |
+## Repository guide
 
-The public project name is **Single-GPU Inference Lab**; the Python namespace
-remains `l20_stack` for compatibility with existing scripts and artifacts.
+| Path | Contents |
+|---|---|
+| `benchmarks/results/` | Raw results, figures, exact commands, and artifact catalog |
+| `src/l20_stack/`, `cuda/`, `cpp/` | Kernels, operators, and control implementations |
+| `integrations/`, `upstream/` | Runtime integrations and proposed upstream changes |
+| `scripts/`, `configs/` | Measurement harnesses, analyzers, and experiment configurations |
+| `tests/` | Correctness, contract, artifact, and repository-hygiene checks |
+| `docs/`, `RESEARCH.md` | Technical reports, methodology, limitations, and full research record |
+
+The Python namespace remains `l20_stack` for compatibility. Code is available
+under the [MIT license](LICENSE).
