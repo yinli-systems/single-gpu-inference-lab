@@ -1,0 +1,24 @@
+{
+  "attribution":"Read-only analysis of previously completed wave/native evidence, not a rerun of those GPU experiments.",
+  "wave":{"raw_records":864,"process_replicates_per_GPU":3,"preregistered_fresh_targets":4,"targets_passed":4,
+    "columns":["total_query_tokens","query_heads","4090_no_split_A_over_B_replicates","5090_no_split_A_over_B_replicates"],
+    "fresh_targets":[
+      [1344,16,[1.0025101922769641,1.0014080752597682,1.0035249851389143],[1.7938428244906242,1.8112333759215662,1.8108108392389535]],
+      [1344,32,[1.007201380495247,1.0080998929682462,1.0049840813818847],[1.3957166398538833,1.3939191209534112,1.390184568528082]],
+      [2720,16,[1.028994376218918,1.025915030463717,1.031898892761472],[1.3321801518266434,1.3236774863950578,1.3297653239955265]],
+      [2720,32,[1.0227861079105482,1.0248848967418664,1.0243513247702463],[1.1463587568336642,1.1448907632570935,1.1460987508957923]]
+    ],
+    "boundary":"These are shape-cost ratios, NOT optimization speedups. EqualW,totalQ,totalcachedK,totalKV-lengthmarginals were checked. All neighboring controls/allfourpolicies/threeprocessrepeats retained in the remote full table. A hardware-boundary crossover supports a specific mechanism; genericwavequantization is prior art and all causal factors are not isolated.",
+    "full_audit_sha256":"d4311de6dcda3054f74ae8c4a86642398db4d9f7eb797436d538dd1e5d68b636"},
+  "break_even":{"kind":"old_measured_cost_linear_diagnostic_NOT_direct_reuse_result",
+    "inequality":"r*(U_fixed-U_candidate)>C_selector+(P_candidate-P_fixed)",
+    "first_positive_integer_when_saving_positive":"max(1,floor((C_selector+deltaP)/deltaU)+1)",
+    "zero_or_negative_saving":"May have no profitable count or only a finite profitable interval; implemented exact strict-inequality contracts.",
+    "columns":["GPU_endpoint","old_cells","eventual_profitable_cells","never_profitable_cells","finite_profitable_window_cells","positive_at_r36"],
+    "summary":[["4090_cycle",144,51,93,0,46],["4090_run",144,66,78,0,61],["5090_cycle",144,37,103,4,35],["5090_run",144,38,102,4,37]],
+    "reuse_count_grid":[1,2,4,8,16,36],
+    "positive_counts":{"4090_cycle":[34,42,44,45,45,46],"4090_run":[46,55,55,58,60,61],"5090_cycle":[30,31,32,33,34,35],"5090_run":[37,38,39,38,37,37]},
+    "boundary":"Uses old per-cell native ctypes overhead measured onln01 and cycle-minus-CUDA as an approximate setup difference. Current fastCPythonbridge/cache/resourceguard/streaminglayerdata differs. Not a deployment result, nor CPUoverhead divided by36.",
+    "full_audit_sha256":"f202fb4a2e6503a003ddedbad14e438f101561f96760a56872b29e39f3bd408c"},
+  "remote_audit_root":"/ssd/scxi253/single-gpu-inference-plan-cost-20260928/artifacts/reuse-gate-audit-v1/recovered"
+}
