@@ -1,0 +1,69 @@
+{
+  "kind": "independent_frozen_FA2_audit_and_decision_equivalent_native_CPU_implementation",
+  "scope": "FA2 operator and CPU selector, not full vLLM serving",
+  "measurement_commit": "32120f9b02f842f83dc9ecb0841e80b547524f86",
+  "public_train_freeze_commit": "d8618fa487f3336dedcc17372afc61d05a0db53e",
+  "native_source_commit": "1e43161a464ebea5f45ca8fe5205e3e84546cf78",
+  "attribution": "The completed GPU jobs were discovered in an independently active execution session, preserved and audited without duplicate submission. This continuation itself executed train-only fitting, frozen test evaluation, native CPU implementation/compilation/parity/timing and GitHub publication. Its earlier GPU launch was blocked and not rerouted.",
+  "corpus": {"train_geometries":72,"test_geometries":72,"discovery_geometries":8,"head_pairs":[[16,4],[32,8]],"GPU_models":["4090","5090"],"process_replicates_per_GPU":3,"policies":["auto","none","s512","s1024","s2048","s4096"],"complete_policy_records":10944,"heldout_decisions_per_GPU":144,"heldout_families":6},
+  "environment": {"torch":"2.13.0+cu130","cuda":"13.0","flashinfer":"0.6.18","backend":"fa2","dtype":"float16","head_dim":128,"causal":true,"cuda_graph":false,"sklearn":"1.8.0","numpy":"2.3.5","native_CPU_host":"ln01","compiler":"GCC 11.4.0"},
+  "selection": {"procedure":"Same Ridge(0.01,1,100)/ExtraTrees(128 trees,leaf2 or8) search for each representation, leave-one-TRAIN-family-out absolute log-error CV; no test fitting.","strong_nonplan":"joint for all endpoints","train_head_fixed":{"4090":{"16":"s512","32":"none"},"5090":{"16":"s512","32":"s512"}},"bootstrap":"20000 nominal family-cluster draws, seed20260928; six test families; no multiple-comparison or hardware-population guarantee. Prediction-error CI is supplemental descriptive analysis."},
+  "prediction_columns": ["marginal_MAE_ms","joint_MAE_ms","plan_MAE_ms","causal_MAE_ms","causal_MAE_reduction_fraction","supplemental_family_CI95_reduction_fraction"],
+  "prediction": {
+    "4090_run":[0.10560294721833371,0.08675964900630116,0.05368038012143534,0.042770508946595676,0.5070230292945359,[0.36305682726041233,0.5738160189666139]],
+    "4090_cycle":[0.154682769034154,0.14489963121658556,0.15235850053962066,0.13466331395001688,0.07064419129727229,[-0.017820289134815148,0.3576770813871051]],
+    "5090_run":[0.08395050790942304,0.06983680560266707,0.045509490863987666,0.03887935913906015,0.4432826816240383,[0.3245448310833352,0.4827328253564388]],
+    "5090_cycle":[0.11241125468966248,0.10274834278043077,0.06801175808101921,0.05849453495180874,0.43070094009390214,[0.3093587826910861,0.45914230568785974]]
+  },
+  "p95_regression_retained": {"4090_cycle_joint_p95_abs_ms":0.8760612130685652,"4090_cycle_causal_p95_abs_ms":0.9639206232111389},
+  "dispatch_columns": ["auto_ratio","joint_ratio","plan_ratio","causal_ratio","causal_nominal_family_CI95","causal_regressions_gt5pct_of144","oracle_ratio"],
+  "dispatch_before_selection_cost_vs_train_head_fixed": {
+    "4090_run":[0.9940091323066969,1.0002900680035545,1.060746265218679,1.0482305998430619,[1.0113523804283537,1.0837457840793596],17,1.0990159530297572],
+    "4090_cycle":[0.9919728666509885,0.9977665102851705,1.0298656690501382,1.036115112785418,[1.0042570893453653,1.0674503291755493],21,1.0716842388289411],
+    "5090_run":[0.8998574114260791,1.0,1.0156203747513086,1.0149831753867469,[0.9883925052970597,1.0439393734489595],11,1.0290918037508556],
+    "5090_cycle":[0.9270982231238769,1.0,1.013271868956158,1.0099332490526507,[0.9935467440132842,1.0317760873956099],3,1.0248451164628574]
+  },
+  "native_columns": ["old_Python_median_ms","native_inclusive_median_ms","additive_ratio","additive_nominal_family_CI95","additive_regressions_gt5pct_of144"],
+  "native_CPU": {
+    "4090_run":[1.2396715,0.010694,1.0147430612682864,[0.9766265485400296,1.055420955462407],35],
+    "4090_cycle":[8.044053,0.0466919,0.9534493734573579,[0.9146197787656305,0.9962097996567586],102],
+    "5090_run":[1.2735755,0.010752,0.9715170346625323,[0.9485728818564616,1.0010857116723093],42],
+    "5090_cycle":[1.264656,0.010669,0.981665616935723,[0.9643700629461344,1.0075457470536473],20]
+  },
+  "native_parity": {"models":4,"choices_equal":2432,"feature_values_compared":510720,"max_abs_feature_difference":0.0,"max_abs_log_prediction_difference":3.1086244689504383e-15,"refitting":false,"policy_changed":false,"timing_blocks":21,"calls_per_block":5},
+  "native_boundary": "Measured CPU cost on ln01 added to unchanged measured GPU costs; NOT integrated selector+GPU timing or serving. Includes Python buffers, FFI, six policy feature/model computations and output conversion. All four unamortized net promotion gates fail; per-case p95 sensitivity does not change that conclusion.",
+  "transfer_without_refit_or_selector_cost": {
+    "trained5090_target4090_cycle":[1.0426769334170742,[1.0144976680220699,1.0711533416614516]],
+    "trained4090_target5090_cycle":[1.011158535574484,[0.9986662161189354,1.0322461157637062]]
+  },
+  "correctness": {"planner_matches":10944,"non_auto_full_tensor_comparisons":9120,"auto_self_comparisons_excluded":1824,"selected_FP32_vectors":23808,"max_abs_vs_auto":0.0009765625,"max_abs_FP32":0.00020051002502441406,"atol":0.005,"rtol":0.02,"bitwise":false,"max_reserved_scratch_bytes":3571875872,"production_KV_capacity_effect_measured":false},
+  "jobs": [
+    {"id":"1632609","kind":"canary4090","state":"COMPLETED","exit":"0:0","GPU_seconds":122},
+    {"id":"1632610","kind":"canary5090","state":"COMPLETED","exit":"0:0","GPU_seconds":84},
+    {"id":"1632615_0","kind":"full4090","state":"COMPLETED","exit":"0:0","GPU_seconds":168},
+    {"id":"1632615_1","kind":"full4090","state":"COMPLETED","exit":"0:0","GPU_seconds":171},
+    {"id":"1632615_2","kind":"full4090","state":"COMPLETED","exit":"0:0","GPU_seconds":165},
+    {"id":"1632616_0","kind":"full5090","state":"COMPLETED","exit":"0:0","GPU_seconds":144},
+    {"id":"1632616_1","kind":"full5090","state":"COMPLETED","exit":"0:0","GPU_seconds":143},
+    {"id":"1632616_2","kind":"full5090","state":"COMPLETED","exit":"0:0","GPU_seconds":141}
+  ],
+  "remote_campaign":"/ssd/scxi253/single-gpu-inference-plan-cost-20260928/campaigns/resume-20260928T2348Z",
+  "remote_audit_subdir":"independent-audit-20260928T0000Z",
+  "analysis_hashes": {
+    "model_selection.json":"6d99f3d0699afafe3977d5a60c6fa8407f0a33296b9d433f4a3a6a5ec30223c5",
+    "test_results.json":"3a2501854283bfe74bd4c39a2d3596086c07d2d5a7af545a1716ae051f6340b9",
+    "test_decisions.json":"f69a42816e588549d220b7e67872e9cc2e4beb109f0ce54ecb90e20f4a2c5096",
+    "native_validation.json":"e56d67a404068ad5eb55b40f0d23e20acd17ffe7eeb5a386a828dd0d6a68371a",
+    "native_compiled/export_manifest.json":"649b277df1612cd02b8d0aad81212a7ddb89b9d59df823552170f9e0df409b71"
+  },
+  "raw_measurements_sha256_by_run": {
+    "full-gpu_4090-1632615-0":"8a63df0c78966ca050ba61f8ba7da9364e453994d936dcd066a1406390666787",
+    "full-gpu_4090-1632615-1":"3a29cfae2312f95de5ad91556d8671d8bc83d8504da5b077551ddf964093c496",
+    "full-gpu_4090-1632615-2":"4dc68be73aea9a8ad3fd53a02b4c4885b038b9d4c0f5be2a911ecbdceb1f9d4e",
+    "full-gpu_5090-1632616-0":"446e629fe1acf339fd0b18cb2036c4f625bddd1f45c6ab0f7b5988e231c9f0ca",
+    "full-gpu_5090-1632616-1":"b7329e05376364b6e6633d9c487c3f6f87c13f989bd51eb42ef63bea264c5600",
+    "full-gpu_5090-1632616-2":"ad2f244c0bdf714e69c050d1b7a57d89abaa0826e9dd900ce9e2bd22dab08955"
+  },
+  "verdict":"Predictive milestone supported on the frozen suite; per-new-plan native adaptive dispatch NOT promoted. No full-serving or prize claim.",
+  "not_evaluated_here":["full vLLM inference","TTFT TPOT throughput tail SLO goodput","native-selector integrated GPU cycles","CUDA graphs","complete microarchitectural causal chain","separate concurrent wave-threshold-v1/native-policy-v1 campaigns"]
+}
