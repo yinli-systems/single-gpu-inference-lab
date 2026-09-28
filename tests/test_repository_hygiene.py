@@ -31,6 +31,19 @@ class RepositoryHygieneTests(unittest.TestCase):
             paths = [str(path.relative_to(ROOT)) for path in ROOT.rglob("*") if path.is_file()]
         self.assertEqual(forbidden_paths(paths), [])
 
+    def test_overview_links_to_the_complete_research_record(self):
+        overview = (ROOT / "README.md").read_text(encoding="utf-8")
+        self.assertIn("[Research record](RESEARCH.md)", overview)
+        self.assertTrue((ROOT / "RESEARCH.md").is_file())
+
+    def test_research_record_local_paths_are_valid(self):
+        from l20_stack.doc_links import inspect_doc_links
+
+        report = inspect_doc_links(ROOT, files=["RESEARCH.md"])
+        self.assertTrue(report.ok, report.errors)
+        self.assertIn("RESEARCH.md", report.checked_files)
+        self.assertTrue(report.entries)
+
     def test_actual_inference_workloads_remain_allowed(self):
         self.assertEqual(forbidden_paths([
             "benchmarks/results/live-trace-replay/raw/replay-mooncake-toolagent/run.json.gz",

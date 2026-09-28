@@ -405,7 +405,7 @@ def test_checked_in_top_logprobs_revalidation_matches_raw_trials():
         assert historical["sha256"] == actual_hash
 
     public_claims = {
-        Path("README.md"): "8.39x–9.45x",
+        Path("RESEARCH.md"): "8.39x–9.45x",
         Path("docs/reviewer-guide.md"): "8.39x–9.45x",
         Path("docs/experiment-status.md"): "8.39x-9.45x",
         Path("benchmarks/results/README.md"): "8.39x-9.45x",

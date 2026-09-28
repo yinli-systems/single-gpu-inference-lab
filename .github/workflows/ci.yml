@@ -39,6 +39,7 @@ jobs:
           PYTHONPATH: src
         run: |
           single-gpu-infer doc-links
+          single-gpu-infer doc-links --file RESEARCH.md
 
       - name: Verify checked-in artifact catalog
         env:

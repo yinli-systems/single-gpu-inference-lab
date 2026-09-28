@@ -45,6 +45,7 @@ python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
 python -m pytest -q
 single-gpu-infer artifact-index --strict-warnings
 single-gpu-infer doc-links
+single-gpu-infer doc-links --file RESEARCH.md
 single-gpu-infer artifact-catalog --output /tmp/artifact-catalog.json
 cmp benchmarks/results/artifact-catalog.json /tmp/artifact-catalog.json
 ```
