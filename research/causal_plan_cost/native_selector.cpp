@@ -107,3 +107,35 @@ extern "C" int select_policy(int model,int n,const I*q,const I*k,int hq,int hkv,
     }
     return best;
 }
+
+#ifdef BUILD_PYTHON_BRIDGE
+#include <Python.h>
+static PyObject* py_choose(PyObject*,PyObject* args) {
+    int model,hq,hkv,sms;PyObject *qs,*ks;
+    if(!PyArg_ParseTuple(args,"iOOiii",&model,&qs,&ks,&hq,&hkv,&sms))return nullptr;
+    PyObject *q=PySequence_Fast(qs,"queries must be a sequence");
+    if(!q)return nullptr;
+    PyObject *k=PySequence_Fast(ks,"depths must be a sequence");
+    if(!k){Py_DECREF(q);return nullptr;}
+    Py_ssize_t n=PySequence_Fast_GET_SIZE(q);
+    if(n<1 || n>64 || n!=PySequence_Fast_GET_SIZE(k)) {
+        Py_DECREF(q);Py_DECREF(k);PyErr_SetString(PyExc_ValueError,"invalid length arrays");return nullptr;
+    }
+    I qv[64],kv[64];
+    for(int i=0;i<n;++i) {
+        PyObject *a=PySequence_Fast_GET_ITEM(q,i),*b=PySequence_Fast_GET_ITEM(k,i);
+        if(!PyLong_Check(a)||!PyLong_Check(b)||PyBool_Check(a)||PyBool_Check(b)) {
+            Py_DECREF(q);Py_DECREF(k);PyErr_SetString(PyExc_TypeError,"lengths must be integers");return nullptr;
+        }
+        qv[i]=PyLong_AsLongLong(a);kv[i]=PyLong_AsLongLong(b);
+        if(PyErr_Occurred()){Py_DECREF(q);Py_DECREF(k);return nullptr;}
+    }
+    Py_DECREF(q);Py_DECREF(k);double scores[6];
+    int selected=select_policy(model,int(n),qv,kv,hq,hkv,sms,scores);
+    if(selected<0){PyErr_SetString(PyExc_ValueError,"unsupported native selector input");return nullptr;}
+    return PyLong_FromLong(selected);
+}
+static PyMethodDef methods[]={{"choose",py_choose,METH_VARARGS,"Frozen policy selection."},{nullptr,nullptr,0,nullptr}};
+static PyModuleDef module={PyModuleDef_HEAD_INIT,"geometry_native",nullptr,-1,methods};
+PyMODINIT_FUNC PyInit_geometry_native(){return PyModule_Create(&module);}
+#endif

@@ -14,6 +14,8 @@ import random
 import statistics
 import subprocess
 import time
+import sysconfig
+import importlib.util
 import numpy as np
 from geometry import Shape, POLICIES, corpus, features
 
@@ -60,7 +62,12 @@ def export(analysis,out):
     source=Path(__file__).with_name('native_selector.cpp')
     command=['g++','-O3','-std=c++17','-shared','-fPIC','-I',str(out),str(source),'-o',str(out/'libselector.so')]
     completed=subprocess.run(command,capture_output=True,text=True,check=True)
-    manifest={'models':mapping,'model_selection_sha256':sha(selection),
+    extension=out/('geometry_native'+sysconfig.get_config_var('EXT_SUFFIX'))
+    bridge_command=['g++','-O3','-std=c++17','-shared','-fPIC','-DBUILD_PYTHON_BRIDGE',
+        '-I',sysconfig.get_paths()['include'],'-I',str(out),str(source),'-o',str(extension)]
+    subprocess.run(bridge_command,capture_output=True,text=True,check=True)
+    manifest={'extension':extension.name,'extension_sha256':sha(extension),
+              'bridge_compile_command':bridge_command,'models':mapping,'model_selection_sha256':sha(selection),
               'source_sha256':sha(source),'exporter_sha256':sha(__file__),
               'library_sha256':sha(out/'libselector.so'),'header_sha256':sha(out/'models.inc'),
               'compile_command':command,'compiler_stderr':completed.stderr,
@@ -73,6 +80,10 @@ class Native:
         self.path=Path(path);self.info=json.loads((self.path/'manifest.json').read_text())
         libpath=self.path/'libselector.so'
         if sha(libpath)!=self.info['library_sha256']:raise ValueError('Modified native library')
+        extension=self.path/self.info['extension']
+        if sha(extension)!=self.info['extension_sha256']:raise ValueError('Modified bridge')
+        spec=importlib.util.spec_from_file_location('geometry_native',extension)
+        self.bridge=importlib.util.module_from_spec(spec);spec.loader.exec_module(self.bridge)
         self.lib=ct.CDLL(str(libpath.resolve()))
         ptr=ct.POINTER(ct.c_int64);out=ct.POINTER(ct.c_double)
         self.lib.select_policy.argtypes=[ct.c_int,ct.c_int,ptr,ptr,ct.c_int,ct.c_int,ct.c_int,out]
@@ -80,6 +91,9 @@ class Native:
         self.lib.causal_features.argtypes=[ct.c_int,ptr,ptr,ct.c_int,ct.c_int,ct.c_int,ct.c_int,out]
         self.lib.causal_features.restype=ct.c_int
     def choose(self,key,shape,hq,hkv,sms,return_scores=False):
+        if not return_scores:
+            i=self.bridge.choose(self.info['models'][key],shape.q,shape.k,hq,hkv,sms)
+            return POLICIES[i]
         q=np.ascontiguousarray(shape.q,dtype=np.int64);k=np.ascontiguousarray(shape.k,dtype=np.int64)
         scores=np.empty(6,dtype=np.float64)
         i=self.lib.select_policy(self.info['models'][key],len(q),
@@ -126,7 +140,7 @@ def validate(analysis,out):
             scores=model.predict(x);p,actual=native.choose(key,shape,hq,hkv,sms,True)
             error=float(abs(scores-actual).max());errors.append(error)
             np.testing.assert_allclose(actual,scores,atol=1e-10,rtol=1e-10)
-            if p!=POLICIES[int(np.argmin(scores))]:mismatches.append(shape.name)
+            if p!=POLICIES[int(np.argmin(scores))] or native.choose(key,shape,hq,hkv,sms)!=p:mismatches.append(shape.name)
             # Includes metadata conversion and FFI; no timing label access.
             for _ in range(5):
                 start=time.perf_counter_ns();native.choose(key,shape,hq,hkv,sms)
