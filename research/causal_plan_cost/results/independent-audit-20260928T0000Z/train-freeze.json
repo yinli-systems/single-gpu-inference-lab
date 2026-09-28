@@ -1,0 +1,42 @@
+{
+  "stage": "train_only_frozen_before_this_auditor_evaluates_test",
+  "selection_created_utc": "2026-09-27T23:58:12Z",
+  "campaign": "/ssd/scxi253/single-gpu-inference-plan-cost-20260928/campaigns/resume-20260928T2348Z",
+  "audit_directory": "independent-audit-20260928T0000Z",
+  "measurement_commit": "32120f9b02f842f83dc9ecb0841e80b547524f86",
+  "analysis_source_sha256": "370a596099168f19f66762d7480cea497b8fa640e89fe3325a401fd8ef05ce2a",
+  "model_selection_sha256": "6d99f3d0699afafe3977d5a60c6fa8407f0a33296b9d433f4a3a6a5ec30223c5",
+  "training_families": ["Q1024-K12288", "Q1024-K3072", "Q2048-K1536", "Q2048-K6144", "Q512-K1536", "Q512-K6144"],
+  "fitting": "Identical five-estimator search for marginal/joint/plan/causal representations; leave-one-TRAIN-family-out CV. Median across three process replicates before fitting. Ridge alpha in [0.01,1,100], or 128 ExtraTrees with minimum leaf size 2 or 8. Seed 20260928.",
+  "libraries": {"sklearn": "1.8.0", "numpy": "2.3.5"},
+  "fixed_policies": {
+    "4090_run": {"global": "s512", "hq16": "s512", "hq32": "none"},
+    "4090_cycle": {"global": "s512", "hq16": "s512", "hq32": "none"},
+    "5090_run": {"global": "s512", "hq16": "s512", "hq32": "s512"},
+    "5090_cycle": {"global": "s512", "hq16": "s512", "hq32": "s512"}
+  },
+  "strong_nonplan_chosen_on_training_cv": "joint for both GPUs and both endpoints",
+  "selected_specs_in_order_marginal_joint_plan_causal": {
+    "4090_run": ["ridge:1", "ridge:1", "ridge:1", "ridge:0.01"],
+    "4090_cycle": ["ridge:100", "ridge:100", "extra_trees:leaf2", "extra_trees:leaf2"],
+    "5090_run": ["ridge:0.01", "ridge:1", "ridge:1", "ridge:1"],
+    "5090_cycle": ["ridge:100", "ridge:100", "ridge:1", "ridge:0.01"]
+  },
+  "causal_model_hashes": {
+    "4090_run": "404a2eff991c30c11367af48f58966c3b3041865cc9562a51084df8a90574a91",
+    "4090_cycle": "360698710161704b2b90bec1f641a055a87baaa758886d6bc7bc28505fdf72ed",
+    "5090_run": "b7caca9a48b9ff6154570b7e743071782e0b60f245274e304a16985e26fec881",
+    "5090_cycle": "7cdea0cc3a39c6fe9d2225b257e3c5a477bd74ee956bf8fe7e7b2a2d2790fa5b"
+  },
+  "raw_run_hashes": {
+    "full-gpu_4090-1632615-0": "8a63df0c78966ca050ba61f8ba7da9364e453994d936dcd066a1406390666787",
+    "full-gpu_4090-1632615-1": "3a29cfae2312f95de5ad91556d8671d8bc83d8504da5b077551ddf964093c496",
+    "full-gpu_4090-1632615-2": "4dc68be73aea9a8ad3fd53a02b4c4885b038b9d4c0f5be2a911ecbdceb1f9d4e",
+    "full-gpu_5090-1632616-0": "446e629fe1acf339fd0b18cb2036c4f625bddd1f45c6ab0f7b5988e231c9f0ca",
+    "full-gpu_5090-1632616-1": "b7329e05376364b6e6633d9c487c3f6f87c13f989bd51eb42ef63bea264c5600",
+    "full-gpu_5090-1632616-2": "ad2f244c0bdf714e69c050d1b7a57d89abaa0826e9dd900ce9e2bd22dab08955"
+  },
+  "attribution": "GPU runs were launched by an independently active execution session. This continuation discovered and preserved them, then executed a separate train-only CPU audit; it did not bypass its blocked GPU launch.",
+  "test_metrics_computed_by_this_auditor": false,
+  "full_vllm_tested": false
+}
