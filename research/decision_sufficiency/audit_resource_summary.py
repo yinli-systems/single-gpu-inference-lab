@@ -139,8 +139,9 @@ def audit(
                     "CI95": [w.right.ci_low, w.right.ci_high],
                     "context": dict(w.right.context),
                 },
-                "normalized_minimax_regret_lower_bound": (
-                    w.normalized_minimax_regret_lower_bound
+                "normalized_minimax_regret_point": w.normalized_minimax_regret_point,
+                "conservative_normalized_minimax_regret": (
+                    w.conservative_normalized_minimax_regret
                 ),
             }
             for w in witnesses
@@ -149,14 +150,13 @@ def audit(
             "rows": len(rows),
             "resolved_preferences": resolved,
             "opposite_action_collision_pairs": len(serialized),
-            "max_normalized_minimax_regret_lower_bound": (
-                max(
-                    (
-                        x["normalized_minimax_regret_lower_bound"]
-                        for x in serialized
-                    ),
-                    default=0.0,
-                )
+            "max_normalized_minimax_regret_point": max(
+                (x["normalized_minimax_regret_point"] for x in serialized),
+                default=0.0,
+            ),
+            "max_conservative_normalized_minimax_regret": max(
+                (x["conservative_normalized_minimax_regret"] for x in serialized),
+                default=0.0,
             ),
             "witnesses": serialized,
         }
@@ -218,8 +218,11 @@ def main() -> None:
                     "opposite_action_collision_pairs": row[
                         "opposite_action_collision_pairs"
                     ],
-                    "max_normalized_minimax_regret_lower_bound": row[
-                        "max_normalized_minimax_regret_lower_bound"
+                    "max_normalized_minimax_regret_point": row[
+                        "max_normalized_minimax_regret_point"
+                    ],
+                    "max_conservative_normalized_minimax_regret": row[
+                        "max_conservative_normalized_minimax_regret"
                     ],
                 }
                 for name, row in result["representations"].items()
