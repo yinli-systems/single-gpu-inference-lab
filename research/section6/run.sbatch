@@ -26,6 +26,8 @@ MON=$!
 finish(){ RC=$?; trap - EXIT; kill "$MON" 2>/dev/null || true; printf '%s\n' "$RC" > "$P/receipts/$KEY-exit.txt"; date -u +%FT%TZ > "$P/receipts/$KEY-end.txt"; exit "$RC"; }
 trap finish EXIT
 for V in 0.6.18 0.7.0; do
+ export FLASHINFER_WORKSPACE_BASE=$LOCAL/flashinfer-$V
+ export XDG_CACHE_HOME=$LOCAL/cache-$V
  if [[ "$V" == 0.7.0 ]]; then export PYTHONPATH="$P/overlays/fi070"; else unset PYTHONPATH || true; fi
  for REP in 0 1 2; do
   R="$P/runs/$KEY-$V-r$REP-$SLURM_JOB_ID"
