@@ -10,7 +10,7 @@ class ReleaseTests(unittest.TestCase):
   for c in self.m['cases']:self.assertEqual(guarded(c['q'],c['cached']),c['guarded_expected'])
   self.assertEqual(sum(c['guarded_expected'] for c in self.m['cases'] if c['family']=='release'),24)
  def test_no_old_case_collision(self):
-  old=json.loads((Path(__file__).parents[1]/'resource_generalization'/'manifest.json').read_text())
+  old=json.loads((Path(__file__).with_name('exposed-old-manifest.json')).read_text())
   a={(tuple(c['q']),tuple(c['cached'])) for c in self.m['cases'] if c['family']=='release'}
   b={(tuple(c['q']),tuple(c['cached'])) for c in old['cases']}
   self.assertFalse(a&b)
