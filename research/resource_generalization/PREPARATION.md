@@ -1,0 +1,1 @@
+Before any new GPU submission, CPU tests rejected the initial fixture generator for duplicate geometries. The generator was corrected to redraw duplicates deterministically and cross request counts with geometry regimes. No GPU result or post-measurement parameter was used for this correction.
