@@ -29,3 +29,9 @@ The registered equal-W pair aliases under these augmented moments but has differ
 ## Observed environment heterogeneity
 
 Initial formal allocations include RTX4090 processes with drivers580.82.07 and580.105.08, and reported memory totals23028MiB and24564MiB. The registered inference is paired within-process and conditional across three repetitions. Driver/host variation is recorded, not removed selectively, and is not proof of hardware-invariant performance.
+
+## Actual upstream feature-map conformance
+
+Vidur snapshot `abae7f63aa857300f5cdc6f5e0d27860cd24721b`, source blob `a5a96466eb86d94503711afec6d45218bd38d93e`, retains paired request parameters at lines754-780, then constructs the prefill lookup key at lines852-869 as `(sum(rounded cached depth), round(sqrt(sum(chunk^2)))^2)`, with a batch-count multiplier. The preserved marginals therefore alias at THIS lookup, despite the internal request list initially preserving pairs.
+
+`audit_vidur.py` executes those two hash-verified upstream methods on all36states at granularities64/128/256,108calls. Every real-code key matches the reference feature map, and each configuration's states share one key despite differing W. This is source-level conformance, NOT a re-trained Vidur accuracy benchmark and not a claim about all simulator versions. See `vidur-source-audit.json` and the licensed, unmodified reference source.

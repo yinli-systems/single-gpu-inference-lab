@@ -22,3 +22,9 @@ Both registered FP16 n2/n4 canaries completed successfully before formal submiss
 [Design notes](DESIGN_NOTES.md) clarify why full pair lists are not the only possible representation. Extra marginal second moments reconstruct analytical work exactly. Run `python representations.py --out NEW_AUDIT.json` and compare to [representation-audit.json](representation-audit.json). This is exact arithmetic, separate from measured runtime cost.
 
 CPU contract suite: `python -m unittest -v test_campaign test_analysis test_representations` (26tests).
+
+## Actual upstream key audit
+
+[Vidur source audit](vidur-source-audit.json) records108calls to hash-verified upstream prefill-feature methods. It confirms invariance of the specific aggregate lookup key, not whole-simulator prediction error. The [licensed reference source](reference_sources/vidur/README.md) is included for offline reproduction.
+
+Run `python reproduce.py` for CPU-only source,contract,representation and upstream-key checks. This command never launches GPU work.
