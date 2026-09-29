@@ -12,14 +12,16 @@ def resolved_options(path):
             except (ValueError,SyntaxError):return {'parse_failed':True}
     return {'missing':True}
 
-def inspect(root):
-    report=dict(campaign=str(root),runs=[],complete=False,diagnostic_only=True,performance_claim=False,serving_promoted=False)
+def inspect(root, repeats=2):
+    if repeats not in (1,2):raise ValueError("explicit bounded repeat count required")
+    expected_reps=range(repeats)
+    report=dict(campaign=str(root),planned_repeats=repeats,runs=[],complete=False,diagnostic_only=True,performance_claim=False,serving_promoted=False)
     for job in sorted((root/'runs').iterdir()):
         if not job.is_dir():continue
         hardware=(job/'hardware.csv').read_text() if (job/'hardware.csv').exists() else None
         modes={};failed=[];missing=[];options={};snapshots={}
         for mode in ('pristine','cap'):
-            for rep in (0,1):
+            for rep in expected_reps:
                 key=f'{mode}-{rep}';path=job/key
                 if (path/'failure.json').exists():failed.append(dict(run=key,failure=json.loads((path/'failure.json').read_text())))
                 if not (path/'complete.json').exists():missing.append(key);continue
@@ -33,7 +35,7 @@ def inspect(root):
                         for kind in ('isolated','prefix'):
                             name=f'{kind}-{rid}-{trial}.json';snapshots[key][name]=read_verified(path/name)
         comparisons=[]
-        for rep in (0,1):
+        for rep in expected_reps:
             bk,ck=f'pristine-{rep}',f'cap-{rep}'
             if bk in modes and ck in modes:
                 for name,b in modes[bk].items():
@@ -47,7 +49,7 @@ def inspect(root):
                         for r in batch['requests']:seqs[(name.split('-b')[0],r['id'])].add(tuple(r['tokens']))
             variation[mode]=[dict(workload=k[0],id=k[1],unique_outputs=len(v)) for k,v in seqs.items() if len(v)>1]
         probes=[]
-        for rep in (0,1):
+        for rep in expected_reps:
             bk,ck=f'pristine-{rep}',f'cap-{rep}'
             if bk not in snapshots or ck not in snapshots:continue
             for name,b in snapshots[bk].items():
@@ -69,7 +71,7 @@ def inspect(root):
     report['complete']=bool(report['runs']) and all(not r['missing'] and not r['failures'] for r in report['runs'])
     return report
 if __name__=='__main__':
-    p=argparse.ArgumentParser();p.add_argument('--root',type=Path,required=True);p.add_argument('--out',type=Path,required=True);a=p.parse_args()
+    p=argparse.ArgumentParser();p.add_argument('--root',type=Path,required=True);p.add_argument('--out',type=Path,required=True);p.add_argument('--repeats',type=int,choices=[1,2],default=2);a=p.parse_args()
     if a.out.exists():raise FileExistsError('preserve audit')
-    d=inspect(a.root);a.out.mkdir(parents=True);(a.out/'summary.json').write_text(json.dumps(d,indent=2,allow_nan=False)+'\n')
+    d=inspect(a.root,a.repeats);a.out.mkdir(parents=True);(a.out/'summary.json').write_text(json.dumps(d,indent=2,allow_nan=False)+'\n')
     print(json.dumps(dict(complete=d['complete'],runs=[{k:r[k] for k in ('job','completed_modes','missing','failures','within_arm_variation','paired_candidate_requests','paired_mismatches','old_failure_resolved')} for r in d['runs']]),indent=2))
