@@ -97,3 +97,29 @@ def test_unresolved_or_different_representation_is_not_promoted():
         _row("unresolved", ("a",), 1.20, 0.99, 1.24),
     ]
     assert find_opposite_action_collisions(rows) == []
+
+
+def test_checked_in_equal_work_fixture_collides_until_pairing_is_retained():
+    import json
+    from pathlib import Path
+
+    cases = json.loads(
+        (
+            Path(__file__).parents[1]
+            / "benchmarks"
+            / "results"
+            / "plan-order-mechanism"
+            / "cases.json"
+        ).read_text()
+    )
+    index = {(row["case"], row["state"]): row for row in cases}
+    a = index[("discovery-n8", "eqC-a")]
+    b = index[("discovery-n8", "eqC-b")]
+    ga = Geometry(tuple(a["query"]), tuple(a["cached"]))
+    gb = Geometry(tuple(b["query"]), tuple(b["cached"]))
+
+    assert aggregate_sums(ga) == aggregate_sums(gb)
+    assert analytical_work(ga) == analytical_work(gb)
+    assert vidur_prefill_lookup_key(ga) == vidur_prefill_lookup_key(gb)
+    assert marginal_moments(ga) == marginal_moments(gb)
+    assert paired_multiset(ga) != paired_multiset(gb)
