@@ -29,7 +29,10 @@ class StreamState:
             tokens=self.tokens,finish_reason=self.finish,done_marker=self.done,frames=self.frames,error=self.error)
 
 async def record_request(session,url,cell,wire_id):
-    state=StreamState(cell['output_tokens']);started=time.perf_counter();status=None;headers={}
+    state=StreamState(cell['output_tokens']);started=time.perf_counter();status=None;headers={};arrivals=[]
+    def feed(data):
+        previous=len(state.tokens);state.accept(data)
+        arrivals.extend([time.perf_counter()-started]*(len(state.tokens)-previous))
     payload=dict(rid=wire_id,input_ids=cell['input_ids'],sampling_params=dict(temperature=0,max_new_tokens=cell['output_tokens'],ignore_eos=True),stream=True)
     try:
         async with session.post(url+'/generate',json=payload) as response:
@@ -42,9 +45,9 @@ async def record_request(session,url,cell,wire_id):
                 async for line in response.content:
                     text=line.decode('utf-8').rstrip('\r\n')
                     if text=='':
-                        if buffer:state.accept('\n'.join(buffer));buffer=[]
+                        if buffer:feed('\n'.join(buffer));buffer=[]
                     elif text.startswith('data:'):buffer.append(text[5:].lstrip(' '))
-                if buffer:state.accept('\n'.join(buffer))
+                if buffer:feed('\n'.join(buffer))
     except Exception as exc:state.error=type(exc).__name__+': '+str(exc)
     return dict(logical_id=cell['id'],wire_id=wire_id,status=status,headers=headers,
-        elapsed_seconds=time.perf_counter()-started,diagnostic_only=True,**state.result())
+        elapsed_seconds=time.perf_counter()-started,token_arrival_seconds=arrivals,diagnostic_only=True,**state.result())
