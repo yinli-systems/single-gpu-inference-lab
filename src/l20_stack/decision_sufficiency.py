@@ -132,12 +132,28 @@ class ResolvedDecision:
         return None
 
     def normalized_costs(self) -> Mapping[str, float]:
-        """Return costs normalized to action_a=1.
+        """Return point-estimate costs normalized to action_a=1.
 
         If r = cost(a)/cost(b), then cost(b)=1/r.  These normalized costs are
         suitable for dimensionless regret audits only; they are not microseconds.
         """
         return {self.action_a: 1.0, self.action_b: 1.0 / self.ratio_a_over_b}
+
+    def conservative_normalized_action_gap(
+        self, relative_margin: float = 0.01
+    ) -> float:
+        """Smallest wrong-action gap supported by the reported ratio interval.
+
+        Costs are normalized independently in each state to action_a=1.
+        This is a conditional interval-derived effect bound, not a familywise or
+        hardware-population guarantee.
+        """
+        pref = self.preference(relative_margin)
+        if pref is None:
+            raise ValueError("decision is unresolved")
+        if pref == self.action_b:
+            return 1.0 - 1.0 / self.ci_low
+        return 1.0 / self.ci_high - 1.0
 
 
 @dataclass(frozen=True)
@@ -145,13 +161,18 @@ class CollisionWitness:
     feature_key: FeatureKey
     left: ResolvedDecision
     right: ResolvedDecision
-    normalized_minimax_regret_lower_bound: float
+    normalized_minimax_regret_point: float
+    conservative_normalized_minimax_regret: float
 
     def __post_init__(self) -> None:
         if self.left.feature_key != self.right.feature_key:
             raise ValueError("not a representation collision")
-        if self.normalized_minimax_regret_lower_bound <= 0:
-            raise ValueError("regret lower bound must be positive")
+        if self.normalized_minimax_regret_point <= 0:
+            raise ValueError("point regret must be positive")
+        if self.conservative_normalized_minimax_regret <= 0:
+            raise ValueError("conservative regret must be positive")
+        if self.conservative_normalized_minimax_regret > self.normalized_minimax_regret_point:
+            raise ValueError("conservative regret cannot exceed point regret")
 
 
 def binary_minimax_regret_lower_bound(
@@ -208,17 +229,29 @@ def find_opposite_action_collisions(
                     continue
                 if left.preference(relative_margin) == right.preference(relative_margin):
                     continue
-                lb = binary_minimax_regret_lower_bound(
+                point = binary_minimax_regret_lower_bound(
                     left.normalized_costs(),
                     right.normalized_costs(),
                     left.action_a,
                     left.action_b,
                 )
-                out.append(CollisionWitness(key, left, right, lb))
+                dl = left.conservative_normalized_action_gap(relative_margin)
+                dr = right.conservative_normalized_action_gap(relative_margin)
+                conservative = dl * dr / (dl + dr)
+                out.append(
+                    CollisionWitness(
+                        key,
+                        left,
+                        right,
+                        point,
+                        conservative,
+                    )
+                )
     return sorted(
         out,
         key=lambda x: (
-            -x.normalized_minimax_regret_lower_bound,
+            -x.conservative_normalized_minimax_regret,
+            -x.normalized_minimax_regret_point,
             x.left.state_id,
             x.right.state_id,
         ),
