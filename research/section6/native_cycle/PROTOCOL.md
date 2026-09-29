@@ -1,0 +1,9 @@
+# Native lifecycle follow-up on exposed witness
+
+Motivated by the completed residency-pressure experiment; this is an independent integration follow-up on the SAME EXPOSED shape, not an unseen workload test. Candidate: exact-logical heavy ordering in the real C++ FA2 planner plus the source-qualified 64-KiB launch constraint. No Python descriptor mutation in the measured cycle.
+
+Comparators: pristine official 0.7.0 wheel; disabled path of the isolated modified source; enabled candidate. Three fresh processes per mode on one allocated GPU per family, rotating order by repeat. Exact input and complete output/LSE hashes must match across modes. Recorded actual plan descriptors must agree with the CPU proposal; separate profiler launch proof must confirm48/64KiB. Case: BF16, [1024,63] queries, [128,16384] cached, unsplit, GQA32/8,D128. Only the exact diagnostic witness is allowed when enabled. This explicit refusal outside scope is NOT a general dispatcher.
+
+Twelve blocks per process; measure actual native plan()+one graph invocation, and plan()+32 captured real invocations separately using host completion wall time. Include source sort, plan, metadata transfer and execution. No synthetic division by layer count. Empty/no-op repeat controls are independent repeated cycles of the same mode. JIT, import and qualification are outside measured lifecycle and reported as excluded startup costs. Conditional three-process intervals, no hardware-population or unseen-shape claim.
+
+Pristine versus disabled versus candidate all remain visible. No default promotion. No E/full-engine insertion: paged/dynamic graphs, multistream/threaded ownership and unseen workload validation remain unsupported. Two further bounded12-minute GPU jobs, no other jobs cancelled. The earlier A/C timeout and preparation failure are retained.
