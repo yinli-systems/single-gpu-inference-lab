@@ -1,0 +1,820 @@
+{
+  "schema": 1,
+  "cases": [
+    {
+      "id": "exposed-two-request",
+      "family": "exposed",
+      "q": [
+        1024,
+        63
+      ],
+      "cached": [
+        128,
+        16384
+      ]
+    },
+    {
+      "id": "canary-small",
+      "family": "canary",
+      "q": [
+        16,
+        32
+      ],
+      "cached": [
+        32,
+        64
+      ]
+    },
+    {
+      "id": "canary-wide",
+      "family": "canary",
+      "q": [
+        512,
+        128
+      ],
+      "cached": [
+        1024,
+        4096
+      ]
+    },
+    {
+      "id": "development-00",
+      "family": "development",
+      "regime": "balanced",
+      "q": [
+        96
+      ],
+      "cached": [
+        128
+      ]
+    },
+    {
+      "id": "development-01",
+      "family": "development",
+      "regime": "same",
+      "q": [
+        384
+      ],
+      "cached": [
+        128
+      ]
+    },
+    {
+      "id": "development-02",
+      "family": "development",
+      "regime": "opposite",
+      "q": [
+        256
+      ],
+      "cached": [
+        512
+      ]
+    },
+    {
+      "id": "development-03",
+      "family": "development",
+      "regime": "mixed",
+      "q": [
+        384
+      ],
+      "cached": [
+        0
+      ]
+    },
+    {
+      "id": "development-04",
+      "family": "development",
+      "regime": "balanced",
+      "q": [
+        192,
+        192
+      ],
+      "cached": [
+        2048,
+        2048
+      ]
+    },
+    {
+      "id": "development-05",
+      "family": "development",
+      "regime": "same",
+      "q": [
+        64,
+        96
+      ],
+      "cached": [
+        1024,
+        8192
+      ]
+    },
+    {
+      "id": "development-06",
+      "family": "development",
+      "regime": "opposite",
+      "q": [
+        256,
+        16
+      ],
+      "cached": [
+        2048,
+        16384
+      ]
+    },
+    {
+      "id": "development-07",
+      "family": "development",
+      "regime": "mixed",
+      "q": [
+        96,
+        384
+      ],
+      "cached": [
+        8192,
+        512
+      ]
+    },
+    {
+      "id": "development-08",
+      "family": "development",
+      "regime": "balanced",
+      "q": [
+        512,
+        512,
+        512,
+        512
+      ],
+      "cached": [
+        2048,
+        2048,
+        2048,
+        2048
+      ]
+    },
+    {
+      "id": "development-09",
+      "family": "development",
+      "regime": "same",
+      "q": [
+        32,
+        64,
+        64,
+        384
+      ],
+      "cached": [
+        4096,
+        8192,
+        8192,
+        8192
+      ]
+    },
+    {
+      "id": "development-10",
+      "family": "development",
+      "regime": "opposite",
+      "q": [
+        384,
+        256,
+        256,
+        48
+      ],
+      "cached": [
+        128,
+        128,
+        2048,
+        16384
+      ]
+    },
+    {
+      "id": "development-11",
+      "family": "development",
+      "regime": "mixed",
+      "q": [
+        256,
+        16,
+        64,
+        32
+      ],
+      "cached": [
+        128,
+        16384,
+        128,
+        1024
+      ]
+    },
+    {
+      "id": "development-12",
+      "family": "development",
+      "regime": "balanced",
+      "q": [
+        384,
+        384,
+        384,
+        384,
+        384,
+        384,
+        384,
+        384
+      ],
+      "cached": [
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128
+      ]
+    },
+    {
+      "id": "development-13",
+      "family": "development",
+      "regime": "same",
+      "q": [
+        64,
+        128,
+        128,
+        192,
+        256,
+        384,
+        512,
+        512
+      ],
+      "cached": [
+        512,
+        4096,
+        8192,
+        8192,
+        8192,
+        8192,
+        16384,
+        16384
+      ]
+    },
+    {
+      "id": "development-14",
+      "family": "development",
+      "regime": "opposite",
+      "q": [
+        512,
+        256,
+        192,
+        192,
+        128,
+        96,
+        32,
+        32
+      ],
+      "cached": [
+        0,
+        128,
+        128,
+        512,
+        1024,
+        1024,
+        16384,
+        16384
+      ]
+    },
+    {
+      "id": "development-15",
+      "family": "development",
+      "regime": "mixed",
+      "q": [
+        64,
+        32,
+        96,
+        192,
+        256,
+        48,
+        512,
+        64
+      ],
+      "cached": [
+        1024,
+        512,
+        128,
+        0,
+        16384,
+        128,
+        512,
+        8192
+      ]
+    },
+    {
+      "id": "confirmatory-00",
+      "family": "confirmatory",
+      "regime": "balanced",
+      "q": [
+        384,
+        384,
+        384
+      ],
+      "cached": [
+        4096,
+        4096,
+        4096
+      ]
+    },
+    {
+      "id": "confirmatory-01",
+      "family": "confirmatory",
+      "regime": "same",
+      "q": [
+        16,
+        32,
+        64
+      ],
+      "cached": [
+        0,
+        1024,
+        2048
+      ]
+    },
+    {
+      "id": "confirmatory-02",
+      "family": "confirmatory",
+      "regime": "opposite",
+      "q": [
+        192,
+        96,
+        32
+      ],
+      "cached": [
+        0,
+        512,
+        2048
+      ]
+    },
+    {
+      "id": "confirmatory-03",
+      "family": "confirmatory",
+      "regime": "mixed",
+      "q": [
+        384,
+        256,
+        192
+      ],
+      "cached": [
+        128,
+        1024,
+        512
+      ]
+    },
+    {
+      "id": "confirmatory-04",
+      "family": "confirmatory",
+      "regime": "balanced",
+      "q": [
+        256,
+        256,
+        256,
+        256,
+        256
+      ],
+      "cached": [
+        128,
+        128,
+        128,
+        128,
+        128
+      ]
+    },
+    {
+      "id": "confirmatory-05",
+      "family": "confirmatory",
+      "regime": "same",
+      "q": [
+        32,
+        96,
+        192,
+        256,
+        256
+      ],
+      "cached": [
+        128,
+        1024,
+        4096,
+        4096,
+        16384
+      ]
+    },
+    {
+      "id": "confirmatory-06",
+      "family": "confirmatory",
+      "regime": "opposite",
+      "q": [
+        192,
+        96,
+        96,
+        64,
+        16
+      ],
+      "cached": [
+        0,
+        0,
+        128,
+        2048,
+        8192
+      ]
+    },
+    {
+      "id": "confirmatory-07",
+      "family": "confirmatory",
+      "regime": "mixed",
+      "q": [
+        32,
+        256,
+        96,
+        512,
+        128
+      ],
+      "cached": [
+        128,
+        4096,
+        16384,
+        128,
+        1024
+      ]
+    },
+    {
+      "id": "confirmatory-08",
+      "family": "confirmatory",
+      "regime": "balanced",
+      "q": [
+        64,
+        64,
+        64,
+        64,
+        64,
+        64,
+        64
+      ],
+      "cached": [
+        2048,
+        2048,
+        2048,
+        2048,
+        2048,
+        2048,
+        2048
+      ]
+    },
+    {
+      "id": "confirmatory-09",
+      "family": "confirmatory",
+      "regime": "same",
+      "q": [
+        16,
+        48,
+        48,
+        64,
+        64,
+        192,
+        256
+      ],
+      "cached": [
+        0,
+        128,
+        512,
+        1024,
+        1024,
+        8192,
+        16384
+      ]
+    },
+    {
+      "id": "confirmatory-10",
+      "family": "confirmatory",
+      "regime": "opposite",
+      "q": [
+        384,
+        256,
+        96,
+        96,
+        64,
+        48,
+        16
+      ],
+      "cached": [
+        1024,
+        1024,
+        2048,
+        4096,
+        8192,
+        16384,
+        16384
+      ]
+    },
+    {
+      "id": "confirmatory-11",
+      "family": "confirmatory",
+      "regime": "mixed",
+      "q": [
+        384,
+        16,
+        32,
+        64,
+        192,
+        192,
+        48
+      ],
+      "cached": [
+        2048,
+        2048,
+        4096,
+        128,
+        2048,
+        1024,
+        128
+      ]
+    },
+    {
+      "id": "confirmatory-12",
+      "family": "confirmatory",
+      "regime": "balanced",
+      "q": [
+        48,
+        48,
+        48,
+        48,
+        48,
+        48,
+        48,
+        48,
+        48,
+        48,
+        48
+      ],
+      "cached": [
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128,
+        128
+      ]
+    },
+    {
+      "id": "confirmatory-13",
+      "family": "confirmatory",
+      "regime": "same",
+      "q": [
+        16,
+        64,
+        64,
+        96,
+        96,
+        128,
+        128,
+        128,
+        192,
+        256,
+        384
+      ],
+      "cached": [
+        0,
+        0,
+        128,
+        512,
+        512,
+        512,
+        512,
+        512,
+        1024,
+        2048,
+        16384
+      ]
+    },
+    {
+      "id": "confirmatory-14",
+      "family": "confirmatory",
+      "regime": "opposite",
+      "q": [
+        512,
+        384,
+        384,
+        256,
+        192,
+        128,
+        64,
+        48,
+        48,
+        48,
+        16
+      ],
+      "cached": [
+        128,
+        512,
+        512,
+        512,
+        1024,
+        2048,
+        2048,
+        4096,
+        16384,
+        16384,
+        16384
+      ]
+    },
+    {
+      "id": "confirmatory-15",
+      "family": "confirmatory",
+      "regime": "mixed",
+      "q": [
+        48,
+        48,
+        192,
+        32,
+        16,
+        32,
+        64,
+        128,
+        32,
+        256,
+        192
+      ],
+      "cached": [
+        0,
+        128,
+        2048,
+        1024,
+        1024,
+        128,
+        16384,
+        1024,
+        1024,
+        16384,
+        16384
+      ]
+    },
+    {
+      "id": "confirmatory-16",
+      "family": "confirmatory",
+      "regime": "balanced",
+      "q": [
+        32,
+        32,
+        32
+      ],
+      "cached": [
+        16384,
+        16384,
+        16384
+      ]
+    },
+    {
+      "id": "confirmatory-17",
+      "family": "confirmatory",
+      "regime": "same",
+      "q": [
+        48,
+        192,
+        256
+      ],
+      "cached": [
+        0,
+        128,
+        128
+      ]
+    },
+    {
+      "id": "confirmatory-18",
+      "family": "confirmatory",
+      "regime": "opposite",
+      "q": [
+        384,
+        128,
+        32
+      ],
+      "cached": [
+        0,
+        128,
+        128
+      ]
+    },
+    {
+      "id": "confirmatory-19",
+      "family": "confirmatory",
+      "regime": "mixed",
+      "q": [
+        48,
+        512,
+        96
+      ],
+      "cached": [
+        2048,
+        2048,
+        0
+      ]
+    },
+    {
+      "id": "confirmatory-20",
+      "family": "confirmatory",
+      "regime": "balanced",
+      "q": [
+        48,
+        48,
+        48,
+        48,
+        48
+      ],
+      "cached": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "id": "confirmatory-21",
+      "family": "confirmatory",
+      "regime": "same",
+      "q": [
+        16,
+        32,
+        192,
+        384,
+        512
+      ],
+      "cached": [
+        128,
+        128,
+        512,
+        2048,
+        4096
+      ]
+    },
+    {
+      "id": "confirmatory-22",
+      "family": "confirmatory",
+      "regime": "opposite",
+      "q": [
+        96,
+        64,
+        48,
+        32,
+        16
+      ],
+      "cached": [
+        128,
+        512,
+        1024,
+        2048,
+        4096
+      ]
+    },
+    {
+      "id": "confirmatory-23",
+      "family": "confirmatory",
+      "regime": "mixed",
+      "q": [
+        384,
+        48,
+        96,
+        512,
+        16
+      ],
+      "cached": [
+        2048,
+        1024,
+        16384,
+        1024,
+        128
+      ]
+    }
+  ],
+  "case_hash": "ffaced26bceb2690aac67d504507325c3cf15061266d56eca18676b7da0a93da",
+  "primary": "cap",
+  "secondary": "wide",
+  "modes": [
+    "pristine",
+    "off",
+    "cap",
+    "wide"
+  ],
+  "dtypes": [
+    "float16",
+    "bfloat16"
+  ],
+  "layouts": [
+    "ragged",
+    "paged"
+  ],
+  "splits": [
+    "auto",
+    "unsplit"
+  ],
+  "blocks": 8,
+  "regimes": [
+    "graph_one",
+    "graph16"
+  ],
+  "full_model": false
+}
