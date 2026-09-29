@@ -1,0 +1,119 @@
+"""Fail-closed per-stage analysis. No model quality is inferred from kernel timings."""
+from __future__ import annotations
+import argparse,hashlib,itertools,json,math,sys
+from pathlib import Path
+from collections import defaultdict
+from functools import lru_cache
+import numpy as np
+
+def require(c,m):
+ if not c:raise ValueError(m)
+def sha(p):return hashlib.sha256(Path(p).read_bytes()).hexdigest()
+def load(root,stage,gpu):
+ sys.path.insert(0,str(root/'source'));from manifest import build,digest
+ m=build();runs=[];seen=set();source=set();physical=defaultdict(set)
+ for path in sorted((root/'runs').glob(stage+'-'+gpu+'-*')):
+  if not path.is_dir():continue
+  require(not (path/'failure.json').exists(),'failure retained '+str(path))
+  require((path/'complete.json').exists() and (path/'launcher-complete.txt').exists(),'incomplete run '+str(path))
+  c=json.loads((path/'complete.json').read_text());e=json.loads((path/'environment.json').read_text())
+  require(c['complete'] is True and e['case_hash']==m['case_hash'],'wrong campaign')
+  for f,h in c['files'].items():require(Path(f).name==f and sha(path/f)==h,'hash mismatch '+f)
+  key=(e['shard'],e['rep'],e['mode']);require(key not in seen,'duplicate run');seen.add(key)
+  source.add(digest(e['source']))
+  hardware=e['hardware']['out'].strip().splitlines();require(len(hardware)==2,'single visible GPU required')
+  physical[e['shard']].add(hardware[1].strip())
+  wanted=('exposed','canary') if stage=='canary' else (stage,)
+  allcases=[x for x in m['cases'] if x['family'] in wanted]
+  expectedcases=[x for i,x in enumerate(allcases) if i%e['shards']==e['shard']]
+  require(e['cases']==expectedcases,'changed cases/shard mapping')
+  blocks=2 if stage=='canary' else m['blocks']
+  basic=set(itertools.product([x['id'] for x in expectedcases],m['dtypes'],m['layouts'],m['splits']))
+  expected=set(itertools.product(basic,range(blocks),(1,16),range(4)));rows=json.loads((path/'measurements.json').read_text());index={}
+  for row in rows:
+   k=((row['case'],row['dtype'],row['layout'],row['split']),row['block'],row['calls'],row['position'])
+   require(k in expected and k not in index,'unexpected/duplicate timing row')
+   seq=('main','repeat','repeat','main') if row['block']%2==0 else ('repeat','main','main','repeat')
+   require(row['label']==seq[row['position']] and row['mode']==e['mode'] and row['rep']==e['rep'],'timing identity mismatch')
+   require(all(isinstance(row[z],(float,int)) and math.isfinite(row[z]) and row[z]>0 for z in ('run_device_us','run_wall_us','cycle_us')),'invalid timing')
+   index[k]=row
+  require(set(index)==expected and len(rows)==c['rows']==c['expected'],'matrix incomplete')
+  quals=json.loads((path/'qualification.json').read_text());qmap={}
+  for q in quals:
+   k=(q['case'],q['dtype'],q['layout'],q['split']);require(k in basic and k not in qmap,'qualification coverage')
+   require(q['eager_graph_exact'] is True,'graph parity missing')
+   if e['mode']!='wide':require(q['pristine_exact'] is True and q['pristine_full_max_abs']==0,'nonexact resource-only output')
+   require(q['FP32']['vectors']>0 and all(math.isfinite(q['FP32'][z]) for z in ['max_abs','rmse','lse_max_abs']),'bad FP32 receipt')
+   qmap[k]=q
+  require(set(qmap)==basic and len(quals)==c['qualifications'],'incomplete qualification')
+  runs.append(dict(path=path,env=e,index=index,qual=qmap))
+ require(runs and len(source)==1,'no runs or mixed source')
+ shards=runs[0]['env']['shards'];reps=1 if stage=='canary' else 3
+ require(seen==set(itertools.product(range(shards),range(reps),m['modes'])),'incomplete declared mode/repeat/shard group')
+ require(all(len(v)==1 for v in physical.values()),'within-shard hardware/driver changed')
+ by=defaultdict(dict)
+ for r in runs:
+  for k,q in r['qual'].items():by[k][(r['env']['rep'],r['env']['mode'])]=q
+ for k,values in by.items():
+  require(len({x['inputs_sha256'] for x in values.values()})==1,'cross-mode input mismatch')
+  for rep in range(reps):
+   base=values[(rep,'pristine')]
+   for mode in ['off','cap']:
+    q=values[(rep,mode)]
+    require(q['out_sha256']==base['out_sha256'] and q['lse_sha256']==base['lse_sha256'],'cross-mode hash parity failure')
+ return m,runs,physical
+
+@lru_cache(None)
+def weights(shard,arm):
+ seed=936612+shard*101+{'pristine':0,'off':7,'cap':13,'wide':23}[arm]
+ rng=np.random.default_rng(seed);w=np.zeros((10000,24),dtype=float)
+ for d in range(10000):
+  for p in rng.integers(0,3,size=3):
+   for b in rng.integers(0,8,size=8):w[d,p*8+b]+=1
+ return w/24
+
+def run(a):
+ require(not a.out.exists(),'preserve analysis output');m,rs,physical=load(a.root,a.stage,a.gpu)
+ receipt=dict(stage=a.stage,gpu=a.gpu,complete=True,processes=len(rs),timing_rows=sum(len(r['index']) for r in rs),
+  qualifications=sum(len(r['qual']) for r in rs),source_hashes=rs[0]['env']['source'],manifest_hash=m['case_hash'],
+  hardware={str(k):sorted(v) for k,v in physical.items()},default_promotion=False,serving_promotion=False)
+ receipt['numerics']={mode:dict(qualifications=sum(len(r['qual']) for r in rs if r['env']['mode']==mode),
+  exact_full_outputs=sum(q['pristine_exact'] for r in rs if r['env']['mode']==mode for q in r['qual'].values()),
+  max_abs_vs_pristine=max(q['pristine_full_max_abs'] for r in rs if r['env']['mode']==mode for q in r['qual'].values()),
+  FP32_max_abs=max(q['FP32']['max_abs'] for r in rs if r['env']['mode']==mode for q in r['qual'].values()),
+  FP32_vectors=sum(q['FP32']['vectors'] for r in rs if r['env']['mode']==mode for q in r['qual'].values())) for mode in m['modes']}
+ md=['# Resource-policy result','',a.stage+' / '+a.gpu,'']
+ if a.stage!='canary':
+  lookup={(r['env']['shard'],r['env']['rep'],r['env']['mode']):r for r in rs};cells=[];drawcache={}
+  for shard in range(rs[0]['env']['shards']):
+   r=lookup[(shard,0,'pristine')]
+   for k in r['qual']:
+    for calls,metric in itertools.product([1,16],['run_device_us','cycle_us']):
+     grids={};aa={}
+     for mode in m['modes']:
+      grids[mode]=np.array([[np.mean([lookup[(shard,rep,mode)]['index'][(k,b,calls,pos)][metric] for pos in range(4) if lookup[(shard,rep,mode)]['index'][(k,b,calls,pos)]['label']=='main']) for b in range(8)] for rep in range(3)])
+      repeated=np.array([[np.mean([lookup[(shard,rep,mode)]['index'][(k,b,calls,pos)][metric] for pos in range(4) if lookup[(shard,rep,mode)]['index'][(k,b,calls,pos)]['label']=='repeat']) for b in range(8)] for rep in range(3)])
+      draws=weights(shard,mode)@np.log(grids[mode]/repeated).reshape(24);lo,hi=np.exp(np.quantile(draws,[.05,.95]))
+      aa[mode]=dict(CI90=[float(lo),float(hi)],resolves1pct=bool(lo>=1/1.005 and hi<=1.005))
+     row=dict(case=k[0],dtype=k[1],layout=k[2],split=k[3],calls=calls,metric=metric,shard=shard,AA=aa,comparisons={})
+     for mode in ['off','cap','wide']:
+      bs=np.log(grids['pristine']).reshape(24);cs=np.log(grids[mode]).reshape(24)
+      draws=weights(shard,'pristine')@bs-weights(shard,mode)@cs
+      ratio=float(np.exp(bs.mean()-cs.mean()));ci=[float(x) for x in np.exp(np.quantile(draws,[.025,.975]))]
+      row['comparisons'][mode]=dict(ratio=ratio,CI95=ci,controls_resolve=aa['pristine']['resolves1pct'] and aa[mode]['resolves1pct'])
+      drawcache[(len(cells),mode)]=draws
+     cells.append(row)
+  summaries=[]
+  for layout,calls,metric,mode in itertools.product(m['layouts'],[1,16],['run_device_us','cycle_us'],['off','cap','wide']):
+   indices=[i for i,c in enumerate(cells) if (c['layout'],c['calls'],c['metric'])==(layout,calls,metric)]
+   selected=[cells[i] for i in indices];draws=np.mean([drawcache[(i,mode)] for i in indices],axis=0)
+   point=float(np.exp(np.mean([math.log(c['comparisons'][mode]['ratio']) for c in selected])))
+   summaries.append(dict(layout=layout,calls=calls,metric=metric,mode=mode,ratio=point,CI95=[float(x) for x in np.exp(np.quantile(draws,[.025,.975]))],
+    cells=len(selected),controls_failed=sum(not c['comparisons'][mode]['controls_resolve'] for c in selected),
+    worst_ratio=min(c['comparisons'][mode]['ratio'] for c in selected),point_regressions_gt1pct=sum(c['comparisons'][mode]['ratio']<1/1.01 for c in selected)))
+  receipt.update(cells=cells,summaries=summaries,statistical_scope='Independent arm process/block bootstrap, common weights only within a physical allocation; conditional on frozen geometries/devices. Not a population or simultaneous guarantee.')
+  md+=['|layout|calls|metric|mode|pristine/candidate [95% CI]|worst|unresolved controls|','|---|---:|---|---|---|---:|---:|']
+  for s in summaries:md.append('|%s|%s|%s|%s|%.6f [%.6f,%.6f]|%.6f|%s|'%(s['layout'],s['calls'],s['metric'],s['mode'],s['ratio'],*s['CI95'],s['worst_ratio'],s['controls_failed']))
+ a.out.mkdir(parents=True);(a.out/'summary.json').write_text(json.dumps(receipt,indent=2,allow_nan=False)+'\n');(a.out/'RESULTS.md').write_text('\n'.join(md)+'\n');print(json.dumps({k:v for k,v in receipt.items() if k not in ['cells','source_hashes']},indent=2))
+if __name__=='__main__':
+ p=argparse.ArgumentParser();p.add_argument('--root',type=Path,required=True);p.add_argument('--out',type=Path,required=True);p.add_argument('--stage',choices=['canary','development','confirmatory'],required=True);p.add_argument('--gpu',choices=['gpu_4090','gpu_5090'],required=True);run(p.parse_args())
