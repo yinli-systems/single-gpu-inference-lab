@@ -254,6 +254,7 @@ def run(args) -> None:
         "affinity_before": affinity_before,
         "affinity": sorted(os.sched_getaffinity(0)),
         "job": os.getenv("SLURM_JOB_ID"),
+        "partition": os.getenv("SLURM_JOB_PARTITION"),
         "full_model": False,
         "serving_promotion": False,
         "default_promotion": False,
