@@ -59,7 +59,8 @@ def test_resource_audit_separates_representation_from_execution_context():
 
     geometry_only = result["representations"]["paired_geometry"]
     assert geometry_only["opposite_action_collision_pairs"] == 1
-    assert geometry_only["max_normalized_minimax_regret_lower_bound"] > 0
+    assert geometry_only["max_normalized_minimax_regret_point"] > 0
+    assert geometry_only["max_conservative_normalized_minimax_regret"] > 0
 
     with_layout = result["representations"]["paired_plus_dtype_layout"]
     assert with_layout["opposite_action_collision_pairs"] == 0
