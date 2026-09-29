@@ -1,7 +1,7 @@
 """Create isolated FlashInfer 0.7 overlays for a plan-time guarded resource-cap tactic."""
 from __future__ import annotations
 from pathlib import Path
-import argparse,difflib,hashlib,json,shutil
+import argparse,difflib,hashlib,json,os,shutil
 EXPECTED={
  'flashinfer/data/include/flashinfer/attention/prefill.cuh':'e66bce2652c0a3c5b54f88510aff2b4b48ff6a52c4ee23fa97f91fa06a935b87',
  'flashinfer/data/include/flashinfer/attention/scheduler.cuh':'425ba78815ba77ae848c67507d1af6b024d05edd257a7d9b331166afcef9b17c',
@@ -104,8 +104,8 @@ def prepare(source,out,mode):
   b=(source/rel).read_bytes()
   if sha_bytes(b)!=h:raise ValueError('unreviewed source '+rel)
   originals[rel]=b.decode()
- shutil.copytree(source/'flashinfer',out/'flashinfer',ignore=shutil.ignore_patterns('__pycache__','*.pyc'))
- for f in source.glob('*.dist-info'):shutil.copytree(f,out/f.name)
+ shutil.copytree(source/'flashinfer',out/'flashinfer',ignore=shutil.ignore_patterns('__pycache__','*.pyc'),copy_function=os.link)
+ for f in source.glob('*.dist-info'):shutil.copytree(f,out/f.name,copy_function=os.link)
  changes={
   'flashinfer/data/include/flashinfer/attention/scheduler.cuh':patch_scheduler(originals['flashinfer/data/include/flashinfer/attention/scheduler.cuh'],mode),
   'flashinfer/data/include/flashinfer/attention/prefill.cuh':patch_prefill(originals['flashinfer/data/include/flashinfer/attention/prefill.cuh']),
@@ -116,7 +116,9 @@ def prepare(source,out,mode):
   src=(source/rel).read_text(); changes[rel]=patch_jinja(src); originals[rel]=src
  diffs=[]; hashes={}
  for rel,new in changes.items():
-  (out/rel).write_text(new); hashes[rel]=sha_text(new)
+  target=out/rel
+  target.unlink()  # break hardlink before writing; base wheel stays byte-identical
+  target.write_text(new); hashes[rel]=sha_text(new)
   diffs.extend(difflib.unified_diff(originals[rel].splitlines(True),new.splitlines(True),fromfile='a/'+rel,tofile='b/'+rel))
  rec=dict(mode=mode,base_version='0.7.0',base_hashes=EXPECTED,modified_hashes=hashes,
   plan_vector_size=16,guard_rule='max_cached_prefix>=8192 && max_q*n/mean_q>=1.2',
