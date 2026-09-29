@@ -1,0 +1,1174 @@
+{
+  "schema": 1,
+  "seed": 2026093007,
+  "cases": [
+    {
+      "id": "canary-safe",
+      "family": "canary",
+      "regime": "safe",
+      "q": [
+        32,
+        96,
+        384,
+        512
+      ],
+      "cached": [
+        128,
+        8192,
+        16384,
+        24576
+      ],
+      "guarded_expected": true
+    },
+    {
+      "id": "canary-off",
+      "family": "canary",
+      "regime": "off",
+      "q": [
+        240,
+        240,
+        240,
+        240
+      ],
+      "cached": [
+        9216,
+        9216,
+        9216,
+        9216
+      ],
+      "guarded_expected": false
+    },
+    {
+      "id": "release-safe-00",
+      "family": "release",
+      "regime": "same",
+      "q": [
+        96,
+        128,
+        256
+      ],
+      "cached": [
+        4096,
+        8192,
+        16384
+      ],
+      "guarded_expected": true
+    },
+    {
+      "id": "release-safe-01",
+      "family": "release",
+      "regime": "opposite",
+      "q": [
+        512,
+        384,
+        192,
+        48,
+        32
+      ],
+      "cached": [
+        2048,
+        4096,
+        4096,
+        8192,
+        24576
+      ],
+      "guarded_expected": true
+    },
+    {
+      "id": "release-safe-02",
+      "family": "release",
+      "regime": "mixed",
+      "q": [
+        192,
+        48,
+        384,
+        384,
+        192,
+        128,
+        512
+      ],
+      "cached": [
+        4096,
+        2048,
+        24576,
+        512,
+        512,
+        0,
+        128
+      ],
+      "guarded_expected": true
+    },
+    {
+      "id": "release-safe-03",
+      "family": "release",
+      "regime": "same",
+      "q": [
+        32,
+        32,
+        96,
+        96,
+        128,
+        384,
+        384,
+        384,
+        512
+      ],
+      "cached": [
+        0,
+        512,
+        512,
+        512,
+        512,
+        2048,
+        2048,
+        4096,
+        12288
+      ],
+      "guarded_expected": true
+    },
+    {
+      "id": "release-safe-04",
+      "family": "release",
+      "regime": "opposite",
+      "q": [
+        512,
+        256,
+        256,
+        192,
+        192,
+        128,
+        128,
+        128,
+        96,
+        48,
+        32
+      ],
+      "cached": [
+        0,
+        0,
+        0,
+        128,
+        128,
+        512,
+        2048,
+        2048,
+        8192,
+        8192,
+        12288
+      ],
+      "guarded_expected": true
+    },
+    {
+      "id": "release-safe-05",
+      "family": "release",
+      "regime": "mixed",
+      "q": [
+        64,
+        96,
+        16
+      ],
+      "cached": [
+        2048,
+        24576,
+        128
+      ],
+      "guarded_expected": true
+    },
+    {
+      "id": "release-safe-06",
+      "family": "release",
+      "regime": "same",
+      "q": [
+        48,
+        64,
+        64,
+        96,
+        128
+      ],
+      "cached": [
+        1024,
+        1024,
+        2048,
+        8192,
+        24576
+      ],
+      "guarded_expected": true
+    },
+    {
+      "id": "release-safe-07",
+      "family": "release",
+      "regime": "opposite",
+      "q": [
+        512,
+        256,
+        96,
+        96,
+        96,
+        48,
+        48
+      ],
+      "cached": [
+        0,
+        0,
+        0,
+        1024,
+        2048,
+        8192,
+        8192
+      ],
+      "guarded_expected": true
+    },
+    {
+      "id": "release-safe-08",
+      "family": "release",
+      "regime": "mixed",
+      "q": [
+        16,
+        16,
+        48,
+        256,
+        48,
+        96,
+        16,
+        48,
+        48
+      ],
+      "cached": [
+        128,
+        4096,
+        8192,
+        2048,
+        2048,
+        4096,
+        0,
+        2048,
+        8192
+      ],
+      "guarded_expected": true
+    },
+    {
+      "id": "release-safe-09",
+      "family": "release",
+      "regime": "same",
+      "q": [
+        32,
+        32,
+        96,
+        128,
+        128,
+        128,
+        192,
+        256,
+        256,
+        384,
+        384
+      ],
+      "cached": [
+        0,
+        512,
+        512,
+        1024,
+        1024,
+        1024,
+        1024,
+        1024,
+        2048,
+        4096,
+        24576
+      ],
+      "guarded_expected": true
+    },
+    {
+      "id": "release-safe-10",
+      "family": "release",
+      "regime": "opposite",
+      "q": [
+        192,
+        96,
+        48
+      ],
+      "cached": [
+        1024,
+        2048,
+        8192
+      ],
+      "guarded_expected": true
+    },
+    {
+      "id": "release-safe-11",
+      "family": "release",
+      "regime": "mixed",
+      "q": [
+        64,
+        192,
+        384,
+        256,
+        96
+      ],
+      "cached": [
+        2048,
+        1024,
+        8192,
+        2048,
+        1024
+      ],
+      "guarded_expected": true
+    },
+    {
+      "id": "release-safe-12",
+      "family": "release",
+      "regime": "same",
+      "q": [
+        16,
+        32,
+        48,
+        96,
+        128,
+        192,
+        256
+      ],
+      "cached": [
+        128,
+        512,
+        1024,
+        2048,
+        2048,
+        8192,
+        8192
+      ],
+      "guarded_expected": true
+    },
+    {
+      "id": "release-safe-13",
+      "family": "release",
+      "regime": "opposite",
+      "q": [
+        512,
+        512,
+        384,
+        256,
+        96,
+        64,
+        32,
+        16,
+        16
+      ],
+      "cached": [
+        0,
+        128,
+        128,
+        2048,
+        2048,
+        8192,
+        8192,
+        8192,
+        12288
+      ],
+      "guarded_expected": true
+    },
+    {
+      "id": "release-safe-14",
+      "family": "release",
+      "regime": "mixed",
+      "q": [
+        48,
+        256,
+        512,
+        512,
+        512,
+        128,
+        48,
+        192,
+        96,
+        512,
+        384
+      ],
+      "cached": [
+        4096,
+        8192,
+        24576,
+        4096,
+        2048,
+        4096,
+        512,
+        128,
+        2048,
+        512,
+        4096
+      ],
+      "guarded_expected": true
+    },
+    {
+      "id": "release-safe-15",
+      "family": "release",
+      "regime": "same",
+      "q": [
+        32,
+        96,
+        256
+      ],
+      "cached": [
+        0,
+        8192,
+        16384
+      ],
+      "guarded_expected": true
+    },
+    {
+      "id": "release-safe-16",
+      "family": "release",
+      "regime": "opposite",
+      "q": [
+        384,
+        192,
+        128,
+        128,
+        64
+      ],
+      "cached": [
+        128,
+        1024,
+        2048,
+        2048,
+        8192
+      ],
+      "guarded_expected": true
+    },
+    {
+      "id": "release-safe-17",
+      "family": "release",
+      "regime": "mixed",
+      "q": [
+        96,
+        256,
+        32,
+        64,
+        64,
+        384,
+        384
+      ],
+      "cached": [
+        1024,
+        512,
+        16384,
+        2048,
+        512,
+        0,
+        2048
+      ],
+      "guarded_expected": true
+    },
+    {
+      "id": "release-safe-18",
+      "family": "release",
+      "regime": "same",
+      "q": [
+        16,
+        64,
+        64,
+        64,
+        192,
+        192,
+        192,
+        192,
+        512
+      ],
+      "cached": [
+        0,
+        128,
+        512,
+        1024,
+        1024,
+        1024,
+        8192,
+        8192,
+        8192
+      ],
+      "guarded_expected": true
+    },
+    {
+      "id": "release-safe-19",
+      "family": "release",
+      "regime": "opposite",
+      "q": [
+        512,
+        512,
+        384,
+        384,
+        256,
+        256,
+        128,
+        96,
+        48,
+        32,
+        32
+      ],
+      "cached": [
+        512,
+        1024,
+        1024,
+        1024,
+        2048,
+        2048,
+        4096,
+        4096,
+        8192,
+        8192,
+        12288
+      ],
+      "guarded_expected": true
+    },
+    {
+      "id": "release-safe-20",
+      "family": "release",
+      "regime": "mixed",
+      "q": [
+        128,
+        48,
+        64
+      ],
+      "cached": [
+        12288,
+        4096,
+        2048
+      ],
+      "guarded_expected": true
+    },
+    {
+      "id": "release-safe-21",
+      "family": "release",
+      "regime": "same",
+      "q": [
+        32,
+        48,
+        256,
+        256,
+        384
+      ],
+      "cached": [
+        2048,
+        2048,
+        8192,
+        8192,
+        16384
+      ],
+      "guarded_expected": true
+    },
+    {
+      "id": "release-safe-22",
+      "family": "release",
+      "regime": "opposite",
+      "q": [
+        384,
+        192,
+        96,
+        64,
+        48,
+        48,
+        16
+      ],
+      "cached": [
+        128,
+        512,
+        1024,
+        1024,
+        2048,
+        2048,
+        16384
+      ],
+      "guarded_expected": true
+    },
+    {
+      "id": "release-safe-23",
+      "family": "release",
+      "regime": "mixed",
+      "q": [
+        192,
+        256,
+        192,
+        192,
+        192,
+        128,
+        32,
+        192,
+        128
+      ],
+      "cached": [
+        1024,
+        0,
+        128,
+        8192,
+        2048,
+        4096,
+        8192,
+        12288,
+        128
+      ],
+      "guarded_expected": true
+    },
+    {
+      "id": "release-boundary-00",
+      "family": "release",
+      "regime": "boundary",
+      "q": [
+        32,
+        96,
+        384
+      ],
+      "cached": [
+        4096,
+        128,
+        1024
+      ],
+      "guarded_expected": false
+    },
+    {
+      "id": "release-boundary-01",
+      "family": "release",
+      "regime": "boundary",
+      "q": [
+        16,
+        64,
+        256,
+        512,
+        96
+      ],
+      "cached": [
+        4096,
+        0,
+        512,
+        2048,
+        128
+      ],
+      "guarded_expected": false
+    },
+    {
+      "id": "release-boundary-02",
+      "family": "release",
+      "regime": "boundary",
+      "q": [
+        48,
+        128,
+        384,
+        64,
+        192,
+        32,
+        256
+      ],
+      "cached": [
+        8191,
+        128,
+        512,
+        1024,
+        2048,
+        4096,
+        128
+      ],
+      "guarded_expected": false
+    },
+    {
+      "id": "release-boundary-03",
+      "family": "release",
+      "regime": "boundary",
+      "q": [
+        16,
+        32,
+        64,
+        96,
+        128,
+        192,
+        256,
+        384,
+        512
+      ],
+      "cached": [
+        8191,
+        0,
+        128,
+        512,
+        1024,
+        2048,
+        4096,
+        128,
+        512
+      ],
+      "guarded_expected": false
+    },
+    {
+      "id": "release-boundary-04",
+      "family": "release",
+      "regime": "boundary",
+      "q": [
+        128,
+        128,
+        144
+      ],
+      "cached": [
+        8192,
+        128,
+        512
+      ],
+      "guarded_expected": false
+    },
+    {
+      "id": "release-boundary-05",
+      "family": "release",
+      "regime": "boundary",
+      "q": [
+        96,
+        96,
+        96,
+        112,
+        96
+      ],
+      "cached": [
+        8192,
+        128,
+        512,
+        1024,
+        2048
+      ],
+      "guarded_expected": false
+    },
+    {
+      "id": "release-boundary-06",
+      "family": "release",
+      "regime": "boundary",
+      "q": [
+        64,
+        64,
+        64,
+        64,
+        72,
+        64,
+        64
+      ],
+      "cached": [
+        16384,
+        0,
+        128,
+        512,
+        1024,
+        2048,
+        4096
+      ],
+      "guarded_expected": false
+    },
+    {
+      "id": "release-boundary-07",
+      "family": "release",
+      "regime": "boundary",
+      "q": [
+        192,
+        192,
+        208,
+        192,
+        192,
+        192,
+        192,
+        192,
+        192
+      ],
+      "cached": [
+        24576,
+        0,
+        128,
+        512,
+        1024,
+        2048,
+        4096,
+        8192,
+        12288
+      ],
+      "guarded_expected": false
+    },
+    {
+      "id": "release-balanced-00",
+      "family": "release",
+      "regime": "balanced",
+      "q": [
+        320,
+        320,
+        320
+      ],
+      "cached": [
+        3072,
+        3072,
+        3072
+      ],
+      "guarded_expected": false
+    },
+    {
+      "id": "release-balanced-01",
+      "family": "release",
+      "regime": "balanced",
+      "q": [
+        224,
+        224,
+        224,
+        224,
+        224
+      ],
+      "cached": [
+        256,
+        256,
+        256,
+        256,
+        256
+      ],
+      "guarded_expected": false
+    },
+    {
+      "id": "release-balanced-02",
+      "family": "release",
+      "regime": "balanced",
+      "q": [
+        56,
+        56,
+        56,
+        56,
+        56,
+        56,
+        56,
+        56,
+        56,
+        56,
+        56
+      ],
+      "cached": [
+        192,
+        192,
+        192,
+        192,
+        192,
+        192,
+        192,
+        192,
+        192,
+        192,
+        192
+      ],
+      "guarded_expected": false
+    },
+    {
+      "id": "release-balanced-03",
+      "family": "release",
+      "regime": "balanced",
+      "q": [
+        80,
+        80,
+        80,
+        80,
+        80,
+        80,
+        80
+      ],
+      "cached": [
+        1536,
+        1536,
+        1536,
+        1536,
+        1536,
+        1536,
+        1536
+      ],
+      "guarded_expected": false
+    },
+    {
+      "id": "release-balanced-04",
+      "family": "release",
+      "regime": "balanced",
+      "q": [
+        40,
+        40,
+        40
+      ],
+      "cached": [
+        12288,
+        12288,
+        12288
+      ],
+      "guarded_expected": false
+    },
+    {
+      "id": "release-balanced-05",
+      "family": "release",
+      "regime": "balanced",
+      "q": [
+        144,
+        144,
+        144,
+        144,
+        144
+      ],
+      "cached": [
+        9216,
+        9216,
+        9216,
+        9216,
+        9216
+      ],
+      "guarded_expected": false
+    },
+    {
+      "id": "release-balanced-06",
+      "family": "release",
+      "regime": "balanced",
+      "q": [
+        112,
+        112,
+        112,
+        112,
+        112,
+        112,
+        112,
+        112,
+        112
+      ],
+      "cached": [
+        10240,
+        10240,
+        10240,
+        10240,
+        10240,
+        10240,
+        10240,
+        10240,
+        10240
+      ],
+      "guarded_expected": false
+    },
+    {
+      "id": "release-balanced-07",
+      "family": "release",
+      "regime": "balanced",
+      "q": [
+        208,
+        208,
+        208,
+        208,
+        208,
+        208,
+        208,
+        208,
+        208,
+        208,
+        208
+      ],
+      "cached": [
+        20480,
+        20480,
+        20480,
+        20480,
+        20480,
+        20480,
+        20480,
+        20480,
+        20480,
+        20480,
+        20480
+      ],
+      "guarded_expected": false
+    },
+    {
+      "id": "release-control-00",
+      "family": "release",
+      "regime": "control",
+      "q": [
+        512,
+        48,
+        64
+      ],
+      "cached": [
+        512,
+        128,
+        512
+      ],
+      "guarded_expected": false
+    },
+    {
+      "id": "release-control-01",
+      "family": "release",
+      "regime": "control",
+      "q": [
+        384,
+        128,
+        16,
+        256,
+        96
+      ],
+      "cached": [
+        128,
+        2048,
+        128,
+        1024,
+        2048
+      ],
+      "guarded_expected": false
+    },
+    {
+      "id": "release-control-02",
+      "family": "release",
+      "regime": "control",
+      "q": [
+        48,
+        512,
+        256,
+        32,
+        128,
+        48,
+        128
+      ],
+      "cached": [
+        1024,
+        1024,
+        128,
+        0,
+        1024,
+        512,
+        0
+      ],
+      "guarded_expected": false
+    },
+    {
+      "id": "release-control-03",
+      "family": "release",
+      "regime": "control",
+      "q": [
+        64,
+        512,
+        256,
+        128,
+        48,
+        128,
+        16,
+        96,
+        384
+      ],
+      "cached": [
+        128,
+        512,
+        128,
+        128,
+        2048,
+        512,
+        2048,
+        2048,
+        512
+      ],
+      "guarded_expected": false
+    },
+    {
+      "id": "release-control-04",
+      "family": "release",
+      "regime": "control",
+      "q": [
+        256,
+        512,
+        96
+      ],
+      "cached": [
+        2048,
+        1024,
+        2048
+      ],
+      "guarded_expected": false
+    },
+    {
+      "id": "release-control-05",
+      "family": "release",
+      "regime": "control",
+      "q": [
+        128,
+        32,
+        48,
+        16,
+        384
+      ],
+      "cached": [
+        2048,
+        1024,
+        0,
+        128,
+        2048
+      ],
+      "guarded_expected": false
+    },
+    {
+      "id": "release-control-06",
+      "family": "release",
+      "regime": "control",
+      "q": [
+        256,
+        128,
+        96,
+        32,
+        512,
+        192,
+        512
+      ],
+      "cached": [
+        1024,
+        2048,
+        2048,
+        1024,
+        1024,
+        128,
+        1024
+      ],
+      "guarded_expected": false
+    },
+    {
+      "id": "release-control-07",
+      "family": "release",
+      "regime": "control",
+      "q": [
+        48,
+        48,
+        64,
+        256,
+        32,
+        48,
+        192,
+        96,
+        128
+      ],
+      "cached": [
+        128,
+        128,
+        4096,
+        128,
+        2048,
+        4096,
+        128,
+        4096,
+        1024
+      ],
+      "guarded_expected": false
+    }
+  ],
+  "dtypes": [
+    "float16",
+    "bfloat16"
+  ],
+  "layouts": [
+    "ragged",
+    "paged"
+  ],
+  "splits": [
+    "auto",
+    "unsplit"
+  ],
+  "modes": [
+    "pristine",
+    "off",
+    "cap",
+    "guarded"
+  ],
+  "blocks": 8,
+  "rule": {
+    "max_cached_prefix": 8192,
+    "max_q_times_n_times_5_gte_sum_q_times_6": true
+  },
+  "case_hash": "9306086e04f2ac698b3b48d821b70d09364ace6c40daa9660468766998ddcdf7"
+}
