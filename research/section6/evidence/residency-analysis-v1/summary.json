@@ -1,0 +1,1382 @@
+{
+  "complete": true,
+  "rows": 3456,
+  "qualified_records": 30,
+  "all_cases_exposed": true,
+  "full_model": false,
+  "default_promotion": false,
+  "serving_promotion": false,
+  "analysis_sha256": "8994377c99b677e70ff558db092b58e2dfa9ca5aa5a5a9dda0e1413abb3f66e7",
+  "GPUs": {
+    "NVIDIA GeForce RTX 4090": {
+      "uuid": "GPU-35159cca-5f77-88f2-12d2-e7b57c2791ee",
+      "driver": "580.82.07",
+      "summaries": [
+        {
+          "regime": "graph_one_warm",
+          "stats": {
+            "repeat48": {
+              "ratio": 0.999958544808077,
+              "CI": [
+                0.9990327416620831,
+                1.0009228818451223
+              ],
+              "confidence": 0.9
+            },
+            "heavy48": {
+              "ratio": 0.5720779415053141,
+              "CI": [
+                0.5717714969483896,
+                0.5723619004333822
+              ],
+              "confidence": 0.95
+            },
+            "native64": {
+              "ratio": 1.0024637146202344,
+              "CI": [
+                1.0007039787356689,
+                1.0047621327236702
+              ],
+              "confidence": 0.95
+            },
+            "heavy64": {
+              "ratio": 1.007724637365929,
+              "CI": [
+                1.0071670157144437,
+                1.0083233508779894
+              ],
+              "confidence": 0.95
+            },
+            "order_ratio_at64": {
+              "ratio": 1.00524799318815,
+              "CI": [
+                1.0031614984623785,
+                1.0067648147342
+              ],
+              "confidence": 0.95
+            },
+            "ratio_of_order_ratios": {
+              "ratio": 1.7571871247876318,
+              "CI": [
+                1.7530808611350994,
+                1.760247625644357
+              ],
+              "confidence": 0.95
+            }
+          },
+          "AA_resolves_one_percent": true
+        },
+        {
+          "regime": "graph32_steady",
+          "stats": {
+            "repeat48": {
+              "ratio": 0.9999584438013407,
+              "CI": [
+                0.9997777662356143,
+                1.000142583158726
+              ],
+              "confidence": 0.9
+            },
+            "heavy48": {
+              "ratio": 0.5701181327472943,
+              "CI": [
+                0.5699498658554347,
+                0.5702485214960731
+              ],
+              "confidence": 0.95
+            },
+            "native64": {
+              "ratio": 1.0030415763641785,
+              "CI": [
+                1.0026704381985179,
+                1.0033456152806712
+              ],
+              "confidence": 0.95
+            },
+            "heavy64": {
+              "ratio": 1.0071808294080193,
+              "CI": [
+                1.0070287444338781,
+                1.0073561781355986
+              ],
+              "confidence": 0.95
+            },
+            "order_ratio_at64": {
+              "ratio": 1.0041267013665025,
+              "CI": [
+                1.0037433599778625,
+                1.0045289918159952
+              ],
+              "confidence": 0.95
+            },
+            "ratio_of_order_ratios": {
+              "ratio": 1.7612607698123912,
+              "CI": [
+                1.7602656098311624,
+                1.7624134296031821
+              ],
+              "confidence": 0.95
+            }
+          },
+          "AA_resolves_one_percent": true
+        },
+        {
+          "regime": "graph_one_pressure128MiB",
+          "stats": {
+            "repeat48": {
+              "ratio": 1.0000266002790388,
+              "CI": [
+                0.9989985695954628,
+                1.0010615618380319
+              ],
+              "confidence": 0.9
+            },
+            "heavy48": {
+              "ratio": 0.5726248683139306,
+              "CI": [
+                0.5721100842014013,
+                0.5730220729570514
+              ],
+              "confidence": 0.95
+            },
+            "native64": {
+              "ratio": 1.0010866519609194,
+              "CI": [
+                1.0005615450002734,
+                1.001599155279269
+              ],
+              "confidence": 0.95
+            },
+            "heavy64": {
+              "ratio": 1.007748002196246,
+              "CI": [
+                1.007178601503876,
+                1.008264167771401
+              ],
+              "confidence": 0.95
+            },
+            "order_ratio_at64": {
+              "ratio": 1.0066541195232983,
+              "CI": [
+                1.0059246929283172,
+                1.0073541456443142
+              ],
+              "confidence": 0.95
+            },
+            "ratio_of_order_ratios": {
+              "ratio": 1.7579643763767163,
+              "CI": [
+                1.7561525355550474,
+                1.7599131738310936
+              ],
+              "confidence": 0.95
+            }
+          },
+          "AA_resolves_one_percent": true
+        }
+      ],
+      "launch_proofs": [
+        [
+          {
+            "arm": "native48",
+            "name": "void flashinfer::BatchPrefillWithRaggedKVCacheKernel<flashinfer::KernelTraits<(flashinfer::MaskMode)1, 128u, 2u, 2u, 8u, 8u, 4u, 1u, (flashinfer::PosEncodingMode)0, __nv_bfloat16, __nv_bfloat16, __nv_bfloat16, float, int, flashinfer::DefaultAttention<false, false, false, false>, true>, RaggedParams>(RaggedParams)",
+            "args": {
+              "queued": 0,
+              "device": 0,
+              "context": 1,
+              "stream": 7,
+              "correlation": 3,
+              "registers per thread": 252,
+              "shared memory": 49152,
+              "blocks per SM": 2.125,
+              "warps per SM": 8.5,
+              "grid": [
+                34,
+                1,
+                8
+              ],
+              "block": [
+                32,
+                4,
+                1
+              ],
+              "est. achieved occupancy %": 17,
+              "occupancy": {
+                "activeBlocksPerMultiprocessor": 2,
+                "limitingFactors": "REGS|SMEM",
+                "blockLimitRegs": 2,
+                "blockLimitSharedMem": 2,
+                "blockLimitWarps": 12,
+                "blockLimitBlocks": 24,
+                "blockLimitBarriers": 2147483647,
+                "allocatedRegistersPerBlock": 32768,
+                "allocatedSharedMemPerBlock": 50176
+              },
+              "graph id": 2,
+              "graph node id": 8589934592,
+              "channel": 0,
+              "channel_type": 1
+            },
+            "profiled_duration_not_used": 963.487
+          },
+          {
+            "arm": "heavy48",
+            "name": "void flashinfer::BatchPrefillWithRaggedKVCacheKernel<flashinfer::KernelTraits<(flashinfer::MaskMode)1, 128u, 2u, 2u, 8u, 8u, 4u, 1u, (flashinfer::PosEncodingMode)0, __nv_bfloat16, __nv_bfloat16, __nv_bfloat16, float, int, flashinfer::DefaultAttention<false, false, false, false>, true>, RaggedParams>(RaggedParams)",
+            "args": {
+              "queued": 0,
+              "device": 0,
+              "context": 1,
+              "stream": 7,
+              "correlation": 257,
+              "registers per thread": 252,
+              "shared memory": 49152,
+              "blocks per SM": 2.125,
+              "warps per SM": 8.5,
+              "grid": [
+                34,
+                1,
+                8
+              ],
+              "block": [
+                32,
+                4,
+                1
+              ],
+              "est. achieved occupancy %": 17,
+              "occupancy": {
+                "activeBlocksPerMultiprocessor": 2,
+                "limitingFactors": "REGS|SMEM",
+                "blockLimitRegs": 2,
+                "blockLimitSharedMem": 2,
+                "blockLimitWarps": 12,
+                "blockLimitBlocks": 24,
+                "blockLimitBarriers": 2147483647,
+                "allocatedRegistersPerBlock": 32768,
+                "allocatedSharedMemPerBlock": 50176
+              },
+              "graph id": 2,
+              "graph node id": 8589934592,
+              "channel": 0,
+              "channel_type": 1
+            },
+            "profiled_duration_not_used": 1692.694
+          },
+          {
+            "arm": "native64",
+            "name": "void flashinfer::BatchPrefillWithRaggedKVCacheKernel<flashinfer::KernelTraits<(flashinfer::MaskMode)1, 128u, 2u, 2u, 8u, 8u, 4u, 1u, (flashinfer::PosEncodingMode)0, __nv_bfloat16, __nv_bfloat16, __nv_bfloat16, float, int, flashinfer::DefaultAttention<false, false, false, false>, true>, RaggedParams>(RaggedParams)",
+            "args": {
+              "queued": 0,
+              "device": 0,
+              "context": 1,
+              "stream": 7,
+              "correlation": 509,
+              "registers per thread": 252,
+              "shared memory": 65536,
+              "blocks per SM": 2.125,
+              "warps per SM": 8.5,
+              "grid": [
+                34,
+                1,
+                8
+              ],
+              "block": [
+                32,
+                4,
+                1
+              ],
+              "est. achieved occupancy %": 0,
+              "occupancy": {
+                "activeBlocksPerMultiprocessor": 0,
+                "limitingFactors": "SMEM",
+                "blockLimitRegs": 2,
+                "blockLimitSharedMem": 0,
+                "blockLimitWarps": 12,
+                "blockLimitBlocks": 24,
+                "blockLimitBarriers": 2147483647,
+                "allocatedRegistersPerBlock": 32768,
+                "allocatedSharedMemPerBlock": 66560
+              },
+              "graph id": 8,
+              "graph node id": 34359738368,
+              "channel": 0,
+              "channel_type": 1
+            },
+            "profiled_duration_not_used": 963.032
+          },
+          {
+            "arm": "heavy64",
+            "name": "void flashinfer::BatchPrefillWithRaggedKVCacheKernel<flashinfer::KernelTraits<(flashinfer::MaskMode)1, 128u, 2u, 2u, 8u, 8u, 4u, 1u, (flashinfer::PosEncodingMode)0, __nv_bfloat16, __nv_bfloat16, __nv_bfloat16, float, int, flashinfer::DefaultAttention<false, false, false, false>, true>, RaggedParams>(RaggedParams)",
+            "args": {
+              "queued": 0,
+              "device": 0,
+              "context": 1,
+              "stream": 7,
+              "correlation": 761,
+              "registers per thread": 252,
+              "shared memory": 65536,
+              "blocks per SM": 2.125,
+              "warps per SM": 8.5,
+              "grid": [
+                34,
+                1,
+                8
+              ],
+              "block": [
+                32,
+                4,
+                1
+              ],
+              "est. achieved occupancy %": 0,
+              "occupancy": {
+                "activeBlocksPerMultiprocessor": 0,
+                "limitingFactors": "SMEM",
+                "blockLimitRegs": 2,
+                "blockLimitSharedMem": 0,
+                "blockLimitWarps": 12,
+                "blockLimitBlocks": 24,
+                "blockLimitBarriers": 2147483647,
+                "allocatedRegistersPerBlock": 32768,
+                "allocatedSharedMemPerBlock": 66560
+              },
+              "graph id": 8,
+              "graph node id": 34359738368,
+              "channel": 0,
+              "channel_type": 1
+            },
+            "profiled_duration_not_used": 958.756
+          }
+        ],
+        [
+          {
+            "arm": "native48",
+            "name": "void flashinfer::BatchPrefillWithRaggedKVCacheKernel<flashinfer::KernelTraits<(flashinfer::MaskMode)1, 128u, 2u, 2u, 8u, 8u, 4u, 1u, (flashinfer::PosEncodingMode)0, __nv_bfloat16, __nv_bfloat16, __nv_bfloat16, float, int, flashinfer::DefaultAttention<false, false, false, false>, true>, RaggedParams>(RaggedParams)",
+            "args": {
+              "queued": 0,
+              "device": 0,
+              "context": 1,
+              "stream": 7,
+              "correlation": 3,
+              "registers per thread": 252,
+              "shared memory": 49152,
+              "blocks per SM": 2.125,
+              "warps per SM": 8.5,
+              "grid": [
+                34,
+                1,
+                8
+              ],
+              "block": [
+                32,
+                4,
+                1
+              ],
+              "est. achieved occupancy %": 17,
+              "occupancy": {
+                "activeBlocksPerMultiprocessor": 2,
+                "limitingFactors": "REGS|SMEM",
+                "blockLimitRegs": 2,
+                "blockLimitSharedMem": 2,
+                "blockLimitWarps": 12,
+                "blockLimitBlocks": 24,
+                "blockLimitBarriers": 2147483647,
+                "allocatedRegistersPerBlock": 32768,
+                "allocatedSharedMemPerBlock": 50176
+              },
+              "graph id": 2,
+              "graph node id": 8589934592,
+              "channel": 0,
+              "channel_type": 1
+            },
+            "profiled_duration_not_used": 964.416
+          },
+          {
+            "arm": "heavy48",
+            "name": "void flashinfer::BatchPrefillWithRaggedKVCacheKernel<flashinfer::KernelTraits<(flashinfer::MaskMode)1, 128u, 2u, 2u, 8u, 8u, 4u, 1u, (flashinfer::PosEncodingMode)0, __nv_bfloat16, __nv_bfloat16, __nv_bfloat16, float, int, flashinfer::DefaultAttention<false, false, false, false>, true>, RaggedParams>(RaggedParams)",
+            "args": {
+              "queued": 0,
+              "device": 0,
+              "context": 1,
+              "stream": 7,
+              "correlation": 257,
+              "registers per thread": 252,
+              "shared memory": 49152,
+              "blocks per SM": 2.125,
+              "warps per SM": 8.5,
+              "grid": [
+                34,
+                1,
+                8
+              ],
+              "block": [
+                32,
+                4,
+                1
+              ],
+              "est. achieved occupancy %": 17,
+              "occupancy": {
+                "activeBlocksPerMultiprocessor": 2,
+                "limitingFactors": "REGS|SMEM",
+                "blockLimitRegs": 2,
+                "blockLimitSharedMem": 2,
+                "blockLimitWarps": 12,
+                "blockLimitBlocks": 24,
+                "blockLimitBarriers": 2147483647,
+                "allocatedRegistersPerBlock": 32768,
+                "allocatedSharedMemPerBlock": 50176
+              },
+              "graph id": 2,
+              "graph node id": 8589934592,
+              "channel": 0,
+              "channel_type": 1
+            },
+            "profiled_duration_not_used": 1690.974
+          },
+          {
+            "arm": "native64",
+            "name": "void flashinfer::BatchPrefillWithRaggedKVCacheKernel<flashinfer::KernelTraits<(flashinfer::MaskMode)1, 128u, 2u, 2u, 8u, 8u, 4u, 1u, (flashinfer::PosEncodingMode)0, __nv_bfloat16, __nv_bfloat16, __nv_bfloat16, float, int, flashinfer::DefaultAttention<false, false, false, false>, true>, RaggedParams>(RaggedParams)",
+            "args": {
+              "queued": 0,
+              "device": 0,
+              "context": 1,
+              "stream": 7,
+              "correlation": 509,
+              "registers per thread": 252,
+              "shared memory": 65536,
+              "blocks per SM": 2.125,
+              "warps per SM": 8.5,
+              "grid": [
+                34,
+                1,
+                8
+              ],
+              "block": [
+                32,
+                4,
+                1
+              ],
+              "est. achieved occupancy %": 0,
+              "occupancy": {
+                "activeBlocksPerMultiprocessor": 0,
+                "limitingFactors": "SMEM",
+                "blockLimitRegs": 2,
+                "blockLimitSharedMem": 0,
+                "blockLimitWarps": 12,
+                "blockLimitBlocks": 24,
+                "blockLimitBarriers": 2147483647,
+                "allocatedRegistersPerBlock": 32768,
+                "allocatedSharedMemPerBlock": 66560
+              },
+              "graph id": 8,
+              "graph node id": 34359738368,
+              "channel": 0,
+              "channel_type": 1
+            },
+            "profiled_duration_not_used": 961.599
+          },
+          {
+            "arm": "heavy64",
+            "name": "void flashinfer::BatchPrefillWithRaggedKVCacheKernel<flashinfer::KernelTraits<(flashinfer::MaskMode)1, 128u, 2u, 2u, 8u, 8u, 4u, 1u, (flashinfer::PosEncodingMode)0, __nv_bfloat16, __nv_bfloat16, __nv_bfloat16, float, int, flashinfer::DefaultAttention<false, false, false, false>, true>, RaggedParams>(RaggedParams)",
+            "args": {
+              "queued": 0,
+              "device": 0,
+              "context": 1,
+              "stream": 7,
+              "correlation": 761,
+              "registers per thread": 252,
+              "shared memory": 65536,
+              "blocks per SM": 2.125,
+              "warps per SM": 8.5,
+              "grid": [
+                34,
+                1,
+                8
+              ],
+              "block": [
+                32,
+                4,
+                1
+              ],
+              "est. achieved occupancy %": 0,
+              "occupancy": {
+                "activeBlocksPerMultiprocessor": 0,
+                "limitingFactors": "SMEM",
+                "blockLimitRegs": 2,
+                "blockLimitSharedMem": 0,
+                "blockLimitWarps": 12,
+                "blockLimitBlocks": 24,
+                "blockLimitBarriers": 2147483647,
+                "allocatedRegistersPerBlock": 32768,
+                "allocatedSharedMemPerBlock": 66560
+              },
+              "graph id": 8,
+              "graph node id": 34359738368,
+              "channel": 0,
+              "channel_type": 1
+            },
+            "profiled_duration_not_used": 957.184
+          }
+        ],
+        [
+          {
+            "arm": "native48",
+            "name": "void flashinfer::BatchPrefillWithRaggedKVCacheKernel<flashinfer::KernelTraits<(flashinfer::MaskMode)1, 128u, 2u, 2u, 8u, 8u, 4u, 1u, (flashinfer::PosEncodingMode)0, __nv_bfloat16, __nv_bfloat16, __nv_bfloat16, float, int, flashinfer::DefaultAttention<false, false, false, false>, true>, RaggedParams>(RaggedParams)",
+            "args": {
+              "queued": 0,
+              "device": 0,
+              "context": 1,
+              "stream": 7,
+              "correlation": 3,
+              "registers per thread": 252,
+              "shared memory": 49152,
+              "blocks per SM": 2.125,
+              "warps per SM": 8.5,
+              "grid": [
+                34,
+                1,
+                8
+              ],
+              "block": [
+                32,
+                4,
+                1
+              ],
+              "est. achieved occupancy %": 17,
+              "occupancy": {
+                "activeBlocksPerMultiprocessor": 2,
+                "limitingFactors": "REGS|SMEM",
+                "blockLimitRegs": 2,
+                "blockLimitSharedMem": 2,
+                "blockLimitWarps": 12,
+                "blockLimitBlocks": 24,
+                "blockLimitBarriers": 2147483647,
+                "allocatedRegistersPerBlock": 32768,
+                "allocatedSharedMemPerBlock": 50176
+              },
+              "graph id": 2,
+              "graph node id": 8589934592,
+              "channel": 0,
+              "channel_type": 1
+            },
+            "profiled_duration_not_used": 962.429
+          },
+          {
+            "arm": "heavy48",
+            "name": "void flashinfer::BatchPrefillWithRaggedKVCacheKernel<flashinfer::KernelTraits<(flashinfer::MaskMode)1, 128u, 2u, 2u, 8u, 8u, 4u, 1u, (flashinfer::PosEncodingMode)0, __nv_bfloat16, __nv_bfloat16, __nv_bfloat16, float, int, flashinfer::DefaultAttention<false, false, false, false>, true>, RaggedParams>(RaggedParams)",
+            "args": {
+              "queued": 0,
+              "device": 0,
+              "context": 1,
+              "stream": 7,
+              "correlation": 257,
+              "registers per thread": 252,
+              "shared memory": 49152,
+              "blocks per SM": 2.125,
+              "warps per SM": 8.5,
+              "grid": [
+                34,
+                1,
+                8
+              ],
+              "block": [
+                32,
+                4,
+                1
+              ],
+              "est. achieved occupancy %": 17,
+              "occupancy": {
+                "activeBlocksPerMultiprocessor": 2,
+                "limitingFactors": "REGS|SMEM",
+                "blockLimitRegs": 2,
+                "blockLimitSharedMem": 2,
+                "blockLimitWarps": 12,
+                "blockLimitBlocks": 24,
+                "blockLimitBarriers": 2147483647,
+                "allocatedRegistersPerBlock": 32768,
+                "allocatedSharedMemPerBlock": 50176
+              },
+              "graph id": 2,
+              "graph node id": 8589934592,
+              "channel": 0,
+              "channel_type": 1
+            },
+            "profiled_duration_not_used": 1690.681
+          },
+          {
+            "arm": "native64",
+            "name": "void flashinfer::BatchPrefillWithRaggedKVCacheKernel<flashinfer::KernelTraits<(flashinfer::MaskMode)1, 128u, 2u, 2u, 8u, 8u, 4u, 1u, (flashinfer::PosEncodingMode)0, __nv_bfloat16, __nv_bfloat16, __nv_bfloat16, float, int, flashinfer::DefaultAttention<false, false, false, false>, true>, RaggedParams>(RaggedParams)",
+            "args": {
+              "queued": 0,
+              "device": 0,
+              "context": 1,
+              "stream": 7,
+              "correlation": 509,
+              "registers per thread": 252,
+              "shared memory": 65536,
+              "blocks per SM": 2.125,
+              "warps per SM": 8.5,
+              "grid": [
+                34,
+                1,
+                8
+              ],
+              "block": [
+                32,
+                4,
+                1
+              ],
+              "est. achieved occupancy %": 0,
+              "occupancy": {
+                "activeBlocksPerMultiprocessor": 0,
+                "limitingFactors": "SMEM",
+                "blockLimitRegs": 2,
+                "blockLimitSharedMem": 0,
+                "blockLimitWarps": 12,
+                "blockLimitBlocks": 24,
+                "blockLimitBarriers": 2147483647,
+                "allocatedRegistersPerBlock": 32768,
+                "allocatedSharedMemPerBlock": 66560
+              },
+              "graph id": 8,
+              "graph node id": 34359738368,
+              "channel": 0,
+              "channel_type": 1
+            },
+            "profiled_duration_not_used": 962.434
+          },
+          {
+            "arm": "heavy64",
+            "name": "void flashinfer::BatchPrefillWithRaggedKVCacheKernel<flashinfer::KernelTraits<(flashinfer::MaskMode)1, 128u, 2u, 2u, 8u, 8u, 4u, 1u, (flashinfer::PosEncodingMode)0, __nv_bfloat16, __nv_bfloat16, __nv_bfloat16, float, int, flashinfer::DefaultAttention<false, false, false, false>, true>, RaggedParams>(RaggedParams)",
+            "args": {
+              "queued": 0,
+              "device": 0,
+              "context": 1,
+              "stream": 7,
+              "correlation": 761,
+              "registers per thread": 252,
+              "shared memory": 65536,
+              "blocks per SM": 2.125,
+              "warps per SM": 8.5,
+              "grid": [
+                34,
+                1,
+                8
+              ],
+              "block": [
+                32,
+                4,
+                1
+              ],
+              "est. achieved occupancy %": 0,
+              "occupancy": {
+                "activeBlocksPerMultiprocessor": 0,
+                "limitingFactors": "SMEM",
+                "blockLimitRegs": 2,
+                "blockLimitSharedMem": 0,
+                "blockLimitWarps": 12,
+                "blockLimitBlocks": 24,
+                "blockLimitBarriers": 2147483647,
+                "allocatedRegistersPerBlock": 32768,
+                "allocatedSharedMemPerBlock": 66560
+              },
+              "graph id": 8,
+              "graph node id": 34359738368,
+              "channel": 0,
+              "channel_type": 1
+            },
+            "profiled_duration_not_used": 958.149
+          }
+        ]
+      ],
+      "receipts": {
+        "gpu_4090-r0-1639491": "abfb240ae6eacbfe6a59ef7fa4ff2453a3b7f2aa44ab326b87e775a2d44bf09b",
+        "gpu_4090-r1-1639491": "2f7fc992f3d824b238de62e34815d5c82e4363080d580a43260c2c1553492344",
+        "gpu_4090-r2-1639491": "06507e12615613dce6ed654fe19eb79921977e89526d340e9fb87a4cfe6c0e38"
+      }
+    },
+    "NVIDIA GeForce RTX 5090": {
+      "uuid": "GPU-2362a724-4361-38fd-c864-fc5cb3ea7e1c",
+      "driver": "580.82.07",
+      "summaries": [
+        {
+          "regime": "graph_one_warm",
+          "stats": {
+            "repeat48": {
+              "ratio": 1.000006916071046,
+              "CI": [
+                0.999410147695058,
+                1.0006290492858687
+              ],
+              "confidence": 0.9
+            },
+            "heavy48": {
+              "ratio": 0.5602055122664706,
+              "CI": [
+                0.5599202209735479,
+                0.5605790770747937
+              ],
+              "confidence": 0.95
+            },
+            "native64": {
+              "ratio": 1.0129800833199152,
+              "CI": [
+                1.011706994768431,
+                1.0139489903736751
+              ],
+              "confidence": 0.95
+            },
+            "heavy64": {
+              "ratio": 1.0209762390080073,
+              "CI": [
+                1.0203035797766022,
+                1.0215844719803633
+              ],
+              "confidence": 0.95
+            },
+            "order_ratio_at64": {
+              "ratio": 1.007893694870965,
+              "CI": [
+                1.0067394827822216,
+                1.0093430770403182
+              ],
+              "confidence": 0.95
+            },
+            "ratio_of_order_ratios": {
+              "ratio": 1.7991499062428795,
+              "CI": [
+                1.7965637682919369,
+                1.802002396801058
+              ],
+              "confidence": 0.95
+            }
+          },
+          "AA_resolves_one_percent": true
+        },
+        {
+          "regime": "graph32_steady",
+          "stats": {
+            "repeat48": {
+              "ratio": 0.9999825018958635,
+              "CI": [
+                0.9998619305547579,
+                1.000128714592449
+              ],
+              "confidence": 0.9
+            },
+            "heavy48": {
+              "ratio": 0.5590152998740044,
+              "CI": [
+                0.5589452632867951,
+                0.5590930601170538
+              ],
+              "confidence": 0.95
+            },
+            "native64": {
+              "ratio": 1.0134970004888193,
+              "CI": [
+                1.0133857178014256,
+                1.013617975190113
+              ],
+              "confidence": 0.95
+            },
+            "heavy64": {
+              "ratio": 1.0214945258278711,
+              "CI": [
+                1.0213124151343798,
+                1.0216969764046258
+              ],
+              "confidence": 0.95
+            },
+            "order_ratio_at64": {
+              "ratio": 1.0078910202350817,
+              "CI": [
+                1.0076714412828836,
+                1.0081379101765928
+              ],
+              "confidence": 0.95
+            },
+            "ratio_of_order_ratios": {
+              "ratio": 1.8029757333336827,
+              "CI": [
+                1.802598472264751,
+                1.8033390557694624
+              ],
+              "confidence": 0.95
+            }
+          },
+          "AA_resolves_one_percent": true
+        },
+        {
+          "regime": "graph_one_pressure128MiB",
+          "stats": {
+            "repeat48": {
+              "ratio": 0.9999303594332405,
+              "CI": [
+                0.9994728360173578,
+                1.0003974550171573
+              ],
+              "confidence": 0.9
+            },
+            "heavy48": {
+              "ratio": 0.5615507197069086,
+              "CI": [
+                0.5612392007155582,
+                0.5618874945119059
+              ],
+              "confidence": 0.95
+            },
+            "native64": {
+              "ratio": 1.013109746361049,
+              "CI": [
+                1.0125317322305223,
+                1.0135745002807675
+              ],
+              "confidence": 0.95
+            },
+            "heavy64": {
+              "ratio": 1.0211476002945123,
+              "CI": [
+                1.020670782816689,
+                1.021621740892272
+              ],
+              "confidence": 0.95
+            },
+            "order_ratio_at64": {
+              "ratio": 1.007933843260648,
+              "CI": [
+                1.0072843299143606,
+                1.0086175623557214
+              ],
+              "confidence": 0.95
+            },
+            "ratio_of_order_ratios": {
+              "ratio": 1.7949114975522087,
+              "CI": [
+                1.793221683731422,
+                1.7965024827374805
+              ],
+              "confidence": 0.95
+            }
+          },
+          "AA_resolves_one_percent": true
+        }
+      ],
+      "launch_proofs": [
+        [
+          {
+            "arm": "native48",
+            "name": "void flashinfer::BatchPrefillWithRaggedKVCacheKernel<flashinfer::KernelTraits<(flashinfer::MaskMode)1, 128u, 2u, 2u, 8u, 8u, 4u, 1u, (flashinfer::PosEncodingMode)0, __nv_bfloat16, __nv_bfloat16, __nv_bfloat16, float, int, flashinfer::DefaultAttention<false, false, false, false>, true>, RaggedParams>(RaggedParams)",
+            "args": {
+              "queued": 0,
+              "device": 0,
+              "context": 1,
+              "stream": 7,
+              "correlation": 3,
+              "registers per thread": 250,
+              "shared memory": 49152,
+              "blocks per SM": 1.6,
+              "warps per SM": 6.4,
+              "grid": [
+                34,
+                1,
+                8
+              ],
+              "block": [
+                32,
+                4,
+                1
+              ],
+              "est. achieved occupancy %": 13,
+              "occupancy": {
+                "activeBlocksPerMultiprocessor": 2,
+                "limitingFactors": "REGS|SMEM",
+                "blockLimitRegs": 2,
+                "blockLimitSharedMem": 2,
+                "blockLimitWarps": 12,
+                "blockLimitBlocks": 24,
+                "blockLimitBarriers": 2147483647,
+                "allocatedRegistersPerBlock": 32768,
+                "allocatedSharedMemPerBlock": 50176
+              },
+              "graph id": 2,
+              "graph node id": 8589934592,
+              "channel": 0,
+              "channel_type": 1
+            },
+            "profiled_duration_not_used": 916.412
+          },
+          {
+            "arm": "heavy48",
+            "name": "void flashinfer::BatchPrefillWithRaggedKVCacheKernel<flashinfer::KernelTraits<(flashinfer::MaskMode)1, 128u, 2u, 2u, 8u, 8u, 4u, 1u, (flashinfer::PosEncodingMode)0, __nv_bfloat16, __nv_bfloat16, __nv_bfloat16, float, int, flashinfer::DefaultAttention<false, false, false, false>, true>, RaggedParams>(RaggedParams)",
+            "args": {
+              "queued": 0,
+              "device": 0,
+              "context": 1,
+              "stream": 7,
+              "correlation": 257,
+              "registers per thread": 250,
+              "shared memory": 49152,
+              "blocks per SM": 1.6,
+              "warps per SM": 6.4,
+              "grid": [
+                34,
+                1,
+                8
+              ],
+              "block": [
+                32,
+                4,
+                1
+              ],
+              "est. achieved occupancy %": 13,
+              "occupancy": {
+                "activeBlocksPerMultiprocessor": 2,
+                "limitingFactors": "REGS|SMEM",
+                "blockLimitRegs": 2,
+                "blockLimitSharedMem": 2,
+                "blockLimitWarps": 12,
+                "blockLimitBlocks": 24,
+                "blockLimitBarriers": 2147483647,
+                "allocatedRegistersPerBlock": 32768,
+                "allocatedSharedMemPerBlock": 50176
+              },
+              "graph id": 2,
+              "graph node id": 8589934592,
+              "channel": 0,
+              "channel_type": 1
+            },
+            "profiled_duration_not_used": 1638.267
+          },
+          {
+            "arm": "native64",
+            "name": "void flashinfer::BatchPrefillWithRaggedKVCacheKernel<flashinfer::KernelTraits<(flashinfer::MaskMode)1, 128u, 2u, 2u, 8u, 8u, 4u, 1u, (flashinfer::PosEncodingMode)0, __nv_bfloat16, __nv_bfloat16, __nv_bfloat16, float, int, flashinfer::DefaultAttention<false, false, false, false>, true>, RaggedParams>(RaggedParams)",
+            "args": {
+              "queued": 0,
+              "device": 0,
+              "context": 1,
+              "stream": 7,
+              "correlation": 509,
+              "registers per thread": 250,
+              "shared memory": 65536,
+              "blocks per SM": 1.6,
+              "warps per SM": 6.4,
+              "grid": [
+                34,
+                1,
+                8
+              ],
+              "block": [
+                32,
+                4,
+                1
+              ],
+              "est. achieved occupancy %": 0,
+              "occupancy": {
+                "activeBlocksPerMultiprocessor": 0,
+                "limitingFactors": "SMEM",
+                "blockLimitRegs": 2,
+                "blockLimitSharedMem": 0,
+                "blockLimitWarps": 12,
+                "blockLimitBlocks": 24,
+                "blockLimitBarriers": 2147483647,
+                "allocatedRegistersPerBlock": 32768,
+                "allocatedSharedMemPerBlock": 66560
+              },
+              "graph id": 8,
+              "graph node id": 34359738368,
+              "channel": 0,
+              "channel_type": 1
+            },
+            "profiled_duration_not_used": 902.878
+          },
+          {
+            "arm": "heavy64",
+            "name": "void flashinfer::BatchPrefillWithRaggedKVCacheKernel<flashinfer::KernelTraits<(flashinfer::MaskMode)1, 128u, 2u, 2u, 8u, 8u, 4u, 1u, (flashinfer::PosEncodingMode)0, __nv_bfloat16, __nv_bfloat16, __nv_bfloat16, float, int, flashinfer::DefaultAttention<false, false, false, false>, true>, RaggedParams>(RaggedParams)",
+            "args": {
+              "queued": 0,
+              "device": 0,
+              "context": 1,
+              "stream": 7,
+              "correlation": 761,
+              "registers per thread": 250,
+              "shared memory": 65536,
+              "blocks per SM": 1.6,
+              "warps per SM": 6.4,
+              "grid": [
+                34,
+                1,
+                8
+              ],
+              "block": [
+                32,
+                4,
+                1
+              ],
+              "est. achieved occupancy %": 0,
+              "occupancy": {
+                "activeBlocksPerMultiprocessor": 0,
+                "limitingFactors": "SMEM",
+                "blockLimitRegs": 2,
+                "blockLimitSharedMem": 0,
+                "blockLimitWarps": 12,
+                "blockLimitBlocks": 24,
+                "blockLimitBarriers": 2147483647,
+                "allocatedRegistersPerBlock": 32768,
+                "allocatedSharedMemPerBlock": 66560
+              },
+              "graph id": 8,
+              "graph node id": 34359738368,
+              "channel": 0,
+              "channel_type": 1
+            },
+            "profiled_duration_not_used": 897.12
+          }
+        ],
+        [
+          {
+            "arm": "native48",
+            "name": "void flashinfer::BatchPrefillWithRaggedKVCacheKernel<flashinfer::KernelTraits<(flashinfer::MaskMode)1, 128u, 2u, 2u, 8u, 8u, 4u, 1u, (flashinfer::PosEncodingMode)0, __nv_bfloat16, __nv_bfloat16, __nv_bfloat16, float, int, flashinfer::DefaultAttention<false, false, false, false>, true>, RaggedParams>(RaggedParams)",
+            "args": {
+              "queued": 0,
+              "device": 0,
+              "context": 1,
+              "stream": 7,
+              "correlation": 3,
+              "registers per thread": 250,
+              "shared memory": 49152,
+              "blocks per SM": 1.6,
+              "warps per SM": 6.4,
+              "grid": [
+                34,
+                1,
+                8
+              ],
+              "block": [
+                32,
+                4,
+                1
+              ],
+              "est. achieved occupancy %": 13,
+              "occupancy": {
+                "activeBlocksPerMultiprocessor": 2,
+                "limitingFactors": "REGS|SMEM",
+                "blockLimitRegs": 2,
+                "blockLimitSharedMem": 2,
+                "blockLimitWarps": 12,
+                "blockLimitBlocks": 24,
+                "blockLimitBarriers": 2147483647,
+                "allocatedRegistersPerBlock": 32768,
+                "allocatedSharedMemPerBlock": 50176
+              },
+              "graph id": 2,
+              "graph node id": 8589934592,
+              "channel": 0,
+              "channel_type": 1
+            },
+            "profiled_duration_not_used": 915.704
+          },
+          {
+            "arm": "heavy48",
+            "name": "void flashinfer::BatchPrefillWithRaggedKVCacheKernel<flashinfer::KernelTraits<(flashinfer::MaskMode)1, 128u, 2u, 2u, 8u, 8u, 4u, 1u, (flashinfer::PosEncodingMode)0, __nv_bfloat16, __nv_bfloat16, __nv_bfloat16, float, int, flashinfer::DefaultAttention<false, false, false, false>, true>, RaggedParams>(RaggedParams)",
+            "args": {
+              "queued": 0,
+              "device": 0,
+              "context": 1,
+              "stream": 7,
+              "correlation": 257,
+              "registers per thread": 250,
+              "shared memory": 49152,
+              "blocks per SM": 1.6,
+              "warps per SM": 6.4,
+              "grid": [
+                34,
+                1,
+                8
+              ],
+              "block": [
+                32,
+                4,
+                1
+              ],
+              "est. achieved occupancy %": 13,
+              "occupancy": {
+                "activeBlocksPerMultiprocessor": 2,
+                "limitingFactors": "REGS|SMEM",
+                "blockLimitRegs": 2,
+                "blockLimitSharedMem": 2,
+                "blockLimitWarps": 12,
+                "blockLimitBlocks": 24,
+                "blockLimitBarriers": 2147483647,
+                "allocatedRegistersPerBlock": 32768,
+                "allocatedSharedMemPerBlock": 50176
+              },
+              "graph id": 2,
+              "graph node id": 8589934592,
+              "channel": 0,
+              "channel_type": 1
+            },
+            "profiled_duration_not_used": 1637.785
+          },
+          {
+            "arm": "native64",
+            "name": "void flashinfer::BatchPrefillWithRaggedKVCacheKernel<flashinfer::KernelTraits<(flashinfer::MaskMode)1, 128u, 2u, 2u, 8u, 8u, 4u, 1u, (flashinfer::PosEncodingMode)0, __nv_bfloat16, __nv_bfloat16, __nv_bfloat16, float, int, flashinfer::DefaultAttention<false, false, false, false>, true>, RaggedParams>(RaggedParams)",
+            "args": {
+              "queued": 0,
+              "device": 0,
+              "context": 1,
+              "stream": 7,
+              "correlation": 509,
+              "registers per thread": 250,
+              "shared memory": 65536,
+              "blocks per SM": 1.6,
+              "warps per SM": 6.4,
+              "grid": [
+                34,
+                1,
+                8
+              ],
+              "block": [
+                32,
+                4,
+                1
+              ],
+              "est. achieved occupancy %": 0,
+              "occupancy": {
+                "activeBlocksPerMultiprocessor": 0,
+                "limitingFactors": "SMEM",
+                "blockLimitRegs": 2,
+                "blockLimitSharedMem": 0,
+                "blockLimitWarps": 12,
+                "blockLimitBlocks": 24,
+                "blockLimitBarriers": 2147483647,
+                "allocatedRegistersPerBlock": 32768,
+                "allocatedSharedMemPerBlock": 66560
+              },
+              "graph id": 8,
+              "graph node id": 34359738368,
+              "channel": 0,
+              "channel_type": 1
+            },
+            "profiled_duration_not_used": 903.521
+          },
+          {
+            "arm": "heavy64",
+            "name": "void flashinfer::BatchPrefillWithRaggedKVCacheKernel<flashinfer::KernelTraits<(flashinfer::MaskMode)1, 128u, 2u, 2u, 8u, 8u, 4u, 1u, (flashinfer::PosEncodingMode)0, __nv_bfloat16, __nv_bfloat16, __nv_bfloat16, float, int, flashinfer::DefaultAttention<false, false, false, false>, true>, RaggedParams>(RaggedParams)",
+            "args": {
+              "queued": 0,
+              "device": 0,
+              "context": 1,
+              "stream": 7,
+              "correlation": 761,
+              "registers per thread": 250,
+              "shared memory": 65536,
+              "blocks per SM": 1.6,
+              "warps per SM": 6.4,
+              "grid": [
+                34,
+                1,
+                8
+              ],
+              "block": [
+                32,
+                4,
+                1
+              ],
+              "est. achieved occupancy %": 0,
+              "occupancy": {
+                "activeBlocksPerMultiprocessor": 0,
+                "limitingFactors": "SMEM",
+                "blockLimitRegs": 2,
+                "blockLimitSharedMem": 0,
+                "blockLimitWarps": 12,
+                "blockLimitBlocks": 24,
+                "blockLimitBarriers": 2147483647,
+                "allocatedRegistersPerBlock": 32768,
+                "allocatedSharedMemPerBlock": 66560
+              },
+              "graph id": 8,
+              "graph node id": 34359738368,
+              "channel": 0,
+              "channel_type": 1
+            },
+            "profiled_duration_not_used": 897.622
+          }
+        ],
+        [
+          {
+            "arm": "native48",
+            "name": "void flashinfer::BatchPrefillWithRaggedKVCacheKernel<flashinfer::KernelTraits<(flashinfer::MaskMode)1, 128u, 2u, 2u, 8u, 8u, 4u, 1u, (flashinfer::PosEncodingMode)0, __nv_bfloat16, __nv_bfloat16, __nv_bfloat16, float, int, flashinfer::DefaultAttention<false, false, false, false>, true>, RaggedParams>(RaggedParams)",
+            "args": {
+              "queued": 0,
+              "device": 0,
+              "context": 1,
+              "stream": 7,
+              "correlation": 3,
+              "registers per thread": 250,
+              "shared memory": 49152,
+              "blocks per SM": 1.6,
+              "warps per SM": 6.4,
+              "grid": [
+                34,
+                1,
+                8
+              ],
+              "block": [
+                32,
+                4,
+                1
+              ],
+              "est. achieved occupancy %": 13,
+              "occupancy": {
+                "activeBlocksPerMultiprocessor": 2,
+                "limitingFactors": "REGS|SMEM",
+                "blockLimitRegs": 2,
+                "blockLimitSharedMem": 2,
+                "blockLimitWarps": 12,
+                "blockLimitBlocks": 24,
+                "blockLimitBarriers": 2147483647,
+                "allocatedRegistersPerBlock": 32768,
+                "allocatedSharedMemPerBlock": 50176
+              },
+              "graph id": 2,
+              "graph node id": 8589934592,
+              "channel": 0,
+              "channel_type": 1
+            },
+            "profiled_duration_not_used": 914.428
+          },
+          {
+            "arm": "heavy48",
+            "name": "void flashinfer::BatchPrefillWithRaggedKVCacheKernel<flashinfer::KernelTraits<(flashinfer::MaskMode)1, 128u, 2u, 2u, 8u, 8u, 4u, 1u, (flashinfer::PosEncodingMode)0, __nv_bfloat16, __nv_bfloat16, __nv_bfloat16, float, int, flashinfer::DefaultAttention<false, false, false, false>, true>, RaggedParams>(RaggedParams)",
+            "args": {
+              "queued": 0,
+              "device": 0,
+              "context": 1,
+              "stream": 7,
+              "correlation": 257,
+              "registers per thread": 250,
+              "shared memory": 49152,
+              "blocks per SM": 1.6,
+              "warps per SM": 6.4,
+              "grid": [
+                34,
+                1,
+                8
+              ],
+              "block": [
+                32,
+                4,
+                1
+              ],
+              "est. achieved occupancy %": 13,
+              "occupancy": {
+                "activeBlocksPerMultiprocessor": 2,
+                "limitingFactors": "REGS|SMEM",
+                "blockLimitRegs": 2,
+                "blockLimitSharedMem": 2,
+                "blockLimitWarps": 12,
+                "blockLimitBlocks": 24,
+                "blockLimitBarriers": 2147483647,
+                "allocatedRegistersPerBlock": 32768,
+                "allocatedSharedMemPerBlock": 50176
+              },
+              "graph id": 2,
+              "graph node id": 8589934592,
+              "channel": 0,
+              "channel_type": 1
+            },
+            "profiled_duration_not_used": 1634.879
+          },
+          {
+            "arm": "native64",
+            "name": "void flashinfer::BatchPrefillWithRaggedKVCacheKernel<flashinfer::KernelTraits<(flashinfer::MaskMode)1, 128u, 2u, 2u, 8u, 8u, 4u, 1u, (flashinfer::PosEncodingMode)0, __nv_bfloat16, __nv_bfloat16, __nv_bfloat16, float, int, flashinfer::DefaultAttention<false, false, false, false>, true>, RaggedParams>(RaggedParams)",
+            "args": {
+              "queued": 0,
+              "device": 0,
+              "context": 1,
+              "stream": 7,
+              "correlation": 509,
+              "registers per thread": 250,
+              "shared memory": 65536,
+              "blocks per SM": 1.6,
+              "warps per SM": 6.4,
+              "grid": [
+                34,
+                1,
+                8
+              ],
+              "block": [
+                32,
+                4,
+                1
+              ],
+              "est. achieved occupancy %": 0,
+              "occupancy": {
+                "activeBlocksPerMultiprocessor": 0,
+                "limitingFactors": "SMEM",
+                "blockLimitRegs": 2,
+                "blockLimitSharedMem": 0,
+                "blockLimitWarps": 12,
+                "blockLimitBlocks": 24,
+                "blockLimitBarriers": 2147483647,
+                "allocatedRegistersPerBlock": 32768,
+                "allocatedSharedMemPerBlock": 66560
+              },
+              "graph id": 8,
+              "graph node id": 34359738368,
+              "channel": 0,
+              "channel_type": 1
+            },
+            "profiled_duration_not_used": 903.134
+          },
+          {
+            "arm": "heavy64",
+            "name": "void flashinfer::BatchPrefillWithRaggedKVCacheKernel<flashinfer::KernelTraits<(flashinfer::MaskMode)1, 128u, 2u, 2u, 8u, 8u, 4u, 1u, (flashinfer::PosEncodingMode)0, __nv_bfloat16, __nv_bfloat16, __nv_bfloat16, float, int, flashinfer::DefaultAttention<false, false, false, false>, true>, RaggedParams>(RaggedParams)",
+            "args": {
+              "queued": 0,
+              "device": 0,
+              "context": 1,
+              "stream": 7,
+              "correlation": 761,
+              "registers per thread": 250,
+              "shared memory": 65536,
+              "blocks per SM": 1.6,
+              "warps per SM": 6.4,
+              "grid": [
+                34,
+                1,
+                8
+              ],
+              "block": [
+                32,
+                4,
+                1
+              ],
+              "est. achieved occupancy %": 0,
+              "occupancy": {
+                "activeBlocksPerMultiprocessor": 0,
+                "limitingFactors": "SMEM",
+                "blockLimitRegs": 2,
+                "blockLimitSharedMem": 0,
+                "blockLimitWarps": 12,
+                "blockLimitBlocks": 24,
+                "blockLimitBarriers": 2147483647,
+                "allocatedRegistersPerBlock": 32768,
+                "allocatedSharedMemPerBlock": 66560
+              },
+              "graph id": 8,
+              "graph node id": 34359738368,
+              "channel": 0,
+              "channel_type": 1
+            },
+            "profiled_duration_not_used": 894.877
+          }
+        ]
+      ],
+      "receipts": {
+        "gpu_5090-r0-1639492": "9a83a18965e05ad2093ffe8638902d54cdc8a93adea1a1de7955905f1960b40f",
+        "gpu_5090-r1-1639492": "1010ee946c6d00c7c2d7138e17a870f391115e1bc002531c8547a3290faebb2d",
+        "gpu_5090-r2-1639492": "fa498e5a4a71bfe9a4ef8332f0714097d7bec6d44448197d602bc660e432672b"
+      }
+    }
+  }
+}

@@ -1,0 +1,19 @@
+--- a/scheduler.cuh
++++ b/scheduler.cuh
+@@ -30,6 +30,7 @@
+ #include "../pos_enc.cuh"
+ #include "../utils.cuh"
+ #include "heap.h"
++#include "sgi_causal_order.cuh"
+ 
+ namespace flashinfer {
+ 
+@@ -674,6 +675,8 @@
+   FLASHINFER_CHECK(new_batch_size <= padded_batch_size,
+                    "new batch size should not exceed padded batch size. If you are using fixed "
+                    "split size, please consider disabling cuda graph.");
++
++  SGICausalOrderWitness(qo_indptr_h, kv_indptr_h, batch_size, gqa_group_size, cta_tile_q, split_kv, enable_cuda_graph, page_size, request_indices, qo_tile_indices, kv_tile_indices);
+ 
+   // step 4: multiply kv_chunk_size by page_size
+   kv_chunk_size *= page_size;
