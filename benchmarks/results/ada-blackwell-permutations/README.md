@@ -21,7 +21,7 @@ Both registered FP16 n2/n4 canaries completed successfully before formal submiss
 
 [Design notes](DESIGN_NOTES.md) clarify why full pair lists are not the only possible representation. Extra marginal second moments reconstruct analytical work exactly. Run `python representations.py --out NEW_AUDIT.json` and compare to [representation-audit.json](representation-audit.json). This is exact arithmetic, separate from measured runtime cost.
 
-CPU contract suite: `python -m unittest -v test_campaign test_analysis test_representations` (26tests).
+CPU contract suite: `python -m unittest -v test_campaign test_analysis test_representations test_upstream` (31tests).
 
 ## Actual upstream key audit
 
