@@ -1,0 +1,5 @@
+# Additional numerical qualification, not a new performance suite
+
+Frozen before execution. 4 GQA head configurations (8/8,16/4,32/4,32/1), 3 fixed geometries including a 32K KV length and non-multiple query tail, causal/noncausal, zeros/unit/scaled-qk patterns, FP16/BF16. This is 144 checks per variant. Values are deterministic and finite; peaked Q/K are scaled4x each. Pristine/off/cap compare full output+LSE bitwise, and all modes independently check FP32 attention on all small-state rows or specified sampled long-state rows. Existing dtype tolerances are not widened for failures. Failure of pristine FP32 is a qualification finding, not automatically a candidate bug. No performance is measured. No global quality or all-distribution guarantee is inferred.
+
+The first pass prioritizes pristine/off/cap. Wide remains a separately qualified numerical candidate and is not automatically substituted for the primary serving path. Each real GPU allocation is bounded and every failure/partial kept. Independent process streams are covered by the earlier paged lifecycle gate; this test targets values, GQA and mask regimes.
