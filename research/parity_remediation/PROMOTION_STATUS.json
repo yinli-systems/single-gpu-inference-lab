@@ -1,0 +1,37 @@
+{
+  "cleanup_scoped_reproduction": true,
+  "cleanup_scoped_fix_verified": true,
+  "old_full_token_parity_issue": "OPEN",
+  "performance_regressions": "OPEN",
+  "full_serving_promotion": false,
+  "default_promotion": false,
+  "new_performance_trials": 0,
+  "standard_replay": {
+    "paired_cap_requests": 288,
+    "mismatches": 0
+  },
+  "deterministic_replay": {
+    "paired_cap_requests": 144,
+    "mismatches": 0,
+    "changed_configuration": true
+  },
+  "sampler_observer": {
+    "paired_cap_requests": 144,
+    "mismatches": 4,
+    "instrumented": true
+  },
+  "layer_observer": {
+    "paired_cap_requests": 144,
+    "mismatches": 10,
+    "instrumented": true,
+    "snapshots": 13,
+    "matched_execution_coordinates": 1
+  },
+  "cpu_tests": {
+    "remote_passed": 56,
+    "remote_skipped": 0,
+    "mac_passed": 51,
+    "mac_skipped": 5
+  },
+  "upstream_PR_submitted": false
+}
