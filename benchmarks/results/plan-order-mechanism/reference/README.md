@@ -1,0 +1,1 @@
+Pinned unmodified FlashInfer v0.6.18 source snapshots, Apache-2.0 licensed upstream code; not original project implementation. Retrieved from https://github.com/flashinfer-ai/flashinfer/tree/v0.6.18 . SHA256 recorded in source.sha256.
