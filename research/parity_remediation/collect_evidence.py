@@ -29,7 +29,7 @@ def collect(parent,out):
   root=parent/dirname
   if not root.is_dir():raise ValueError('missing campaign root')
   for child in root.iterdir():
-   if child.name in ('source','runs','logs','historical-audit-v1','inspection-2220','abort-source-patch-v1','audit-v1','final-audit','trace-audit','trace-audit-v2','layer-audit') or (child.is_file() and child.name in ('submissions.txt','submission.txt')):
+   if child.name in ('source','runs','logs','historical-audit-v1','inspection-2220','abort-source-patch-v1','audit-v1','final-audit','trace-audit','trace-audit-v2','layer-audit','layer-context-audit','historical_reference') or (child.is_file() and child.name in ('submissions.txt','submission.txt','cpu-check-v1.txt')):
     entries=list(child.rglob('*')) if child.is_dir() else [child]
     for p in entries:
      if '__pycache__' in p.parts:continue
