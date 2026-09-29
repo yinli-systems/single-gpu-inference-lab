@@ -1,0 +1,30 @@
+--- official0.7.0
++++ main7bcf918
+@@ -1,6 +1,6 @@
+-cudaError_t BatchPrefillWithPagedKVCacheDispatchedImpl(Params params,
+-                                                       typename Params::DTypeO* tmp_v, float* tmp_s,
+-                                                       bool enable_pdl, cudaStream_t stream) {
++cudaError_t BatchPrefillWithPagedKVCacheDispatched(Params params, typename Params::DTypeO* tmp_v,
++                                                   float* tmp_s, bool enable_pdl,
++                                                   cudaStream_t stream) {
+   using DTypeQ = typename Params::DTypeQ;
+   using DTypeKV = typename Params::DTypeKV;
+   using DTypeO = typename Params::DTypeO;
+@@ -45,7 +45,7 @@
+   // is active, so NUM_MMA_KV is chosen to keep base+staging within the occupancy
+   // budget (otherwise the staging silently drops blocks/SM at large head dims).
+   constexpr bool kUseRepack =
+-      use_kv_repack<DTypeKV, CTA_TILE_Q, HEAD_DIM_QK, HEAD_DIM_VO>(ENABLE_FP4_REPACK);
++      use_kv_repack<DTypeKV, CTA_TILE_Q, HEAD_DIM_QK, HEAD_DIM_VO>(kPrefillLauncherRepacksFp4);
+   // Matches KernelTraits::USE_KV_SHARED_SMEM: K/V share one smem buffer for bf16/fp16 at every
+   // tile and for FP8 only at CTA_TILE_Q=32 (not NVFP4), so the occupancy budget counts the K/V
+   // footprint once exactly when the kernel actually shares it.
+@@ -107,7 +107,7 @@
+         using KTraits = KernelTraits<MASK_MODE, CTA_TILE_Q, NUM_MMA_Q, NUM_MMA_KV, NUM_MMA_D_QK,
+                                      NUM_MMA_D_VO, NUM_WARPS_Q, NUM_WARPS_KV, POS_ENCODING_MODE,
+                                      DTypeQ, DTypeKV, DTypeO, DTypeQKAccum, typename Params::IdType,
+-                                     AttentionVariant, ENABLE_FP4_REPACK>;
++                                     AttentionVariant, kPrefillLauncherRepacksFp4>;
+         if constexpr (KTraits::IsInvalid()) {
+           // Invalid configuration, skip
+           std::ostringstream err_msg;
