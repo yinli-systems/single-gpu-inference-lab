@@ -18,6 +18,8 @@ FILES = [
     "research/decision_sufficiency/collision_factorial/analyze.py",
     "research/decision_sufficiency/collision_factorial/validate_canary.py",
     "research/decision_sufficiency/collision_factorial/PROTOCOL.md",
+    "research/decision_sufficiency/collision_factorial/run.sbatch",
+    "research/decision_sufficiency/collision_factorial/prepare_campaign.py",
     "research/section6/metadata_adapter.py",
     "research/section6/bindings.json",
     "benchmarks/results/plan-order-mechanism/plan_contract.py",
