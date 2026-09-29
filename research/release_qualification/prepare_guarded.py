@@ -15,12 +15,16 @@ def one(s,old,new,label):
  return s.replace(old,new)
 
 def patch_scheduler(s,mode):
- s=one(s,'  bool enable_cuda_graph;\n  bool split_kv;','  bool enable_cuda_graph;\n  bool split_kv;\n  bool resource_cap;','plan field')
- s=one(s,'        enable_cuda_graph(false),\n        split_kv(false) {}','        enable_cuda_graph(false),\n        split_kv(false),\n        resource_cap(false) {}','plan init')
- s=one(s,'            block_valid_mask_offset,\n            enable_cuda_graph,\n            split_kv};','            block_valid_mask_offset,\n            enable_cuda_graph,\n            split_kv,\n            resource_cap};','to vector')
- s=one(s,'    if (vec.size() != 15) {','    if (vec.size() != 16) {','vector size check')
- s=one(s,'      err_msg << "PrefillPlanInfo::FromVector: vec.size() should be 15, but got " << vec.size();','      err_msg << "PrefillPlanInfo::FromVector: vec.size() should be 16, but got " << vec.size();','vector error')
- s=one(s,'    split_kv = vec[14];\n  }','    split_kv = vec[14];\n    resource_cap = vec[15];\n  }','from vector')
+ start=s.index('struct PrefillPlanInfo {')
+ stop=s.index('template <bool MATERIALIZE',start)
+ body=s[start:stop]
+ body=one(body,'  bool enable_cuda_graph;\n  bool split_kv;','  bool enable_cuda_graph;\n  bool split_kv;\n  bool resource_cap;','plan field')
+ body=one(body,'        enable_cuda_graph(false),\n        split_kv(false) {}','        enable_cuda_graph(false),\n        split_kv(false),\n        resource_cap(false) {}','plan init')
+ body=one(body,'            block_valid_mask_offset,\n            enable_cuda_graph,\n            split_kv};','            block_valid_mask_offset,\n            enable_cuda_graph,\n            split_kv,\n            resource_cap};','to vector')
+ body=one(body,'    if (vec.size() != 15) {','    if (vec.size() != 16) {','vector size check')
+ body=one(body,'      err_msg << "PrefillPlanInfo::FromVector: vec.size() should be 15, but got " << vec.size();','      err_msg << "PrefillPlanInfo::FromVector: vec.size() should be 16, but got " << vec.size();','vector error')
+ body=one(body,'    split_kv = vec[14];\n  }','    split_kv = vec[14];\n    resource_cap = vec[15];\n  }','from vector')
+ s=s[:start]+body+s[stop:]
  anchor=(
  '  plan_info.cta_tile_q = cta_tile_q;\n'
  '  plan_info.total_num_rows = total_num_rows;\n'
