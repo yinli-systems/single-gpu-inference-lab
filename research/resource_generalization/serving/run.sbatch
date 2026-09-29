@@ -16,7 +16,14 @@ export PATH=$CUDA_HOME/bin:$E/bin:$PATH
 export LD_LIBRARY_PATH=$CUDA_HOME/lib:${LD_LIBRARY_PATH:-}
 export OMP_NUM_THREADS=2 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 MAX_JOBS=4
 export TRITON_CACHE_DIR=$LOCAL/triton
-cd "$P/serving-source-v2"; sha256sum -c serving.sha256
+# Existing pinned CCCL headers are required by SGLang's independent JIT compiler.
+CCCL=$P/overlays/pristine/flashinfer/data/cccl
+export CPATH=$CCCL/libcudacxx/include:$CCCL/cub:$CCCL/thrust
+export NVCC_PREPEND_FLAGS="-I$CCCL/libcudacxx/include -I$CCCL/cub -I$CCCL/thrust"
+export SGLANG_JIT_CACHE_DIR=$P/sglang-cache/$SLURM_JOB_PARTITION/jit
+export SGLANG_CACHE_DIR=$P/sglang-cache/$SLURM_JOB_PARTITION/runtime
+export SGLANG_CUTE_AOT_CACHE_DIR=$P/sglang-cache/$SLURM_JOB_PARTITION/cute-aot
+cd "$P/serving-source-v3"; sha256sum -c serving.sha256
 mkdir "$P/serving-runs/$SLURM_JOB_ID"
 R="$P/serving-runs/$SLURM_JOB_ID"
 scontrol show job "$SLURM_JOB_ID" -o > "$R/slurm.txt"
