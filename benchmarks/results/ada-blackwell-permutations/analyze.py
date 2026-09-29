@@ -2,6 +2,7 @@
 from __future__ import annotations
 import argparse
 from collections import defaultdict
+from functools import lru_cache
 import itertools
 import json
 import math
@@ -28,13 +29,23 @@ def spearman(x,y):
  den=math.sqrt(sum((v-ma)**2 for v in a)*sum((v-mb)**2 for v in b))
  return sum((v-ma)*(w-mb) for v,w in zip(a,b))/den if den else None
 
+@lru_cache(maxsize=1)
+def bootstrap_weights():
+ # The exact registered Random(20260929) resampling order, cached once.
+ # Each draw has three sampled processes and twelve sampled blocks per process.
+ rng=random.Random(20260929);result=[]
+ for _ in range(5000):
+  processes=[rng.randrange(3) for _ in range(3)];counts=[0]*36
+  for process in processes:
+   for _ in range(12):counts[process*12+rng.randrange(12)]+=1
+  result.append(tuple((i,n) for i,n in enumerate(counts) if n))
+ return tuple(result)
+
 def interval(process_blocks,level=.95):
  if len(process_blocks)!=3 or any(len(v)!=12 for v in process_blocks):
   raise ValueError('three complete process repeats, twelve matched blocks required')
- rng=random.Random(20260929);draws=[]
- for _ in range(5000):
-  sample=[process_blocks[rng.randrange(3)] for _ in range(3)]
-  draws.append(S.mean(S.mean(v[rng.randrange(12)] for _ in range(12)) for v in sample))
+ flat=[x for block in process_blocks for x in block]
+ draws=[math.fsum(flat[i]*n for i,n in weights)/36 for weights in bootstrap_weights()]
  alpha=(1-level)/2
  return dict(mean=S.mean(S.mean(v) for v in process_blocks),
              CI=[quantile(draws,alpha),quantile(draws,1-alpha)],confidence=level,
@@ -67,6 +78,7 @@ def analyze(root,out):
  if len(dirs)!=6:raise ValueError(f'exactly six formal runs required, found {len(dirs)}')
  allrows=[];identities=set();indices=set();evidence=[];gpus=set();validations=[]
  for d in dirs:
+  if (d/'failure.json').exists():raise ValueError('preserve failed job; do not promote partial data')
   c=json.loads((d/'complete.json').read_text());e=json.loads((d/'environment.json').read_text())
   if not c['complete'] or c['stage']!='test' or c['rows']!=3456 or c['expected']!=3456:
    raise ValueError('incomplete formal job')

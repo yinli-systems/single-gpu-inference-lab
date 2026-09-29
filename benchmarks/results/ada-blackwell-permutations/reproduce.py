@@ -47,7 +47,7 @@ def main():
  subprocess.run([sys.executable,'-m','unittest','-v','test_campaign','test_analysis','test_representations','test_upstream'],cwd=BASE,check=True)
  if audit()!=json.loads((BASE/'representation-audit.json').read_text()):raise ValueError('representation golden-data mismatch')
  if audit_upstream(BASE/'reference_sources/vidur/sklearn_execution_time_predictor.py')!=json.loads((BASE/'vidur-source-audit.json').read_text()):raise ValueError('upstream feature-map golden-data mismatch')
- print('CPU_ARTIFACT_PASS: source identity,29contracts,exact representation audit,108upstream feature-map calls',flush=True)
+ print('CPU_ARTIFACT_PASS: source identity,31contracts,exact representation audit,108upstream feature-map calls',flush=True)
  if a.archive:
   manifest=BASE/'data-manifest.json'
   if not manifest.exists():raise ValueError('no published data manifest')
