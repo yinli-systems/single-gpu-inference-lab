@@ -1,0 +1,11 @@
+# Residency-pressure intervention (exposed development diagnostic)
+
+Motivation: in an independent profiler capture, identity and harmful orders use the same 34x1x8 grid, 128-thread block, 250 registers/thread and 49152 dynamic shared-memory bytes. Reported resource limits allow two CTAs per SM. This motivates a causal intervention, not a claimed explanation.
+
+Patch only the host launch for the existing two-request BF16/unsplit/D128 witness. Keep device kernel source, mathematical work, descriptors (within an order comparison), Q/K/V and output addresses fixed. Compare actual dynamic shared memory 49152 versus 65536 bytes. The latter is expected to constrain simultaneous residency; verify actual launch bytes, registers and resource limits in separate profiler records. Padding does not add mathematical operations. It may change occupancy and other resource behavior, so it does not uniquely identify SM issue order or cache effects.
+
+Primary question: does the heavy/native latency ratio contract toward one under the residency constraint? Also report native64/native48; eliminating a bad reorder is not necessarily accelerating the original native path. No best-policy selection. Three processes on one allocated GPU per family, 12 balanced paired blocks, graph-one warm, graph32 steady and graph-one after a 128-MiB write separately. Literal native-repeat controls must resolve the declared 0.5% equivalence band before interpreting 1% deltas. All cases are exposed; no unseen generalization claim.
+
+Full output and LSE must remain bit-exact in each tested graph regime and eager path, after independent sampled FP32 checks. All profiler durations are excluded from performance tables. Default OFF. The native comparator is the disabled path in the same experimental compiled source; a pristine native plan-plus-run A/B is still required for D. No engine insertion before net-benefit and lifecycle gates. An environment switch is not a thread-safe production API.
+
+This bounded B follow-up uses two additional single-GPU allocations (at most eight minutes each); total active study concurrency never exceeds four GPUs. Preserve original A/C jobs. Runtime support or qualification failures are retained, never replaced by fabricated timings.
