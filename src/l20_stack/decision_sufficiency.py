@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 import math
-from typing import Callable, Iterable, Mapping, Sequence
+from typing import Iterable, Mapping, Optional, Sequence
 
 
 FeatureKey = tuple[object, ...]
@@ -119,7 +119,7 @@ class ResolvedDecision:
         if self.action_a == self.action_b:
             raise ValueError("actions must differ")
 
-    def preference(self, relative_margin: float = 0.01) -> str | None:
+    def preference(self, relative_margin: float = 0.01) -> Optional[str]:
         """Return the faster action only when controls and the CI resolve the margin."""
         if not 0 <= relative_margin < 1:
             raise ValueError("relative_margin must be in [0,1)")
