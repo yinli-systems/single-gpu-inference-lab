@@ -8,6 +8,7 @@ import json
 from pathlib import Path
 import shutil
 import subprocess
+import sys
 
 
 FILES = [
@@ -82,7 +83,11 @@ def prepare(repo, site_packages, out):
     )
     manifest_module = importlib.util.module_from_spec(spec)
     assert spec.loader is not None
-    spec.loader.exec_module(manifest_module)
+    sys.path.insert(0, str(source_tree / "src"))
+    try:
+        spec.loader.exec_module(manifest_module)
+    finally:
+        sys.path.pop(0)
     manifest = manifest_module.build()
 
     (out / "receipts").mkdir(parents=True)
