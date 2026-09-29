@@ -21,6 +21,7 @@ PYTHONPATH=src single-gpu-infer artifact-index
 
 | Result directory | Status | Why it matters |
 | --- | --- | --- |
+| `plan-order-mechanism/` | Completed controlled FA2 experiment; NOT PROMOTED | 43,200 formal timings plus an actual source-native plan/run pilot. Fixed buffers isolate descriptor order; 4.50%/2.36% mean run-only gains coexist with a 42% 5090 regression and failed A/A controls. Full artifacts and CPU reproduction included. |
 | `a100-lmhead-flashsampling-boundary/` | A100 control | Shows the standalone LM-head/Gumbel candidate compiles on A100/Triton 3.4 after `BLOCK_BATCH=16` padding and beats full-logits reference by 1.07x-1.21x on four shapes. |
 | `a100-vllm-gemm-epilogue-candidate/` | A100 boundary proof | Shows the output-changing greedy LM-head epilogue path reaches real vLLM serving but does not beat same-session baseline ITL. |
 | `a100-vllm-sampling-semantics-qwen25-05b/` | A100 direction-setting | Shows top-k/top-p, penalties, and logprobs add roughly +37-42% median ITL over greedy/no-penalty control. |

@@ -1,0 +1,52 @@
+{
+  "complete": true,
+  "same_workflow_new_CPU_environment": true,
+  "independent_third_party": false,
+  "GPU_rerun": false,
+  "comparisons": {
+    "formal-results/summary.json": {
+      "byte_identical": false,
+      "checked_in_sha256": "96181c6d4f63d7d2961cc816de45dd5dd76ab94f01a119a4396767bf88c2a10c",
+      "reproduced_sha256": "518614f1624ba9eee3b41f267f8fe35d68c83e8c0e394f4e2bc235bdc7b04be2"
+    },
+    "formal-results/RESULTS.md": {
+      "byte_identical": true,
+      "checked_in_sha256": "e66c5c23ee389f0244620dc0d56f3d9042a8e2d8808f6263972547ab1c0953cd",
+      "reproduced_sha256": "e66c5c23ee389f0244620dc0d56f3d9042a8e2d8808f6263972547ab1c0953cd"
+    },
+    "native-results/summary.json": {
+      "byte_identical": false,
+      "checked_in_sha256": "68f0ddd3abf1362406a847618e0081fa4cecca3d1786ca0062264cc6d0d87ee3",
+      "reproduced_sha256": "6aedbfc040891fbf7e993268b608da21c48f1a3117a361e158d0b56b552020af"
+    },
+    "native-results/RESULTS.md": {
+      "byte_identical": true,
+      "checked_in_sha256": "bc5a9fabdc69ab889687d78f857015325ae4d565d13f6521741fc4613b43477d",
+      "reproduced_sha256": "bc5a9fabdc69ab889687d78f857015325ae4d565d13f6521741fc4613b43477d"
+    }
+  },
+  "numerically_reproduced_with_atol": 5e-15,
+  "all_nonfloating_values_exact": true,
+  "exact_float_differences": [
+    {
+      "path": "formal-results/GPUs/NVIDIA GeForce RTX 5090/cells/22/ratios/interleave",
+      "original": 0.9111655377857213,
+      "reproduced": 0.9111655377857214,
+      "absolute_difference": 1.1102230246251565e-16
+    },
+    {
+      "path": "formal-results/GPUs/NVIDIA GeForce RTX 5090/cells/226/ratios/heavy_first",
+      "original": 1.032749825507821,
+      "reproduced": 1.0327498255078211,
+      "absolute_difference": 2.220446049250313e-16
+    },
+    {
+      "path": "native-results/GPUs/NVIDIA GeForce RTX 4090/cells/3/ratios/heavy_first",
+      "original": 0.9995664752521292,
+      "reproduced": 0.9995664752521293,
+      "absolute_difference": 1.1102230246251565e-16
+    }
+  ],
+  "all_JSON_byte_identical": false,
+  "all_Markdown_byte_identical": true
+}

@@ -174,7 +174,7 @@ def analyze(root,stage,out):
         report['GPUs'][gpu]=dict(runs=len(runs),timing_rows=len(allrows),summaries=summaries,cells=cell_results,
              AA_failed=control_failures,policy_apply_median_us=statistics.median(r['apply_us'] for r in allrows),
              qualification_records=sum(len(json.loads((Path(run['path'])/'qualification.json').read_text())) for run in runs),
-             environments=[run['env'] for run in runs],raw_hashes={run['path']:run['hashes'] for run in runs})
+             environments=[run['env'] for run in runs],raw_hashes={Path(run['path']).name:run['hashes'] for run in runs})
         md+=['','A/A failures on %s: %d. Median prototype metadata setup %.1f us (NOT included in run-only ratios).'%(gpu,len(control_failures),report['GPUs'][gpu]['policy_apply_median_us']),'']
     out.mkdir(parents=True)
     (out/'summary.json').write_text(json.dumps(report,indent=2,allow_nan=False)+'\n')

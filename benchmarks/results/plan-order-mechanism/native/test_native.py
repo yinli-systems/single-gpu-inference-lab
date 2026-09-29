@@ -1,5 +1,6 @@
 """CPU native/Python differential tests, not GPU performance evidence."""
 import ctypes
+import argparse
 import hashlib
 import json
 from pathlib import Path
@@ -11,6 +12,8 @@ import time
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
 from plan_contract import expected_descriptors,order_indices,POLICIES
 D=Path(__file__).resolve().parent
+parser=argparse.ArgumentParser();parser.add_argument('--out',type=Path);args=parser.parse_args()
+if args.out is not None and args.out.exists():raise FileExistsError('preserve previous qualification receipt')
 with tempfile.TemporaryDirectory(prefix='sgi-order-native-') as tmp:
     lib=Path(tmp)/('order.dylib' if sys.platform=='darwin' else 'order.so')
     compiler=['xcrun','clang++'] if sys.platform=='darwin' else ['g++']
@@ -41,4 +44,5 @@ with tempfile.TemporaryDirectory(prefix='sgi-order-native-') as tmp:
                 differential_checks=checks,invalid_input_rejections=rejections,random_geometries=300,
                 source_sha256=hashlib.sha256((D/'descriptor_order.cc').read_bytes()).hexdigest(),
                 seconds=time.monotonic()-start,GPU_integration=False,performance_claim=False)
-    (D/'cpu-differential.json').write_text(json.dumps(result,indent=2)+'\n');print(json.dumps(result),flush=True)
+    if args.out is not None: args.out.write_text(json.dumps(result,indent=2)+'\n')
+    print(json.dumps(result),flush=True)
