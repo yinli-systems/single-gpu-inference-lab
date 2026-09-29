@@ -1,0 +1,24 @@
+# Registered Ada/Blackwell permutation assay — 29 September 2026
+
+This is a NEW kernel-level study, not completion of the registered A100 full-engine campaign. Original A100 geometries are reused to test a new hardware/mode/dtype matrix, not claimed as unseen geometries. No new timing exists when this document is first committed. Prior full-engine-v2 rejection remains unchanged.
+
+## Question and controls
+Does request pairing remain measurable with 2/4/8/16 prefills, and is the scalar attention-work W sufficient under the tested backend? Keep the chunk multiset, cached-depth multiset, count, total query and total KV constant. The per-request TOTAL KV-length multiset k+q may change: it is explicitly NOT a preserved feature. W = sum(q*k + q*(q+1)/2). Cases and six random pairings for n>=4 are fixed in campaign.py; order-null reverses batch rows without changing logical pairs; eqC-a/b hold W constant while changing pairs.
+
+## Fixed matrix
+RTX4090 and RTX5090; FlashInfer0.6.18 explicit FA2; 32 query heads / 8 KV heads / D128; FP16 and BF16; ragged attention; two independent 512MiB scratch spaces. Auto split and disable-split are explanatory controls, not a tuned candidate. No model weights, scheduler, HTTP or paged-KV claim. Eager and CUDA-graph-replay results are separate. Plan time is measured and reported separately, not included in execution timing. GPU graph capture contains four calls, replayed12times; eager12calls. CUDA-event device and synchronized wall time both retained; host submission can affect eager device intervals.
+
+Three fresh processes per GPU,12 randomized complete blocks after2 unscored warm-up blocks. Per state, random arm and execution-mode order. Explicit trial_id identifies every row; no sequence-position trace matching. Logical input buffers have fixed values within a process; three process seeds vary values. These are three process repeats, NOT three independent GPU populations. No post-hoc outlier removal. Record GPUUUID, host, versions, source hashes, power/clock telemetry, source commit and all failures. Co-node interference cannot be fully excluded and must not be described as isolated hardware.
+
+## Qualification and limits
+Every state/arm checks selected first/middle/last query rows for every request and all32heads against FP32 causal attention, plus complete output comparison of unsplit versus auto. FP16 atol=.005/rtol=.02; BF16 atol=.02/rtol=.04. These are tolerances, not bit equality. Order-null output is unpermuted and compared. Every graph output must match its eager output exactly before timing. Selected-row FP32 checks do NOT claim full FP32-tensor reference coverage. Any failure stops that process and retains partial evidence.
+
+First one bounded canary on each GPU (n2/n4,FP16,2blocks) validates infrastructure; exclude canary timing from confirmatory analysis. Only after both canaries pass submit3processes/GPU. Each formal process must produce3456unique timing rows,144state/arm qualification records,2016graph equality checks. Expected formal total20736timing rows. Max2canariesx10minutes and6formaljobsx20minutes, maximum3simultaneous formal GPU jobs; no extra resources purchased or unrelated data deleted.
+
+## Frozen analysis
+Primary descriptive endpoint: same-minus-opposite CUDA-graph device time under auto, by GPU/dtype/n. Report each replicate, paired block differences, and a conditional95%hierarchical bootstrap (resample3processes then12paired blocks,5000draws,seed20260929). Do not claim device/workload population significance or adjusted familywise significance. Also report Spearman rank correlation of W and state medians excluding the duplicate order-null. Negative/reversed slopes remain visible. Small process count limits inference.
+
+Controls: order-null minus same, eqC-b minus eqC-a with90%conditional intervals. A cell passes equivalence only if the whole interval is inside +/- max(2microseconds,2% reference median). Failure is not proof of non-equivalence. Split/mode effects are diagnostics. Do NOT count a shape-time ratio as an optimization speedup. No automatic serving promotion. Additional fitting, learned baselines or new workload selection after inspecting these results must be explicitly exploratory and use held-out confirmation later.
+
+## Research basis and non-novel ingredients
+FlashInfer already implements plan/run separation and load-balanced attention scheduling: https://arxiv.org/abs/2501.01005 . Its deployment-matched eager/graph tuning and context-valid reuse are established: https://flashinfer.ai/2026/09/22/autotuner-v2.html . KernelSight-LM is relevant per-request/kernel-aware prior art: https://arxiv.org/html/2606.28565v1 . Neither pairing-aware attention FLOPs, caching, nor CUDA graphs is claimed as invented here. This assay contributes controlled evidence and limits for the repository's state-identifiability question.

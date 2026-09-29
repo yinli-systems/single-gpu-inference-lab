@@ -54,6 +54,22 @@ jobs:
         run: |
           python -m pytest -q
 
+      - name: Validate controlled permutation contracts
+        working-directory: benchmarks/results/ada-blackwell-permutations
+        run: |
+          python -m unittest -v test_campaign test_analysis test_representations test_upstream
+          python representations.py --out /tmp/permutation-representation-audit.json
+          cmp representation-audit.json /tmp/permutation-representation-audit.json
+          python audit_vidur.py --source reference_sources/vidur/sklearn_execution_time_predictor.py --out /tmp/vidur-source-audit.json
+          cmp vidur-source-audit.json /tmp/vidur-source-audit.json
+
+      - name: Validate plan-order contracts and native conformance
+        run: |
+          python -m unittest discover -s benchmarks/results/plan-order-mechanism -p test_plan_contract.py
+          python -m unittest discover -s benchmarks/results/plan-order-mechanism/analysis -p 'test_*.py'
+          python benchmarks/results/plan-order-mechanism/native/test_native.py --out /tmp/native-order-qualification.json
+          python benchmarks/results/plan-order-mechanism/native/test_source_helper.py --out /tmp/native-source-helper-qualification.json
+
       - name: Run static checks
         env:
           PYTHONPYCACHEPREFIX: /tmp/single-gpu-infer-pycache

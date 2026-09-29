@@ -1,0 +1,16 @@
+[
+  {
+    "partition": "gpu_4090",
+    "rc": 0,
+    "job": "1638269",
+    "stderr": "",
+    "command": "sbatch --parsable --partition=gpu_4090 --array=0-2%2 --dependency=afterok:1638239:1638241 --output=/ssd/scxi253/single-gpu-inference-plan-order-20260929/logs/%x-%A_%a.log /ssd/scxi253/single-gpu-inference-plan-order-20260929/source/run_order.sbatch test"
+  },
+  {
+    "partition": "gpu_5090",
+    "rc": 0,
+    "job": "1638270",
+    "stderr": "",
+    "command": "sbatch --parsable --partition=gpu_5090 --array=0-2%2 --dependency=afterok:1638239:1638241 --output=/ssd/scxi253/single-gpu-inference-plan-order-20260929/logs/%x-%A_%a.log /ssd/scxi253/single-gpu-inference-plan-order-20260929/source/run_order.sbatch test"
+  }
+]

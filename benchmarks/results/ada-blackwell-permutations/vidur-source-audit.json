@@ -1,0 +1,1007 @@
+{
+  "scope": "actual upstream methods with a key-capturing lookup; NOT a trained Vidur performance benchmark",
+  "repo": "microsoft/vidur",
+  "commit": "abae7f63aa857300f5cdc6f5e0d27860cd24721b",
+  "path": "vidur/execution_time_predictor/sklearn_execution_time_predictor.py",
+  "git_blob": "a5a96466eb86d94503711afec6d45218bd38d93e",
+  "source_sha256": "8f648817ac7027ce47ef17dd54ad54483eb511b0772c80cc95bcf01bfa13553a",
+  "method_lines": {
+    "_get_batch_prefill_attention_params": [
+      754,
+      780
+    ],
+    "_get_attention_prefill_execution_time": [
+      852,
+      869
+    ]
+  },
+  "calls": 108,
+  "all_reference_keys_match": true,
+  "rows": [
+    {
+      "config": "n2",
+      "granularity": 64,
+      "state_calls": 3,
+      "unique_lookup_keys": 1,
+      "distinct_work_values": 2,
+      "all_states_alias": true,
+      "states": [
+        {
+          "state": "same",
+          "key": [
+            20480,
+            656100
+          ],
+          "W": 13959680
+        },
+        {
+          "state": "opposite",
+          "key": [
+            20480,
+            656100
+          ],
+          "W": 7668224
+        },
+        {
+          "state": "order-null",
+          "key": [
+            20480,
+            656100
+          ],
+          "W": 13959680
+        }
+      ]
+    },
+    {
+      "config": "n4",
+      "granularity": 64,
+      "state_calls": 11,
+      "unique_lookup_keys": 1,
+      "distinct_work_values": 8,
+      "all_states_alias": true,
+      "states": [
+        {
+          "state": "same",
+          "key": [
+            40960,
+            1392400
+          ],
+          "W": 33203136
+        },
+        {
+          "state": "opposite",
+          "key": [
+            40960,
+            1392400
+          ],
+          "W": 9085888
+        },
+        {
+          "state": "eqC-a",
+          "key": [
+            40960,
+            1392400
+          ],
+          "W": 17474496
+        },
+        {
+          "state": "eqC-b",
+          "key": [
+            40960,
+            1392400
+          ],
+          "W": 17474496
+        },
+        {
+          "state": "rand4",
+          "key": [
+            40960,
+            1392400
+          ],
+          "W": 28484544
+        },
+        {
+          "state": "rand5",
+          "key": [
+            40960,
+            1392400
+          ],
+          "W": 11183040
+        },
+        {
+          "state": "rand6",
+          "key": [
+            40960,
+            1392400
+          ],
+          "W": 13804480
+        },
+        {
+          "state": "rand7",
+          "key": [
+            40960,
+            1392400
+          ],
+          "W": 29533120
+        },
+        {
+          "state": "rand8",
+          "key": [
+            40960,
+            1392400
+          ],
+          "W": 18523072
+        },
+        {
+          "state": "rand9",
+          "key": [
+            40960,
+            1392400
+          ],
+          "W": 11183040
+        },
+        {
+          "state": "order-null",
+          "key": [
+            40960,
+            1392400
+          ],
+          "W": 33203136
+        }
+      ]
+    },
+    {
+      "config": "n8",
+      "granularity": 64,
+      "state_calls": 11,
+      "unique_lookup_keys": 1,
+      "distinct_work_values": 9,
+      "all_states_alias": true,
+      "states": [
+        {
+          "state": "same",
+          "key": [
+            73728,
+            835396
+          ],
+          "W": 30303360
+        },
+        {
+          "state": "opposite",
+          "key": [
+            73728,
+            835396
+          ],
+          "W": 13001856
+        },
+        {
+          "state": "eqC-a",
+          "key": [
+            73728,
+            835396
+          ],
+          "W": 22963328
+        },
+        {
+          "state": "eqC-b",
+          "key": [
+            73728,
+            835396
+          ],
+          "W": 22963328
+        },
+        {
+          "state": "rand4",
+          "key": [
+            73728,
+            835396
+          ],
+          "W": 17720448
+        },
+        {
+          "state": "rand5",
+          "key": [
+            73728,
+            835396
+          ],
+          "W": 19948672
+        },
+        {
+          "state": "rand6",
+          "key": [
+            73728,
+            835396
+          ],
+          "W": 24405120
+        },
+        {
+          "state": "rand7",
+          "key": [
+            73728,
+            835396
+          ],
+          "W": 20866176
+        },
+        {
+          "state": "rand8",
+          "key": [
+            73728,
+            835396
+          ],
+          "W": 16016512
+        },
+        {
+          "state": "rand9",
+          "key": [
+            73728,
+            835396
+          ],
+          "W": 21521536
+        },
+        {
+          "state": "order-null",
+          "key": [
+            73728,
+            835396
+          ],
+          "W": 30303360
+        }
+      ]
+    },
+    {
+      "config": "n16",
+      "granularity": 64,
+      "state_calls": 11,
+      "unique_lookup_keys": 1,
+      "distinct_work_values": 9,
+      "all_states_alias": true,
+      "states": [
+        {
+          "state": "same",
+          "key": [
+            175104,
+            1532644
+          ],
+          "W": 68073600
+        },
+        {
+          "state": "opposite",
+          "key": [
+            175104,
+            1532644
+          ],
+          "W": 28719232
+        },
+        {
+          "state": "eqC-a",
+          "key": [
+            175104,
+            1532644
+          ],
+          "W": 45627520
+        },
+        {
+          "state": "eqC-b",
+          "key": [
+            175104,
+            1532644
+          ],
+          "W": 45627520
+        },
+        {
+          "state": "rand4",
+          "key": [
+            175104,
+            1532644
+          ],
+          "W": 44480640
+        },
+        {
+          "state": "rand5",
+          "key": [
+            175104,
+            1532644
+          ],
+          "W": 40253568
+        },
+        {
+          "state": "rand6",
+          "key": [
+            175104,
+            1532644
+          ],
+          "W": 44382336
+        },
+        {
+          "state": "rand7",
+          "key": [
+            175104,
+            1532644
+          ],
+          "W": 46872704
+        },
+        {
+          "state": "rand8",
+          "key": [
+            175104,
+            1532644
+          ],
+          "W": 50116736
+        },
+        {
+          "state": "rand9",
+          "key": [
+            175104,
+            1532644
+          ],
+          "W": 53098624
+        },
+        {
+          "state": "order-null",
+          "key": [
+            175104,
+            1532644
+          ],
+          "W": 68073600
+        }
+      ]
+    },
+    {
+      "config": "n2",
+      "granularity": 128,
+      "state_calls": 3,
+      "unique_lookup_keys": 1,
+      "distinct_work_values": 2,
+      "all_states_alias": true,
+      "states": [
+        {
+          "state": "same",
+          "key": [
+            20480,
+            656100
+          ],
+          "W": 13959680
+        },
+        {
+          "state": "opposite",
+          "key": [
+            20480,
+            656100
+          ],
+          "W": 7668224
+        },
+        {
+          "state": "order-null",
+          "key": [
+            20480,
+            656100
+          ],
+          "W": 13959680
+        }
+      ]
+    },
+    {
+      "config": "n4",
+      "granularity": 128,
+      "state_calls": 11,
+      "unique_lookup_keys": 1,
+      "distinct_work_values": 8,
+      "all_states_alias": true,
+      "states": [
+        {
+          "state": "same",
+          "key": [
+            40960,
+            1392400
+          ],
+          "W": 33203136
+        },
+        {
+          "state": "opposite",
+          "key": [
+            40960,
+            1392400
+          ],
+          "W": 9085888
+        },
+        {
+          "state": "eqC-a",
+          "key": [
+            40960,
+            1392400
+          ],
+          "W": 17474496
+        },
+        {
+          "state": "eqC-b",
+          "key": [
+            40960,
+            1392400
+          ],
+          "W": 17474496
+        },
+        {
+          "state": "rand4",
+          "key": [
+            40960,
+            1392400
+          ],
+          "W": 28484544
+        },
+        {
+          "state": "rand5",
+          "key": [
+            40960,
+            1392400
+          ],
+          "W": 11183040
+        },
+        {
+          "state": "rand6",
+          "key": [
+            40960,
+            1392400
+          ],
+          "W": 13804480
+        },
+        {
+          "state": "rand7",
+          "key": [
+            40960,
+            1392400
+          ],
+          "W": 29533120
+        },
+        {
+          "state": "rand8",
+          "key": [
+            40960,
+            1392400
+          ],
+          "W": 18523072
+        },
+        {
+          "state": "rand9",
+          "key": [
+            40960,
+            1392400
+          ],
+          "W": 11183040
+        },
+        {
+          "state": "order-null",
+          "key": [
+            40960,
+            1392400
+          ],
+          "W": 33203136
+        }
+      ]
+    },
+    {
+      "config": "n8",
+      "granularity": 128,
+      "state_calls": 11,
+      "unique_lookup_keys": 1,
+      "distinct_work_values": 9,
+      "all_states_alias": true,
+      "states": [
+        {
+          "state": "same",
+          "key": [
+            73728,
+            835396
+          ],
+          "W": 30303360
+        },
+        {
+          "state": "opposite",
+          "key": [
+            73728,
+            835396
+          ],
+          "W": 13001856
+        },
+        {
+          "state": "eqC-a",
+          "key": [
+            73728,
+            835396
+          ],
+          "W": 22963328
+        },
+        {
+          "state": "eqC-b",
+          "key": [
+            73728,
+            835396
+          ],
+          "W": 22963328
+        },
+        {
+          "state": "rand4",
+          "key": [
+            73728,
+            835396
+          ],
+          "W": 17720448
+        },
+        {
+          "state": "rand5",
+          "key": [
+            73728,
+            835396
+          ],
+          "W": 19948672
+        },
+        {
+          "state": "rand6",
+          "key": [
+            73728,
+            835396
+          ],
+          "W": 24405120
+        },
+        {
+          "state": "rand7",
+          "key": [
+            73728,
+            835396
+          ],
+          "W": 20866176
+        },
+        {
+          "state": "rand8",
+          "key": [
+            73728,
+            835396
+          ],
+          "W": 16016512
+        },
+        {
+          "state": "rand9",
+          "key": [
+            73728,
+            835396
+          ],
+          "W": 21521536
+        },
+        {
+          "state": "order-null",
+          "key": [
+            73728,
+            835396
+          ],
+          "W": 30303360
+        }
+      ]
+    },
+    {
+      "config": "n16",
+      "granularity": 128,
+      "state_calls": 11,
+      "unique_lookup_keys": 1,
+      "distinct_work_values": 9,
+      "all_states_alias": true,
+      "states": [
+        {
+          "state": "same",
+          "key": [
+            175104,
+            1532644
+          ],
+          "W": 68073600
+        },
+        {
+          "state": "opposite",
+          "key": [
+            175104,
+            1532644
+          ],
+          "W": 28719232
+        },
+        {
+          "state": "eqC-a",
+          "key": [
+            175104,
+            1532644
+          ],
+          "W": 45627520
+        },
+        {
+          "state": "eqC-b",
+          "key": [
+            175104,
+            1532644
+          ],
+          "W": 45627520
+        },
+        {
+          "state": "rand4",
+          "key": [
+            175104,
+            1532644
+          ],
+          "W": 44480640
+        },
+        {
+          "state": "rand5",
+          "key": [
+            175104,
+            1532644
+          ],
+          "W": 40253568
+        },
+        {
+          "state": "rand6",
+          "key": [
+            175104,
+            1532644
+          ],
+          "W": 44382336
+        },
+        {
+          "state": "rand7",
+          "key": [
+            175104,
+            1532644
+          ],
+          "W": 46872704
+        },
+        {
+          "state": "rand8",
+          "key": [
+            175104,
+            1532644
+          ],
+          "W": 50116736
+        },
+        {
+          "state": "rand9",
+          "key": [
+            175104,
+            1532644
+          ],
+          "W": 53098624
+        },
+        {
+          "state": "order-null",
+          "key": [
+            175104,
+            1532644
+          ],
+          "W": 68073600
+        }
+      ]
+    },
+    {
+      "config": "n2",
+      "granularity": 256,
+      "state_calls": 3,
+      "unique_lookup_keys": 1,
+      "distinct_work_values": 2,
+      "all_states_alias": true,
+      "states": [
+        {
+          "state": "same",
+          "key": [
+            20480,
+            656100
+          ],
+          "W": 13959680
+        },
+        {
+          "state": "opposite",
+          "key": [
+            20480,
+            656100
+          ],
+          "W": 7668224
+        },
+        {
+          "state": "order-null",
+          "key": [
+            20480,
+            656100
+          ],
+          "W": 13959680
+        }
+      ]
+    },
+    {
+      "config": "n4",
+      "granularity": 256,
+      "state_calls": 11,
+      "unique_lookup_keys": 1,
+      "distinct_work_values": 8,
+      "all_states_alias": true,
+      "states": [
+        {
+          "state": "same",
+          "key": [
+            40960,
+            1392400
+          ],
+          "W": 33203136
+        },
+        {
+          "state": "opposite",
+          "key": [
+            40960,
+            1392400
+          ],
+          "W": 9085888
+        },
+        {
+          "state": "eqC-a",
+          "key": [
+            40960,
+            1392400
+          ],
+          "W": 17474496
+        },
+        {
+          "state": "eqC-b",
+          "key": [
+            40960,
+            1392400
+          ],
+          "W": 17474496
+        },
+        {
+          "state": "rand4",
+          "key": [
+            40960,
+            1392400
+          ],
+          "W": 28484544
+        },
+        {
+          "state": "rand5",
+          "key": [
+            40960,
+            1392400
+          ],
+          "W": 11183040
+        },
+        {
+          "state": "rand6",
+          "key": [
+            40960,
+            1392400
+          ],
+          "W": 13804480
+        },
+        {
+          "state": "rand7",
+          "key": [
+            40960,
+            1392400
+          ],
+          "W": 29533120
+        },
+        {
+          "state": "rand8",
+          "key": [
+            40960,
+            1392400
+          ],
+          "W": 18523072
+        },
+        {
+          "state": "rand9",
+          "key": [
+            40960,
+            1392400
+          ],
+          "W": 11183040
+        },
+        {
+          "state": "order-null",
+          "key": [
+            40960,
+            1392400
+          ],
+          "W": 33203136
+        }
+      ]
+    },
+    {
+      "config": "n8",
+      "granularity": 256,
+      "state_calls": 11,
+      "unique_lookup_keys": 1,
+      "distinct_work_values": 9,
+      "all_states_alias": true,
+      "states": [
+        {
+          "state": "same",
+          "key": [
+            73728,
+            835396
+          ],
+          "W": 30303360
+        },
+        {
+          "state": "opposite",
+          "key": [
+            73728,
+            835396
+          ],
+          "W": 13001856
+        },
+        {
+          "state": "eqC-a",
+          "key": [
+            73728,
+            835396
+          ],
+          "W": 22963328
+        },
+        {
+          "state": "eqC-b",
+          "key": [
+            73728,
+            835396
+          ],
+          "W": 22963328
+        },
+        {
+          "state": "rand4",
+          "key": [
+            73728,
+            835396
+          ],
+          "W": 17720448
+        },
+        {
+          "state": "rand5",
+          "key": [
+            73728,
+            835396
+          ],
+          "W": 19948672
+        },
+        {
+          "state": "rand6",
+          "key": [
+            73728,
+            835396
+          ],
+          "W": 24405120
+        },
+        {
+          "state": "rand7",
+          "key": [
+            73728,
+            835396
+          ],
+          "W": 20866176
+        },
+        {
+          "state": "rand8",
+          "key": [
+            73728,
+            835396
+          ],
+          "W": 16016512
+        },
+        {
+          "state": "rand9",
+          "key": [
+            73728,
+            835396
+          ],
+          "W": 21521536
+        },
+        {
+          "state": "order-null",
+          "key": [
+            73728,
+            835396
+          ],
+          "W": 30303360
+        }
+      ]
+    },
+    {
+      "config": "n16",
+      "granularity": 256,
+      "state_calls": 11,
+      "unique_lookup_keys": 1,
+      "distinct_work_values": 9,
+      "all_states_alias": true,
+      "states": [
+        {
+          "state": "same",
+          "key": [
+            175104,
+            1532644
+          ],
+          "W": 68073600
+        },
+        {
+          "state": "opposite",
+          "key": [
+            175104,
+            1532644
+          ],
+          "W": 28719232
+        },
+        {
+          "state": "eqC-a",
+          "key": [
+            175104,
+            1532644
+          ],
+          "W": 45627520
+        },
+        {
+          "state": "eqC-b",
+          "key": [
+            175104,
+            1532644
+          ],
+          "W": 45627520
+        },
+        {
+          "state": "rand4",
+          "key": [
+            175104,
+            1532644
+          ],
+          "W": 44480640
+        },
+        {
+          "state": "rand5",
+          "key": [
+            175104,
+            1532644
+          ],
+          "W": 40253568
+        },
+        {
+          "state": "rand6",
+          "key": [
+            175104,
+            1532644
+          ],
+          "W": 44382336
+        },
+        {
+          "state": "rand7",
+          "key": [
+            175104,
+            1532644
+          ],
+          "W": 46872704
+        },
+        {
+          "state": "rand8",
+          "key": [
+            175104,
+            1532644
+          ],
+          "W": 50116736
+        },
+        {
+          "state": "rand9",
+          "key": [
+            175104,
+            1532644
+          ],
+          "W": 53098624
+        },
+        {
+          "state": "order-null",
+          "key": [
+            175104,
+            1532644
+          ],
+          "W": 68073600
+        }
+      ]
+    }
+  ],
+  "limitation": "Conditional on this pinned prefill lookup and configured granularities. Not a claim about every Vidur fork/version, whole simulator error, or attained speedup."
+}

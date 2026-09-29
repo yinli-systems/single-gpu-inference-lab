@@ -1,0 +1,1 @@
+The native host test runner now defaults to stdout and accepts --out NEW_PATH, so CI cannot overwrite the recorded Linux qualification. This post-measurement packaging change does not modify the already deployed C++ helper, native GPU harness, or their recorded source manifest.
