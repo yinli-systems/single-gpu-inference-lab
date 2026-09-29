@@ -1,0 +1,4540 @@
+{
+  "complete": true,
+  "formal_runs": 6,
+  "timing_rows": 20736,
+  "qualifications": 864,
+  "fp32_vectors": 723456,
+  "max_fp32_abs": 0.004671216011047363,
+  "graph_checks": 12096,
+  "full_model": false,
+  "serving_promotion": false,
+  "analysis_source_sha256": "7c68f1826b4f5c68e5d0ab436263abc4a651c8d6bcb7d2204d5ca8e864bc7a39",
+  "evidence": [
+    {
+      "directory": "test-gpu_4090-1637898-0",
+      "complete_sha256": "50f7362240778d291a12e11bf639edbca52d1b479cb397aaa0d11893eaea1ca5",
+      "metadata": {
+        "source_sha256": "a5c9995b3d3ad442977ac1fdd0609741384124d7eb6c1561395a77f51710287a",
+        "rep": 0,
+        "stage": "test",
+        "torch": "2.13.0+cu130",
+        "flashinfer": "0.6.18",
+        "cuda": "13.0",
+        "gpu": "NVIDIA GeForce RTX 4090",
+        "sm": [
+          8,
+          9
+        ],
+        "sm_count": 128,
+        "backend": "fa2",
+        "heads": 32,
+        "kv_heads": 8,
+        "head_dim": 128,
+        "scratch_MiB_per_arm": 512,
+        "seed": 20260929,
+        "job": "1637898",
+        "host": "wqd10naf06g3",
+        "attention_only": true,
+        "full_model": false,
+        "HTTP": false,
+        "timing_scope": "plan excluded; eager device/wall and graph replay measured separately",
+        "hardware": {
+          "returncode": 0,
+          "stdout": "name, uuid, driver_version, memory.total [MiB], power.limit [W]\nNVIDIA GeForce RTX 4090, GPU-2b00a51f-cb91-4ef2-21b2-deab1fab7009, 580.82.07, 23028 MiB, 450.00 W\n",
+          "stderr": ""
+        },
+        "compute_apps": {
+          "returncode": 0,
+          "stdout": "gpu_uuid, pid, process_name, used_gpu_memory [MiB]\n",
+          "stderr": ""
+        },
+        "flashinfer_source_sha256": "743953a8d301d89c6943dc48a8f6b393c0d636b71b165ae1842c2c65c7defaab"
+      },
+      "completion": {
+        "complete": true,
+        "stage": "test",
+        "rep": 0,
+        "rows": 3456,
+        "expected": 3456,
+        "checks": 144,
+        "graph_exact_checks": 2016,
+        "fp32_vectors": 120576,
+        "seconds": 759.1854705326259,
+        "source_sha256": "a5c9995b3d3ad442977ac1fdd0609741384124d7eb6c1561395a77f51710287a",
+        "measurements_sha256": "77191589813575f85df315b3d7bddbac4b03a250ae646b0c6c7699a5d634f53b",
+        "validation_sha256": "04612fe5fc699a12b495adbf311325485dd10d362c271d6427f95096c2b00a25",
+        "peak_cuda_allocated_bytes": 4349271552,
+        "full_model": false,
+        "performance_promotion": false
+      }
+    },
+    {
+      "directory": "test-gpu_4090-1637900-1",
+      "complete_sha256": "f8cadd35d21fce506f4f3d903e6448b2b7cbe30cd69b5d281dd98499de9ec0b7",
+      "metadata": {
+        "source_sha256": "a5c9995b3d3ad442977ac1fdd0609741384124d7eb6c1561395a77f51710287a",
+        "rep": 1,
+        "stage": "test",
+        "torch": "2.13.0+cu130",
+        "flashinfer": "0.6.18",
+        "cuda": "13.0",
+        "gpu": "NVIDIA GeForce RTX 4090",
+        "sm": [
+          8,
+          9
+        ],
+        "sm_count": 128,
+        "backend": "fa2",
+        "heads": 32,
+        "kv_heads": 8,
+        "head_dim": 128,
+        "scratch_MiB_per_arm": 512,
+        "seed": 20260930,
+        "job": "1637900",
+        "host": "wqd10naf13g1",
+        "attention_only": true,
+        "full_model": false,
+        "HTTP": false,
+        "timing_scope": "plan excluded; eager device/wall and graph replay measured separately",
+        "hardware": {
+          "returncode": 0,
+          "stdout": "name, uuid, driver_version, memory.total [MiB], power.limit [W]\nNVIDIA GeForce RTX 4090, GPU-2901de3a-06fe-6948-2ae0-48f76f9882b0, 580.105.08, 24564 MiB, 450.00 W\n",
+          "stderr": ""
+        },
+        "compute_apps": {
+          "returncode": 0,
+          "stdout": "gpu_uuid, pid, process_name, used_gpu_memory [MiB]\n",
+          "stderr": ""
+        },
+        "flashinfer_source_sha256": "743953a8d301d89c6943dc48a8f6b393c0d636b71b165ae1842c2c65c7defaab"
+      },
+      "completion": {
+        "complete": true,
+        "stage": "test",
+        "rep": 1,
+        "rows": 3456,
+        "expected": 3456,
+        "checks": 144,
+        "graph_exact_checks": 2016,
+        "fp32_vectors": 120576,
+        "seconds": 754.2504974454641,
+        "source_sha256": "a5c9995b3d3ad442977ac1fdd0609741384124d7eb6c1561395a77f51710287a",
+        "measurements_sha256": "afbd7bd4ec7e691e48caeddd223c1c3ac1fb677cfb034fea1b8dfe7643a3164e",
+        "validation_sha256": "5da977bb34cd34f7ecb004fce4b64d192948d2189ad7ffa6e7a831c5ce5b8f83",
+        "peak_cuda_allocated_bytes": 4349271552,
+        "full_model": false,
+        "performance_promotion": false
+      }
+    },
+    {
+      "directory": "test-gpu_4090-1637902-2",
+      "complete_sha256": "c752f841409ff0ad6f809b95c888ab2cb37f72e24b4114a191b810012d435f96",
+      "metadata": {
+        "source_sha256": "a5c9995b3d3ad442977ac1fdd0609741384124d7eb6c1561395a77f51710287a",
+        "rep": 2,
+        "stage": "test",
+        "torch": "2.13.0+cu130",
+        "flashinfer": "0.6.18",
+        "cuda": "13.0",
+        "gpu": "NVIDIA GeForce RTX 4090",
+        "sm": [
+          8,
+          9
+        ],
+        "sm_count": 128,
+        "backend": "fa2",
+        "heads": 32,
+        "kv_heads": 8,
+        "head_dim": 128,
+        "scratch_MiB_per_arm": 512,
+        "seed": 20260931,
+        "job": "1637902",
+        "host": "wqd10naf06g3",
+        "attention_only": true,
+        "full_model": false,
+        "HTTP": false,
+        "timing_scope": "plan excluded; eager device/wall and graph replay measured separately",
+        "hardware": {
+          "returncode": 0,
+          "stdout": "name, uuid, driver_version, memory.total [MiB], power.limit [W]\nNVIDIA GeForce RTX 4090, GPU-2b00a51f-cb91-4ef2-21b2-deab1fab7009, 580.82.07, 23028 MiB, 450.00 W\n",
+          "stderr": ""
+        },
+        "compute_apps": {
+          "returncode": 0,
+          "stdout": "gpu_uuid, pid, process_name, used_gpu_memory [MiB]\n",
+          "stderr": ""
+        },
+        "flashinfer_source_sha256": "743953a8d301d89c6943dc48a8f6b393c0d636b71b165ae1842c2c65c7defaab"
+      },
+      "completion": {
+        "complete": true,
+        "stage": "test",
+        "rep": 2,
+        "rows": 3456,
+        "expected": 3456,
+        "checks": 144,
+        "graph_exact_checks": 2016,
+        "fp32_vectors": 120576,
+        "seconds": 753.1149165034294,
+        "source_sha256": "a5c9995b3d3ad442977ac1fdd0609741384124d7eb6c1561395a77f51710287a",
+        "measurements_sha256": "587af736dd8fc7e49a9b862519f75a9429f10ee502752241d3c9d9bbf59c160a",
+        "validation_sha256": "c7ea3e3ad4c9f1baaf17d73b56a036ce94fb2115ef1044359b49d01c639e5961",
+        "peak_cuda_allocated_bytes": 4349271552,
+        "full_model": false,
+        "performance_promotion": false
+      }
+    },
+    {
+      "directory": "test-gpu_5090-1637899-0",
+      "complete_sha256": "3470de54b30a2d7edaa32e0dd26122ee221b2efbc1342ecb5c28ba73e0864f12",
+      "metadata": {
+        "source_sha256": "a5c9995b3d3ad442977ac1fdd0609741384124d7eb6c1561395a77f51710287a",
+        "rep": 0,
+        "stage": "test",
+        "torch": "2.13.0+cu130",
+        "flashinfer": "0.6.18",
+        "cuda": "13.0",
+        "gpu": "NVIDIA GeForce RTX 5090",
+        "sm": [
+          12,
+          0
+        ],
+        "sm_count": 170,
+        "backend": "fa2",
+        "heads": 32,
+        "kv_heads": 8,
+        "head_dim": 128,
+        "scratch_MiB_per_arm": 512,
+        "seed": 20260929,
+        "job": "1637899",
+        "host": "wqd10nah04g5",
+        "attention_only": true,
+        "full_model": false,
+        "HTTP": false,
+        "timing_scope": "plan excluded; eager device/wall and graph replay measured separately",
+        "hardware": {
+          "returncode": 0,
+          "stdout": "name, uuid, driver_version, memory.total [MiB], power.limit [W]\nNVIDIA GeForce RTX 5090, GPU-1b487538-ef51-d27a-0a77-744faa5d19ac, 580.82.07, 32607 MiB, 575.00 W\n",
+          "stderr": ""
+        },
+        "compute_apps": {
+          "returncode": 0,
+          "stdout": "gpu_uuid, pid, process_name, used_gpu_memory [MiB]\n",
+          "stderr": ""
+        },
+        "flashinfer_source_sha256": "743953a8d301d89c6943dc48a8f6b393c0d636b71b165ae1842c2c65c7defaab"
+      },
+      "completion": {
+        "complete": true,
+        "stage": "test",
+        "rep": 0,
+        "rows": 3456,
+        "expected": 3456,
+        "checks": 144,
+        "graph_exact_checks": 2016,
+        "fp32_vectors": 120576,
+        "seconds": 615.708609489724,
+        "source_sha256": "a5c9995b3d3ad442977ac1fdd0609741384124d7eb6c1561395a77f51710287a",
+        "measurements_sha256": "00e387afcce1397ea752dc8359cdb8154bca61c87c8bf6da9747d7728fd6a168",
+        "validation_sha256": "062f93f30facd0a28c391551614397fe657de91fd5a806ce638b743bb8008660",
+        "peak_cuda_allocated_bytes": 4374437376,
+        "full_model": false,
+        "performance_promotion": false
+      }
+    },
+    {
+      "directory": "test-gpu_5090-1637901-1",
+      "complete_sha256": "760f44bff6d5d0f6a5f5d9e328556a5c7442d3a858fa0fa6dbe14109d52d5a81",
+      "metadata": {
+        "source_sha256": "a5c9995b3d3ad442977ac1fdd0609741384124d7eb6c1561395a77f51710287a",
+        "rep": 1,
+        "stage": "test",
+        "torch": "2.13.0+cu130",
+        "flashinfer": "0.6.18",
+        "cuda": "13.0",
+        "gpu": "NVIDIA GeForce RTX 5090",
+        "sm": [
+          12,
+          0
+        ],
+        "sm_count": 170,
+        "backend": "fa2",
+        "heads": 32,
+        "kv_heads": 8,
+        "head_dim": 128,
+        "scratch_MiB_per_arm": 512,
+        "seed": 20260930,
+        "job": "1637901",
+        "host": "wqd10nah04g5",
+        "attention_only": true,
+        "full_model": false,
+        "HTTP": false,
+        "timing_scope": "plan excluded; eager device/wall and graph replay measured separately",
+        "hardware": {
+          "returncode": 0,
+          "stdout": "name, uuid, driver_version, memory.total [MiB], power.limit [W]\nNVIDIA GeForce RTX 5090, GPU-1b487538-ef51-d27a-0a77-744faa5d19ac, 580.82.07, 32607 MiB, 575.00 W\n",
+          "stderr": ""
+        },
+        "compute_apps": {
+          "returncode": 0,
+          "stdout": "gpu_uuid, pid, process_name, used_gpu_memory [MiB]\n",
+          "stderr": ""
+        },
+        "flashinfer_source_sha256": "743953a8d301d89c6943dc48a8f6b393c0d636b71b165ae1842c2c65c7defaab"
+      },
+      "completion": {
+        "complete": true,
+        "stage": "test",
+        "rep": 1,
+        "rows": 3456,
+        "expected": 3456,
+        "checks": 144,
+        "graph_exact_checks": 2016,
+        "fp32_vectors": 120576,
+        "seconds": 607.9089387152344,
+        "source_sha256": "a5c9995b3d3ad442977ac1fdd0609741384124d7eb6c1561395a77f51710287a",
+        "measurements_sha256": "d289b4ffdfa2b4202f005f4170bd00e4b4962fe0769991f3bfd472b9f6a46b77",
+        "validation_sha256": "4eb7db46b7ea5a0608cf91fdf317dbd9337110d231153ca7097aa8d627e7f565",
+        "peak_cuda_allocated_bytes": 4374437376,
+        "full_model": false,
+        "performance_promotion": false
+      }
+    },
+    {
+      "directory": "test-gpu_5090-1637903-2",
+      "complete_sha256": "15e4f7b3dd1c2a097094b3b0ea947c9cd63fe6459e4f5147cdd3bbe483a0c6c0",
+      "metadata": {
+        "source_sha256": "a5c9995b3d3ad442977ac1fdd0609741384124d7eb6c1561395a77f51710287a",
+        "rep": 2,
+        "stage": "test",
+        "torch": "2.13.0+cu130",
+        "flashinfer": "0.6.18",
+        "cuda": "13.0",
+        "gpu": "NVIDIA GeForce RTX 5090",
+        "sm": [
+          12,
+          0
+        ],
+        "sm_count": 170,
+        "backend": "fa2",
+        "heads": 32,
+        "kv_heads": 8,
+        "head_dim": 128,
+        "scratch_MiB_per_arm": 512,
+        "seed": 20260931,
+        "job": "1637903",
+        "host": "wqd10nah10g1",
+        "attention_only": true,
+        "full_model": false,
+        "HTTP": false,
+        "timing_scope": "plan excluded; eager device/wall and graph replay measured separately",
+        "hardware": {
+          "returncode": 0,
+          "stdout": "name, uuid, driver_version, memory.total [MiB], power.limit [W]\nNVIDIA GeForce RTX 5090, GPU-61688937-36a9-952c-035f-b85b9ad2ff1c, 580.82.07, 32607 MiB, 575.00 W\n",
+          "stderr": ""
+        },
+        "compute_apps": {
+          "returncode": 0,
+          "stdout": "gpu_uuid, pid, process_name, used_gpu_memory [MiB]\n",
+          "stderr": ""
+        },
+        "flashinfer_source_sha256": "743953a8d301d89c6943dc48a8f6b393c0d636b71b165ae1842c2c65c7defaab"
+      },
+      "completion": {
+        "complete": true,
+        "stage": "test",
+        "rep": 2,
+        "rows": 3456,
+        "expected": 3456,
+        "checks": 144,
+        "graph_exact_checks": 2016,
+        "fp32_vectors": 120576,
+        "seconds": 618.604838558007,
+        "source_sha256": "a5c9995b3d3ad442977ac1fdd0609741384124d7eb6c1561395a77f51710287a",
+        "measurements_sha256": "90631272204ef4738dd994f2d43926f418494904c01ea01f37b451c068cc3e9c",
+        "validation_sha256": "9be304ab44dae8e329f097e8ee8e844237e58739f63dec171ded83bb99330794",
+        "peak_cuda_allocated_bytes": 4374437376,
+        "full_model": false,
+        "performance_promotion": false
+      }
+    }
+  ],
+  "cells": [
+    {
+      "gpu": "NVIDIA GeForce RTX 4090",
+      "dtype": "bfloat16",
+      "config": "n16",
+      "arm": "auto",
+      "mode": "eager",
+      "primary": false,
+      "same_minus_opposite_us": {
+        "mean": 4039.800952982019,
+        "CI": [
+          4011.753812542668,
+          4069.0766976939312
+        ],
+        "confidence": 0.95,
+        "replicate_means": [
+          4052.691804038154,
+          4013.3793883853486,
+          4053.3316665225557
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference"
+      },
+      "state_median_us": {
+        "same": 8389.485359191895,
+        "opposite": 4341.290632883708,
+        "eqC-a": 6129.749298095703,
+        "eqC-b": 6115.715980529785,
+        "rand4": 6151.6612370808925,
+        "rand5": 5749.589284261068,
+        "rand6": 6051.153182983398,
+        "rand7": 6389.514605204264,
+        "rand8": 6735.917409261068,
+        "rand9": 6896.0812886556,
+        "order-null": 7902.194658915201
+      },
+      "spearman_work_latency": 0.960490759014502,
+      "observed_median_half_range_us": 2024.0973631540933,
+      "order_null": {
+        "mean": -485.8981061864783,
+        "CI": [
+          -496.35722548873343,
+          -476.07904805077453
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          -477.133697933621,
+          -493.0202696058484,
+          -487.5403510199654
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 167.7897071838379,
+        "equivalent": false
+      },
+      "equal_work": {
+        "mean": -11.712250886140055,
+        "CI": [
+          -44.914675641942864,
+          17.94355622044312
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          4.774729410807292,
+          6.27904468112509,
+          -46.19052675035255
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 122.59498596191406,
+        "equivalent": true
+      },
+      "plan_median_us": 148.4728418290615,
+      "synchronized_wall_median_us": 6178.199973267813
+    },
+    {
+      "gpu": "NVIDIA GeForce RTX 4090",
+      "dtype": "bfloat16",
+      "config": "n16",
+      "arm": "auto",
+      "mode": "graph",
+      "primary": true,
+      "same_minus_opposite_us": {
+        "mean": 4031.967560450236,
+        "CI": [
+          4020.5548350457793,
+          4044.064071222588
+        ],
+        "confidence": 0.95,
+        "replicate_means": [
+          4032.8829023573135,
+          4026.746723386976,
+          4036.273055606418
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference"
+      },
+      "state_median_us": {
+        "same": 8382.826487223307,
+        "opposite": 4348.936716715495,
+        "eqC-a": 6128.963152567545,
+        "eqC-b": 6091.258684794108,
+        "rand4": 6145.300229390463,
+        "rand5": 5699.94862874349,
+        "rand6": 6033.7066650390625,
+        "rand7": 6350.871404012045,
+        "rand8": 6721.002896626791,
+        "rand9": 6853.888193766275,
+        "order-null": 7919.516245524089
+      },
+      "spearman_work_latency": 0.960490759014502,
+      "observed_median_half_range_us": 2016.9448852539058,
+      "order_null": {
+        "mean": -465.91725172819906,
+        "CI": [
+          -475.73386474891925,
+          -455.62523117771843
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          -474.13057751125757,
+          -453.4063339233398,
+          -470.21484374999983
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 167.65652974446613,
+        "equivalent": false
+      },
+      "equal_work": {
+        "mean": -39.53200799447518,
+        "CI": [
+          -54.95828610879392,
+          -24.803046826963165
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          -35.57417127821176,
+          -55.12412389119451,
+          -27.897728814019274
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 122.5792630513509,
+        "equivalent": true
+      },
+      "plan_median_us": 148.4728418290615,
+      "synchronized_wall_median_us": 6157.694268040359
+    },
+    {
+      "gpu": "NVIDIA GeForce RTX 4090",
+      "dtype": "bfloat16",
+      "config": "n16",
+      "arm": "unsplit",
+      "mode": "eager",
+      "primary": false,
+      "same_minus_opposite_us": {
+        "mean": 4058.536070364493,
+        "CI": [
+          4037.204266698272,
+          4078.970391220517
+        ],
+        "confidence": 0.95,
+        "replicate_means": [
+          4044.7696314917666,
+          4073.3750661214194,
+          4057.463513480293
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference"
+      },
+      "state_median_us": {
+        "same": 8387.991905212402,
+        "opposite": 4319.970607757568,
+        "eqC-a": 6125.695864359538,
+        "eqC-b": 6120.002428690592,
+        "rand4": 6165.409406026205,
+        "rand5": 5746.134440104166,
+        "rand6": 6052.38660176595,
+        "rand7": 6370.052019755045,
+        "rand8": 6735.76800028483,
+        "rand9": 6891.172091166179,
+        "order-null": 7919.045130411783
+      },
+      "spearman_work_latency": 0.960490759014502,
+      "observed_median_half_range_us": 2034.010648727417,
+      "order_null": {
+        "mean": -475.48896295053,
+        "CI": [
+          -490.1691339634083,
+          -459.5004858794037
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          -488.15043767293287,
+          -481.6898769802519,
+          -456.6265741984052
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 167.75983810424805,
+        "equivalent": false
+      },
+      "equal_work": {
+        "mean": -9.271621704101538,
+        "CI": [
+          -34.22203328874374,
+          13.810444761205654
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          -1.3079113430448313,
+          -3.241909874809911,
+          -23.26504389444987
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 122.51391728719076,
+        "equivalent": true
+      },
+      "plan_median_us": 143.7002792954445,
+      "synchronized_wall_median_us": 6181.346524196366
+    },
+    {
+      "gpu": "NVIDIA GeForce RTX 4090",
+      "dtype": "bfloat16",
+      "config": "n16",
+      "arm": "unsplit",
+      "mode": "graph",
+      "primary": false,
+      "same_minus_opposite_us": {
+        "mean": 4033.420809993038,
+        "CI": [
+          4016.2788013617205,
+          4048.094452310491
+        ],
+        "confidence": 0.95,
+        "replicate_means": [
+          4041.0587787628174,
+          4019.3928347693554,
+          4039.8108164469404
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference"
+      },
+      "state_median_us": {
+        "same": 8381.717046101887,
+        "opposite": 4349.613348642984,
+        "eqC-a": 6139.1096115112305,
+        "eqC-b": 6099.797566731771,
+        "rand4": 6148.003896077475,
+        "rand5": 5706.201235453287,
+        "rand6": 6044.2969004313145,
+        "rand7": 6336.217562357585,
+        "rand8": 6719.296137491861,
+        "rand9": 6860.032081604004,
+        "order-null": 7908.255894978842
+      },
+      "spearman_work_latency": 0.960490759014502,
+      "observed_median_half_range_us": 2016.0518487294512,
+      "order_null": {
+        "mean": -469.7391898543747,
+        "CI": [
+          -479.31712645071536,
+          -460.127678623906
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          -472.8928142123751,
+          -459.3583212958444,
+          -476.9664340549046
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 167.63434092203775,
+        "equivalent": false
+      },
+      "equal_work": {
+        "mean": -40.33002146968124,
+        "CI": [
+          -66.0005419342607,
+          -16.82852197576435
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          -23.03748660617377,
+          -74.92759492662223,
+          -23.02498287624773
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 122.78219223022461,
+        "equivalent": true
+      },
+      "plan_median_us": 143.7002792954445,
+      "synchronized_wall_median_us": 6161.899499905607
+    },
+    {
+      "gpu": "NVIDIA GeForce RTX 4090",
+      "dtype": "bfloat16",
+      "config": "n2",
+      "arm": "auto",
+      "mode": "eager",
+      "primary": false,
+      "same_minus_opposite_us": {
+        "mean": 54.80644879517731,
+        "CI": [
+          54.04207430503985,
+          55.8042388271402
+        ],
+        "confidence": 0.95,
+        "replicate_means": [
+          54.83067035675045,
+          55.409789085388205,
+          54.17888694339327
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference"
+      },
+      "state_median_us": {
+        "same": 1804.2479356129966,
+        "opposite": 1749.6240139007568,
+        "order-null": 1801.3693491617837
+      },
+      "spearman_work_latency": 1.0,
+      "observed_median_half_range_us": 27.311960856119867,
+      "order_null": {
+        "mean": -2.4581529476024695,
+        "CI": [
+          -3.3478856086730886,
+          -1.667670188126771
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          -2.32088565826416,
+          -3.4173462125990377,
+          -1.636226971944211
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 36.08495871225993,
+        "equivalent": true
+      },
+      "equal_work": null,
+      "plan_median_us": 137.20476999878883,
+      "synchronized_wall_median_us": 1802.0928837358952
+    },
+    {
+      "gpu": "NVIDIA GeForce RTX 4090",
+      "dtype": "bfloat16",
+      "config": "n2",
+      "arm": "auto",
+      "mode": "graph",
+      "primary": true,
+      "same_minus_opposite_us": {
+        "mean": 54.776668548584006,
+        "CI": [
+          54.18106637619161,
+          55.627517015845704
+        ],
+        "confidence": 0.95,
+        "replicate_means": [
+          54.72475952572296,
+          55.26014169057212,
+          54.34510442945693
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference"
+      },
+      "state_median_us": {
+        "same": 1798.2890605926514,
+        "opposite": 1743.7996864318848,
+        "order-null": 1797.5333531697593
+      },
+      "spearman_work_latency": 1.0,
+      "observed_median_half_range_us": 27.2446870803833,
+      "order_null": {
+        "mean": -2.0870235231187673,
+        "CI": [
+          -2.977420444841757,
+          -1.3395735511073628
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          -1.5157328711615605,
+          -3.0496120452881237,
+          -1.6957256529066171
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 35.96578121185303,
+        "equivalent": true
+      },
+      "equal_work": null,
+      "plan_median_us": 137.20476999878883,
+      "synchronized_wall_median_us": 1795.9969894339642
+    },
+    {
+      "gpu": "NVIDIA GeForce RTX 4090",
+      "dtype": "bfloat16",
+      "config": "n2",
+      "arm": "unsplit",
+      "mode": "eager",
+      "primary": false,
+      "same_minus_opposite_us": {
+        "mean": 55.066899017051405,
+        "CI": [
+          54.536420989919584,
+          55.81454347681113
+        ],
+        "confidence": 0.95,
+        "replicate_means": [
+          54.88599671257865,
+          55.25889661577012,
+          55.05580372280544
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference"
+      },
+      "state_median_us": {
+        "same": 1803.149382273356,
+        "opposite": 1748.3213742574058,
+        "order-null": 1801.1732896169026
+      },
+      "spearman_work_latency": 1.0,
+      "observed_median_half_range_us": 27.41400400797511,
+      "order_null": {
+        "mean": -1.8335624977394407,
+        "CI": [
+          -2.4826442753827287,
+          -1.078350455672666
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          -1.912236213684101,
+          -1.2722280290391648,
+          -2.3162232504950566
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 36.06298764546712,
+        "equivalent": true
+      },
+      "equal_work": null,
+      "plan_median_us": 135.55539771914482,
+      "synchronized_wall_median_us": 1802.035141736269
+    },
+    {
+      "gpu": "NVIDIA GeForce RTX 4090",
+      "dtype": "bfloat16",
+      "config": "n2",
+      "arm": "unsplit",
+      "mode": "graph",
+      "primary": false,
+      "same_minus_opposite_us": {
+        "mean": 55.184430546230715,
+        "CI": [
+          54.56945167647464,
+          55.96971500802922
+        ],
+        "confidence": 0.95,
+        "replicate_means": [
+          55.347137980990944,
+          55.24615446726477,
+          54.95999919043643
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference"
+      },
+      "state_median_us": {
+        "same": 1799.0313371022544,
+        "opposite": 1743.2106335957847,
+        "order-null": 1797.3770300547283
+      },
+      "spearman_work_latency": 1.0,
+      "observed_median_half_range_us": 27.910351753234863,
+      "order_null": {
+        "mean": -2.0256483996355743,
+        "CI": [
+          -2.465612358517119,
+          -1.604432309115354
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          -2.144045299953897,
+          -1.8866459528604764,
+          -2.0462539460923495
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 35.98062674204509,
+        "equivalent": true
+      },
+      "equal_work": null,
+      "plan_median_us": 135.55539771914482,
+      "synchronized_wall_median_us": 1796.6924545665584
+    },
+    {
+      "gpu": "NVIDIA GeForce RTX 4090",
+      "dtype": "bfloat16",
+      "config": "n4",
+      "arm": "auto",
+      "mode": "eager",
+      "primary": false,
+      "same_minus_opposite_us": {
+        "mean": 1877.793413621408,
+        "CI": [
+          1871.064668452298,
+          1883.544275826878
+        ],
+        "confidence": 0.95,
+        "replicate_means": [
+          1878.5512977176243,
+          1882.736020618015,
+          1872.0929225285847
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference"
+      },
+      "state_median_us": {
+        "same": 4552.070617675781,
+        "opposite": 2678.3493359883623,
+        "eqC-a": 2790.3159459431963,
+        "eqC-b": 2708.6920738220215,
+        "rand4": 4147.582689921061,
+        "rand5": 2677.816073099772,
+        "rand6": 2705.372015635173,
+        "rand7": 4247.082710266113,
+        "rand8": 2802.033265431722,
+        "rand9": 3010.2612177530928,
+        "order-null": 3994.5321083068848
+      },
+      "spearman_work_latency": 0.8292837093139817,
+      "observed_median_half_range_us": 937.1272722880046,
+      "order_null": {
+        "mean": -560.2484544118245,
+        "CI": [
+          -563.6997973477398,
+          -556.4307879518578
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          -562.326192855835,
+          -562.3946719699435,
+          -556.0244984096951
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 91.04141235351562,
+        "equivalent": false
+      },
+      "equal_work": {
+        "mean": -78.09197461163552,
+        "CI": [
+          -81.74846039877998,
+          -74.40397165439738
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          -75.57484838697637,
+          -79.99330096774634,
+          -78.70777448018384
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 55.80631891886393,
+        "equivalent": false
+      },
+      "plan_median_us": 138.86019587516785,
+      "synchronized_wall_median_us": 2804.0600397313633
+    },
+    {
+      "gpu": "NVIDIA GeForce RTX 4090",
+      "dtype": "bfloat16",
+      "config": "n4",
+      "arm": "auto",
+      "mode": "graph",
+      "primary": true,
+      "same_minus_opposite_us": {
+        "mean": 1876.4048329106083,
+        "CI": [
+          1870.04747291406,
+          1883.1336785245824
+        ],
+        "confidence": 0.95,
+        "replicate_means": [
+          1875.0826782650417,
+          1883.3529154459634,
+          1870.7789050208198
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference"
+      },
+      "state_median_us": {
+        "same": 4546.847979227702,
+        "opposite": 2670.1332728068032,
+        "eqC-a": 2787.519931793213,
+        "eqC-b": 2710.687319437663,
+        "rand4": 4142.209053039551,
+        "rand5": 2669.307867685954,
+        "rand6": 2703.106085459391,
+        "rand7": 4236.827055613199,
+        "rand8": 2802.3500442504883,
+        "rand9": 3000.8519490559893,
+        "order-null": 3990.479628245036
+      },
+      "spearman_work_latency": 0.8292837093139817,
+      "observed_median_half_range_us": 938.770055770874,
+      "order_null": {
+        "mean": -557.0686393313938,
+        "CI": [
+          -560.28813123703,
+          -553.7900169690452
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          -557.5353304545084,
+          -559.9227481418185,
+          -553.7478393978544
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 90.93695958455405,
+        "equivalent": false
+      },
+      "equal_work": {
+        "mean": -78.13671783164699,
+        "CI": [
+          -82.07075066036656,
+          -74.4739629604198
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          -76.17031203375932,
+          -77.38818062676326,
+          -80.85166083441838
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 55.75039863586426,
+        "equivalent": false
+      },
+      "plan_median_us": 138.86019587516785,
+      "synchronized_wall_median_us": 2802.782808430493
+    },
+    {
+      "gpu": "NVIDIA GeForce RTX 4090",
+      "dtype": "bfloat16",
+      "config": "n4",
+      "arm": "unsplit",
+      "mode": "eager",
+      "primary": false,
+      "same_minus_opposite_us": {
+        "mean": 1875.865861221596,
+        "CI": [
+          1872.5499249166915,
+          1879.0492483863125
+        ],
+        "confidence": 0.95,
+        "replicate_means": [
+          1875.9035931693184,
+          1876.7173290252686,
+          1874.9766614702012
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference"
+      },
+      "state_median_us": {
+        "same": 4551.760037740071,
+        "opposite": 2675.3799120585127,
+        "eqC-a": 2790.6867663065595,
+        "eqC-b": 2706.463972727458,
+        "rand4": 4148.0560302734375,
+        "rand5": 2678.380012512207,
+        "rand6": 2702.2453943888345,
+        "rand7": 4243.313312530518,
+        "rand8": 2821.215947469075,
+        "rand9": 3001.2733141581216,
+        "order-null": 3994.098663330078
+      },
+      "spearman_work_latency": 0.8475767323135548,
+      "observed_median_half_range_us": 938.1900628407793,
+      "order_null": {
+        "mean": -557.7584284323233,
+        "CI": [
+          -560.8302072242452,
+          -554.6374206189757
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          -561.0231558481852,
+          -555.9092627631294,
+          -556.3428666856554
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 91.03520075480142,
+        "equivalent": false
+      },
+      "equal_work": {
+        "mean": -80.38880206920481,
+        "CI": [
+          -86.55083267777061,
+          -74.49830284825075
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          -76.58929295010034,
+          -76.8779648674858,
+          -87.69914839002831
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 55.813735326131194,
+        "equivalent": false
+      },
+      "plan_median_us": 136.53375208377838,
+      "synchronized_wall_median_us": 2822.979741419355
+    },
+    {
+      "gpu": "NVIDIA GeForce RTX 4090",
+      "dtype": "bfloat16",
+      "config": "n4",
+      "arm": "unsplit",
+      "mode": "graph",
+      "primary": false,
+      "same_minus_opposite_us": {
+        "mean": 1879.222627039309,
+        "CI": [
+          1873.4569824404186,
+          1885.6956639775524
+        ],
+        "confidence": 0.95,
+        "replicate_means": [
+          1877.5374492009482,
+          1885.9647512435913,
+          1874.1656806733872
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference"
+      },
+      "state_median_us": {
+        "same": 4547.338008880615,
+        "opposite": 2668.1702931722,
+        "eqC-a": 2787.346363067627,
+        "eqC-b": 2707.6775232950845,
+        "rand4": 4143.040974934896,
+        "rand5": 2669.902642567952,
+        "rand6": 2702.5052706400556,
+        "rand7": 4249.0922609965,
+        "rand8": 2806.23737970988,
+        "rand9": 2989.1462326049805,
+        "order-null": 3990.4227256774902
+      },
+      "spearman_work_latency": 0.8475767323135548,
+      "observed_median_half_range_us": 939.5838578542075,
+      "order_null": {
+        "mean": -558.7991431907371,
+        "CI": [
+          -562.2892384175901,
+          -555.1716778013442
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          -561.6604752010769,
+          -560.4417588975696,
+          -554.2951954735651
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 90.9467601776123,
+        "equivalent": false
+      },
+      "equal_work": {
+        "mean": -77.03359038741502,
+        "CI": [
+          -81.92970885170834,
+          -72.76367081536186
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          -74.70112376742895,
+          -73.67563247680668,
+          -82.7240149180094
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 55.74692726135254,
+        "equivalent": false
+      },
+      "plan_median_us": 136.53375208377838,
+      "synchronized_wall_median_us": 2811.7855933184424
+    },
+    {
+      "gpu": "NVIDIA GeForce RTX 4090",
+      "dtype": "bfloat16",
+      "config": "n8",
+      "arm": "auto",
+      "mode": "eager",
+      "primary": false,
+      "same_minus_opposite_us": {
+        "mean": 1785.141626993815,
+        "CI": [
+          1661.1664928771831,
+          1865.327493018574
+        ],
+        "confidence": 0.95,
+        "replicate_means": [
+          1863.4957472483316,
+          1654.6916034486558,
+          1837.2375302844578
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference"
+      },
+      "state_median_us": {
+        "same": 4459.181308746338,
+        "opposite": 2624.549388885498,
+        "eqC-a": 3431.1626752217608,
+        "eqC-b": 3489.0213012695312,
+        "rand4": 2664.8679574330645,
+        "rand5": 3053.854624430339,
+        "rand6": 3574.358622233073,
+        "rand7": 3387.0946566263833,
+        "rand8": 3183.5306485493975,
+        "rand9": 3592.79727935791,
+        "order-null": 3928.5866419474282
+      },
+      "spearman_work_latency": 0.8875420937728943,
+      "observed_median_half_range_us": 917.3159599304199,
+      "order_null": {
+        "mean": -484.4214033197473,
+        "CI": [
+          -557.5944547299985,
+          -405.77262595847793
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          -556.173112657335,
+          -354.1386657290989,
+          -542.9524315728081
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 89.18362617492676,
+        "equivalent": false
+      },
+      "equal_work": {
+        "mean": 49.933998673050446,
+        "CI": [
+          26.75987482070919,
+          69.63650827054626
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          30.663543277316574,
+          57.902680502997406,
+          61.23577223883736
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 68.62325350443521,
+        "equivalent": false
+      },
+      "plan_median_us": 138.68696987628937,
+      "synchronized_wall_median_us": 3440.9159173568087
+    },
+    {
+      "gpu": "NVIDIA GeForce RTX 4090",
+      "dtype": "bfloat16",
+      "config": "n8",
+      "arm": "auto",
+      "mode": "graph",
+      "primary": true,
+      "same_minus_opposite_us": {
+        "mean": 1760.0873708724976,
+        "CI": [
+          1675.1000452924657,
+          1814.8974144900287
+        ],
+        "confidence": 0.95,
+        "replicate_means": [
+          1799.1567452748618,
+          1671.9127760993108,
+          1809.19259124332
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference"
+      },
+      "state_median_us": {
+        "same": 4397.7173169453945,
+        "opposite": 2626.7383893330893,
+        "eqC-a": 3412.830352783203,
+        "eqC-b": 3498.6468950907392,
+        "rand4": 2660.442352294922,
+        "rand5": 3059.5946311950684,
+        "rand6": 3577.8883298238115,
+        "rand7": 3407.0329666137695,
+        "rand8": 3165.217717488607,
+        "rand9": 3573.3866691589355,
+        "order-null": 3924.2021242777505
+      },
+      "spearman_work_latency": 0.9240164263936981,
+      "observed_median_half_range_us": 885.4894638061526,
+      "order_null": {
+        "mean": -461.9514500653303,
+        "CI": [
+          -516.2978715366788,
+          -407.3830423531708
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          -498.79643652174224,
+          -370.834986368815,
+          -516.2229273054336
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 87.9543463389079,
+        "equivalent": false
+      },
+      "equal_work": {
+        "mean": 82.60740174187556,
+        "CI": [
+          73.51699714307436,
+          92.75670228181065
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          90.03353118896484,
+          79.17732662624785,
+          78.61134741041398
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 68.25660705566406,
+        "equivalent": false
+      },
+      "plan_median_us": 138.68696987628937,
+      "synchronized_wall_median_us": 3439.124285553892
+    },
+    {
+      "gpu": "NVIDIA GeForce RTX 4090",
+      "dtype": "bfloat16",
+      "config": "n8",
+      "arm": "unsplit",
+      "mode": "eager",
+      "primary": false,
+      "same_minus_opposite_us": {
+        "mean": 1788.1360495531999,
+        "CI": [
+          1645.7195144008704,
+          1870.7338288978292
+        ],
+        "confidence": 0.95,
+        "replicate_means": [
+          1854.562203089396,
+          1641.9208447138467,
+          1867.925100856357
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference"
+      },
+      "state_median_us": {
+        "same": 4459.659894307454,
+        "opposite": 2624.73464012146,
+        "eqC-a": 3427.7400970458984,
+        "eqC-b": 3475.282669067383,
+        "rand4": 2665.2572949727373,
+        "rand5": 3066.4107004801435,
+        "rand6": 3575.551986694336,
+        "rand7": 3427.2534052530923,
+        "rand8": 3203.2852172851562,
+        "rand9": 3589.4293785095215,
+        "order-null": 3929.3719927469892
+      },
+      "spearman_work_latency": 0.8875420937728943,
+      "observed_median_half_range_us": 917.4626270929971,
+      "order_null": {
+        "mean": -481.0278327376752,
+        "CI": [
+          -562.2088021702235,
+          -397.63476362934813
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          -551.2377156151664,
+          -332.0371045006645,
+          -559.8086780971948
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 89.19319788614908,
+        "equivalent": false
+      },
+      "equal_work": {
+        "mean": 49.34881351612233,
+        "CI": [
+          35.56573744173407,
+          63.88125684526232
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          59.28394529554578,
+          39.351171917385614,
+          49.41132333543559
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 68.55480194091797,
+        "equivalent": true
+      },
+      "plan_median_us": 137.2452825307846,
+      "synchronized_wall_median_us": 3445.802101244529
+    },
+    {
+      "gpu": "NVIDIA GeForce RTX 4090",
+      "dtype": "bfloat16",
+      "config": "n8",
+      "arm": "unsplit",
+      "mode": "graph",
+      "primary": false,
+      "same_minus_opposite_us": {
+        "mean": 1762.653152147929,
+        "CI": [
+          1681.0460655777545,
+          1818.0590599775317
+        ],
+        "confidence": 0.95,
+        "replicate_means": [
+          1815.632846620348,
+          1677.3708528942532,
+          1794.9557569291856
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference"
+      },
+      "state_median_us": {
+        "same": 4410.172780354818,
+        "opposite": 2625.7553100585938,
+        "eqC-a": 3417.268753051758,
+        "eqC-b": 3496.6360727945967,
+        "rand4": 2660.293022791545,
+        "rand5": 3060.145378112793,
+        "rand6": 3585.1383209228516,
+        "rand7": 3397.3007202148438,
+        "rand8": 3166.499296824137,
+        "rand9": 3574.1818745930987,
+        "order-null": 3924.7109095255537
+      },
+      "spearman_work_latency": 0.9240164263936981,
+      "observed_median_half_range_us": 892.2087351481123,
+      "order_null": {
+        "mean": -462.3471719247324,
+        "CI": [
+          -514.4147912661235,
+          -409.20888759471745
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          -514.8773988087974,
+          -375.0918441348606,
+          -497.0722728305392
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 88.20345560709637,
+        "equivalent": false
+      },
+      "equal_work": {
+        "mean": 78.05906401740178,
+        "CI": [
+          69.56278174011791,
+          86.54649169356726
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          80.39082421196827,
+          80.32880889044868,
+          73.45755894978838
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 68.34537506103516,
+        "equivalent": false
+      },
+      "plan_median_us": 137.2452825307846,
+      "synchronized_wall_median_us": 3429.8563259653747
+    },
+    {
+      "gpu": "NVIDIA GeForce RTX 4090",
+      "dtype": "float16",
+      "config": "n16",
+      "arm": "auto",
+      "mode": "eager",
+      "primary": false,
+      "same_minus_opposite_us": {
+        "mean": 4052.2591096383553,
+        "CI": [
+          4020.6781934808805,
+          4077.8177005273324
+        ],
+        "confidence": 0.95,
+        "replicate_means": [
+          4057.5938489702016,
+          4076.467540529039,
+          4022.7159394158257
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference"
+      },
+      "state_median_us": {
+        "same": 8411.636034647625,
+        "opposite": 4343.7879880269375,
+        "eqC-a": 6139.1175587972,
+        "eqC-b": 6132.682800292969,
+        "rand4": 6170.92259724935,
+        "rand5": 5730.169296264648,
+        "rand6": 6051.237106323242,
+        "rand7": 6359.76537068685,
+        "rand8": 6743.386586507162,
+        "rand9": 6884.750684102377,
+        "order-null": 7965.014457702637
+      },
+      "spearman_work_latency": 0.960490759014502,
+      "observed_median_half_range_us": 2033.9240233103437,
+      "order_null": {
+        "mean": -445.93938191731775,
+        "CI": [
+          -454.69016234080004,
+          -435.9735895086218
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          -449.04804229736357,
+          -449.8273001776801,
+          -438.9428032769096
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 168.2327206929525,
+        "equivalent": false
+      },
+      "equal_work": {
+        "mean": -18.048056849726965,
+        "CI": [
+          -41.93923208448624,
+          4.20944690704354
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          -22.934436798095856,
+          3.938939836290198,
+          -35.14867358737524
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 122.782351175944,
+        "equivalent": true
+      },
+      "plan_median_us": 150.9096473455429,
+      "synchronized_wall_median_us": 6190.729366304973
+    },
+    {
+      "gpu": "NVIDIA GeForce RTX 4090",
+      "dtype": "float16",
+      "config": "n16",
+      "arm": "auto",
+      "mode": "graph",
+      "primary": true,
+      "same_minus_opposite_us": {
+        "mean": 4038.560443454319,
+        "CI": [
+          4025.0122699472645,
+          4051.527731948429
+        ],
+        "confidence": 0.95,
+        "replicate_means": [
+          4048.217535018921,
+          4030.2007728152807,
+          4037.2630225287544
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference"
+      },
+      "state_median_us": {
+        "same": 8409.169832865398,
+        "opposite": 4371.177037556966,
+        "eqC-a": 6150.387128194174,
+        "eqC-b": 6137.493133544922,
+        "rand4": 6169.039726257324,
+        "rand5": 5713.791847229004,
+        "rand6": 6052.0435969034825,
+        "rand7": 6337.312062581381,
+        "rand8": 6731.656710306804,
+        "rand9": 6842.461903889975,
+        "order-null": 7958.38737487793
+      },
+      "spearman_work_latency": 0.960490759014502,
+      "observed_median_half_range_us": 2018.9963976542163,
+      "order_null": {
+        "mean": -448.95887374877924,
+        "CI": [
+          -456.48579862382667,
+          -440.8143979531748
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          -455.4414749145508,
+          -446.16105821397565,
+          -445.27408811781135
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 168.18339665730798,
+        "equivalent": false
+      },
+      "equal_work": {
+        "mean": -21.813092408356876,
+        "CI": [
+          -35.99901905766244,
+          -7.1991205215454
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          -11.77586449517139,
+          -29.285060034857832,
+          -24.37835269504141
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 123.00774256388348,
+        "equivalent": true
+      },
+      "plan_median_us": 150.9096473455429,
+      "synchronized_wall_median_us": 6185.1616483181715
+    },
+    {
+      "gpu": "NVIDIA GeForce RTX 4090",
+      "dtype": "float16",
+      "config": "n16",
+      "arm": "unsplit",
+      "mode": "eager",
+      "primary": false,
+      "same_minus_opposite_us": {
+        "mean": 4044.75274792424,
+        "CI": [
+          4016.42723414633,
+          4073.311660245613
+        ],
+        "confidence": 0.95,
+        "replicate_means": [
+          4042.59114795261,
+          4074.510441886054,
+          4017.156653934055
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference"
+      },
+      "state_median_us": {
+        "same": 8415.162722269695,
+        "opposite": 4364.384015401205,
+        "eqC-a": 6157.974561055501,
+        "eqC-b": 6137.174606323242,
+        "rand4": 6174.0306218465175,
+        "rand5": 5752.546628316244,
+        "rand6": 6051.420211791992,
+        "rand7": 6374.3480046590175,
+        "rand8": 6749.504089355469,
+        "rand9": 6904.6173095703125,
+        "order-null": 7969.970703125
+      },
+      "spearman_work_latency": 0.960490759014502,
+      "observed_median_half_range_us": 2025.389353434245,
+      "order_null": {
+        "mean": -445.5470862212005,
+        "CI": [
+          -458.96802213456914,
+          -434.2534321325797
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          -443.7639448377823,
+          -438.29154968261713,
+          -454.5857641432022
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 168.30325444539392,
+        "equivalent": false
+      },
+      "equal_work": {
+        "mean": -20.993992134376892,
+        "CI": [
+          -45.06997973830617,
+          3.5655357219553596
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          -32.45507346259228,
+          8.414003584119882,
+          -38.94090652465828
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 123.15949122111002,
+        "equivalent": true
+      },
+      "plan_median_us": 147.7194018661976,
+      "synchronized_wall_median_us": 6196.006977309784
+    },
+    {
+      "gpu": "NVIDIA GeForce RTX 4090",
+      "dtype": "float16",
+      "config": "n16",
+      "arm": "unsplit",
+      "mode": "graph",
+      "primary": false,
+      "same_minus_opposite_us": {
+        "mean": 4048.593839009603,
+        "CI": [
+          4032.5316760275095,
+          4069.5193922078165
+        ],
+        "confidence": 0.95,
+        "replicate_means": [
+          4038.4015772077773,
+          4037.9704104529483,
+          4069.409529368083
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference"
+      },
+      "state_median_us": {
+        "same": 8407.266616821289,
+        "opposite": 4364.357948303223,
+        "eqC-a": 6152.826309204102,
+        "eqC-b": 6131.689071655273,
+        "rand4": 6168.961524963379,
+        "rand5": 5722.047805786133,
+        "rand6": 6045.749346415201,
+        "rand7": 6342.848141988118,
+        "rand8": 6737.685203552246,
+        "rand9": 6830.538749694824,
+        "order-null": 7957.626024881998
+      },
+      "spearman_work_latency": 0.960490759014502,
+      "observed_median_half_range_us": 2021.4543342590332,
+      "order_null": {
+        "mean": -447.6993702076099,
+        "CI": [
+          -457.85923533969446,
+          -437.75674590358034
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          -458.95083745320636,
+          -443.2168536716036,
+          -440.9304194980198
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 168.14533233642578,
+        "equivalent": false
+      },
+      "equal_work": {
+        "mean": -16.83438265765153,
+        "CI": [
+          -42.01484786139604,
+          4.5316104535704165
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          1.8860499064128362,
+          -5.240334404839359,
+          -47.14886347452807
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 123.05652618408203,
+        "equivalent": true
+      },
+      "plan_median_us": 147.7194018661976,
+      "synchronized_wall_median_us": 6179.862083323921
+    },
+    {
+      "gpu": "NVIDIA GeForce RTX 4090",
+      "dtype": "float16",
+      "config": "n2",
+      "arm": "auto",
+      "mode": "eager",
+      "primary": false,
+      "same_minus_opposite_us": {
+        "mean": 54.89889339164452,
+        "CI": [
+          53.70323238549411,
+          56.096750056302106
+        ],
+        "confidence": 0.95,
+        "replicate_means": [
+          55.864691734313965,
+          53.986218240526,
+          54.845770200093604
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference"
+      },
+      "state_median_us": {
+        "same": 1802.6933670043945,
+        "opposite": 1747.9279836018882,
+        "order-null": 1800.20538965861
+      },
+      "spearman_work_latency": 1.0,
+      "observed_median_half_range_us": 27.38269170125318,
+      "order_null": {
+        "mean": -2.507483517682109,
+        "CI": [
+          -3.4079463393599885,
+          -1.7197560381006158
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          -3.0335585276285806,
+          -2.3931132422553296,
+          -2.095778783162416
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 36.05386734008789,
+        "equivalent": true
+      },
+      "equal_work": null,
+      "plan_median_us": 138.28277587890625,
+      "synchronized_wall_median_us": 1801.7025043567023
+    },
+    {
+      "gpu": "NVIDIA GeForce RTX 4090",
+      "dtype": "float16",
+      "config": "n2",
+      "arm": "auto",
+      "mode": "graph",
+      "primary": true,
+      "same_minus_opposite_us": {
+        "mean": 55.46358338108771,
+        "CI": [
+          54.40260039435494,
+          56.72882066832653
+        ],
+        "confidence": 0.95,
+        "replicate_means": [
+          56.647923257615865,
+          54.44196859995524,
+          55.300858285692016
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference"
+      },
+      "state_median_us": {
+        "same": 1798.51500193278,
+        "opposite": 1743.5406843821206,
+        "order-null": 1795.7976659139
+      },
+      "spearman_work_latency": 1.0,
+      "observed_median_half_range_us": 27.487158775329704,
+      "order_null": {
+        "mean": -2.272177625585502,
+        "CI": [
+          -2.829824332837696,
+          -1.7151090833875933
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          -2.6833481258816314,
+          -1.8247101042006004,
+          -2.308474646674275
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 35.9703000386556,
+        "equivalent": true
+      },
+      "equal_work": null,
+      "plan_median_us": 138.28277587890625,
+      "synchronized_wall_median_us": 1796.2123189742367
+    },
+    {
+      "gpu": "NVIDIA GeForce RTX 4090",
+      "dtype": "float16",
+      "config": "n2",
+      "arm": "unsplit",
+      "mode": "eager",
+      "primary": false,
+      "same_minus_opposite_us": {
+        "mean": 55.55814725381358,
+        "CI": [
+          54.68978705229584,
+          56.46170686792445
+        ],
+        "confidence": 0.95,
+        "replicate_means": [
+          55.60243129730228,
+          55.66913551754419,
+          55.402874946594274
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference"
+      },
+      "state_median_us": {
+        "same": 1802.6839892069497,
+        "opposite": 1747.8066285451252,
+        "order-null": 1800.1279830932617
+      },
+      "spearman_work_latency": 1.0,
+      "observed_median_half_range_us": 27.438680330912234,
+      "order_null": {
+        "mean": -3.0963641625863576,
+        "CI": [
+          -4.252647029029013,
+          -2.192091941833498
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          -4.0746397442288,
+          -2.993981043497721,
+          -2.2204717000325522
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 36.05367978413899,
+        "equivalent": true
+      },
+      "equal_work": null,
+      "plan_median_us": 134.4052143394947,
+      "synchronized_wall_median_us": 1801.7271844049294
+    },
+    {
+      "gpu": "NVIDIA GeForce RTX 4090",
+      "dtype": "float16",
+      "config": "n2",
+      "arm": "unsplit",
+      "mode": "graph",
+      "primary": false,
+      "same_minus_opposite_us": {
+        "mean": 55.85081930513734,
+        "CI": [
+          55.124414850164335,
+          56.655038727654336
+        ],
+        "confidence": 0.95,
+        "replicate_means": [
+          55.5844042036268,
+          56.25678433312313,
+          55.71126937866211
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference"
+      },
+      "state_median_us": {
+        "same": 1798.5773086547852,
+        "opposite": 1743.5030142466226,
+        "order-null": 1795.9339618682861
+      },
+      "spearman_work_latency": 1.0,
+      "observed_median_half_range_us": 27.537147204081293,
+      "order_null": {
+        "mean": -2.6555811917340417,
+        "CI": [
+          -3.585407027491823,
+          -1.9689767448990863
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          -3.3577415678235902,
+          -2.3246871100532,
+          -2.2843148973253355
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 35.9715461730957,
+        "equivalent": true
+      },
+      "equal_work": null,
+      "plan_median_us": 134.4052143394947,
+      "synchronized_wall_median_us": 1796.287678492566
+    },
+    {
+      "gpu": "NVIDIA GeForce RTX 4090",
+      "dtype": "float16",
+      "config": "n4",
+      "arm": "auto",
+      "mode": "eager",
+      "primary": false,
+      "same_minus_opposite_us": {
+        "mean": 1872.763258439523,
+        "CI": [
+          1867.1807684280252,
+          1878.0683095808383
+        ],
+        "confidence": 0.95,
+        "replicate_means": [
+          1867.9546647601655,
+          1877.049101723565,
+          1873.2860088348389
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference"
+      },
+      "state_median_us": {
+        "same": 4553.226629892984,
+        "opposite": 2676.6133308410645,
+        "eqC-a": 2791.0706202189126,
+        "eqC-b": 2712.1987342834473,
+        "rand4": 4147.321383158365,
+        "rand5": 2677.3680051167808,
+        "rand6": 2702.6093800862627,
+        "rand7": 4246.898651123047,
+        "rand8": 2807.9373041788735,
+        "rand9": 3010.726769765218,
+        "order-null": 3996.4946111043296
+      },
+      "spearman_work_latency": 0.8475767323135548,
+      "observed_median_half_range_us": 938.30664952596,
+      "order_null": {
+        "mean": -551.715506447686,
+        "CI": [
+          -554.9390651561597,
+          -548.6448738310073
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          -549.7344599829779,
+          -552.8673595852322,
+          -552.544699774848
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 91.0645325978597,
+        "equivalent": false
+      },
+      "equal_work": {
+        "mean": -77.67493636519818,
+        "CI": [
+          -81.30364992000433,
+          -73.76230248698484
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          -75.21131303575305,
+          -80.16620741950135,
+          -77.64728864034014
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 55.82141240437825,
+        "equivalent": false
+      },
+      "plan_median_us": 136.5593634545803,
+      "synchronized_wall_median_us": 2807.1824538831906
+    },
+    {
+      "gpu": "NVIDIA GeForce RTX 4090",
+      "dtype": "float16",
+      "config": "n4",
+      "arm": "auto",
+      "mode": "graph",
+      "primary": true,
+      "same_minus_opposite_us": {
+        "mean": 1873.422591774552,
+        "CI": [
+          1868.1192972041943,
+          1878.6500750868408
+        ],
+        "confidence": 0.95,
+        "replicate_means": [
+          1869.4834576712715,
+          1878.067308002048,
+          1872.7170096503364
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference"
+      },
+      "state_median_us": {
+        "same": 4547.475020090738,
+        "opposite": 2669.401963551839,
+        "eqC-a": 2788.1433169047036,
+        "eqC-b": 2711.215337117513,
+        "rand4": 4142.3109372456875,
+        "rand5": 2669.78136698405,
+        "rand6": 2702.0082473754883,
+        "rand7": 4243.891080220541,
+        "rand8": 2816.2420590718584,
+        "rand9": 2983.647664388021,
+        "order-null": 3992.149194081624
+      },
+      "spearman_work_latency": 0.8475767323135548,
+      "observed_median_half_range_us": 939.0365282694497,
+      "order_null": {
+        "mean": -551.8188653168854,
+        "CI": [
+          -554.6040866110061,
+          -548.6233503730208
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          -549.9005317687987,
+          -554.388788011339,
+          -551.1672761705186
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 90.94950040181477,
+        "equivalent": false
+      },
+      "equal_work": {
+        "mean": -75.7243544967086,
+        "CI": [
+          -80.62127607840077,
+          -71.64408189279062
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          -73.20170932345916,
+          -73.5867023468018,
+          -80.38465181986483
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 55.76286633809407,
+        "equivalent": false
+      },
+      "plan_median_us": 136.5593634545803,
+      "synchronized_wall_median_us": 2816.6860186805325
+    },
+    {
+      "gpu": "NVIDIA GeForce RTX 4090",
+      "dtype": "float16",
+      "config": "n4",
+      "arm": "unsplit",
+      "mode": "eager",
+      "primary": false,
+      "same_minus_opposite_us": {
+        "mean": 1874.465545018514,
+        "CI": [
+          1869.169445280675,
+          1879.2590144607757
+        ],
+        "confidence": 0.95,
+        "replicate_means": [
+          1870.3793287277222,
+          1877.2351211971707,
+          1875.7821851306492
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference"
+      },
+      "state_median_us": {
+        "same": 4554.804007212321,
+        "opposite": 2673.066775004069,
+        "eqC-a": 2791.1146481831865,
+        "eqC-b": 2711.0706965128584,
+        "rand4": 4147.374788920085,
+        "rand5": 2676.318645477295,
+        "rand6": 2703.8720448811846,
+        "rand7": 4255.928039550781,
+        "rand8": 2810.763994852702,
+        "rand9": 3010.773340861003,
+        "order-null": 4000.52801767985
+      },
+      "spearman_work_latency": 0.8475767323135548,
+      "observed_median_half_range_us": 940.8686161041262,
+      "order_null": {
+        "mean": -551.8006042197898,
+        "CI": [
+          -555.0395435757107,
+          -548.3593185742695
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          -549.1800043318005,
+          -554.1082488165961,
+          -552.1135595109728
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 91.09608014424643,
+        "equivalent": false
+      },
+      "equal_work": {
+        "mean": -74.29995360197843,
+        "CI": [
+          -79.45742253904001,
+          -67.73467593722866
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          -74.14515813191724,
+          -70.18359502156572,
+          -78.57110765245234
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 55.822292963663735,
+        "equivalent": false
+      },
+      "plan_median_us": 135.5358399450779,
+      "synchronized_wall_median_us": 2812.47259893765
+    },
+    {
+      "gpu": "NVIDIA GeForce RTX 4090",
+      "dtype": "float16",
+      "config": "n4",
+      "arm": "unsplit",
+      "mode": "graph",
+      "primary": false,
+      "same_minus_opposite_us": {
+        "mean": 1877.0340769379227,
+        "CI": [
+          1871.3155015751167,
+          1882.904999123679
+        ],
+        "confidence": 0.95,
+        "replicate_means": [
+          1872.3441362380981,
+          1882.2494082980686,
+          1876.5086862776013
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference"
+      },
+      "state_median_us": {
+        "same": 4550.637086232503,
+        "opposite": 2668.6004002888994,
+        "eqC-a": 2788.1220181783037,
+        "eqC-b": 2713.315010070801,
+        "rand4": 4143.510341644287,
+        "rand5": 2672.3930040995283,
+        "rand6": 2702.847480773926,
+        "rand7": 4243.959108988443,
+        "rand8": 2808.447996775309,
+        "rand9": 2992.379983266195,
+        "order-null": 3991.3172721862793
+      },
+      "spearman_work_latency": 0.8475767323135548,
+      "observed_median_half_range_us": 941.0183429718018,
+      "order_null": {
+        "mean": -553.6296367645263,
+        "CI": [
+          -555.6464544049013,
+          -551.5420918111448
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          -553.2425509558783,
+          -554.4456111060249,
+          -553.2007482316757
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 91.01274172465006,
+        "equivalent": false
+      },
+      "equal_work": {
+        "mean": -74.1430741769296,
+        "CI": [
+          -79.01583689230455,
+          -69.8875634758561
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          -70.72806358337402,
+          -72.80927234225805,
+          -78.89188660515674
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 55.76244036356608,
+        "equivalent": false
+      },
+      "plan_median_us": 135.5358399450779,
+      "synchronized_wall_median_us": 2809.0447497864566
+    },
+    {
+      "gpu": "NVIDIA GeForce RTX 4090",
+      "dtype": "float16",
+      "config": "n8",
+      "arm": "auto",
+      "mode": "eager",
+      "primary": false,
+      "same_minus_opposite_us": {
+        "mean": 1767.0785276978106,
+        "CI": [
+          1631.8557880542899,
+          1850.8397452257298
+        ],
+        "confidence": 0.95,
+        "replicate_means": [
+          1828.0195660061308,
+          1625.441352526347,
+          1847.7746645609539
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference"
+      },
+      "state_median_us": {
+        "same": 4455.102602640788,
+        "opposite": 2632.537364959717,
+        "eqC-a": 3431.2626520792646,
+        "eqC-b": 3487.4933560689287,
+        "rand4": 2668.92131169637,
+        "rand5": 3068.729241689046,
+        "rand6": 3601.4881134033203,
+        "rand7": 3445.1200167338056,
+        "rand8": 3200.255870819092,
+        "rand9": 3595.1786041259766,
+        "order-null": 3940.122604370117
+      },
+      "spearman_work_latency": 0.8936211492096949,
+      "observed_median_half_range_us": 911.2826188405356,
+      "order_null": {
+        "mean": -462.4359254483825,
+        "CI": [
+          -538.7502489266574,
+          -380.0499991134362
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          -524.2291026645239,
+          -325.428671307034,
+          -537.6500023735896
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 89.10205205281576,
+        "equivalent": false
+      },
+      "equal_work": {
+        "mean": 59.42139802155672,
+        "CI": [
+          28.13155783547306,
+          90.05158389056164
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          22.57702085706933,
+          64.38469886779781,
+          91.30247433980303
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 68.6252530415853,
+        "equivalent": false
+      },
+      "plan_median_us": 138.24738562107086,
+      "synchronized_wall_median_us": 3450.5577447513742
+    },
+    {
+      "gpu": "NVIDIA GeForce RTX 4090",
+      "dtype": "float16",
+      "config": "n8",
+      "arm": "auto",
+      "mode": "graph",
+      "primary": true,
+      "same_minus_opposite_us": {
+        "mean": 1756.69820661898,
+        "CI": [
+          1656.7406099151683,
+          1826.218757143727
+        ],
+        "confidence": 0.95,
+        "replicate_means": [
+          1791.4128171073066,
+          1651.3934267891777,
+          1827.288375960456
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference"
+      },
+      "state_median_us": {
+        "same": 4423.275629679362,
+        "opposite": 2633.1389745076494,
+        "eqC-a": 3431.2413533528643,
+        "eqC-b": 3510.184129079183,
+        "rand4": 2664.8410161336265,
+        "rand5": 3066.6030248006186,
+        "rand6": 3605.4536501566567,
+        "rand7": 3401.3849894205728,
+        "rand8": 3172.5986798604326,
+        "rand9": 3580.746650695801,
+        "order-null": 3934.3929290771484
+      },
+      "spearman_work_latency": 0.9240164263936981,
+      "observed_median_half_range_us": 895.0683275858564,
+      "order_null": {
+        "mean": -456.97659916347936,
+        "CI": [
+          -519.748013107865,
+          -392.2851659633496
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          -498.83985519409197,
+          -348.5630883110894,
+          -523.5268539852567
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 88.46551259358725,
+        "equivalent": false
+      },
+      "equal_work": {
+        "mean": 91.02733929951984,
+        "CI": [
+          77.44399309158322,
+          105.86319543697215
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          76.94133122762041,
+          89.95940950181746,
+          106.18127716912166
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 68.62482706705728,
+        "equivalent": false
+      },
+      "plan_median_us": 138.24738562107086,
+      "synchronized_wall_median_us": 3439.601879411687
+    },
+    {
+      "gpu": "NVIDIA GeForce RTX 4090",
+      "dtype": "float16",
+      "config": "n8",
+      "arm": "unsplit",
+      "mode": "eager",
+      "primary": false,
+      "same_minus_opposite_us": {
+        "mean": 1766.273851747866,
+        "CI": [
+          1663.270592579135,
+          1846.119623824402
+        ],
+        "confidence": 0.95,
+        "replicate_means": [
+          1797.3897722032336,
+          1654.808441797892,
+          1846.6233412424722
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference"
+      },
+      "state_median_us": {
+        "same": 4430.43073018392,
+        "opposite": 2630.3653717041016,
+        "eqC-a": 3438.4106000264483,
+        "eqC-b": 3491.9587771097817,
+        "rand4": 2668.754736582438,
+        "rand5": 3070.2306429545088,
+        "rand6": 3593.3440526326494,
+        "rand7": 3429.775873819987,
+        "rand8": 3193.1640307108564,
+        "rand9": 3585.395971934001,
+        "order-null": 3939.5839373270674
+      },
+      "spearman_work_latency": 0.9240164263936981,
+      "observed_median_half_range_us": 900.0326792399092,
+      "order_null": {
+        "mean": -460.9699337570755,
+        "CI": [
+          -534.9353830019634,
+          -386.5056223339504
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          -488.846222559611,
+          -349.0308920542398,
+          -545.0326866573757
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 88.6086146036784,
+        "equivalent": false
+      },
+      "equal_work": {
+        "mean": 77.25841027719002,
+        "CI": [
+          59.970707363552485,
+          95.67392490528246
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          72.24615414937341,
+          67.07284185621468,
+          92.45623482598198
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 68.76821200052896,
+        "equivalent": false
+      },
+      "plan_median_us": 136.93515211343765,
+      "synchronized_wall_median_us": 3451.5840622286005
+    },
+    {
+      "gpu": "NVIDIA GeForce RTX 4090",
+      "dtype": "float16",
+      "config": "n8",
+      "arm": "unsplit",
+      "mode": "graph",
+      "primary": false,
+      "same_minus_opposite_us": {
+        "mean": 1764.9087376064724,
+        "CI": [
+          1666.6341908552026,
+          1828.1326483797145
+        ],
+        "confidence": 0.95,
+        "replicate_means": [
+          1807.9922993977866,
+          1659.3294011221992,
+          1827.4045122994316
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference"
+      },
+      "state_median_us": {
+        "same": 4429.873784383139,
+        "opposite": 2629.7530333201094,
+        "eqC-a": 3422.7685928344727,
+        "eqC-b": 3504.009246826172,
+        "rand4": 2664.606650670369,
+        "rand5": 3068.9543088277183,
+        "rand6": 3606.9897015889483,
+        "rand7": 3405.1292737325034,
+        "rand8": 3174.793402353923,
+        "rand9": 3575.5027135213213,
+        "order-null": 3932.2152137756348
+      },
+      "spearman_work_latency": 0.9240164263936981,
+      "observed_median_half_range_us": 900.0603755315146,
+      "order_null": {
+        "mean": -464.58935737609863,
+        "CI": [
+          -526.7068271283749,
+          -395.866592725118
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          -507.3918501536052,
+          -356.38724433051215,
+          -529.9889776441786
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 88.59747568766278,
+        "equivalent": false
+      },
+      "equal_work": {
+        "mean": 92.05283942045985,
+        "CI": [
+          78.13395835735176,
+          104.44778027357874
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          76.5977170732286,
+          103.35845417446554,
+          96.20234701368543
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 68.45537185668945,
+        "equivalent": false
+      },
+      "plan_median_us": 136.93515211343765,
+      "synchronized_wall_median_us": 3431.801926732684
+    },
+    {
+      "gpu": "NVIDIA GeForce RTX 5090",
+      "dtype": "bfloat16",
+      "config": "n16",
+      "arm": "auto",
+      "mode": "eager",
+      "primary": false,
+      "same_minus_opposite_us": {
+        "mean": 2957.923588929353,
+        "CI": [
+          2898.7469834310036,
+          3003.969401783413
+        ],
+        "confidence": 0.95,
+        "replicate_means": [
+          2994.1606256696914,
+          2981.4707703060576,
+          2898.13937081231
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference"
+      },
+      "state_median_us": {
+        "same": 6421.937306722005,
+        "opposite": 3465.273380279541,
+        "eqC-a": 4909.272034962973,
+        "eqC-b": 4622.214635213217,
+        "rand4": 4832.13472366333,
+        "rand5": 4446.336110432943,
+        "rand6": 4709.780057271322,
+        "rand7": 4906.102657318115,
+        "rand8": 5167.8667068481445,
+        "rand9": 5155.291875203451,
+        "order-null": 6163.240114847818
+      },
+      "spearman_work_latency": 0.9179373709568974,
+      "observed_median_half_range_us": 1478.331963221232,
+      "order_null": {
+        "mean": -262.28472038551615,
+        "CI": [
+          -284.76581396879965,
+          -243.19710201687272
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          -246.90257178412548,
+          -250.0091658698187,
+          -289.94242350260424
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 128.4387461344401,
+        "equivalent": false
+      },
+      "equal_work": {
+        "mean": -307.7706584223995,
+        "CI": [
+          -339.18796645270464,
+          -274.53980048497533
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          -327.9577891031902,
+          -267.69442028469524,
+          -327.65976587931306
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 98.18544069925946,
+        "equivalent": false
+      },
+      "plan_median_us": 175.28946045786142,
+      "synchronized_wall_median_us": 4876.34499828952
+    },
+    {
+      "gpu": "NVIDIA GeForce RTX 5090",
+      "dtype": "bfloat16",
+      "config": "n16",
+      "arm": "auto",
+      "mode": "graph",
+      "primary": true,
+      "same_minus_opposite_us": {
+        "mean": 2935.3564933494285,
+        "CI": [
+          2910.433589087592,
+          2958.821534227442
+        ],
+        "confidence": 0.95,
+        "replicate_means": [
+          2938.551558388604,
+          2955.85921075609,
+          2911.658710903592
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference"
+      },
+      "state_median_us": {
+        "same": 6413.5033289591465,
+        "opposite": 3481.5783500671387,
+        "eqC-a": 4900.319417317709,
+        "eqC-b": 4614.148298899332,
+        "rand4": 4827.489535013834,
+        "rand5": 4433.470090230307,
+        "rand6": 4703.497568766275,
+        "rand7": 4907.778739929199,
+        "rand8": 5176.990032196045,
+        "rand9": 5140.990098317464,
+        "order-null": 6153.739293416342
+      },
+      "spearman_work_latency": 0.9361745372672994,
+      "observed_median_half_range_us": 1465.962489446004,
+      "order_null": {
+        "mean": -265.8711362768103,
+        "CI": [
+          -273.51356347401946,
+          -258.63220868287266
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          -266.071637471517,
+          -257.83581203884546,
+          -273.7059593200684
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 128.27006657918292,
+        "equivalent": false
+      },
+      "equal_work": {
+        "mean": -293.7130133310954,
+        "CI": [
+          -316.5714533240707,
+          -269.8065532578363
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          -300.0100983513728,
+          -263.47915331522614,
+          -317.6497883266873
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 98.00638834635419,
+        "equivalent": false
+      },
+      "plan_median_us": 175.28946045786142,
+      "synchronized_wall_median_us": 4875.3465101375095
+    },
+    {
+      "gpu": "NVIDIA GeForce RTX 5090",
+      "dtype": "bfloat16",
+      "config": "n16",
+      "arm": "unsplit",
+      "mode": "eager",
+      "primary": false,
+      "same_minus_opposite_us": {
+        "mean": 2954.6278494375724,
+        "CI": [
+          2928.225173552831,
+          2980.794215864605
+        ],
+        "confidence": 0.95,
+        "replicate_means": [
+          2969.3591594696045,
+          2961.657974455092,
+          2932.8664143880205
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference"
+      },
+      "state_median_us": {
+        "same": 6410.98658243815,
+        "opposite": 3462.443987528483,
+        "eqC-a": 4902.761300404866,
+        "eqC-b": 4632.246653238933,
+        "rand4": 4845.344066619873,
+        "rand5": 4453.6387125651045,
+        "rand6": 4687.128067016602,
+        "rand7": 4893.193403879801,
+        "rand8": 5158.329327901205,
+        "rand9": 5158.534526824951,
+        "order-null": 6161.524136861165
+      },
+      "spearman_work_latency": 0.9300954818304987,
+      "observed_median_half_range_us": 1474.2712974548338,
+      "order_null": {
+        "mean": -255.84408088966651,
+        "CI": [
+          -272.543536292182,
+          -236.46909925672745
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          -268.5328589545356,
+          -232.5879202948676,
+          -266.4114634195964
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 128.219731648763,
+        "equivalent": false
+      },
+      "equal_work": {
+        "mean": -278.63829224197957,
+        "CI": [
+          -318.1879308488634,
+          -248.08149955890798
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          -321.8857182396783,
+          -252.18621889750162,
+          -261.8429395887587
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 98.05522600809732,
+        "equivalent": false
+      },
+      "plan_median_us": 171.89118079841137,
+      "synchronized_wall_median_us": 4879.562247272892
+    },
+    {
+      "gpu": "NVIDIA GeForce RTX 5090",
+      "dtype": "bfloat16",
+      "config": "n16",
+      "arm": "unsplit",
+      "mode": "graph",
+      "primary": false,
+      "same_minus_opposite_us": {
+        "mean": 2916.1126525313766,
+        "CI": [
+          2900.812516168312,
+          2930.5254686761787
+        ],
+        "confidence": 0.95,
+        "replicate_means": [
+          2907.396846347385,
+          2913.0923218197295,
+          2927.8487894270156
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference"
+      },
+      "state_median_us": {
+        "same": 6412.195205688477,
+        "opposite": 3496.628602345784,
+        "eqC-a": 4912.033398946127,
+        "eqC-b": 4612.651983896891,
+        "rand4": 4829.811890920003,
+        "rand5": 4434.593995412191,
+        "rand6": 4717.7534103393555,
+        "rand7": 4906.461556752523,
+        "rand8": 5107.585271199545,
+        "rand9": 5141.979217529297,
+        "order-null": 6150.938987731934
+      },
+      "spearman_work_latency": 0.9300954818304987,
+      "observed_median_half_range_us": 1457.7833016713462,
+      "order_null": {
+        "mean": -262.53398259480804,
+        "CI": [
+          -273.60154346183504,
+          -253.14885068822807
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          -252.38206651475707,
+          -259.49509938557964,
+          -275.7247818840874
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 128.24390411376953,
+        "equivalent": false
+      },
+      "equal_work": {
+        "mean": -299.9377868793628,
+        "CI": [
+          -314.976116904506,
+          -286.0673184748048
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          -289.94758923848457,
+          -296.3321738772922,
+          -313.53359752231177
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 98.24066797892254,
+        "equivalent": false
+      },
+      "plan_median_us": 171.89118079841137,
+      "synchronized_wall_median_us": 4882.136063921886
+    },
+    {
+      "gpu": "NVIDIA GeForce RTX 5090",
+      "dtype": "bfloat16",
+      "config": "n2",
+      "arm": "auto",
+      "mode": "eager",
+      "primary": false,
+      "same_minus_opposite_us": {
+        "mean": 841.0865995619032,
+        "CI": [
+          838.1086732502338,
+          843.7500234555315
+        ],
+        "confidence": 0.95,
+        "replicate_means": [
+          840.3059972657098,
+          839.7953642739191,
+          843.1584371460808
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference"
+      },
+      "state_median_us": {
+        "same": 1696.6920693715415,
+        "opposite": 855.6119998296101,
+        "order-null": 1688.6560122172036
+      },
+      "spearman_work_latency": 1.0,
+      "observed_median_half_range_us": 420.5400347709657,
+      "order_null": {
+        "mean": -5.607949362860811,
+        "CI": [
+          -8.530590710816575,
+          -2.5179999845999403
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          -4.105567932128925,
+          -4.085832171969969,
+          -8.63244798448354
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 33.93384138743083,
+        "equivalent": true
+      },
+      "equal_work": null,
+      "plan_median_us": 148.19856733083725,
+      "synchronized_wall_median_us": 1690.0767950573936
+    },
+    {
+      "gpu": "NVIDIA GeForce RTX 5090",
+      "dtype": "bfloat16",
+      "config": "n2",
+      "arm": "auto",
+      "mode": "graph",
+      "primary": true,
+      "same_minus_opposite_us": {
+        "mean": 841.7971222488968,
+        "CI": [
+          838.5123771097925,
+          844.6835841293688
+        ],
+        "confidence": 0.95,
+        "replicate_means": [
+          842.0981499883864,
+          839.2326169543796,
+          844.0605998039246
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference"
+      },
+      "state_median_us": {
+        "same": 1693.1189695994058,
+        "opposite": 851.0433435440063,
+        "order-null": 1685.5016549428306
+      },
+      "spearman_work_latency": 1.0,
+      "observed_median_half_range_us": 421.0378130276997,
+      "order_null": {
+        "mean": -5.671143531799335,
+        "CI": [
+          -8.583960047474605,
+          -2.6861230532328366
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          -4.017657703823583,
+          -3.98212009006077,
+          -9.013652801513652
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 33.862379391988114,
+        "equivalent": true
+      },
+      "equal_work": null,
+      "plan_median_us": 148.19856733083725,
+      "synchronized_wall_median_us": 1685.7701036011954
+    },
+    {
+      "gpu": "NVIDIA GeForce RTX 5090",
+      "dtype": "bfloat16",
+      "config": "n2",
+      "arm": "unsplit",
+      "mode": "eager",
+      "primary": false,
+      "same_minus_opposite_us": {
+        "mean": 53.14318780545837,
+        "CI": [
+          48.92628027333156,
+          58.00314954033606
+        ],
+        "confidence": 0.95,
+        "replicate_means": [
+          56.919111145867284,
+          52.535785569085,
+          49.97466670142281
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference"
+      },
+      "state_median_us": {
+        "same": 1697.3679860432942,
+        "opposite": 1643.5360113779702,
+        "order-null": 1689.0079975128174
+      },
+      "spearman_work_latency": 1.0,
+      "observed_median_half_range_us": 26.915987332661985,
+      "order_null": {
+        "mean": -6.4270408065230775,
+        "CI": [
+          -9.525498858204655,
+          -3.213617536756743
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          -8.887118763393877,
+          -3.0257966783311567,
+          -7.3682069778442
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 33.94735972086588,
+        "equivalent": true
+      },
+      "equal_work": null,
+      "plan_median_us": 145.20867262035608,
+      "synchronized_wall_median_us": 1689.8323762385794
+    },
+    {
+      "gpu": "NVIDIA GeForce RTX 5090",
+      "dtype": "bfloat16",
+      "config": "n2",
+      "arm": "unsplit",
+      "mode": "graph",
+      "primary": false,
+      "same_minus_opposite_us": {
+        "mean": 53.4520634898433,
+        "CI": [
+          50.71158144209117,
+          56.52031986801713
+        ],
+        "confidence": 0.95,
+        "replicate_means": [
+          54.63998847537571,
+          54.54370710584849,
+          51.172494888305685
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference"
+      },
+      "state_median_us": {
+        "same": 1693.6416625976562,
+        "opposite": 1639.660676320394,
+        "order-null": 1684.4696203867593
+      },
+      "spearman_work_latency": 1.0,
+      "observed_median_half_range_us": 26.99049313863111,
+      "order_null": {
+        "mean": -6.769325998094353,
+        "CI": [
+          -9.324550407904162,
+          -3.9731213340053047
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          -8.943756421407064,
+          -3.8754012849595747,
+          -7.488820287916421
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 33.872833251953125,
+        "equivalent": true
+      },
+      "equal_work": null,
+      "plan_median_us": 145.20867262035608,
+      "synchronized_wall_median_us": 1684.746738950101
+    },
+    {
+      "gpu": "NVIDIA GeForce RTX 5090",
+      "dtype": "bfloat16",
+      "config": "n4",
+      "arm": "auto",
+      "mode": "eager",
+      "primary": false,
+      "same_minus_opposite_us": {
+        "mean": 1396.3621545720982,
+        "CI": [
+          1319.2815474889896,
+          1465.640315082338
+        ],
+        "confidence": 0.95,
+        "replicate_means": [
+          1467.3015541500515,
+          1404.931770430671,
+          1316.8531391355725
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference"
+      },
+      "state_median_us": {
+        "same": 3341.3120905558267,
+        "opposite": 1933.0640633900962,
+        "eqC-a": 2311.776002248128,
+        "eqC-b": 2463.531970977783,
+        "rand4": 2763.971964518229,
+        "rand5": 1911.1812909444175,
+        "rand6": 2451.9039789835615,
+        "rand7": 2769.9546813964844,
+        "rand8": 2582.4040571848554,
+        "rand9": 2459.1559569040933,
+        "order-null": 3315.25198618571
+      },
+      "spearman_work_latency": 0.9024558013122742,
+      "observed_median_half_range_us": 715.0653998057046,
+      "order_null": {
+        "mean": -37.124457182707616,
+        "CI": [
+          -57.54761695861819,
+          -17.69389532230519
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          -55.82753817240397,
+          -39.56977526346842,
+          -15.976058112250447
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 66.82624181111653,
+        "equivalent": true
+      },
+      "equal_work": {
+        "mean": 150.65726968977185,
+        "CI": [
+          146.02924232129698,
+          154.9062605257387
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          155.50246503618018,
+          149.6633291244507,
+          146.80601490868466
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 46.23552004496256,
+        "equivalent": false
+      },
+      "plan_median_us": 143.98997882381082,
+      "synchronized_wall_median_us": 2470.4630438160775
+    },
+    {
+      "gpu": "NVIDIA GeForce RTX 5090",
+      "dtype": "bfloat16",
+      "config": "n4",
+      "arm": "auto",
+      "mode": "graph",
+      "primary": true,
+      "same_minus_opposite_us": {
+        "mean": 1411.7325102841412,
+        "CI": [
+          1346.6160710211154,
+          1460.391628962976
+        ],
+        "confidence": 0.95,
+        "replicate_means": [
+          1456.403334935506,
+          1434.916721449958,
+          1343.8774744669597
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference"
+      },
+      "state_median_us": {
+        "same": 3350.122610727946,
+        "opposite": 1915.9303506215415,
+        "eqC-a": 2314.107656478882,
+        "eqC-b": 2457.7056566874185,
+        "rand4": 2752.667268117269,
+        "rand5": 1926.2967109680176,
+        "rand6": 2446.711301803589,
+        "rand7": 2760.9543800354004,
+        "rand8": 2594.028949737549,
+        "rand9": 2453.8293679555254,
+        "order-null": 3310.1449012756348
+      },
+      "spearman_work_latency": 0.9207488243118473,
+      "observed_median_half_range_us": 717.0961300532022,
+      "order_null": {
+        "mean": -40.089103910658146,
+        "CI": [
+          -58.62664249208243,
+          -21.289062941515965
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          -48.43062824673124,
+          -57.912985483805414,
+          -13.92369800143778
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 67.00245221455891,
+        "equivalent": true
+      },
+      "equal_work": {
+        "mean": 147.57014645470508,
+        "CI": [
+          142.6884019816363,
+          152.32441624005625
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          153.19584475623222,
+          144.28706963857016,
+          145.22752496931287
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 46.28215312957764,
+        "equivalent": false
+      },
+      "plan_median_us": 143.98997882381082,
+      "synchronized_wall_median_us": 2463.5160831773346
+    },
+    {
+      "gpu": "NVIDIA GeForce RTX 5090",
+      "dtype": "bfloat16",
+      "config": "n4",
+      "arm": "unsplit",
+      "mode": "eager",
+      "primary": false,
+      "same_minus_opposite_us": {
+        "mean": 1399.5303754453307,
+        "CI": [
+          1314.154060571282,
+          1462.8384230313477
+        ],
+        "confidence": 0.95,
+        "replicate_means": [
+          1434.504442744785,
+          1449.6797720591228,
+          1314.4069115320842
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference"
+      },
+      "state_median_us": {
+        "same": 3351.296106974284,
+        "opposite": 1976.098616917928,
+        "eqC-a": 2306.327978769938,
+        "eqC-b": 2464.359998703003,
+        "rand4": 2765.3492291768393,
+        "rand5": 1949.3626753489175,
+        "rand6": 2452.2920449574785,
+        "rand7": 2771.7240651448565,
+        "rand8": 2635.193347930908,
+        "rand9": 2459.0933322906494,
+        "order-null": 3322.8786786397295
+      },
+      "spearman_work_latency": 0.9024558013122742,
+      "observed_median_half_range_us": 700.9667158126833,
+      "order_null": {
+        "mean": -45.76866715042681,
+        "CI": [
+          -73.39387999640572,
+          -16.91694083037193
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          -70.75598504808222,
+          -54.547998640272304,
+          -12.002017762925902
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 67.02592213948569,
+        "equivalent": false
+      },
+      "equal_work": {
+        "mean": 154.53399110723424,
+        "CI": [
+          150.85231683872365,
+          157.94523821936716
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          154.03999222649466,
+          158.57577323913577,
+          150.9862078560723
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 46.12655957539876,
+        "equivalent": false
+      },
+      "plan_median_us": 144.5820089429617,
+      "synchronized_wall_median_us": 2471.5892068343237
+    },
+    {
+      "gpu": "NVIDIA GeForce RTX 5090",
+      "dtype": "bfloat16",
+      "config": "n4",
+      "arm": "unsplit",
+      "mode": "graph",
+      "primary": false,
+      "same_minus_opposite_us": {
+        "mean": 1407.8316732689186,
+        "CI": [
+          1347.2601819921424,
+          1452.4998936388226
+        ],
+        "confidence": 0.95,
+        "replicate_means": [
+          1443.954759173923,
+          1435.8836809794109,
+          1343.656579653422
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference"
+      },
+      "state_median_us": {
+        "same": 3348.8316535949707,
+        "opposite": 1938.26158841451,
+        "eqC-a": 2312.29567527771,
+        "eqC-b": 2457.653601964315,
+        "rand4": 2754.733085632324,
+        "rand5": 1929.844617843628,
+        "rand6": 2446.7732906341553,
+        "rand7": 2764.4495964050293,
+        "rand8": 2584.0413570404053,
+        "rand9": 2453.7653128306074,
+        "order-null": 3308.654308319092
+      },
+      "spearman_work_latency": 0.9024558013122742,
+      "observed_median_half_range_us": 709.4935178756714,
+      "order_null": {
+        "mean": -45.47095298767086,
+        "CI": [
+          -71.83809810214574,
+          -19.762777840649537
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          -50.465848710801765,
+          -74.05482398139111,
+          -11.892186270819707
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 66.97663307189941,
+        "equivalent": false
+      },
+      "equal_work": {
+        "mean": 150.16115153277357,
+        "CI": [
+          147.03476914653064,
+          153.0823129194754
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          151.9023312462701,
+          146.70509762234155,
+          151.87602572970908
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 46.2459135055542,
+        "equivalent": false
+      },
+      "plan_median_us": 144.5820089429617,
+      "synchronized_wall_median_us": 2465.592592974038
+    },
+    {
+      "gpu": "NVIDIA GeForce RTX 5090",
+      "dtype": "bfloat16",
+      "config": "n8",
+      "arm": "auto",
+      "mode": "eager",
+      "primary": false,
+      "same_minus_opposite_us": {
+        "mean": 1214.6610374803895,
+        "CI": [
+          1211.0669037810078,
+          1218.6813440587784
+        ],
+        "confidence": 0.95,
+        "replicate_means": [
+          1212.6453717549641,
+          1213.0590809716118,
+          1218.2786597145928
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference"
+      },
+      "state_median_us": {
+        "same": 3570.181210835775,
+        "opposite": 2356.862624486287,
+        "eqC-a": 2722.1508026123047,
+        "eqC-b": 2809.8812103271484,
+        "rand4": 2756.594657897949,
+        "rand5": 2775.6373087565107,
+        "rand6": 3282.7773094177246,
+        "rand7": 2589.6360079447427,
+        "rand8": 2658.2333246866865,
+        "rand9": 2773.186683654785,
+        "order-null": 3175.3346125284834
+      },
+      "spearman_work_latency": 0.7841981513472833,
+      "observed_median_half_range_us": 606.6592931747439,
+      "order_null": {
+        "mean": -401.1770089467366,
+        "CI": [
+          -409.0941424723025,
+          -392.3886833367523
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          -401.88736385769306,
+          -391.64082209269196,
+          -410.00284088982477
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 71.4036242167155,
+        "equivalent": false
+      },
+      "equal_work": {
+        "mean": 80.24482373838072,
+        "CI": [
+          56.94970554775662,
+          99.35267987074678
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          92.5632582770454,
+          100.32571686638725,
+          47.845496071709476
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 54.443016052246094,
+        "equivalent": false
+      },
+      "plan_median_us": 150.89515363797545,
+      "synchronized_wall_median_us": 2773.3028400689363
+    },
+    {
+      "gpu": "NVIDIA GeForce RTX 5090",
+      "dtype": "bfloat16",
+      "config": "n8",
+      "arm": "auto",
+      "mode": "graph",
+      "primary": true,
+      "same_minus_opposite_us": {
+        "mean": 1215.4219194694801,
+        "CI": [
+          1211.8363445555722,
+          1219.884616578067
+        ],
+        "confidence": 0.95,
+        "replicate_means": [
+          1213.9415343602498,
+          1212.2104432847766,
+          1220.113780763414
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference"
+      },
+      "state_median_us": {
+        "same": 3565.9559567769365,
+        "opposite": 2352.0156542460127,
+        "eqC-a": 2713.1098111470537,
+        "eqC-b": 2804.215590159098,
+        "rand4": 2752.5575955708823,
+        "rand5": 2772.0872561136885,
+        "rand6": 3278.882662455241,
+        "rand7": 2582.902669906616,
+        "rand8": 2645.2412605285645,
+        "rand9": 2774.6286392211914,
+        "order-null": 3168.5172716776533
+      },
+      "spearman_work_latency": 0.8085143730944858,
+      "observed_median_half_range_us": 606.9701512654619,
+      "order_null": {
+        "mean": -403.0497692249439,
+        "CI": [
+          -410.25978989071314,
+          -396.0317011232729
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          -401.62049399481873,
+          -395.30332883199054,
+          -412.2254848480224
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 71.31911913553873,
+        "equivalent": false
+      },
+      "equal_work": {
+        "mean": 78.47221692403158,
+        "CI": [
+          58.10237548969405,
+          96.81243675726432
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          90.31078550550671,
+          98.33931922912605,
+          46.766546037462
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 54.26219622294108,
+        "equivalent": false
+      },
+      "plan_median_us": 150.89515363797545,
+      "synchronized_wall_median_us": 2770.429729328801
+    },
+    {
+      "gpu": "NVIDIA GeForce RTX 5090",
+      "dtype": "bfloat16",
+      "config": "n8",
+      "arm": "unsplit",
+      "mode": "eager",
+      "primary": false,
+      "same_minus_opposite_us": {
+        "mean": 1214.5255980668244,
+        "CI": [
+          1206.8829970227348,
+          1223.7516667003986
+        ],
+        "confidence": 0.95,
+        "replicate_means": [
+          1208.476185798645,
+          1210.907975832621,
+          1224.192632569207
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference"
+      },
+      "state_median_us": {
+        "same": 3569.8013305664062,
+        "opposite": 2357.3719660441084,
+        "eqC-a": 2717.81063079834,
+        "eqC-b": 2809.4879786173506,
+        "rand4": 2758.1520080566406,
+        "rand5": 2776.306629180908,
+        "rand6": 3283.950646718343,
+        "rand7": 2590.3600056966143,
+        "rand8": 2657.896041870117,
+        "rand9": 2775.7372856140137,
+        "order-null": 3174.9320030212402
+      },
+      "spearman_work_latency": 0.7841981513472833,
+      "observed_median_half_range_us": 606.2146822611489,
+      "order_null": {
+        "mean": -402.3691724847865,
+        "CI": [
+          -409.8077787293328,
+          -394.93609931733874
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          -398.75086148579913,
+          -397.30620384216314,
+          -411.0504521263971
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 71.39602661132812,
+        "equivalent": false
+      },
+      "equal_work": {
+        "mean": 83.88379768089008,
+        "CI": [
+          60.18836674866841,
+          102.849668485147
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          102.44178771972656,
+          96.97135289510088,
+          52.238252427842816
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 54.3562126159668,
+        "equivalent": false
+      },
+      "plan_median_us": 149.03582632541656,
+      "synchronized_wall_median_us": 2774.918063854178
+    },
+    {
+      "gpu": "NVIDIA GeForce RTX 5090",
+      "dtype": "bfloat16",
+      "config": "n8",
+      "arm": "unsplit",
+      "mode": "graph",
+      "primary": false,
+      "same_minus_opposite_us": {
+        "mean": 1216.7124659926803,
+        "CI": [
+          1213.21694486671,
+          1220.6936284347817
+        ],
+        "confidence": 0.95,
+        "replicate_means": [
+          1216.027577718099,
+          1213.4064435958862,
+          1220.7033766640557
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference"
+      },
+      "state_median_us": {
+        "same": 3569.125811258952,
+        "opposite": 2352.250337600708,
+        "eqC-a": 2718.1806564331055,
+        "eqC-b": 2804.3963114420576,
+        "rand4": 2751.8056233723955,
+        "rand5": 2772.2738583882647,
+        "rand6": 3278.799057006836,
+        "rand7": 2584.7463607788086,
+        "rand8": 2647.982994715373,
+        "rand9": 2774.524688720703,
+        "order-null": 3170.802116394043
+      },
+      "spearman_work_latency": 0.8085143730944858,
+      "observed_median_half_range_us": 608.4377368291221,
+      "order_null": {
+        "mean": -402.3769696553548,
+        "CI": [
+          -408.79501545870744,
+          -395.9247677414505
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          -396.820068359375,
+          -399.0877204471164,
+          -411.223120159573
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 71.38251622517905,
+        "equivalent": false
+      },
+      "equal_work": {
+        "mean": 78.91933123270672,
+        "CI": [
+          61.055012985512114,
+          95.05108285833288
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          90.42859077453609,
+          95.40703561570915,
+          50.92236730787496
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 54.36361312866211,
+        "equivalent": false
+      },
+      "plan_median_us": 149.03582632541656,
+      "synchronized_wall_median_us": 2770.999427108715
+    },
+    {
+      "gpu": "NVIDIA GeForce RTX 5090",
+      "dtype": "float16",
+      "config": "n16",
+      "arm": "auto",
+      "mode": "eager",
+      "primary": false,
+      "same_minus_opposite_us": {
+        "mean": 2924.7588581509062,
+        "CI": [
+          2902.4711467601637,
+          2944.4882525338066
+        ],
+        "confidence": 0.95,
+        "replicate_means": [
+          2928.058359358046,
+          2909.8806646135117,
+          2936.3375504811606
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference"
+      },
+      "state_median_us": {
+        "same": 6444.429397583008,
+        "opposite": 3514.4213040669756,
+        "eqC-a": 4946.656068166098,
+        "eqC-b": 4628.747940063477,
+        "rand4": 4855.002562204996,
+        "rand5": 4475.462595621744,
+        "rand6": 4732.659975687663,
+        "rand7": 4944.5947011311855,
+        "rand8": 5180.393218994141,
+        "rand9": 5192.601203918457,
+        "order-null": 6184.973398844401
+      },
+      "spearman_work_latency": 0.9300954818304987,
+      "observed_median_half_range_us": 1465.004046758016,
+      "order_null": {
+        "mean": -264.1821084199128,
+        "CI": [
+          -281.2561467841819,
+          -246.1548293078387
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          -271.38990826076923,
+          -241.08886718750009,
+          -280.0675498114692
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 128.88858795166016,
+        "equivalent": false
+      },
+      "equal_work": {
+        "mean": -316.32876396179205,
+        "CI": [
+          -347.06338025905484,
+          -283.02108270150643
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          -345.12750307718915,
+          -325.97984208001026,
+          -277.8789467281767
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 98.93312136332196,
+        "equivalent": false
+      },
+      "plan_median_us": 177.85461386665702,
+      "synchronized_wall_median_us": 4906.748998716163
+    },
+    {
+      "gpu": "NVIDIA GeForce RTX 5090",
+      "dtype": "float16",
+      "config": "n16",
+      "arm": "auto",
+      "mode": "graph",
+      "primary": true,
+      "same_minus_opposite_us": {
+        "mean": 2906.061508037426,
+        "CI": [
+          2897.0792445871566,
+          2915.221420703111
+        ],
+        "confidence": 0.95,
+        "replicate_means": [
+          2904.2130576239692,
+          2907.867193222046,
+          2906.1042732662627
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference"
+      },
+      "state_median_us": {
+        "same": 6452.667554219564,
+        "opposite": 3545.0897216796875,
+        "eqC-a": 4937.358061472574,
+        "eqC-b": 4632.510662078857,
+        "rand4": 4855.193614959717,
+        "rand5": 4456.229368845621,
+        "rand6": 4735.316276550293,
+        "rand7": 4936.638037363688,
+        "rand8": 5151.781241099039,
+        "rand9": 5169.126669565836,
+        "order-null": 6186.127344767252
+      },
+      "spearman_work_latency": 0.9300954818304987,
+      "observed_median_half_range_us": 1453.7889162699385,
+      "order_null": {
+        "mean": -262.77939478556317,
+        "CI": [
+          -267.0846135528001,
+          -257.92471479486545
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          -265.0246620178222,
+          -262.4140845404732,
+          -260.8994377983941
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 129.0533510843913,
+        "equivalent": false
+      },
+      "equal_work": {
+        "mean": -306.342743061207,
+        "CI": [
+          -329.4947332806056,
+          -281.5658145480686
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          -328.85800467597124,
+          -315.17770555284284,
+          -274.9925189548069
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 98.74716122945149,
+        "equivalent": false
+      },
+      "plan_median_us": 177.85461386665702,
+      "synchronized_wall_median_us": 4905.87957513829
+    },
+    {
+      "gpu": "NVIDIA GeForce RTX 5090",
+      "dtype": "float16",
+      "config": "n16",
+      "arm": "unsplit",
+      "mode": "eager",
+      "primary": false,
+      "same_minus_opposite_us": {
+        "mean": 2944.191897356952,
+        "CI": [
+          2906.8714291961105,
+          2976.7809525684074
+        ],
+        "confidence": 0.95,
+        "replicate_means": [
+          2940.422402487861,
+          2976.1561817593047,
+          2915.9971078236895
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference"
+      },
+      "state_median_us": {
+        "same": 6459.978421529135,
+        "opposite": 3506.8386395772295,
+        "eqC-a": 4937.924067179361,
+        "eqC-b": 4648.974577585856,
+        "rand4": 4862.070719401042,
+        "rand5": 4482.652028401693,
+        "rand6": 4739.988009134928,
+        "rand7": 4927.864074707031,
+        "rand8": 5184.0039889017735,
+        "rand9": 5182.048002878824,
+        "order-null": 6193.8012440999355
+      },
+      "spearman_work_latency": 0.9179373709568974,
+      "observed_median_half_range_us": 1476.5698909759526,
+      "order_null": {
+        "mean": -259.40529505411774,
+        "CI": [
+          -274.57728297622106,
+          -246.68229862495696
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          -249.40723843044694,
+          -251.91015667385523,
+          -276.8984900580511
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 129.1995684305827,
+        "equivalent": false
+      },
+      "equal_work": {
+        "mean": -296.9165024933991,
+        "CI": [
+          -321.9279819064669,
+          -273.0238905659428
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          -324.2297437455918,
+          -288.87685139973945,
+          -277.64291233486597
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 98.75848134358723,
+        "equivalent": false
+      },
+      "plan_median_us": 172.4008470773697,
+      "synchronized_wall_median_us": 4897.753916642008
+    },
+    {
+      "gpu": "NVIDIA GeForce RTX 5090",
+      "dtype": "float16",
+      "config": "n16",
+      "arm": "unsplit",
+      "mode": "graph",
+      "primary": false,
+      "same_minus_opposite_us": {
+        "mean": 2925.9621478893137,
+        "CI": [
+          2911.269059004607,
+          2939.97762159065
+        ],
+        "confidence": 0.95,
+        "replicate_means": [
+          2937.987698449029,
+          2919.8589589860703,
+          2920.0397862328423
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference"
+      },
+      "state_median_us": {
+        "same": 6453.910509745279,
+        "opposite": 3519.4129943847656,
+        "eqC-a": 4941.689968109131,
+        "eqC-b": 4636.563301086426,
+        "rand4": 4850.321451822916,
+        "rand5": 4460.180759429932,
+        "rand6": 4746.930917104085,
+        "rand7": 4935.568650563559,
+        "rand8": 5190.008640289307,
+        "rand9": 5177.0124435424805,
+        "order-null": 6180.5419921875
+      },
+      "spearman_work_latency": 0.9179373709568974,
+      "observed_median_half_range_us": 1467.2487576802569,
+      "order_null": {
+        "mean": -268.47297173959237,
+        "CI": [
+          -273.9818219785338,
+          -262.7023167080349
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          -267.55216386583123,
+          -272.5324630737304,
+          -265.3342882792154
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 129.07821019490558,
+        "equivalent": false
+      },
+      "equal_work": {
+        "mean": -299.1142184646041,
+        "CI": [
+          -320.28266500543657,
+          -276.09068199440287
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          -305.54450882805713,
+          -321.99957635667585,
+          -269.7985702090794
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 98.83379936218262,
+        "equivalent": false
+      },
+      "plan_median_us": 172.4008470773697,
+      "synchronized_wall_median_us": 4892.4152918819655
+    },
+    {
+      "gpu": "NVIDIA GeForce RTX 5090",
+      "dtype": "float16",
+      "config": "n2",
+      "arm": "auto",
+      "mode": "eager",
+      "primary": false,
+      "same_minus_opposite_us": {
+        "mean": 846.6399996368974,
+        "CI": [
+          840.7288587203732,
+          852.0401099765742
+        ],
+        "confidence": 0.95,
+        "replicate_means": [
+          852.1226710743374,
+          847.2817937533061,
+          840.5155340830486
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference"
+      },
+      "state_median_us": {
+        "same": 1709.2186609903972,
+        "opposite": 857.8746716181437,
+        "order-null": 1704.2186260223389
+      },
+      "spearman_work_latency": 1.0,
+      "observed_median_half_range_us": 425.67199468612677,
+      "order_null": {
+        "mean": -7.5851855454621635,
+        "CI": [
+          -10.1685682932536,
+          -5.367494954003249
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          -7.25509060753717,
+          -9.362909528944252,
+          -6.137556499905069
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 34.184373219807945,
+        "equivalent": true
+      },
+      "equal_work": null,
+      "plan_median_us": 150.87705105543137,
+      "synchronized_wall_median_us": 1695.772919144171
+    },
+    {
+      "gpu": "NVIDIA GeForce RTX 5090",
+      "dtype": "float16",
+      "config": "n2",
+      "arm": "auto",
+      "mode": "graph",
+      "primary": true,
+      "same_minus_opposite_us": {
+        "mean": 845.5347220102946,
+        "CI": [
+          842.110920559477,
+          849.454440397245
+        ],
+        "confidence": 0.95,
+        "replicate_means": [
+          849.5627707905239,
+          844.954318470425,
+          842.0870767699348
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference"
+      },
+      "state_median_us": {
+        "same": 1703.084627787272,
+        "opposite": 854.4613520304362,
+        "order-null": 1701.1093298594155
+      },
+      "spearman_work_latency": 1.0,
+      "observed_median_half_range_us": 424.3116378784179,
+      "order_null": {
+        "mean": -4.435963100857211,
+        "CI": [
+          -6.988653650990231,
+          -1.8559354322928086
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          -3.2201740476820078,
+          -1.818709903293211,
+          -8.269005351596414
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 34.06169255574544,
+        "equivalent": true
+      },
+      "equal_work": null,
+      "plan_median_us": 150.87705105543137,
+      "synchronized_wall_median_us": 1695.1807471438465
+    },
+    {
+      "gpu": "NVIDIA GeForce RTX 5090",
+      "dtype": "float16",
+      "config": "n2",
+      "arm": "unsplit",
+      "mode": "eager",
+      "primary": false,
+      "same_minus_opposite_us": {
+        "mean": 58.908153463293,
+        "CI": [
+          47.93873804586903,
+          66.27588768800096
+        ],
+        "confidence": 0.95,
+        "replicate_means": [
+          64.67892063988579,
+          64.6211306254069,
+          47.424409124586305
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference"
+      },
+      "state_median_us": {
+        "same": 1708.733320236206,
+        "opposite": 1647.4213600158691,
+        "order-null": 1705.3906917572021
+      },
+      "spearman_work_latency": 1.0,
+      "observed_median_half_range_us": 30.655980110168457,
+      "order_null": {
+        "mean": -4.569556978013793,
+        "CI": [
+          -7.029502480118385,
+          -2.2069065659134512
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          -2.5995837317572446,
+          -2.7822256088257027,
+          -8.326861593458432
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 34.17466640472412,
+        "equivalent": true
+      },
+      "equal_work": null,
+      "plan_median_us": 146.61438763141632,
+      "synchronized_wall_median_us": 1700.318287475966
+    },
+    {
+      "gpu": "NVIDIA GeForce RTX 5090",
+      "dtype": "float16",
+      "config": "n2",
+      "arm": "unsplit",
+      "mode": "graph",
+      "primary": false,
+      "same_minus_opposite_us": {
+        "mean": 60.90267499287922,
+        "CI": [
+          48.41379887527891,
+          68.20597803151163
+        ],
+        "confidence": 0.95,
+        "replicate_means": [
+          67.65392091539171,
+          66.79247485266787,
+          48.261629210578086
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference"
+      },
+      "state_median_us": {
+        "same": 1704.3349742889404,
+        "opposite": 1638.3943557739258,
+        "order-null": 1700.8602619171143
+      },
+      "spearman_work_latency": 1.0,
+      "observed_median_half_range_us": 32.970309257507324,
+      "order_null": {
+        "mean": -5.384595305831359,
+        "CI": [
+          -7.5509715963293225,
+          -3.257889659316463
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          -4.033287366231302,
+          -3.898488150702576,
+          -8.2220104005602
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 34.08669948577881,
+        "equivalent": true
+      },
+      "equal_work": null,
+      "plan_median_us": 146.61438763141632,
+      "synchronized_wall_median_us": 1694.2907701983738
+    },
+    {
+      "gpu": "NVIDIA GeForce RTX 5090",
+      "dtype": "float16",
+      "config": "n4",
+      "arm": "auto",
+      "mode": "eager",
+      "primary": false,
+      "same_minus_opposite_us": {
+        "mean": 1412.6089413960774,
+        "CI": [
+          1326.7172507665773,
+          1476.5713253506908
+        ],
+        "confidence": 0.95,
+        "replicate_means": [
+          1467.5156275431316,
+          1449.448929892646,
+          1320.8622667524548
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference"
+      },
+      "state_median_us": {
+        "same": 3359.037399291992,
+        "opposite": 1978.2000382741292,
+        "eqC-a": 2312.382698059082,
+        "eqC-b": 2467.262665430705,
+        "rand4": 2766.1266326904297,
+        "rand5": 1950.6146113077798,
+        "rand6": 2455.1000595092773,
+        "rand7": 2773.3319600423174,
+        "rand8": 2600.2239386240644,
+        "rand9": 2462.1787071228027,
+        "order-null": 3329.1586240132647
+      },
+      "spearman_work_latency": 0.9024558013122742,
+      "observed_median_half_range_us": 704.2113939921062,
+      "order_null": {
+        "mean": -54.03029477154769,
+        "CI": [
+          -85.827331631272,
+          -22.211867350119032
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          -85.93675825330956,
+          -62.353610992431676,
+          -13.800515068901822
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 67.18074798583984,
+        "equivalent": false
+      },
+      "equal_work": {
+        "mean": 151.38177518491395,
+        "CI": [
+          147.31173736077776,
+          154.8607188242453
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          150.96289581722695,
+          154.92398209042017,
+          148.25844764709475
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 46.24765396118164,
+        "equivalent": false
+      },
+      "plan_median_us": 146.49523654952645,
+      "synchronized_wall_median_us": 2471.906404631833
+    },
+    {
+      "gpu": "NVIDIA GeForce RTX 5090",
+      "dtype": "float16",
+      "config": "n4",
+      "arm": "auto",
+      "mode": "graph",
+      "primary": true,
+      "same_minus_opposite_us": {
+        "mean": 1377.0788334034107,
+        "CI": [
+          1298.6763858132895,
+          1433.7819039821625
+        ],
+        "confidence": 0.95,
+        "replicate_means": [
+          1422.3473734325833,
+          1414.312309688992,
+          1294.576817088657
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference"
+      },
+      "state_median_us": {
+        "same": 3369.573752085368,
+        "opposite": 1962.8206888834634,
+        "eqC-a": 2310.062726338704,
+        "eqC-b": 2462.3546600341797,
+        "rand4": 2764.1507784525556,
+        "rand5": 1954.5640150705972,
+        "rand6": 2449.6610164642334,
+        "rand7": 2768.5106595357256,
+        "rand8": 2594.2482948303223,
+        "rand9": 2456.919352213542,
+        "order-null": 3329.4076919555664
+      },
+      "spearman_work_latency": 0.9024558013122742,
+      "observed_median_half_range_us": 707.5048685073855,
+      "order_null": {
+        "mean": -39.15772614655671,
+        "CI": [
+          -59.331300965061885,
+          -18.951484450587504
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          -58.839559555053675,
+          -48.81090588039823,
+          -9.82271300421822
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 67.39147504170737,
+        "equivalent": true
+      },
+      "equal_work": {
+        "mean": 150.19288327958856,
+        "CI": [
+          148.29610917303307,
+          152.0595671953979
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          150.198777516683,
+          150.27240912119555,
+          150.10746320088708
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 46.201254526774086,
+        "equivalent": false
+      },
+      "plan_median_us": 146.49523654952645,
+      "synchronized_wall_median_us": 2467.031833172465
+    },
+    {
+      "gpu": "NVIDIA GeForce RTX 5090",
+      "dtype": "float16",
+      "config": "n4",
+      "arm": "unsplit",
+      "mode": "eager",
+      "primary": false,
+      "same_minus_opposite_us": {
+        "mean": 1425.35752720303,
+        "CI": [
+          1362.353154133867,
+          1481.1455066557282
+        ],
+        "confidence": 0.95,
+        "replicate_means": [
+          1465.9877883063423,
+          1448.689725663927,
+          1361.395067638821
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference"
+      },
+      "state_median_us": {
+        "same": 3375.453313191732,
+        "opposite": 1933.7706565856934,
+        "eqC-a": 2321.838617324829,
+        "eqC-b": 2469.1866238911944,
+        "rand4": 2767.812093098958,
+        "rand5": 1948.209285736084,
+        "rand6": 2455.674648284912,
+        "rand7": 2776.0346730550127,
+        "rand8": 2582.1774005889893,
+        "rand9": 2462.9613558451338,
+        "order-null": 3333.898703257243
+      },
+      "spearman_work_latency": 0.9207488243118473,
+      "observed_median_half_range_us": 720.8413283030193,
+      "order_null": {
+        "mean": -52.304930157131594,
+        "CI": [
+          -80.12121297695016,
+          -24.41032197740339
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          -75.1495361328125,
+          -68.71395640903044,
+          -13.051297929551842
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 67.50906626383464,
+        "equivalent": false
+      },
+      "equal_work": {
+        "mean": 142.0662314803512,
+        "CI": [
+          131.73374246667933,
+          149.86280467775134
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          148.89245563083227,
+          146.82376384735107,
+          130.48247496287027
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 46.43677234649658,
+        "equivalent": false
+      },
+      "plan_median_us": 144.05447291210294,
+      "synchronized_wall_median_us": 2472.4777904339135
+    },
+    {
+      "gpu": "NVIDIA GeForce RTX 5090",
+      "dtype": "float16",
+      "config": "n4",
+      "arm": "unsplit",
+      "mode": "graph",
+      "primary": false,
+      "same_minus_opposite_us": {
+        "mean": 1407.8386801260488,
+        "CI": [
+          1353.8306911786397,
+          1451.4844445166764
+        ],
+        "confidence": 0.95,
+        "replicate_means": [
+          1439.812143643697,
+          1430.962006251017,
+          1352.7418904834324
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference"
+      },
+      "state_median_us": {
+        "same": 3371.184666951497,
+        "opposite": 1939.6089712778728,
+        "eqC-a": 2318.3190027872724,
+        "eqC-b": 2462.7410570780435,
+        "rand4": 2766.544024149577,
+        "rand5": 1927.4543126424153,
+        "rand6": 2449.803034464518,
+        "rand7": 2769.291400909424,
+        "rand8": 2562.779664993286,
+        "rand9": 2457.836627960205,
+        "order-null": 3327.8420766194663
+      },
+      "spearman_work_latency": 0.9024558013122742,
+      "observed_median_half_range_us": 721.8651771545409,
+      "order_null": {
+        "mean": -41.96072507787633,
+        "CI": [
+          -62.52091239999838,
+          -21.42399328726313
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          -63.3841620551215,
+          -49.104213714599574,
+          -13.393799463907916
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 67.42369333902994,
+        "equivalent": true
+      },
+      "equal_work": {
+        "mean": 145.75125111473932,
+        "CI": [
+          140.3876679914968,
+          151.1955393685235
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          151.38767825232614,
+          141.9579055574205,
+          143.90816953447128
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 46.36638005574545,
+        "equivalent": false
+      },
+      "plan_median_us": 144.05447291210294,
+      "synchronized_wall_median_us": 2467.8261567411637
+    },
+    {
+      "gpu": "NVIDIA GeForce RTX 5090",
+      "dtype": "float16",
+      "config": "n8",
+      "arm": "auto",
+      "mode": "eager",
+      "primary": false,
+      "same_minus_opposite_us": {
+        "mean": 1219.5995825308341,
+        "CI": [
+          1214.2423244538131,
+          1224.790060189035
+        ],
+        "confidence": 0.95,
+        "replicate_means": [
+          1218.0527183744641,
+          1216.1593437194824,
+          1224.5866854985557
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference"
+      },
+      "state_median_us": {
+        "same": 3582.1760495503745,
+        "opposite": 2361.506700515747,
+        "eqC-a": 2724.5960235595703,
+        "eqC-b": 2815.513451894124,
+        "rand4": 2758.6305936177573,
+        "rand5": 2780.9066772460938,
+        "rand6": 3290.95458984375,
+        "rand7": 2597.332000732422,
+        "rand8": 2658.8239669799805,
+        "rand9": 2778.9813677469892,
+        "order-null": 3181.22657140096
+      },
+      "spearman_work_latency": 0.7841981513472833,
+      "observed_median_half_range_us": 610.3346745173137,
+      "order_null": {
+        "mean": -397.3748242413556,
+        "CI": [
+          -408.91637139850195,
+          -385.5368018150329
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          -384.66511832343207,
+          -394.69422234429254,
+          -412.7651320563422
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 71.64352099100749,
+        "equivalent": false
+      },
+      "equal_work": {
+        "mean": 83.6549511662236,
+        "CI": [
+          67.27027363247342,
+          97.404377548783
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          94.13112534417048,
+          95.66468662685823,
+          61.169041527642094
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 54.491920471191406,
+        "equivalent": false
+      },
+      "plan_median_us": 151.43724158406258,
+      "synchronized_wall_median_us": 2776.3334413369494
+    },
+    {
+      "gpu": "NVIDIA GeForce RTX 5090",
+      "dtype": "float16",
+      "config": "n8",
+      "arm": "auto",
+      "mode": "graph",
+      "primary": true,
+      "same_minus_opposite_us": {
+        "mean": 1217.5318929884168,
+        "CI": [
+          1211.568385693762,
+          1222.4681563951349
+        ],
+        "confidence": 0.95,
+        "replicate_means": [
+          1220.5722067091199,
+          1210.9723091125488,
+          1221.0511631435818
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference"
+      },
+      "state_median_us": {
+        "same": 3579.4299443562822,
+        "opposite": 2363.48032951355,
+        "eqC-a": 2721.372763315837,
+        "eqC-b": 2811.8607203165693,
+        "rand4": 2754.3787956237793,
+        "rand5": 2775.5430539449053,
+        "rand6": 3285.3110631306963,
+        "rand7": 2592.209657033284,
+        "rand8": 2638.8329664866133,
+        "rand9": 2780.7675997416177,
+        "order-null": 3178.7277857462564
+      },
+      "spearman_work_latency": 0.8085143730944858,
+      "observed_median_half_range_us": 607.9748074213662,
+      "order_null": {
+        "mean": -397.6348329473425,
+        "CI": [
+          -406.6746168666416,
+          -389.22451469633313
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          -390.74206352233887,
+          -390.9998469882541,
+          -411.16258833143445
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 71.58859888712564,
+        "equivalent": false
+      },
+      "equal_work": {
+        "mean": 84.4801355291296,
+        "CI": [
+          71.68365628631025,
+          94.89996300803293
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          91.79499414232043,
+          94.85793113708496,
+          66.7874813079834
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 54.42745526631674,
+        "equivalent": false
+      },
+      "plan_median_us": 151.43724158406258,
+      "synchronized_wall_median_us": 2773.930629094442
+    },
+    {
+      "gpu": "NVIDIA GeForce RTX 5090",
+      "dtype": "float16",
+      "config": "n8",
+      "arm": "unsplit",
+      "mode": "eager",
+      "primary": false,
+      "same_minus_opposite_us": {
+        "mean": 1216.1128344359222,
+        "CI": [
+          1209.5086560205175,
+          1223.626380496555
+        ],
+        "confidence": 0.95,
+        "replicate_means": [
+          1221.4862240685356,
+          1209.3254062864514,
+          1217.5268729527793
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference"
+      },
+      "state_median_us": {
+        "same": 3582.246780395508,
+        "opposite": 2362.8532886505127,
+        "eqC-a": 2722.3706245422363,
+        "eqC-b": 2816.9600168863935,
+        "rand4": 2760.057290395101,
+        "rand5": 2782.2159131368,
+        "rand6": 3291.9851938883467,
+        "rand7": 2597.089370091756,
+        "rand8": 2661.57865524292,
+        "rand9": 2781.418641408284,
+        "order-null": 3180.901368459066
+      },
+      "spearman_work_latency": 0.7841981513472833,
+      "observed_median_half_range_us": 609.6967458724976,
+      "order_null": {
+        "mean": -400.0866501419633,
+        "CI": [
+          -409.4406719560977,
+          -390.21060599221124
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          -402.53064367506244,
+          -388.31469747755267,
+          -409.4146092732748
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 71.64493560791016,
+        "equivalent": false
+      },
+      "equal_work": {
+        "mean": 82.23083284166127,
+        "CI": [
+          60.83943887993142,
+          101.1188100885462
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          101.6453637017144,
+          93.50646866692448,
+          51.54066615634493
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 54.44741249084473,
+        "equivalent": false
+      },
+      "plan_median_us": 152.12822472676635,
+      "synchronized_wall_median_us": 2778.0975748707233
+    },
+    {
+      "gpu": "NVIDIA GeForce RTX 5090",
+      "dtype": "float16",
+      "config": "n8",
+      "arm": "unsplit",
+      "mode": "graph",
+      "primary": false,
+      "same_minus_opposite_us": {
+        "mean": 1218.2011162793196,
+        "CI": [
+          1212.289353211721,
+          1223.6812120234524
+        ],
+        "confidence": 0.95,
+        "replicate_means": [
+          1222.7274047003853,
+          1211.695949236552,
+          1220.1799949010215
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference"
+      },
+      "state_median_us": {
+        "same": 3580.352306365967,
+        "opposite": 2359.239339828491,
+        "eqC-a": 2722.9623794555664,
+        "eqC-b": 2811.7205301920576,
+        "rand4": 2754.5588811238604,
+        "rand5": 2774.904092152913,
+        "rand6": 3287.1843973795576,
+        "rand7": 2592.137336730957,
+        "rand8": 2647.03369140625,
+        "rand9": 2778.928279876709,
+        "order-null": 3180.089632670085
+      },
+      "spearman_work_latency": 0.8085143730944858,
+      "observed_median_half_range_us": 610.5564832687378,
+      "order_null": {
+        "mean": -397.35964492515285,
+        "CI": [
+          -406.5661787986755,
+          -388.7257319909555
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          -392.94830958048504,
+          -388.88321982489697,
+          -410.2474053700765
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 71.60704612731934,
+        "equivalent": false
+      },
+      "equal_work": {
+        "mean": 82.10342018692586,
+        "CI": [
+          69.64913253430971,
+          93.3489018016391
+        ],
+        "confidence": 0.9,
+        "replicate_means": [
+          93.49889225429956,
+          90.10333485073527,
+          62.70803345574276
+        ],
+        "interpretation": "conditional process/block uncertainty; not GPU-population inference",
+        "epsilon_us": 54.45924758911133,
+        "equivalent": false
+      },
+      "plan_median_us": 152.12822472676635,
+      "synchronized_wall_median_us": 2771.9427986691394
+    }
+  ]
+}
