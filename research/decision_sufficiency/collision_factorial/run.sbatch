@@ -61,7 +61,7 @@ for MODE in $MODES; do
   if [[ "$MODE" == "cap" ]]; then
     export PYTHONPATH="$P/overlays/cap:$P/source-tree/src"
   else
-    export PYTHONPATH="$P/source-tree/src"
+    export PYTHONPATH="$P/overlays/pristine:$P/source-tree/src"
   fi
 
   R="$P/runs/${STAGE}-${SLURM_JOB_PARTITION}-r${REP}-${MODE}-${SLURM_JOB_ID}"
