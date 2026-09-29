@@ -16,8 +16,8 @@ export PATH=$CUDA_HOME/bin:$E/bin:$PATH
 export LD_LIBRARY_PATH=$CUDA_HOME/lib:${LD_LIBRARY_PATH:-}
 export OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 MAX_JOBS=4
 export XDG_CACHE_HOME=$LOCAL/cache TRITON_CACHE_DIR=$LOCAL/triton FLASHINFER_WORKSPACE_BASE=$LOCAL/flashinfer
-export PYTHONPATH=$P/overlays/residency070
-cd "$P/residency-source"
+export PYTHONPATH=$P/overlays/residency070-v2
+cd "$P/residency-v2-source"
 sha256sum -c source.sha256 > "$P/receipts/residency-$KEY-source.txt"
 scontrol show job "$SLURM_JOB_ID" -o > "$P/receipts/residency-$KEY-slurm.txt"
 nvidia-smi --query-gpu=timestamp,uuid,utilization.gpu,clocks.sm,clocks.mem,power.draw,temperature.gpu --format=csv -l 2 > "$P/logs/residency-$KEY-telemetry.csv" &
