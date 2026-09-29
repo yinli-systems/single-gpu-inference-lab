@@ -50,9 +50,9 @@ def git(repo, *args):
     return result.stdout.strip()
 
 
-def prepare(repo, site_packages, out):
+def prepare(repo, pristine_source, out):
     repo = repo.resolve()
-    site_packages = site_packages.resolve()
+    pristine_source = pristine_source.resolve()
     out = out.resolve()
     if out.exists():
         raise FileExistsError("campaign root already exists")
@@ -99,8 +99,33 @@ def prepare(repo, site_packages, out):
     resource_prepare = load_resource_prepare(
         source_tree / "research" / "resource_generalization" / "prepare.py"
     )
+    pristine_header = (
+        pristine_source
+        / "flashinfer"
+        / "data"
+        / "include"
+        / "flashinfer"
+        / "attention"
+        / "prefill.cuh"
+    )
+    if not pristine_header.exists():
+        raise FileNotFoundError("pristine FlashInfer 0.7.0 header missing")
+    if sha256(pristine_header) != resource_prepare.EXPECTED:
+        raise RuntimeError("pristine 0.7.0 header hash mismatch")
+
+    pristine_out = out / "overlays" / "pristine"
+    shutil.copytree(
+        pristine_source / "flashinfer",
+        pristine_out / "flashinfer",
+        ignore=shutil.ignore_patterns("__pycache__", "*.pyc"),
+    )
+    dist_infos = list(pristine_source.glob("flashinfer_python-*.dist-info"))
+    if len(dist_infos) != 1:
+        raise RuntimeError("expected one FlashInfer dist-info directory")
+    shutil.copytree(dist_infos[0], pristine_out / dist_infos[0].name)
+
     cap_binding = resource_prepare.prepare(
-        site_packages,
+        pristine_source,
         out / "overlays" / "cap",
         "cap",
     )
@@ -113,8 +138,18 @@ def prepare(repo, site_packages, out):
         "git_branch": git(repo, "rev-parse", "--abbrev-ref", "HEAD"),
         "files": source_hashes,
         "collision_case_hash": manifest["case_hash"],
-        "site_packages": str(site_packages),
+        "pristine_source": str(pristine_source),
         "official_flashinfer_header_sha256": resource_prepare.EXPECTED,
+        "pristine_overlay": str(pristine_out),
+        "pristine_header_sha256": sha256(
+            pristine_out
+            / "flashinfer"
+            / "data"
+            / "include"
+            / "flashinfer"
+            / "attention"
+            / "prefill.cuh"
+        ),
         "cap_binding": cap_binding,
     }
     (out / "manifest.json").write_text(
@@ -133,6 +168,8 @@ def prepare(repo, site_packages, out):
         "git_commit": head,
         "case_hash": manifest["case_hash"],
         "source_files": len(source_hashes),
+        "pristine_overlay": str(out / "overlays" / "pristine"),
+        "pristine_header_sha256": resource_prepare.EXPECTED,
         "cap_overlay": str(out / "overlays" / "cap"),
         "cap_header_sha256": cap_binding["modified_sha256"],
         "performance_measured": False,
@@ -146,12 +183,12 @@ def prepare(repo, site_packages, out):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--repo", type=Path, required=True)
-    parser.add_argument("--site-packages", type=Path, required=True)
+    parser.add_argument("--pristine-source", type=Path, required=True)
     parser.add_argument("--out", type=Path, required=True)
     args = parser.parse_args()
     print(
         json.dumps(
-            prepare(args.repo, args.site_packages, args.out),
+            prepare(args.repo, args.pristine_source, args.out),
             indent=2,
             allow_nan=False,
         )
