@@ -14,5 +14,6 @@ jobs:
       - run: python -m unittest discover -s research/resource_generalization -p 'test_*.py' -v
       - run: python -m unittest discover -s research/resource_generalization/analysis -p 'test_*.py' -v
       - run: python -m unittest discover -s research/resource_generalization/serving -p 'test_*.py' -v
+      - run: python -m unittest discover -s research/resource_generalization/numerics -p 'test_*.py' -v
       - run: python -m compileall -q research/resource_generalization
       - run: bash -n research/resource_generalization/run.sbatch && bash -n research/resource_generalization/serving/run.sbatch
