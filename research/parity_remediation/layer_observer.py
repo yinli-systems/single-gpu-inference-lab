@@ -43,7 +43,7 @@ def install_model(runner):
             module.register_forward_hook(lambda m,args,out,name=name:store(name,'output',out))
     runner._sgi_shadow_modules=selected
     layer_ids={int(re.search(r'\.layers\.(\d+)\.',n).group(1)) for n in selected}
-    if len(layer_ids)!=36:raise RuntimeError('this observer supports the pinned 36-layer Qwen model only')
+    if len(layer_ids)!=36 or len(selected)!=36*len(suffixes):raise RuntimeError('this observer supports the pinned 36-layer Qwen operator structure only')
 
 def snapshot(runner,fb,record,logits):
     if not fb.forward_mode.is_decode():return
