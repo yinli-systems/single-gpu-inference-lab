@@ -1,0 +1,25 @@
+name: Execution contract integrity
+on:
+  pull_request:
+    paths:
+      - 'research/execution_contracts/**'
+      - 'research/resource_generalization/**'
+      - '.github/workflows/execution-contracts.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  cpu-contracts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install numpy aiohttp
+      - run: python -m unittest discover -s research/execution_contracts -p 'test_*.py' -v
+      - run: python -m unittest discover -s research/resource_generalization -p 'test_*.py' -v
+      - run: python -m unittest discover -s research/resource_generalization/analysis -p 'test_*.py' -v
+      - run: python -m unittest discover -s research/resource_generalization/serving -p 'test_*.py' -v
+      - run: python -m unittest discover -s research/resource_generalization/numerics -p 'test_*.py' -v
+      - run: python -m compileall -q research/execution_contracts

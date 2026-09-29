@@ -1,0 +1,187 @@
+{
+  "kind": "synthetic_fault_injection_not_actual_experiment_corruption",
+  "legacy_git_blob": "369441f58807d279aac54b967474fdd097f70c46",
+  "faults": 28,
+  "legacy_accepted": 19,
+  "new_accepted": 0,
+  "cases": [
+    {
+      "fault": "ttft",
+      "legacy": "accepted",
+      "new": "rejected",
+      "new_reason": "ValueError: derived metric mismatch: ttft"
+    },
+    {
+      "fault": "tpot",
+      "legacy": "accepted",
+      "new": "rejected",
+      "new_reason": "ValueError: derived metric mismatch: tpot"
+    },
+    {
+      "fault": "latency",
+      "legacy": "accepted",
+      "new": "rejected",
+      "new_reason": "ValueError: request outside measured horizon"
+    },
+    {
+      "fault": "tail",
+      "legacy": "accepted",
+      "new": "rejected",
+      "new_reason": "ValueError: derived metric mismatch: TTFT0.99"
+    },
+    {
+      "fault": "goodput",
+      "legacy": "accepted",
+      "new": "rejected",
+      "new_reason": "ValueError: derived metric mismatch: joint SLO goodput"
+    },
+    {
+      "fault": "request_rate",
+      "legacy": "accepted",
+      "new": "rejected",
+      "new_reason": "ValueError: derived metric mismatch: request throughput"
+    },
+    {
+      "fault": "output_count",
+      "legacy": "rejected",
+      "legacy_reason": "ValueError: wrong throughput numerator",
+      "new": "rejected",
+      "new_reason": "ValueError: throughput numerator"
+    },
+    {
+      "fault": "throughput",
+      "legacy": "rejected",
+      "legacy_reason": "ValueError: wrong throughput",
+      "new": "rejected",
+      "new_reason": "ValueError: derived metric mismatch: throughput"
+    },
+    {
+      "fault": "bool_timing",
+      "legacy": "accepted",
+      "new": "rejected",
+      "new_reason": "ValueError: ttft: real number required"
+    },
+    {
+      "fault": "nan_timing",
+      "legacy": "rejected",
+      "legacy_reason": "ValueError: invalid latency",
+      "new": "rejected",
+      "new_reason": "ValueError: nonfinite JSON constant: NaN"
+    },
+    {
+      "fault": "inf_elapsed",
+      "legacy": "rejected",
+      "legacy_reason": "ValueError: wrong throughput",
+      "new": "rejected",
+      "new_reason": "ValueError: nonfinite JSON constant: Infinity"
+    },
+    {
+      "fault": "zero_elapsed",
+      "legacy": "rejected",
+      "legacy_reason": "ZeroDivisionError: float division by zero",
+      "new": "rejected",
+      "new_reason": "ValueError: elapsed: invalid finite nonnegative value"
+    },
+    {
+      "fault": "request_id",
+      "legacy": "accepted",
+      "new": "rejected",
+      "new_reason": "ValueError: unexpected/duplicate request ID"
+    },
+    {
+      "fault": "duplicate_request",
+      "legacy": "rejected",
+      "legacy_reason": "ValueError: duplicate request ID",
+      "new": "rejected",
+      "new_reason": "ValueError: unexpected/duplicate request ID"
+    },
+    {
+      "fault": "bool_token",
+      "legacy": "accepted",
+      "new": "rejected",
+      "new_reason": "ValueError: invalid token IDs"
+    },
+    {
+      "fault": "negative_token",
+      "legacy": "accepted",
+      "new": "rejected",
+      "new_reason": "ValueError: invalid token IDs"
+    },
+    {
+      "fault": "input_count",
+      "legacy": "accepted",
+      "new": "rejected",
+      "new_reason": "ValueError: input length mismatch"
+    },
+    {
+      "fault": "missing_finish",
+      "legacy": "accepted",
+      "new": "rejected",
+      "new_reason": "ValueError: missing finish reason"
+    },
+    {
+      "fault": "event_count",
+      "legacy": "accepted",
+      "new": "rejected",
+      "new_reason": "ValueError: SSE accounting mismatch"
+    },
+    {
+      "fault": "event_time",
+      "legacy": "accepted",
+      "new": "rejected",
+      "new_reason": "ValueError: SSE/token time mismatch"
+    },
+    {
+      "fault": "time_reversal",
+      "legacy": "rejected",
+      "legacy_reason": "ValueError: time reversal",
+      "new": "rejected",
+      "new_reason": "ValueError: nonmonotonic arrivals"
+    },
+    {
+      "fault": "end_outside",
+      "legacy": "accepted",
+      "new": "rejected",
+      "new_reason": "ValueError: request outside measured horizon"
+    },
+    {
+      "fault": "errors",
+      "legacy": "rejected",
+      "legacy_reason": "ValueError: request failures retained",
+      "new": "rejected",
+      "new_reason": "ValueError: request failures retained: not a comparable complete batch"
+    },
+    {
+      "fault": "concurrency",
+      "legacy": "accepted",
+      "new": "rejected",
+      "new_reason": "ValueError: workload/concurrency mismatch"
+    },
+    {
+      "fault": "workload_hash",
+      "legacy": "accepted",
+      "new": "rejected",
+      "new_reason": "ValueError: workload binding mismatch"
+    },
+    {
+      "fault": "missing_quantile",
+      "legacy": "accepted",
+      "new": "rejected",
+      "new_reason": "ValueError: quantile coverage"
+    },
+    {
+      "fault": "token_count",
+      "legacy": "rejected",
+      "legacy_reason": "ValueError: missing token events",
+      "new": "rejected",
+      "new_reason": "ValueError: output token count mismatch"
+    },
+    {
+      "fault": "empty_hash_manifest",
+      "legacy": "accepted",
+      "new": "rejected",
+      "new_reason": "ValueError: required files not hash-bound"
+    }
+  ],
+  "new_gpu_runs": 0
+}

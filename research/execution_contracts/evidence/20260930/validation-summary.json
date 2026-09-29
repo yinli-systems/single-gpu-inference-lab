@@ -1,0 +1,914 @@
+{
+  "timestamp_utc": "2026-09-29T22:01:46.012913+00:00",
+  "base_commit": "42a000d064f77cd13f38d2a244c1e09a4f156dd5",
+  "python": "3.10.12 (main, Jan  8 2026, 06:52:19) [GCC 11.4.0]",
+  "new_gpu_jobs_submitted": 0,
+  "frozen_protocols_changed": false,
+  "raw_gpu_samples_included": false,
+  "serving_promotion": false,
+  "formal_status": "QUARANTINED",
+  "successful_requests": 1296,
+  "token_mismatches": [
+    {
+      "job": 1639805,
+      "mode": "cap",
+      "file": "decode-b1.json",
+      "id": "decode-11"
+    },
+    {
+      "job": 1639805,
+      "mode": "cap",
+      "file": "decode-b1.json",
+      "id": "decode-13"
+    }
+  ],
+  "confirmatory": {
+    "4090": {
+      "complete": true,
+      "processes": 48,
+      "timing_rows": 147456,
+      "qualifications": 2304,
+      "numerics": {
+        "pristine": {
+          "qualifications": 576,
+          "exact_full_outputs": 576,
+          "max_abs_vs_pristine": 0.0,
+          "FP32_max_abs": 0.009161710739135742,
+          "FP32_vectors": 858624
+        },
+        "off": {
+          "qualifications": 576,
+          "exact_full_outputs": 576,
+          "max_abs_vs_pristine": 0.0,
+          "FP32_max_abs": 0.009161710739135742,
+          "FP32_vectors": 858624
+        },
+        "cap": {
+          "qualifications": 576,
+          "exact_full_outputs": 576,
+          "max_abs_vs_pristine": 0.0,
+          "FP32_max_abs": 0.009161710739135742,
+          "FP32_vectors": 858624
+        },
+        "wide": {
+          "qualifications": 576,
+          "exact_full_outputs": 120,
+          "max_abs_vs_pristine": 0.0078125,
+          "FP32_max_abs": 0.009161710739135742,
+          "FP32_vectors": 858624
+        }
+      },
+      "summaries": [
+        {
+          "layout": "ragged",
+          "calls": 1,
+          "metric": "run_device_us",
+          "mode": "off",
+          "ratio": 1.000468191359267,
+          "CI95": [
+            0.9988775071356345,
+            1.0020997951414705
+          ],
+          "cells": 96,
+          "controls_failed": 50,
+          "worst_ratio": 0.9821487052521714,
+          "point_regressions_gt1pct": 3
+        },
+        {
+          "layout": "ragged",
+          "calls": 1,
+          "metric": "run_device_us",
+          "mode": "cap",
+          "ratio": 1.1372694566781767,
+          "CI95": [
+            1.1354795172979262,
+            1.1390998987214511
+          ],
+          "cells": 96,
+          "controls_failed": 48,
+          "worst_ratio": 0.9385936137373487,
+          "point_regressions_gt1pct": 16
+        },
+        {
+          "layout": "ragged",
+          "calls": 1,
+          "metric": "run_device_us",
+          "mode": "wide",
+          "ratio": 1.151551165527261,
+          "CI95": [
+            1.1495691462105577,
+            1.1535150549656739
+          ],
+          "cells": 96,
+          "controls_failed": 47,
+          "worst_ratio": 0.8939711045112985,
+          "point_regressions_gt1pct": 19
+        },
+        {
+          "layout": "ragged",
+          "calls": 1,
+          "metric": "cycle_us",
+          "mode": "off",
+          "ratio": 1.0014276513246314,
+          "CI95": [
+            0.9924221919963057,
+            1.0103578663124773
+          ],
+          "cells": 96,
+          "controls_failed": 92,
+          "worst_ratio": 0.9796457967271238,
+          "point_regressions_gt1pct": 5
+        },
+        {
+          "layout": "ragged",
+          "calls": 1,
+          "metric": "cycle_us",
+          "mode": "cap",
+          "ratio": 1.12615285906518,
+          "CI95": [
+            1.1163803272246235,
+            1.1360704164101938
+          ],
+          "cells": 96,
+          "controls_failed": 92,
+          "worst_ratio": 0.9480713383233644,
+          "point_regressions_gt1pct": 11
+        },
+        {
+          "layout": "ragged",
+          "calls": 1,
+          "metric": "cycle_us",
+          "mode": "wide",
+          "ratio": 1.1374647144982686,
+          "CI95": [
+            1.1262767712514283,
+            1.1483817536630414
+          ],
+          "cells": 96,
+          "controls_failed": 92,
+          "worst_ratio": 0.9079695282885083,
+          "point_regressions_gt1pct": 20
+        },
+        {
+          "layout": "ragged",
+          "calls": 16,
+          "metric": "run_device_us",
+          "mode": "off",
+          "ratio": 0.9991797511423735,
+          "CI95": [
+            0.998331085751492,
+            1.0000142174648436
+          ],
+          "cells": 96,
+          "controls_failed": 13,
+          "worst_ratio": 0.9852798020561486,
+          "point_regressions_gt1pct": 2
+        },
+        {
+          "layout": "ragged",
+          "calls": 16,
+          "metric": "run_device_us",
+          "mode": "cap",
+          "ratio": 1.1372666083607503,
+          "CI95": [
+            1.1364426342311358,
+            1.1380871041076046
+          ],
+          "cells": 96,
+          "controls_failed": 9,
+          "worst_ratio": 0.9354684195709205,
+          "point_regressions_gt1pct": 14
+        },
+        {
+          "layout": "ragged",
+          "calls": 16,
+          "metric": "run_device_us",
+          "mode": "wide",
+          "ratio": 1.1479071033902986,
+          "CI95": [
+            1.1470035128683755,
+            1.1488044645561872
+          ],
+          "cells": 96,
+          "controls_failed": 10,
+          "worst_ratio": 0.8761790227119527,
+          "point_regressions_gt1pct": 22
+        },
+        {
+          "layout": "ragged",
+          "calls": 16,
+          "metric": "cycle_us",
+          "mode": "off",
+          "ratio": 0.9986390256577071,
+          "CI95": [
+            0.9961616413511273,
+            1.0010917891981215
+          ],
+          "cells": 96,
+          "controls_failed": 39,
+          "worst_ratio": 0.9519332967638428,
+          "point_regressions_gt1pct": 4
+        },
+        {
+          "layout": "ragged",
+          "calls": 16,
+          "metric": "cycle_us",
+          "mode": "cap",
+          "ratio": 1.135993872677983,
+          "CI95": [
+            1.1334002772617013,
+            1.138640398413055
+          ],
+          "cells": 96,
+          "controls_failed": 41,
+          "worst_ratio": 0.9338550579110804,
+          "point_regressions_gt1pct": 16
+        },
+        {
+          "layout": "ragged",
+          "calls": 16,
+          "metric": "cycle_us",
+          "mode": "wide",
+          "ratio": 1.1487589251808235,
+          "CI95": [
+            1.145811437379952,
+            1.1516366028106388
+          ],
+          "cells": 96,
+          "controls_failed": 42,
+          "worst_ratio": 0.9013129772394254,
+          "point_regressions_gt1pct": 21
+        },
+        {
+          "layout": "paged",
+          "calls": 1,
+          "metric": "run_device_us",
+          "mode": "off",
+          "ratio": 0.9995829678521908,
+          "CI95": [
+            0.9977480945602712,
+            1.0010784878692705
+          ],
+          "cells": 96,
+          "controls_failed": 47,
+          "worst_ratio": 0.9493970195481434,
+          "point_regressions_gt1pct": 5
+        },
+        {
+          "layout": "paged",
+          "calls": 1,
+          "metric": "run_device_us",
+          "mode": "cap",
+          "ratio": 1.1359544970317603,
+          "CI95": [
+            1.1348103657614308,
+            1.1371925915751735
+          ],
+          "cells": 96,
+          "controls_failed": 48,
+          "worst_ratio": 0.9368909934269484,
+          "point_regressions_gt1pct": 18
+        },
+        {
+          "layout": "paged",
+          "calls": 1,
+          "metric": "run_device_us",
+          "mode": "wide",
+          "ratio": 1.1202286825806096,
+          "CI95": [
+            1.1187015201954937,
+            1.12186217965123
+          ],
+          "cells": 96,
+          "controls_failed": 48,
+          "worst_ratio": 0.8726009159311948,
+          "point_regressions_gt1pct": 33
+        },
+        {
+          "layout": "paged",
+          "calls": 1,
+          "metric": "cycle_us",
+          "mode": "off",
+          "ratio": 1.0003563810441387,
+          "CI95": [
+            0.9926385626878471,
+            1.008081764324944
+          ],
+          "cells": 96,
+          "controls_failed": 94,
+          "worst_ratio": 0.9747055436094717,
+          "point_regressions_gt1pct": 1
+        },
+        {
+          "layout": "paged",
+          "calls": 1,
+          "metric": "cycle_us",
+          "mode": "cap",
+          "ratio": 1.1137682264492519,
+          "CI95": [
+            1.105280627783836,
+            1.1222063524852324
+          ],
+          "cells": 96,
+          "controls_failed": 96,
+          "worst_ratio": 0.9492466364268392,
+          "point_regressions_gt1pct": 15
+        },
+        {
+          "layout": "paged",
+          "calls": 1,
+          "metric": "cycle_us",
+          "mode": "wide",
+          "ratio": 1.106360448468114,
+          "CI95": [
+            1.0978181982610316,
+            1.1150691139980897
+          ],
+          "cells": 96,
+          "controls_failed": 94,
+          "worst_ratio": 0.9429688607654787,
+          "point_regressions_gt1pct": 25
+        },
+        {
+          "layout": "paged",
+          "calls": 16,
+          "metric": "run_device_us",
+          "mode": "off",
+          "ratio": 0.9994318640794668,
+          "CI95": [
+            0.998872688827565,
+            0.9999469157572716
+          ],
+          "cells": 96,
+          "controls_failed": 10,
+          "worst_ratio": 0.991659839123078,
+          "point_regressions_gt1pct": 0
+        },
+        {
+          "layout": "paged",
+          "calls": 16,
+          "metric": "run_device_us",
+          "mode": "cap",
+          "ratio": 1.134746711054904,
+          "CI95": [
+            1.1340802883843517,
+            1.1353373114539078
+          ],
+          "cells": 96,
+          "controls_failed": 9,
+          "worst_ratio": 0.9368229780638403,
+          "point_regressions_gt1pct": 18
+        },
+        {
+          "layout": "paged",
+          "calls": 16,
+          "metric": "run_device_us",
+          "mode": "wide",
+          "ratio": 1.1134511209476727,
+          "CI95": [
+            1.1128297832211411,
+            1.1140314807551877
+          ],
+          "cells": 96,
+          "controls_failed": 8,
+          "worst_ratio": 0.8547495361326654,
+          "point_regressions_gt1pct": 37
+        },
+        {
+          "layout": "paged",
+          "calls": 16,
+          "metric": "cycle_us",
+          "mode": "off",
+          "ratio": 0.9997384784879325,
+          "CI95": [
+            0.9974680382402072,
+            1.0021082857453507
+          ],
+          "cells": 96,
+          "controls_failed": 42,
+          "worst_ratio": 0.9915160818960176,
+          "point_regressions_gt1pct": 0
+        },
+        {
+          "layout": "paged",
+          "calls": 16,
+          "metric": "cycle_us",
+          "mode": "cap",
+          "ratio": 1.1339662657521001,
+          "CI95": [
+            1.1313267890055712,
+            1.1367670724129766
+          ],
+          "cells": 96,
+          "controls_failed": 41,
+          "worst_ratio": 0.9383173342222444,
+          "point_regressions_gt1pct": 19
+        },
+        {
+          "layout": "paged",
+          "calls": 16,
+          "metric": "cycle_us",
+          "mode": "wide",
+          "ratio": 1.1183063482152917,
+          "CI95": [
+            1.1157052411956165,
+            1.120987507452952
+          ],
+          "cells": 96,
+          "controls_failed": 41,
+          "worst_ratio": 0.9063759008846356,
+          "point_regressions_gt1pct": 36
+        }
+      ],
+      "hardware": {
+        "0": [
+          "NVIDIA GeForce RTX 4090, GPU-59eeb799-6b42-cf99-755c-9e8c6f6f565f, 580.82.07, 450.00 W"
+        ],
+        "1": [
+          "NVIDIA GeForce RTX 4090, GPU-053161a9-228c-a207-1124-21b632298eeb, 580.82.07, 450.00 W"
+        ],
+        "2": [
+          "NVIDIA GeForce RTX 4090, GPU-59eeb799-6b42-cf99-755c-9e8c6f6f565f, 580.82.07, 450.00 W"
+        ],
+        "3": [
+          "NVIDIA GeForce RTX 4090, GPU-bcab197c-93db-4a54-1149-0299f27e8599, 580.105.08, 450.00 W"
+        ]
+      },
+      "summary_sha256": "790f5e71bee6a14406265694e1ad29edf1a37938d8c299af6006ba81f48132d8"
+    },
+    "5090": {
+      "complete": true,
+      "processes": 48,
+      "timing_rows": 147456,
+      "qualifications": 2304,
+      "numerics": {
+        "pristine": {
+          "qualifications": 576,
+          "exact_full_outputs": 576,
+          "max_abs_vs_pristine": 0.0,
+          "FP32_max_abs": 0.009134531021118164,
+          "FP32_vectors": 858624
+        },
+        "off": {
+          "qualifications": 576,
+          "exact_full_outputs": 576,
+          "max_abs_vs_pristine": 0.0,
+          "FP32_max_abs": 0.009134531021118164,
+          "FP32_vectors": 858624
+        },
+        "cap": {
+          "qualifications": 576,
+          "exact_full_outputs": 576,
+          "max_abs_vs_pristine": 0.0,
+          "FP32_max_abs": 0.009134531021118164,
+          "FP32_vectors": 858624
+        },
+        "wide": {
+          "qualifications": 576,
+          "exact_full_outputs": 204,
+          "max_abs_vs_pristine": 0.0078125,
+          "FP32_max_abs": 0.009134531021118164,
+          "FP32_vectors": 858624
+        }
+      },
+      "summaries": [
+        {
+          "layout": "ragged",
+          "calls": 1,
+          "metric": "run_device_us",
+          "mode": "off",
+          "ratio": 0.9992231374297434,
+          "CI95": [
+            0.9971503621911407,
+            1.0011948853646722
+          ],
+          "cells": 96,
+          "controls_failed": 40,
+          "worst_ratio": 0.9826035741953004,
+          "point_regressions_gt1pct": 2
+        },
+        {
+          "layout": "ragged",
+          "calls": 1,
+          "metric": "run_device_us",
+          "mode": "cap",
+          "ratio": 1.1008659354252943,
+          "CI95": [
+            1.0985422531354465,
+            1.1030478013562321
+          ],
+          "cells": 96,
+          "controls_failed": 41,
+          "worst_ratio": 0.949479727731053,
+          "point_regressions_gt1pct": 16
+        },
+        {
+          "layout": "ragged",
+          "calls": 1,
+          "metric": "run_device_us",
+          "mode": "wide",
+          "ratio": 1.1108153506650067,
+          "CI95": [
+            1.1087942495492862,
+            1.112825709323537
+          ],
+          "cells": 96,
+          "controls_failed": 44,
+          "worst_ratio": 0.9202122722042633,
+          "point_regressions_gt1pct": 14
+        },
+        {
+          "layout": "ragged",
+          "calls": 1,
+          "metric": "cycle_us",
+          "mode": "off",
+          "ratio": 0.9905204589230243,
+          "CI95": [
+            0.9787565029781711,
+            1.002846190583087
+          ],
+          "cells": 96,
+          "controls_failed": 91,
+          "worst_ratio": 0.9060152366188114,
+          "point_regressions_gt1pct": 34
+        },
+        {
+          "layout": "ragged",
+          "calls": 1,
+          "metric": "cycle_us",
+          "mode": "cap",
+          "ratio": 1.0851391486199928,
+          "CI95": [
+            1.0731462227373048,
+            1.0975498822084735
+          ],
+          "cells": 96,
+          "controls_failed": 94,
+          "worst_ratio": 0.9487997504169576,
+          "point_regressions_gt1pct": 36
+        },
+        {
+          "layout": "ragged",
+          "calls": 1,
+          "metric": "cycle_us",
+          "mode": "wide",
+          "ratio": 1.1026192031564874,
+          "CI95": [
+            1.090291055654687,
+            1.114656271295977
+          ],
+          "cells": 96,
+          "controls_failed": 89,
+          "worst_ratio": 0.955293557157055,
+          "point_regressions_gt1pct": 17
+        },
+        {
+          "layout": "ragged",
+          "calls": 16,
+          "metric": "run_device_us",
+          "mode": "off",
+          "ratio": 0.9997667332252922,
+          "CI95": [
+            0.999150527499286,
+            1.0003618551198508
+          ],
+          "cells": 96,
+          "controls_failed": 11,
+          "worst_ratio": 0.9933704242324157,
+          "point_regressions_gt1pct": 0
+        },
+        {
+          "layout": "ragged",
+          "calls": 16,
+          "metric": "run_device_us",
+          "mode": "cap",
+          "ratio": 1.0998865767262362,
+          "CI95": [
+            1.0992625369803386,
+            1.1005090375682662
+          ],
+          "cells": 96,
+          "controls_failed": 10,
+          "worst_ratio": 0.9521998896785948,
+          "point_regressions_gt1pct": 12
+        },
+        {
+          "layout": "ragged",
+          "calls": 16,
+          "metric": "run_device_us",
+          "mode": "wide",
+          "ratio": 1.108462028622175,
+          "CI95": [
+            1.107867540542048,
+            1.1090398333550189
+          ],
+          "cells": 96,
+          "controls_failed": 10,
+          "worst_ratio": 0.9009881047776369,
+          "point_regressions_gt1pct": 12
+        },
+        {
+          "layout": "ragged",
+          "calls": 16,
+          "metric": "cycle_us",
+          "mode": "off",
+          "ratio": 0.9982393675554423,
+          "CI95": [
+            0.9957640964567998,
+            1.0008568499822286
+          ],
+          "cells": 96,
+          "controls_failed": 39,
+          "worst_ratio": 0.9767550945181941,
+          "point_regressions_gt1pct": 5
+        },
+        {
+          "layout": "ragged",
+          "calls": 16,
+          "metric": "cycle_us",
+          "mode": "cap",
+          "ratio": 1.0976088916868305,
+          "CI95": [
+            1.094723710670194,
+            1.1004300473119586
+          ],
+          "cells": 96,
+          "controls_failed": 43,
+          "worst_ratio": 0.9496471881889881,
+          "point_regressions_gt1pct": 15
+        },
+        {
+          "layout": "ragged",
+          "calls": 16,
+          "metric": "cycle_us",
+          "mode": "wide",
+          "ratio": 1.1087284986384038,
+          "CI95": [
+            1.1060982024743429,
+            1.1112452173873715
+          ],
+          "cells": 96,
+          "controls_failed": 43,
+          "worst_ratio": 0.9106878350982488,
+          "point_regressions_gt1pct": 13
+        },
+        {
+          "layout": "paged",
+          "calls": 1,
+          "metric": "run_device_us",
+          "mode": "off",
+          "ratio": 0.9989475586759652,
+          "CI95": [
+            0.9966666865951043,
+            1.0010003068324322
+          ],
+          "cells": 96,
+          "controls_failed": 40,
+          "worst_ratio": 0.969971963152267,
+          "point_regressions_gt1pct": 3
+        },
+        {
+          "layout": "paged",
+          "calls": 1,
+          "metric": "run_device_us",
+          "mode": "cap",
+          "ratio": 1.0926053193528211,
+          "CI95": [
+            1.0910830163012903,
+            1.0941574920017896
+          ],
+          "cells": 96,
+          "controls_failed": 42,
+          "worst_ratio": 0.9406782892221652,
+          "point_regressions_gt1pct": 13
+        },
+        {
+          "layout": "paged",
+          "calls": 1,
+          "metric": "run_device_us",
+          "mode": "wide",
+          "ratio": 1.0734392264683916,
+          "CI95": [
+            1.071600182355001,
+            1.0751134708845227
+          ],
+          "cells": 96,
+          "controls_failed": 39,
+          "worst_ratio": 0.8516168808914083,
+          "point_regressions_gt1pct": 35
+        },
+        {
+          "layout": "paged",
+          "calls": 1,
+          "metric": "cycle_us",
+          "mode": "off",
+          "ratio": 0.9923034371215951,
+          "CI95": [
+            0.9798635911252377,
+            1.0049514797995074
+          ],
+          "cells": 96,
+          "controls_failed": 95,
+          "worst_ratio": 0.9465008021569337,
+          "point_regressions_gt1pct": 34
+        },
+        {
+          "layout": "paged",
+          "calls": 1,
+          "metric": "cycle_us",
+          "mode": "cap",
+          "ratio": 1.0718284439443817,
+          "CI95": [
+            1.0597683775539521,
+            1.0841969602773494
+          ],
+          "cells": 96,
+          "controls_failed": 96,
+          "worst_ratio": 0.9042162720042958,
+          "point_regressions_gt1pct": 37
+        },
+        {
+          "layout": "paged",
+          "calls": 1,
+          "metric": "cycle_us",
+          "mode": "wide",
+          "ratio": 1.067946669355383,
+          "CI95": [
+            1.055879080451087,
+            1.0796793085385867
+          ],
+          "cells": 96,
+          "controls_failed": 95,
+          "worst_ratio": 0.9415013370714449,
+          "point_regressions_gt1pct": 36
+        },
+        {
+          "layout": "paged",
+          "calls": 16,
+          "metric": "run_device_us",
+          "mode": "off",
+          "ratio": 0.9995523540417688,
+          "CI95": [
+            0.9990461510669586,
+            1.0000533504268139
+          ],
+          "cells": 96,
+          "controls_failed": 6,
+          "worst_ratio": 0.9962186870843056,
+          "point_regressions_gt1pct": 0
+        },
+        {
+          "layout": "paged",
+          "calls": 16,
+          "metric": "run_device_us",
+          "mode": "cap",
+          "ratio": 1.0939317062464948,
+          "CI95": [
+            1.093391429831514,
+            1.094473328584367
+          ],
+          "cells": 96,
+          "controls_failed": 7,
+          "worst_ratio": 0.9430353154359563,
+          "point_regressions_gt1pct": 12
+        },
+        {
+          "layout": "paged",
+          "calls": 16,
+          "metric": "run_device_us",
+          "mode": "wide",
+          "ratio": 1.0701707327158583,
+          "CI95": [
+            1.0696626045139301,
+            1.0706802501253758
+          ],
+          "cells": 96,
+          "controls_failed": 6,
+          "worst_ratio": 0.8425496129306911,
+          "point_regressions_gt1pct": 34
+        },
+        {
+          "layout": "paged",
+          "calls": 16,
+          "metric": "cycle_us",
+          "mode": "off",
+          "ratio": 0.9969101073696774,
+          "CI95": [
+            0.9938783077185033,
+            1.0001942508994817
+          ],
+          "cells": 96,
+          "controls_failed": 43,
+          "worst_ratio": 0.9459592534715356,
+          "point_regressions_gt1pct": 10
+        },
+        {
+          "layout": "paged",
+          "calls": 16,
+          "metric": "cycle_us",
+          "mode": "cap",
+          "ratio": 1.0910840283750018,
+          "CI95": [
+            1.0884096026923584,
+            1.093906610712188
+          ],
+          "cells": 96,
+          "controls_failed": 44,
+          "worst_ratio": 0.9430016301404824,
+          "point_regressions_gt1pct": 21
+        },
+        {
+          "layout": "paged",
+          "calls": 16,
+          "metric": "cycle_us",
+          "mode": "wide",
+          "ratio": 1.0736066627633032,
+          "CI95": [
+            1.0707215340130067,
+            1.0764429515435219
+          ],
+          "cells": 96,
+          "controls_failed": 44,
+          "worst_ratio": 0.8702723169860002,
+          "point_regressions_gt1pct": 36
+        }
+      ],
+      "hardware": {
+        "0": [
+          "NVIDIA GeForce RTX 5090, GPU-0efeab26-f092-497c-8b06-6753207e1130, 580.82.07, 575.00 W"
+        ],
+        "1": [
+          "NVIDIA GeForce RTX 5090, GPU-b6a19805-15f5-54ae-96fc-b60c97cbccd3, 580.82.07, 575.00 W"
+        ],
+        "2": [
+          "NVIDIA GeForce RTX 5090, GPU-094d407e-d708-b790-4ae5-4ff1b30b8a23, 580.82.07, 575.00 W"
+        ],
+        "3": [
+          "NVIDIA GeForce RTX 5090, GPU-9fc9ab50-1466-3b27-b858-6a0d85053aef, 580.82.07, 575.00 W"
+        ]
+      },
+      "summary_sha256": "72798b87693dac98ac85c02424b7c2a3719f53a5098f34c59ab35123881a3c77"
+    }
+  },
+  "scans": {
+    "scan-4090-aggregate": {
+      "cells_seen": 768,
+      "candidate_count": 0,
+      "measured_gpu_witness": false
+    },
+    "scan-4090-joint_work": {
+      "cells_seen": 768,
+      "candidate_count": 0,
+      "measured_gpu_witness": false
+    },
+    "scan-4090-marginals": {
+      "cells_seen": 768,
+      "candidate_count": 0,
+      "measured_gpu_witness": false
+    },
+    "scan-4090-ordered_pairs": {
+      "cells_seen": 768,
+      "candidate_count": 0,
+      "measured_gpu_witness": false
+    },
+    "scan-4090-unordered_pairs": {
+      "cells_seen": 768,
+      "candidate_count": 0,
+      "measured_gpu_witness": false
+    },
+    "scan-5090-aggregate": {
+      "cells_seen": 768,
+      "candidate_count": 0,
+      "measured_gpu_witness": false
+    },
+    "scan-5090-joint_work": {
+      "cells_seen": 768,
+      "candidate_count": 0,
+      "measured_gpu_witness": false
+    },
+    "scan-5090-marginals": {
+      "cells_seen": 768,
+      "candidate_count": 0,
+      "measured_gpu_witness": false
+    },
+    "scan-5090-ordered_pairs": {
+      "cells_seen": 768,
+      "candidate_count": 0,
+      "measured_gpu_witness": false
+    },
+    "scan-5090-unordered_pairs": {
+      "cells_seen": 768,
+      "candidate_count": 0,
+      "measured_gpu_witness": false
+    }
+  },
+  "source_hashes": {
+    "research/execution_contracts/audit.py": "02b454bd34db0d215e633028e13aa8dc75bda96d394c2ca995c1cac831f094d5",
+    "research/execution_contracts/core.py": "24d0cdb53e1c1737590e20f728a0a6a5ee45ac2855073df6ee2ab4f3df557bd8",
+    "research/execution_contracts/diagnose.py": "a0d925359a636766b511adbcdba3c170162f73d7314ea304500987b4d8be1229",
+    "research/execution_contracts/pipeline.py": "3b17aa115460ae82235a19f338b28a1cdd118cc26d6580d6e9823150f50cc513",
+    "research/execution_contracts/test_contracts.py": "6e0d302919496a0e7e494fa7c9546e0e503dc7c8e4c6c3968a742978a735f283",
+    "research/execution_contracts/test_pipeline.py": "6d087a3f5654191f6fd85f9c5ae1fce13369fbdca8907cabc762534e4fc46234"
+  },
+  "frozen_analysis_sha256": "387e2ccd4fa6ab0bc16125ee480a4caa4c160eb9117b74ab0d5b3efeace67e7c"
+}
