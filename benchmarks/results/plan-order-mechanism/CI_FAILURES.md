@@ -1,0 +1,3 @@
+# Retained CI failure
+
+Initial integration commit e1281a9 failed CI run36571218491 during collection/execution of the artifact native test driver, with NameError: __file__. No GPU benchmark was executed by that CI run. Main pytest collection is now scoped to tests/, while artifact contract suites and both native drivers have explicit subprocess CI steps. The test runner accepts --out NEW_PATH and never overwrites the recorded qualification by default. This changes test invocation/packaging, not frozen GPU code, endpoints or measurements. The final pushed commit needs its own green CI before claiming CI success.
