@@ -82,7 +82,12 @@ def test_exact_collision_with_opposite_actions_produces_positive_lower_bound():
     assert len(witnesses) == 1
     w = witnesses[0]
     assert {w.left.state_id, w.right.state_id} == {"left", "right"}
-    assert w.normalized_minimax_regret_lower_bound > 0
+    assert w.normalized_minimax_regret_point > 0
+    assert w.conservative_normalized_minimax_regret > 0
+    assert (
+        w.conservative_normalized_minimax_regret
+        <= w.normalized_minimax_regret_point
+    )
 
 
 def test_unresolved_or_different_representation_is_not_promoted():
