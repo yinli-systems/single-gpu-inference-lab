@@ -23,3 +23,5 @@ jobs:
       - run: python -m unittest discover -s research/resource_generalization/serving -p 'test_*.py' -v
       - run: python -m unittest discover -s research/resource_generalization/numerics -p 'test_*.py' -v
       - run: python -m compileall -q research/execution_contracts
+      - run: cd research/execution_contracts && sha256sum -c SOURCE_AND_ADDITIONS.sha256
+      - run: cd research/execution_contracts/evidence/20260930 && sha256sum -c MANIFEST.sha256
