@@ -34,10 +34,11 @@ async def run(a):
         rec=await record_request(session,url,cell,cell['id'])
         save(a.out/f'wire-{index:04d}.json',rec)
         if not rec['complete']:raise RuntimeError('incomplete stream; raw wire receipt '+str(index))
-        # Diagnostic output only: do not manufacture token timing or performance statistics.
+        # Actual client SSE arrival stamps; diagnostic workload, not a performance repeat.
         stamp=time.perf_counter()-origin
         return dict(id=cell['id'],input_tokens=len(cell['input_ids']),tokens=rec['tokens'],events=[],
-            token_times=[rec['elapsed_seconds']]*len(rec['tokens']),ttft=rec['elapsed_seconds'],tpot=0.,
+            token_times=rec['token_arrival_seconds'],ttft=rec['token_arrival_seconds'][0],
+            tpot=(rec['token_arrival_seconds'][-1]-rec['token_arrival_seconds'][0])/(len(rec['tokens'])-1) if len(rec['tokens'])>1 else 0.,
             latency=rec['elapsed_seconds'],request_start=stamp-rec['elapsed_seconds'],completion=stamp,
             finish_reason=rec['finish_reason'],diagnostic_timing_not_performance=True)
     evidence_request.count=0
