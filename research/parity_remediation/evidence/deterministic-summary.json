@@ -1,0 +1,980 @@
+{
+  "campaign": "/ssd/scxi253/single-gpu-inference-parity-wire-20260930T2222Z",
+  "planned_repeats": 1,
+  "runs": [
+    {
+      "job": "deterministic-1639852",
+      "hardware": "name, uuid, driver_version, power.limit [W]\nNVIDIA GeForce RTX 4090, GPU-78c3a86b-f953-79e4-eac1-f6fe65ea3ce2, 580.105.08, 450.00 W\n",
+      "completed_modes": [
+        "pristine-0",
+        "cap-0"
+      ],
+      "missing": [],
+      "failures": [],
+      "options": {
+        "pristine-0": {
+          "random_seed": 42,
+          "enable_deterministic_inference": true,
+          "sampling_backend": "pytorch",
+          "disable_overlap_schedule": false,
+          "cuda_graph_config": {
+            "decode": {
+              "backend": "full",
+              "max_bs": 16,
+              "bs": [
+                1,
+                2,
+                4,
+                8,
+                12,
+                16
+              ],
+              "tc_compiler": "eager",
+              "full_prefill_max_req": null,
+              "full_prefill_prefix_chunk_tokens": null
+            },
+            "prefill": {
+              "backend": "breakable",
+              "max_bs": 1024,
+              "bs": [
+                4,
+                8,
+                12,
+                16,
+                20,
+                24,
+                28,
+                32,
+                48,
+                64,
+                80,
+                96,
+                112,
+                128,
+                144,
+                160,
+                176,
+                192,
+                208,
+                224,
+                240,
+                256,
+                288,
+                320,
+                352,
+                384,
+                416,
+                448,
+                480,
+                512,
+                576,
+                640,
+                704,
+                768,
+                832,
+                896,
+                960,
+                1024
+              ],
+              "tc_compiler": "eager",
+              "full_prefill_max_req": null,
+              "full_prefill_prefix_chunk_tokens": null
+            }
+          },
+          "page_size": 16,
+          "disable_radix_cache": true
+        },
+        "cap-0": {
+          "random_seed": 42,
+          "enable_deterministic_inference": true,
+          "sampling_backend": "pytorch",
+          "disable_overlap_schedule": false,
+          "cuda_graph_config": {
+            "decode": {
+              "backend": "full",
+              "max_bs": 16,
+              "bs": [
+                1,
+                2,
+                4,
+                8,
+                12,
+                16
+              ],
+              "tc_compiler": "eager",
+              "full_prefill_max_req": null,
+              "full_prefill_prefix_chunk_tokens": null
+            },
+            "prefill": {
+              "backend": "breakable",
+              "max_bs": 1024,
+              "bs": [
+                4,
+                8,
+                12,
+                16,
+                20,
+                24,
+                28,
+                32,
+                48,
+                64,
+                80,
+                96,
+                112,
+                128,
+                144,
+                160,
+                176,
+                192,
+                208,
+                224,
+                240,
+                256,
+                288,
+                320,
+                352,
+                384,
+                416,
+                448,
+                480,
+                512,
+                576,
+                640,
+                704,
+                768,
+                832,
+                896,
+                960,
+                1024
+              ],
+              "tc_compiler": "eager",
+              "full_prefill_max_req": null,
+              "full_prefill_prefix_chunk_tokens": null
+            }
+          },
+          "page_size": 16,
+          "disable_radix_cache": true
+        }
+      },
+      "within_arm_variation": {
+        "pristine": [],
+        "cap": []
+      },
+      "paired_candidate_requests": 144,
+      "paired_mismatches": 0,
+      "comparisons": [
+        {
+          "rep": 0,
+          "cell": "prefill-b0",
+          "candidate_requests": 16,
+          "mismatches": [],
+          "exact_parity": true
+        },
+        {
+          "rep": 0,
+          "cell": "prefill-b1",
+          "candidate_requests": 16,
+          "mismatches": [],
+          "exact_parity": true
+        },
+        {
+          "rep": 0,
+          "cell": "prefill-b2",
+          "candidate_requests": 16,
+          "mismatches": [],
+          "exact_parity": true
+        },
+        {
+          "rep": 0,
+          "cell": "decode-b0",
+          "candidate_requests": 16,
+          "mismatches": [],
+          "exact_parity": true
+        },
+        {
+          "rep": 0,
+          "cell": "decode-b1",
+          "candidate_requests": 16,
+          "mismatches": [],
+          "exact_parity": true
+        },
+        {
+          "rep": 0,
+          "cell": "decode-b2",
+          "candidate_requests": 16,
+          "mismatches": [],
+          "exact_parity": true
+        },
+        {
+          "rep": 0,
+          "cell": "mixed-b0",
+          "candidate_requests": 16,
+          "mismatches": [],
+          "exact_parity": true
+        },
+        {
+          "rep": 0,
+          "cell": "mixed-b1",
+          "candidate_requests": 16,
+          "mismatches": [],
+          "exact_parity": true
+        },
+        {
+          "rep": 0,
+          "cell": "mixed-b2",
+          "candidate_requests": 16,
+          "mismatches": [],
+          "exact_parity": true
+        }
+      ],
+      "probes": [
+        {
+          "rep": 0,
+          "file": "isolated-decode-11-0.json",
+          "kind": "single-request-autoregressive",
+          "candidate_requests": 1,
+          "mismatches": [],
+          "exact_parity": true
+        },
+        {
+          "rep": 0,
+          "file": "prefix-decode-11-0.json",
+          "kind": "teacher-forced-prefill",
+          "historical_choices": [
+            315,
+            304
+          ],
+          "output_equal": true,
+          "pristine": {
+            "output_ids": [
+              315
+            ],
+            "meta_info": {
+              "id": "prefix-decode-11-0",
+              "finish_reason": {
+                "type": "length",
+                "length": 1
+              },
+              "prompt_tokens": 202,
+              "weight_version": "default",
+              "num_retractions": 0,
+              "input_token_logprobs": [],
+              "output_token_logprobs": [
+                [
+                  -0.9355667233467102,
+                  315,
+                  null
+                ]
+              ],
+              "output_token_logprobs_length": 1,
+              "input_top_logprobs": [],
+              "output_top_logprobs": [
+                [
+                  [
+                    -0.9355667233467102,
+                    315,
+                    null
+                  ],
+                  [
+                    -1.0605666637420654,
+                    304,
+                    null
+                  ],
+                  [
+                    -2.1855666637420654,
+                    476,
+                    null
+                  ],
+                  [
+                    -2.4355666637420654,
+                    1141,
+                    null
+                  ],
+                  [
+                    -3.8105666637420654,
+                    594,
+                    null
+                  ],
+                  [
+                    -4.1855669021606445,
+                    1939,
+                    null
+                  ],
+                  [
+                    -4.5605669021606445,
+                    320,
+                    null
+                  ],
+                  [
+                    -4.8105669021606445,
+                    2687,
+                    null
+                  ]
+                ]
+              ],
+              "reasoning_tokens": 0,
+              "completion_tokens": 1,
+              "cached_tokens": 0,
+              "weight_versions": [
+                {
+                  "version": "default",
+                  "start": 0,
+                  "end": 1
+                }
+              ],
+              "cached_tokens_details": null,
+              "dp_rank": null,
+              "e2e_latency": 0.31013073772192,
+              "response_sent_to_client_ts": 1790720860.7901812
+            }
+          },
+          "cap": {
+            "output_ids": [
+              315
+            ],
+            "meta_info": {
+              "id": "prefix-decode-11-0",
+              "finish_reason": {
+                "type": "length",
+                "length": 1
+              },
+              "prompt_tokens": 202,
+              "weight_version": "default",
+              "num_retractions": 0,
+              "input_token_logprobs": [],
+              "output_token_logprobs": [
+                [
+                  -0.9355667233467102,
+                  315,
+                  null
+                ]
+              ],
+              "output_token_logprobs_length": 1,
+              "input_top_logprobs": [],
+              "output_top_logprobs": [
+                [
+                  [
+                    -0.9355667233467102,
+                    315,
+                    null
+                  ],
+                  [
+                    -1.0605666637420654,
+                    304,
+                    null
+                  ],
+                  [
+                    -2.1855666637420654,
+                    476,
+                    null
+                  ],
+                  [
+                    -2.4355666637420654,
+                    1141,
+                    null
+                  ],
+                  [
+                    -3.8105666637420654,
+                    594,
+                    null
+                  ],
+                  [
+                    -4.1855669021606445,
+                    1939,
+                    null
+                  ],
+                  [
+                    -4.5605669021606445,
+                    320,
+                    null
+                  ],
+                  [
+                    -4.8105669021606445,
+                    2687,
+                    null
+                  ]
+                ]
+              ],
+              "reasoning_tokens": 0,
+              "completion_tokens": 1,
+              "cached_tokens": 0,
+              "weight_versions": [
+                {
+                  "version": "default",
+                  "start": 0,
+                  "end": 1
+                }
+              ],
+              "cached_tokens_details": null,
+              "dp_rank": null,
+              "e2e_latency": 0.0752772968262434,
+              "response_sent_to_client_ts": 1790721100.3185477
+            }
+          },
+          "identical_prefix": true
+        },
+        {
+          "rep": 0,
+          "file": "isolated-decode-11-1.json",
+          "kind": "single-request-autoregressive",
+          "candidate_requests": 1,
+          "mismatches": [],
+          "exact_parity": true
+        },
+        {
+          "rep": 0,
+          "file": "prefix-decode-11-1.json",
+          "kind": "teacher-forced-prefill",
+          "historical_choices": [
+            315,
+            304
+          ],
+          "output_equal": true,
+          "pristine": {
+            "output_ids": [
+              315
+            ],
+            "meta_info": {
+              "id": "prefix-decode-11-1",
+              "finish_reason": {
+                "type": "length",
+                "length": 1
+              },
+              "prompt_tokens": 202,
+              "weight_version": "default",
+              "num_retractions": 0,
+              "input_token_logprobs": [],
+              "output_token_logprobs": [
+                [
+                  -0.9355667233467102,
+                  315,
+                  null
+                ]
+              ],
+              "output_token_logprobs_length": 1,
+              "input_top_logprobs": [],
+              "output_top_logprobs": [
+                [
+                  [
+                    -0.9355667233467102,
+                    315,
+                    null
+                  ],
+                  [
+                    -1.0605666637420654,
+                    304,
+                    null
+                  ],
+                  [
+                    -2.1855666637420654,
+                    476,
+                    null
+                  ],
+                  [
+                    -2.4355666637420654,
+                    1141,
+                    null
+                  ],
+                  [
+                    -3.8105666637420654,
+                    594,
+                    null
+                  ],
+                  [
+                    -4.1855669021606445,
+                    1939,
+                    null
+                  ],
+                  [
+                    -4.5605669021606445,
+                    320,
+                    null
+                  ],
+                  [
+                    -4.8105669021606445,
+                    2687,
+                    null
+                  ]
+                ]
+              ],
+              "reasoning_tokens": 0,
+              "completion_tokens": 1,
+              "cached_tokens": 0,
+              "weight_versions": [
+                {
+                  "version": "default",
+                  "start": 0,
+                  "end": 1
+                }
+              ],
+              "cached_tokens_details": null,
+              "dp_rank": null,
+              "e2e_latency": 0.041635431349277496,
+              "response_sent_to_client_ts": 1790720860.8493702
+            }
+          },
+          "cap": {
+            "output_ids": [
+              315
+            ],
+            "meta_info": {
+              "id": "prefix-decode-11-1",
+              "finish_reason": {
+                "type": "length",
+                "length": 1
+              },
+              "prompt_tokens": 202,
+              "weight_version": "default",
+              "num_retractions": 0,
+              "input_token_logprobs": [],
+              "output_token_logprobs": [
+                [
+                  -0.9355667233467102,
+                  315,
+                  null
+                ]
+              ],
+              "output_token_logprobs_length": 1,
+              "input_top_logprobs": [],
+              "output_top_logprobs": [
+                [
+                  [
+                    -0.9355667233467102,
+                    315,
+                    null
+                  ],
+                  [
+                    -1.0605666637420654,
+                    304,
+                    null
+                  ],
+                  [
+                    -2.1855666637420654,
+                    476,
+                    null
+                  ],
+                  [
+                    -2.4355666637420654,
+                    1141,
+                    null
+                  ],
+                  [
+                    -3.8105666637420654,
+                    594,
+                    null
+                  ],
+                  [
+                    -4.1855669021606445,
+                    1939,
+                    null
+                  ],
+                  [
+                    -4.5605669021606445,
+                    320,
+                    null
+                  ],
+                  [
+                    -4.8105669021606445,
+                    2687,
+                    null
+                  ]
+                ]
+              ],
+              "reasoning_tokens": 0,
+              "completion_tokens": 1,
+              "cached_tokens": 0,
+              "weight_versions": [
+                {
+                  "version": "default",
+                  "start": 0,
+                  "end": 1
+                }
+              ],
+              "cached_tokens_details": null,
+              "dp_rank": null,
+              "e2e_latency": 0.03859081119298935,
+              "response_sent_to_client_ts": 1790721100.3778074
+            }
+          },
+          "identical_prefix": true
+        },
+        {
+          "rep": 0,
+          "file": "isolated-decode-13-0.json",
+          "kind": "single-request-autoregressive",
+          "candidate_requests": 1,
+          "mismatches": [],
+          "exact_parity": true
+        },
+        {
+          "rep": 0,
+          "file": "prefix-decode-13-0.json",
+          "kind": "teacher-forced-prefill",
+          "historical_choices": [
+            30280,
+            785
+          ],
+          "output_equal": true,
+          "pristine": {
+            "output_ids": [
+              30280
+            ],
+            "meta_info": {
+              "id": "prefix-decode-13-0",
+              "finish_reason": {
+                "type": "length",
+                "length": 1
+              },
+              "prompt_tokens": 242,
+              "weight_version": "default",
+              "num_retractions": 0,
+              "input_token_logprobs": [],
+              "output_token_logprobs": [
+                [
+                  -0.9977260828018188,
+                  30280,
+                  null
+                ]
+              ],
+              "output_token_logprobs_length": 1,
+              "input_top_logprobs": [],
+              "output_top_logprobs": [
+                [
+                  [
+                    -0.9977260828018188,
+                    30280,
+                    null
+                  ],
+                  [
+                    -1.1227260828018188,
+                    785,
+                    null
+                  ],
+                  [
+                    -1.7477260828018188,
+                    18,
+                    null
+                  ],
+                  [
+                    -2.7477259635925293,
+                    16141,
+                    null
+                  ],
+                  [
+                    -3.6227259635925293,
+                    11190,
+                    null
+                  ],
+                  [
+                    -4.622725963592529,
+                    28715,
+                    null
+                  ],
+                  [
+                    -5.247725963592529,
+                    641,
+                    null
+                  ],
+                  [
+                    -5.247725963592529,
+                    32,
+                    null
+                  ]
+                ]
+              ],
+              "reasoning_tokens": 0,
+              "completion_tokens": 1,
+              "cached_tokens": 0,
+              "weight_versions": [
+                {
+                  "version": "default",
+                  "start": 0,
+                  "end": 1
+                }
+              ],
+              "cached_tokens_details": null,
+              "dp_rank": null,
+              "e2e_latency": 0.03128725476562977,
+              "response_sent_to_client_ts": 1790720868.7233126
+            }
+          },
+          "cap": {
+            "output_ids": [
+              30280
+            ],
+            "meta_info": {
+              "id": "prefix-decode-13-0",
+              "finish_reason": {
+                "type": "length",
+                "length": 1
+              },
+              "prompt_tokens": 242,
+              "weight_version": "default",
+              "num_retractions": 0,
+              "input_token_logprobs": [],
+              "output_token_logprobs": [
+                [
+                  -0.9977260828018188,
+                  30280,
+                  null
+                ]
+              ],
+              "output_token_logprobs_length": 1,
+              "input_top_logprobs": [],
+              "output_top_logprobs": [
+                [
+                  [
+                    -0.9977260828018188,
+                    30280,
+                    null
+                  ],
+                  [
+                    -1.1227260828018188,
+                    785,
+                    null
+                  ],
+                  [
+                    -1.7477260828018188,
+                    18,
+                    null
+                  ],
+                  [
+                    -2.7477259635925293,
+                    16141,
+                    null
+                  ],
+                  [
+                    -3.6227259635925293,
+                    11190,
+                    null
+                  ],
+                  [
+                    -4.622725963592529,
+                    28715,
+                    null
+                  ],
+                  [
+                    -5.247725963592529,
+                    641,
+                    null
+                  ],
+                  [
+                    -5.247725963592529,
+                    32,
+                    null
+                  ]
+                ]
+              ],
+              "reasoning_tokens": 0,
+              "completion_tokens": 1,
+              "cached_tokens": 0,
+              "weight_versions": [
+                {
+                  "version": "default",
+                  "start": 0,
+                  "end": 1
+                }
+              ],
+              "cached_tokens_details": null,
+              "dp_rank": null,
+              "e2e_latency": 0.031398504972457886,
+              "response_sent_to_client_ts": 1790721108.2944121
+            }
+          },
+          "identical_prefix": true
+        },
+        {
+          "rep": 0,
+          "file": "isolated-decode-13-1.json",
+          "kind": "single-request-autoregressive",
+          "candidate_requests": 1,
+          "mismatches": [],
+          "exact_parity": true
+        },
+        {
+          "rep": 0,
+          "file": "prefix-decode-13-1.json",
+          "kind": "teacher-forced-prefill",
+          "historical_choices": [
+            30280,
+            785
+          ],
+          "output_equal": true,
+          "pristine": {
+            "output_ids": [
+              30280
+            ],
+            "meta_info": {
+              "id": "prefix-decode-13-1",
+              "finish_reason": {
+                "type": "length",
+                "length": 1
+              },
+              "prompt_tokens": 242,
+              "weight_version": "default",
+              "num_retractions": 0,
+              "input_token_logprobs": [],
+              "output_token_logprobs": [
+                [
+                  -0.9977260828018188,
+                  30280,
+                  null
+                ]
+              ],
+              "output_token_logprobs_length": 1,
+              "input_top_logprobs": [],
+              "output_top_logprobs": [
+                [
+                  [
+                    -0.9977260828018188,
+                    30280,
+                    null
+                  ],
+                  [
+                    -1.1227260828018188,
+                    785,
+                    null
+                  ],
+                  [
+                    -1.7477260828018188,
+                    18,
+                    null
+                  ],
+                  [
+                    -2.7477259635925293,
+                    16141,
+                    null
+                  ],
+                  [
+                    -3.6227259635925293,
+                    11190,
+                    null
+                  ],
+                  [
+                    -4.622725963592529,
+                    28715,
+                    null
+                  ],
+                  [
+                    -5.247725963592529,
+                    641,
+                    null
+                  ],
+                  [
+                    -5.247725963592529,
+                    32,
+                    null
+                  ]
+                ]
+              ],
+              "reasoning_tokens": 0,
+              "completion_tokens": 1,
+              "cached_tokens": 0,
+              "weight_versions": [
+                {
+                  "version": "default",
+                  "start": 0,
+                  "end": 1
+                }
+              ],
+              "cached_tokens_details": null,
+              "dp_rank": null,
+              "e2e_latency": 0.0425930991768837,
+              "response_sent_to_client_ts": 1790720868.7835653
+            }
+          },
+          "cap": {
+            "output_ids": [
+              30280
+            ],
+            "meta_info": {
+              "id": "prefix-decode-13-1",
+              "finish_reason": {
+                "type": "length",
+                "length": 1
+              },
+              "prompt_tokens": 242,
+              "weight_version": "default",
+              "num_retractions": 0,
+              "input_token_logprobs": [],
+              "output_token_logprobs": [
+                [
+                  -0.9977260828018188,
+                  30280,
+                  null
+                ]
+              ],
+              "output_token_logprobs_length": 1,
+              "input_top_logprobs": [],
+              "output_top_logprobs": [
+                [
+                  [
+                    -0.9977260828018188,
+                    30280,
+                    null
+                  ],
+                  [
+                    -1.1227260828018188,
+                    785,
+                    null
+                  ],
+                  [
+                    -1.7477260828018188,
+                    18,
+                    null
+                  ],
+                  [
+                    -2.7477259635925293,
+                    16141,
+                    null
+                  ],
+                  [
+                    -3.6227259635925293,
+                    11190,
+                    null
+                  ],
+                  [
+                    -4.622725963592529,
+                    28715,
+                    null
+                  ],
+                  [
+                    -5.247725963592529,
+                    641,
+                    null
+                  ],
+                  [
+                    -5.247725963592529,
+                    32,
+                    null
+                  ]
+                ]
+              ],
+              "reasoning_tokens": 0,
+              "completion_tokens": 1,
+              "cached_tokens": 0,
+              "weight_versions": [
+                {
+                  "version": "default",
+                  "start": 0,
+                  "end": 1
+                }
+              ],
+              "cached_tokens_details": null,
+              "dp_rank": null,
+              "e2e_latency": 0.04022066481411457,
+              "response_sent_to_client_ts": 1790721108.3544714
+            }
+          },
+          "identical_prefix": true
+        }
+      ],
+      "old_failure_resolved": false
+    }
+  ],
+  "complete": true,
+  "diagnostic_only": true,
+  "performance_claim": false,
+  "serving_promoted": false
+}

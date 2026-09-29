@@ -141,7 +141,25 @@ All56 CPU tests passed in the recorded remote Python/Torch environment. On the M
 without Torch,51 passed and five Torch-dependent tests were explicitly skipped; these
 five were executed successfully remotely. CPU tests are not GPU performance validation.
 
-The evidence manifest distinguishes archived files from large raw layer tensors retained
+The evidence manifest distinguishes archived files from large activation/KV/logit tensor binaries retained
 on ParaCloud with exact SHA256 and paths. It includes failed attempts, raw SSE responses,
 source snapshots, job accounting, trace metadata, original historical JSON inputs and
 all final audits. Diagnostic output timing is never merged into a serving performance table.
+
+## Delivery receipt
+
+Seven bounded one-GPU jobs are terminal: five completed and two failed diagnostic
+attempts. All failures are retained. Total allocation was3,761 GPU-seconds
+(1.044722 GPU-hours), including the failures; this is not a billing-price estimate.
+
+The public packet contains1,426 source/log/JSON evidence files,13,717,829 compressed
+bytes, SHA256 `05506de8b81654281ce632e2de5669ede665f0d7e748601f3b2e35d2970f5499`.
+All1426 members were hash-verified on ParaCloud and again on the Mac. Fifty-three
+large tensor binary files remain at their recorded ParaCloud paths with SHA256s.
+The original62,021,886-byte pre-thinning archive is also retained with SHA256
+`cb64d0c94e320540a033c2ef36f3777469336714655fe1fc7e4b3b1cc9a27970`.
+No failed request, trace, timing observation or slow case was filtered from the JSON
+packet. See `evidence/DELIVERY.json` and `evidence/MANIFEST.json` for exact accounting.
+
+The standalone reviewed cleanup patch and source binding are under `upstream/`.
+The review is in this research repository; it is not official SGLang acceptance.

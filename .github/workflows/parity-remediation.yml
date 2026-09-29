@@ -23,3 +23,10 @@ jobs:
           if [ -f research/parity_remediation/evidence/raw-evidence.tar.gz ]; then
             python research/parity_remediation/verify_archive.py research/parity_remediation/evidence/raw-evidence.tar.gz
           fi
+      - name: Export source and auditable result packet
+        uses: actions/upload-artifact@v4
+        with:
+          name: parity-remediation-delivery
+          path: research/parity_remediation/
+          retention-days: 14
+          if-no-files-found: error
