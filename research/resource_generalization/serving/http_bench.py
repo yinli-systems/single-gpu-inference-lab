@@ -114,7 +114,7 @@ async def main_async(a):
  url=f'http://127.0.0.1:{port}'
  args=[sys.executable,'-m','sglang.launch_server','--model-path',str(model),'--host','127.0.0.1','--port',str(port),
   '--attention-backend','flashinfer','--dtype','bfloat16','--mem-fraction-static','0.80','--context-length','8192',
-  '--chunked-prefill-size','1024','--max-running-requests','16','--cuda-graph-max-bs','16','--page-size','16',
+  '--chunked-prefill-size','1024','--max-running-requests','16','--cuda-graph-max-bs-decode','16','--page-size','16',
   '--skip-tokenizer-init','--disable-radix-cache']
  env=dict(os.environ,HF_HUB_OFFLINE='1',TRANSFORMERS_OFFLINE='1',SGLANG_TORCH_PROFILER_DIR=str(a.out/'profile'),SGLANG_ENABLE_JIT_DEEPGEMM='0')
  receipt=dict(mode=a.mode,rep=a.rep,stage=a.stage,command=args,flashinfer=flashinfer.__version__,sglang=sglang.__version__,prefill_sha256=header,

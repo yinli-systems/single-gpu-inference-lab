@@ -16,7 +16,7 @@ export PATH=$CUDA_HOME/bin:$E/bin:$PATH
 export LD_LIBRARY_PATH=$CUDA_HOME/lib:${LD_LIBRARY_PATH:-}
 export OMP_NUM_THREADS=2 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 MAX_JOBS=4
 export TRITON_CACHE_DIR=$LOCAL/triton
-cd "$P/serving-source"; sha256sum -c serving.sha256
+cd "$P/serving-source-v2"; sha256sum -c serving.sha256
 mkdir "$P/serving-runs/$SLURM_JOB_ID"
 R="$P/serving-runs/$SLURM_JOB_ID"
 scontrol show job "$SLURM_JOB_ID" -o > "$R/slurm.txt"
