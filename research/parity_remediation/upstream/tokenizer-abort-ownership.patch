@@ -1,0 +1,24 @@
+--- a/python/sglang/srt/managers/tokenizer_manager.py
++++ b/python/sglang/srt/managers/tokenizer_manager.py
+@@ -2269,12 +2269,17 @@
+         return None
+ 
+     def create_abort_task(self, obj: GenerateReqInput):
+-        # Abort the request if the client is disconnected.
++        # Bind cleanup to the originating objects, never just a reusable RID.
+         async def abort_request():
++            requests = [obj] if obj.is_single else [obj[i] for i in range(len(obj.rid))]
++            states = []
++            for request_obj in requests:
++                state = self.rid_to_state.get(request_obj.rid)
++                if state is not None and state.obj is request_obj:
++                    states.append((request_obj.rid, state))
+             await asyncio.sleep(2)
+-            rids = [obj.rid] if obj.is_single else obj.rid
+-            for rid in rids:
+-                if rid in self.rid_to_state:
++            for rid, state in states:
++                if self.rid_to_state.get(rid) is state and not state.finished:
+                     self.abort_request(rid)
+ 
+         background_tasks = BackgroundTasks()

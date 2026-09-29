@@ -1,0 +1,121 @@
+{
+  "modes": {
+    "original": {
+      "requests": 8,
+      "complete_requests": 6,
+      "reused": [
+        {
+          "wire_id": "reuse-0",
+          "received_tokens": 128,
+          "finish_reason": {
+            "type": "length",
+            "length": 128
+          },
+          "complete": true
+        },
+        {
+          "wire_id": "reuse-0",
+          "received_tokens": 66,
+          "finish_reason": {
+            "type": "abort",
+            "message": "Aborted",
+            "status_code": null,
+            "err_type": null
+          },
+          "complete": false
+        },
+        {
+          "wire_id": "reuse-1",
+          "received_tokens": 128,
+          "finish_reason": {
+            "type": "length",
+            "length": 128
+          },
+          "complete": true
+        },
+        {
+          "wire_id": "reuse-1",
+          "received_tokens": 65,
+          "finish_reason": {
+            "type": "abort",
+            "message": "Aborted",
+            "status_code": null,
+            "err_type": null
+          },
+          "complete": false
+        }
+      ],
+      "unique_complete": 4,
+      "stale_cleanup_aborts": [
+        {
+          "time": 11626124.265978193,
+          "pid": 249938,
+          "event": "abort",
+          "rid": "reuse-0",
+          "abort_all": false,
+          "cleanup_owner": 22758804893344,
+          "target_object": 22758769639792,
+          "target_state": 22758769641184
+        },
+        {
+          "time": 11626132.608318442,
+          "pid": 249938,
+          "event": "abort",
+          "rid": "reuse-1",
+          "abort_all": false,
+          "cleanup_owner": 22758804896128,
+          "target_object": 22758770079360,
+          "target_state": 22758770077008
+        }
+      ]
+    },
+    "patched": {
+      "requests": 8,
+      "complete_requests": 8,
+      "reused": [
+        {
+          "wire_id": "reuse-0",
+          "received_tokens": 128,
+          "finish_reason": {
+            "type": "length",
+            "length": 128
+          },
+          "complete": true
+        },
+        {
+          "wire_id": "reuse-0",
+          "received_tokens": 128,
+          "finish_reason": {
+            "type": "length",
+            "length": 128
+          },
+          "complete": true
+        },
+        {
+          "wire_id": "reuse-1",
+          "received_tokens": 128,
+          "finish_reason": {
+            "type": "length",
+            "length": 128
+          },
+          "complete": true
+        },
+        {
+          "wire_id": "reuse-1",
+          "received_tokens": 128,
+          "finish_reason": {
+            "type": "length",
+            "length": 128
+          },
+          "complete": true
+        }
+      ],
+      "unique_complete": 4,
+      "stale_cleanup_aborts": []
+    }
+  },
+  "historical_token_divergence_fixed": false,
+  "production_promoted": false,
+  "bounded_reproduction_supported": true,
+  "bounded_fix_supported": true
+}

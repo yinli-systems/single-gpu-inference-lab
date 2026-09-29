@@ -1,0 +1,32 @@
+name: Parity remediation evidence contracts
+on:
+  push:
+    paths: ['research/parity_remediation/**', '.github/workflows/parity-remediation.yml']
+  pull_request:
+    paths: ['research/parity_remediation/**', '.github/workflows/parity-remediation.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  cpu-contracts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+      - run: python -m unittest discover -s research/parity_remediation -p 'test_*.py' -v
+      - run: python -m compileall -q research/parity_remediation
+      - run: for f in research/parity_remediation/*.sbatch; do bash -n "$f"; done
+      - name: Verify collected evidence when present
+        run: |
+          if [ -f research/parity_remediation/evidence/raw-evidence.tar.gz ]; then
+            python research/parity_remediation/verify_archive.py research/parity_remediation/evidence/raw-evidence.tar.gz
+          fi
+      - name: Export source and auditable result packet
+        uses: actions/upload-artifact@v4
+        with:
+          name: parity-remediation-delivery
+          path: research/parity_remediation/
+          retention-days: 14
+          if-no-files-found: error
