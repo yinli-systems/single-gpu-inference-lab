@@ -5,12 +5,10 @@ p=argparse.ArgumentParser();p.add_argument('--source',type=Path,required=True);p
 if a.out.exists():raise FileExistsError('preserve existing overlay')
 source=a.source/'flashinfer';target=a.out/'flashinfer'
 assert source.is_dir()
-shutil.copytree(source,target)
-for info in a.source.glob("*.dist-info"):
- shutil.copytree(info,a.out/info.name)
-f=target/'data/include/flashinfer/attention/prefill.cuh';original=f.read_text()
-start=original.index('cudaError_t BatchPrefillWithRaggedKVCacheDispatched(')
-end=original.index('cudaError_t BatchPrefillWithPagedKVCacheDispatched(',start)
+f=source/'data/include/flashinfer/attention/prefill.cuh';original=f.read_text()
+assert hashlib.sha256(original.encode()).hexdigest()=='e66bce2652c0a3c5b54f88510aff2b4b48ff6a52c4ee23fa97f91fa06a935b87', 'unreviewed source'
+start=original.index('cudaError_t BatchPrefillWithRaggedKVCacheDispatchedImpl(')
+end=original.index('cudaError_t BatchPrefillWithRaggedKVCacheDispatched(',start)
 body=original[start:end]
 needle='size_t smem_size = sizeof(SmemStorage);'
 assert body.count(needle)==1
@@ -40,8 +38,13 @@ modified=original[:start]+body+original[end:]
 modified='#include <cstdlib>\n'+modified
 # Device kernel text is unchanged. This is not a new compute kernel.
 k0=original.index('template <typename KTraits, typename Params>\n__global__ __launch_bounds__(KTraits::NUM_THREADS) void BatchPrefillWithRaggedKVCacheKernel(')
-k1=original.index('cudaError_t BatchPrefillWithRaggedKVCacheDispatched(',k0)
+k1=original.index('cudaError_t BatchPrefillWithRaggedKVCacheDispatchedImpl(',k0)
 assert original[k0:k1] in modified
+# All exact-source checks precede copying or writes.
+shutil.copytree(source,target)
+for info in a.source.glob("*.dist-info"):
+ shutil.copytree(info,a.out/info.name)
+f=target/'data/include/flashinfer/attention/prefill.cuh'
 f.write_text(modified)
 (a.out/'host-launch-only.patch').write_text(''.join(difflib.unified_diff(original.splitlines(True),modified.splitlines(True),fromfile='a/data/include/flashinfer/attention/prefill.cuh',tofile='b/data/include/flashinfer/attention/prefill.cuh')))
 rec=dict(original_sha256=hashlib.sha256(original.encode()).hexdigest(),modified_sha256=hashlib.sha256(modified.encode()).hexdigest(),
