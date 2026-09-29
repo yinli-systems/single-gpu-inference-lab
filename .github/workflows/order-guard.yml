@@ -1,0 +1,65 @@
+name: Order guard evidence audit
+on:
+  push:
+    branches: [kevin/locality-guard-20260929]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+      - name: Run CPU contracts, never GPU benchmarks
+        run: |
+          mkdir -p /tmp/order-guard-export
+          python -m unittest discover -s research/order_guard -p 'test_*.py' -v
+          python -m compileall -q research/order_guard
+          python research/order_guard/gpu_probe.py --help
+          python research/order_guard/stress.py --out /tmp/order-guard-export/stress.json
+          python research/order_guard/collisions.py --out /tmp/order-guard-export/collisions.json
+          python research/order_guard/manifest.py --out /tmp/order-guard-export/manifest.json
+          python research/order_guard/analyze_archive.py --out /tmp/order-guard-export/development-analysis.json
+      - name: Match regenerated evidence with recorded CPU results
+        run: |
+          python - <<'PY'
+          import json,math
+          from pathlib import Path
+          root=Path('/tmp/order-guard-export')
+          expected=json.loads(Path('research/order_guard/CPU_RESULTS.json').read_text())
+          stress=json.loads((root/'stress.json').read_text())
+          assert stress==expected['stress']
+          col=json.loads((root/'collisions.json').read_text())
+          assert col['checked_pairs']==1080 and col['different_descriptor_counts']==256
+          assert col['minimal_example']['descriptor_counts']==[22,20]
+          manifest=json.loads((root/'manifest.json').read_text())
+          assert manifest['cases_sha256']==expected['unmeasured_manifest']['cases_sha256']
+          actual=json.loads((root/'development-analysis.json').read_text())
+          assert actual['formal_rows']==43200 and actual['GPU_rerun'] is False
+          gpu=actual['GPUs']['NVIDIA GeForce RTX 5090']
+          uncharged=gpu['variants']['strict_environment/uncharged']['summary']
+          for k in ('geomean','worst_ratio'):
+              assert math.isclose(uncharged[k],expected['retrospective_5090_uncharged'][k],rel_tol=1e-12,abs_tol=1e-12)
+          assert uncharged['slowdown_over_1pct']==1
+          for budget in ('36','1000'):
+              assert gpu['variants']['strict_environment/'+budget]['summary']['policy_counts']=={'identity':360}
+          cost=gpu['variants']['strict_environment/10000']['summary']['optimistic_total_cost_geomean']
+          assert math.isclose(cost,expected['retrospective_charged_recipe']['5090_total_cost_geomean_at_10000_reuses'],rel_tol=1e-12)
+          Path('/tmp/order-guard-export/validation.json').write_text(json.dumps({'CPU_reproduction_passed':True,'GPU_executed':False,'tests':19,'source_manifest':manifest['cases_sha256']},indent=2)+'\n')
+          print('CPU evidence reproduced; no GPU or production qualification claimed.')
+          PY
+      - name: Export auditable evidence and research sources
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: order-guard-cpu-evidence
+          path: |
+            /tmp/order-guard-export/
+            benchmarks/results/plan-order-mechanism/
+            research/order_guard/
+          retention-days: 3
+          if-no-files-found: error
