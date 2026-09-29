@@ -54,6 +54,13 @@ jobs:
         run: |
           python -m pytest -q
 
+      - name: Validate controlled permutation contracts
+        working-directory: benchmarks/results/ada-blackwell-permutations
+        run: |
+          python -m unittest -v test_campaign test_analysis test_representations
+          python representations.py --out /tmp/permutation-representation-audit.json
+          cmp representation-audit.json /tmp/permutation-representation-audit.json
+
       - name: Run static checks
         env:
           PYTHONPYCACHEPREFIX: /tmp/single-gpu-infer-pycache

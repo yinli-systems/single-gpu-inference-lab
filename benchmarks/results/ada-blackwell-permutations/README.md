@@ -12,3 +12,13 @@ Never reuse an existing output directory or include canary samples in formal est
 Analysis contracts: `python -m unittest -v test_campaign test_analysis`.
 After all six formal runs complete: `python analyze.py --root RUNS_DIRECTORY --out NEW_ANALYSIS_DIRECTORY`.
 The analyzer rejects missing cells/repeats, wrong trial IDs, changed geometries, altered hashes, missing graph checks and mixed runtime identities. Canary data are never part of the formal report.
+
+## Completed qualification
+
+Both registered FP16 n2/n4 canaries completed successfully before formal submission. Each performed9,600selected FP32-vector comparisons and112graph/eager exact-output checks; maximum FP32 absolute discrepancies were0.0002696514 (RTX4090) and0.0004703999 (RTX5090). See [qualification.json](qualification.json). These are numerical/infrastructure checks, not formal latency results.
+
+## Representation audit
+
+[Design notes](DESIGN_NOTES.md) clarify why full pair lists are not the only possible representation. Extra marginal second moments reconstruct analytical work exactly. Run `python representations.py --out NEW_AUDIT.json` and compare to [representation-audit.json](representation-audit.json). This is exact arithmetic, separate from measured runtime cost.
+
+CPU contract suite: `python -m unittest -v test_campaign test_analysis test_representations` (26tests).
