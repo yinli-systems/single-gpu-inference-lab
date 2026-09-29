@@ -1,0 +1,64 @@
+--- a/include/flashinfer/attention/scheduler.cuh
++++ b/include/flashinfer/attention/scheduler.cuh
+@@ -30,6 +30,8 @@
+ #include "../pos_enc.cuh"
+ #include "../utils.cuh"
+ #include "heap.h"
++
++#include "sgi_experimental_order.cuh"
+ 
+ namespace flashinfer {
+ 
+@@ -674,6 +676,10 @@
+   FLASHINFER_CHECK(new_batch_size <= padded_batch_size,
+                    "new batch size should not exceed padded batch size. If you are using fixed "
+                    "split size, please consider disabling cuda graph.");
++
++  SGIExperimentalOrderFA2(qo_indptr_h, kv_indptr_h, batch_size, gqa_group_size,
++                          cta_tile_q, kv_chunk_size, split_kv, enable_cuda_graph,
++                          page_size, request_indices, qo_tile_indices, kv_tile_indices);
+ 
+   // step 4: multiply kv_chunk_size by page_size
+   kv_chunk_size *= page_size;
+--- /dev/null
++++ b/include/flashinfer/attention/sgi_experimental_order.cuh
+@@ -0,0 +1,39 @@
++// Experimental descriptor-order intervention. Default path unchanged.
++// Existing longest-work-first scheduling heuristic; no novelty claim.
++#include <cstdlib>
++#include <cstring>
++
++namespace flashinfer {
++template <typename IdType>
++inline void SGIExperimentalOrderFA2(const IdType* qp,const IdType* kp,
++    uint32_t batch,uint32_t group,uint32_t tile,int64_t chunk,bool split,
++    bool graph,uint32_t page,std::vector<IdType>& requests,
++    std::vector<IdType>& qtiles,std::vector<IdType>& ktiles) {
++  const char* mode=std::getenv("FLASHINFER_EXP_WORK_ORDER");
++  if(mode==nullptr||std::strcmp(mode,"identity")==0)return;
++  FLASHINFER_CHECK(std::strcmp(mode,"heavy_first")==0,"invalid experimental FA2 order");
++  FLASHINFER_CHECK(!graph,"experimental ordering rejects dynamic/padded graph plans");
++  FLASHINFER_CHECK(page==1,"experimental ordering qualifies ragged page-unit one only");
++  FLASHINFER_CHECK(requests.size()==qtiles.size()&&requests.size()==ktiles.size(),"invalid work map");
++  std::vector<std::pair<int64_t,size_t>> work;work.reserve(requests.size());
++  for(size_t i=0;i<requests.size();++i){
++    const uint32_t r=requests[i];FLASHINFER_CHECK(r<batch,"request outside batch");
++    const int64_t q=int64_t(qp[r+1])-qp[r], L=int64_t(kp[r+1])-kp[r];
++    const int64_t packed=std::min<int64_t>(tile,q*group-int64_t(qtiles[i])*tile);
++    const int64_t visible=std::min<int64_t>(L,L-q+((int64_t(qtiles[i])+1)*tile+group-1)/group);
++    const int64_t first=split?int64_t(ktiles[i])*chunk:0;
++    const int64_t last=split?std::min<int64_t>(visible,(int64_t(ktiles[i])+1)*chunk):visible;
++    FLASHINFER_CHECK(packed>0,"invalid query tile");
++    work.emplace_back(std::max<int64_t>(0,last-first)*packed,i);
++  }
++  std::stable_sort(work.begin(),work.end(),[&](const auto& a,const auto& b){
++    if(a.first!=b.first)return a.first>b.first;
++    if(requests[a.second]!=requests[b.second])return requests[a.second]<requests[b.second];
++    if(qtiles[a.second]!=qtiles[b.second])return qtiles[a.second]<qtiles[b.second];
++    return ktiles[a.second]<ktiles[b.second];
++  });
++  const auto original_r=requests,original_q=qtiles,original_k=ktiles;
++  for(size_t i=0;i<work.size();++i){const auto j=work[i].second;
++    requests[i]=original_r[j];qtiles[i]=original_q[j];ktiles[i]=original_k[j];}
++}
++} // namespace flashinfer
