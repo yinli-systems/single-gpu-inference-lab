@@ -1,0 +1,47 @@
+{
+  "schema": 1,
+  "selector_version": "4.0",
+  "base_version": "0.7.0",
+  "base_hashes": {
+    "flashinfer/prefill.py": "bd4aaa0a24462efbb6e6ddb12b3c98da9507e7b6ff6b22da3f40167ca66beb12",
+    "flashinfer/data/csrc/batch_prefill_jit_binding.cu": "dad0d81c55b92f71a634cb8240dcb0d150aa6ffd391ef3ef5d87b6207eeca4fc",
+    "flashinfer/data/include/flashinfer/attention/prefill.cuh": "e66bce2652c0a3c5b54f88510aff2b4b48ff6a52c4ee23fa97f91fa06a935b87",
+    "flashinfer/data/include/flashinfer/attention/scheduler.cuh": "425ba78815ba77ae848c67507d1af6b024d05edd257a7d9b331166afcef9b17c",
+    "flashinfer/data/csrc/batch_prefill.cu": "4190105e8b5c93621af44356b9aa50861560a5fbf8ff3279301487860604d932",
+    "flashinfer/data/csrc/batch_prefill_paged.cuh": "52fa2dfb066729e7ddac10509d0c2d2a99433622055acb146e2938460aec432e",
+    "flashinfer/data/csrc/batch_prefill_paged.cu": "7f9aaa45879034eb1b978ad1a43901fe22a5e84282d61f72e700fd2e77067dbd",
+    "flashinfer/data/csrc/batch_prefill_ragged_kernel_inst.jinja": "4e177455f914c3665cf38728883d74c076f368c1bea3736c0033675de342f687",
+    "flashinfer/data/csrc/batch_prefill_paged_kernel_inst.jinja": "1e41a0ea9795847272674c1058a9d72f220facf296037cbf1f95ce6b77225a63"
+  },
+  "modified_hashes": {
+    "flashinfer/data/include/flashinfer/attention/scheduler.cuh": "6e9810bd9f4b3a7646dedecfc08d5b3d29d77979810b493b4c0d7f2109c9ca0a",
+    "flashinfer/data/include/flashinfer/attention/prefill.cuh": "5270cddb0cbc4ed41ac0ee8e886bd322325f215fe0546633585c3b6e356de36c",
+    "flashinfer/data/csrc/batch_prefill.cu": "fa1d7696e89af1b52db2d4f9c884bbbb2d3e91a5a540898f8bcd6d4bc478a1b8",
+    "flashinfer/data/csrc/batch_prefill_jit_binding.cu": "6a04a4b332b4837aec5425f6627cb42aa87d5df09a405aabc8c349b106ae8b14",
+    "flashinfer/prefill.py": "1e8d1a3118c4bd2c3c077b5fb6d2e431fe97f2e751e1734d32b1d03a9ca234df",
+    "flashinfer/data/csrc/batch_prefill_paged.cuh": "69fffb49c086646e66566970760fc0b71bc5d9de8e3aa8bc770f6289b15c8cc7",
+    "flashinfer/data/csrc/batch_prefill_paged.cu": "04d91e5b6bb6f7e22e911cd58e7d83e082cd3bee5b6845d6eb5061fc001bfcc4",
+    "flashinfer/data/csrc/batch_prefill_ragged_kernel_inst.jinja": "d2c6bf36aba85fc1ca8f163140dbec87baa6a2988844e58050c07492b2dddd9e",
+    "flashinfer/data/csrc/batch_prefill_paged_kernel_inst.jinja": "a4dad3accadd0162dc5d5c64ff64c2c2b806a2d8289e8a1a6660266888ab0dd5"
+  },
+  "plan_vector_size": 16,
+  "policies": {
+    "native": 0,
+    "cap": 1,
+    "candidate_pool": 2
+  },
+  "default_policy": "native",
+  "kernel_symbol_isolation": true,
+  "native_kernel_source_unchanged": true,
+  "symbol_hashes": {
+    "ragged_native_sha256": "ae022c254687b0e27e818f5cccdd534de306235ba1be6ff9d08e59e32cfe7977",
+    "ragged_clone_sha256": "9948e57c494027405562fc1e3fe2cb80c3bbba370d3a342b9742a53e06fe9950",
+    "paged_native_sha256": "5cbe9296d39270b657c9286af5032df21f68f7bb2169780b3f3ad97adf72105c",
+    "paged_clone_sha256": "1dc3aedbbd5deaba314e270f50b8118420273f16af46b01d6d7973a7b8583947"
+  },
+  "candidate_pool": "anti_monotone && unsplit && >=2.4 block-waves",
+  "final_tactic": "deployment-mode calibration cache; cache miss => native",
+  "device_math_unchanged": true,
+  "descriptor_order_unchanged": true,
+  "production_promoted": false
+}
