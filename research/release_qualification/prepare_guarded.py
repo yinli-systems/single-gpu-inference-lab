@@ -7,6 +7,7 @@ EXPECTED={
  'flashinfer/data/include/flashinfer/attention/scheduler.cuh':'425ba78815ba77ae848c67507d1af6b024d05edd257a7d9b331166afcef9b17c',
  'flashinfer/data/csrc/batch_prefill.cu':'4190105e8b5c93621af44356b9aa50861560a5fbf8ff3279301487860604d932',
  'flashinfer/data/csrc/batch_prefill_paged.cuh':'52fa2dfb066729e7ddac10509d0c2d2a99433622055acb146e2938460aec432e',
+ 'flashinfer/data/csrc/batch_prefill_paged.cu':'7f9aaa45879034eb1b978ad1a43901fe22a5e84282d61f72e700fd2e77067dbd',
 }
 def sha_bytes(b):return hashlib.sha256(b).hexdigest()
 def sha_text(s):return sha_bytes(s.encode())
@@ -86,6 +87,12 @@ def patch_prefill(s):
   s=s[:start]+body+s[stop:]
  return s
 
+def patch_declarations(s):
+ old='                                                   cudaStream_t stream);'
+ count=s.count(old)
+ if count not in (1,2):raise ValueError(f'dispatch declarations: {count}')
+ return s.replace(old,'                                                   cudaStream_t stream, bool resource_cap);')
+
 def patch_run(s,paged=False):
  if paged:
   old='PagedParams>(params, tmp_v, tmp_s, enable_pdl, stream);'
@@ -113,8 +120,9 @@ def prepare(source,out,mode):
  changes={
   'flashinfer/data/include/flashinfer/attention/scheduler.cuh':patch_scheduler(originals['flashinfer/data/include/flashinfer/attention/scheduler.cuh'],mode),
   'flashinfer/data/include/flashinfer/attention/prefill.cuh':patch_prefill(originals['flashinfer/data/include/flashinfer/attention/prefill.cuh']),
-  'flashinfer/data/csrc/batch_prefill.cu':patch_run(originals['flashinfer/data/csrc/batch_prefill.cu']),
+  'flashinfer/data/csrc/batch_prefill.cu':patch_run(patch_declarations(originals['flashinfer/data/csrc/batch_prefill.cu'])),
   'flashinfer/data/csrc/batch_prefill_paged.cuh':patch_run(originals['flashinfer/data/csrc/batch_prefill_paged.cuh'],True),
+  'flashinfer/data/csrc/batch_prefill_paged.cu':patch_declarations(originals['flashinfer/data/csrc/batch_prefill_paged.cu']),
  }
  for rel in ['flashinfer/data/csrc/batch_prefill_ragged_kernel_inst.jinja','flashinfer/data/csrc/batch_prefill_paged_kernel_inst.jinja']:
   src=(source/rel).read_text(); changes[rel]=patch_jinja(src); originals[rel]=src
