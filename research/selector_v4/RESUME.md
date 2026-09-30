@@ -53,3 +53,11 @@ Immutable source `8ea2169dbc2967e02f12e527ea0b304a264df1ab`, campaign `/ssd/scxi
 ## Persistent JIT launcher correction
 
 Before dev submission, audit found that `run_v4.sbatch` placed XDG JIT binaries in a temporary directory deleted on exit while the required binary audit scanned the persistent campaign workspace. No v4.1 dev job had been submitted. The launcher now uses persistent per-mode/per-repeat XDG roots under the campaign cache; a new exact-source smoke is required before dev.
+
+## Native-overlay qualification hardening
+
+A pre-canary audit found that v4.1 cross-fit correctly measures off/cap but treated a native tactic as a mathematical 1.0 policy result. The raw campaign already contains independent official-pristine and candidate-native processes. Analysis now separately gates their performance equivalence: cell worst and simultaneous joint-min95% LCB must both be >=0.99, and pristine/candidate-native duplicate-control90% intervals must fit reciprocal +/-1%. This audit never trains the tactic and does not relax any threshold. Because the analysis source changed, any canary campaign requires a new exact-source smoke after the dev evidence is reanalyzed.
+
+## Linux freshness-ledger correction
+
+The v4.1 manifest previously recorded `research/parity_remediation/evidence/manifest.json`, while the tracked file is `MANIFEST.json`. macOS case-insensitive lookup hid this; ParaCloud Linux validation rejected it. The key is corrected without changing any case geometry, case hash, stage hash, selector rule, threshold, or consumed evidence. A new source commit and exact-source smoke are required before canary.

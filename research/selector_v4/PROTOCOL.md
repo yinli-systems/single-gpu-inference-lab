@@ -45,6 +45,7 @@ Canary/release require:
 - selected held-out geomean>=1.05;
 - selected point worst, block worst and simultaneous joint-min95% LCB >=0.99;
 - whole-policy worst>=0.99;
+- independent candidate-native versus official-pristine point worst and simultaneous joint-min95% LCB >=0.99, with both duplicate-control CIs inside reciprocal +/-1%;
 - held-out controls resolved;
 - cache publication/reload round trip.
 

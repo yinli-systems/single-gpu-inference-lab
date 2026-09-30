@@ -36,6 +36,56 @@ def block_evidence(rows, key, execution):
         treatment.append(geo(off)/geo(candidate));native.append(off[0]/off[1]);cap.append(candidate[0]/candidate[1])
     return RepeatEvidence(tuple(treatment),tuple(native),tuple(cap))
 
+def absolute_native_block_evidence(pristine_rows, paired_rows, key, execution):
+    """Compare official pristine against candidate-native without training the tactic.
+
+    The two arms live in independent processes.  Process order is rotated by the
+    launcher; this receipt is qualification-only and never enters cap selection.
+    """
+    pristine=[r for r in pristine_rows if (r["case"],r["dtype"],r["layout"],r["split"])==key and r["execution_mode"]==execution]
+    paired=[r for r in paired_rows if (r["case"],r["dtype"],r["layout"],r["split"])==key and r["execution_mode"]==execution]
+    blocks=sorted({r["block"] for r in pristine}|{r["block"] for r in paired})
+    ratios=[];pristine_controls=[];off_controls=[]
+    for block in blocks:
+        pp=sorted([r for r in pristine if r["block"]==block],key=lambda r:r["position"])
+        qq=sorted([r for r in paired if r["block"]==block],key=lambda r:r["position"])
+        need(len(pp)==len(qq)==4,"absolute native block multiplicity")
+        need(all(r["arm"]=="pristine" for r in pp),"absolute pristine arm")
+        off=[r for r in qq if r["arm"]=="off"]
+        need(len(off)==2,"absolute off multiplicity")
+        a=[r["wall_us"] for r in pp if r["role"]=="a"]
+        b=[r["wall_us"] for r in pp if r["role"]=="b"]
+        need(len(a)==len(b)==2,"pristine position-control multiplicity")
+        ratios.append(geo([r["wall_us"] for r in pp])/geo([r["wall_us"] for r in off]))
+        pristine_controls.append(geo(a)/geo(b))
+        off_controls.append(off[0]["wall_us"]/off[1]["wall_us"])
+    return {"ratios":tuple(ratios),"pristine_controls":tuple(pristine_controls),"off_controls":tuple(off_controls)}
+
+
+def hierarchical_ratio_summary(repeats, *, seed, draws=20000):
+    """Three-process / within-process block bootstrap for an absolute ratio."""
+    if sorted(repeats)!=[0,1,2]:raise ValueError("absolute ratio requires repeats 0,1,2")
+    arrays=[np.asarray(repeats[i],dtype=np.float64) for i in range(3)]
+    if any(x.ndim!=1 or len(x)==0 or not np.isfinite(x).all() or np.any(x<=0) for x in arrays):
+        raise ValueError("invalid absolute-ratio evidence")
+    if len({len(x) for x in arrays})!=1:raise ValueError("absolute-ratio block mismatch")
+    logs=np.stack([np.log(x) for x in arrays]);rng=np.random.default_rng(seed)
+    samples=np.empty(draws,dtype=np.float64)
+    for d in range(draws):
+        proc=rng.integers(0,3,3);values=[]
+        for i in proc:
+            idx=rng.integers(0,logs.shape[1],logs.shape[1]);values.append(logs[i,idx])
+        samples[d]=np.concatenate(values).mean()
+    point=float(np.exp(logs.mean()));ci=[float(x) for x in np.exp(np.quantile(samples,(.025,.975)))]
+    return {"ratio":point,"CI95":ci,"block_worst":float(np.exp(logs.min())),"draws":samples}
+
+
+def simultaneous_ratio_lcb(summaries, quantile=.025):
+    if not summaries:return 1.0
+    matrix=np.stack([x["draws"] for x in summaries])
+    return float(np.exp(np.quantile(matrix.min(axis=0),quantile)))
+
+
 def telemetry_receipt(path: Path) -> dict[str, Any]:
     with Path(path).open() as stream:
         rows=list(csv.DictReader(stream))
@@ -79,7 +129,7 @@ def run(args):
         binary_audits[str(shard)]=validate_binary_audit(args.root/f"receipts/binary-audit-{job_id}.json")
         telemetry[str(shard)]=telemetry_receipt(args.root/f"logs/telemetry-{job_id}.csv")
     need(len(source)==len(overlay)==1,"campaign source drift")
-    all_folds=[];cell_receipts=[];numerics=0;cache_ok=True;native_after_cap=True
+    all_folds=[];cell_receipts=[];native_overlay_records=[];native_overlay_summaries=[];numerics=0;cache_ok=True;native_after_cap=True
     for shard in range(args.shards):
         base=lookup[shard,0,"paired"]
         for key,q0 in base["qualifications"].items():
@@ -95,7 +145,28 @@ def run(args):
                 raw=q0["identities"]["cap"][execution]["payload"]
                 identity=TacticIdentity(raw["environment"],raw["operation"],raw["measurement_policy"])
                 eligibility=EligibilityDecision(bool(q0["eligibility"][execution]["eligible"]),tuple(q0["eligibility"][execution]["reasons"]))
+                identity_keys=[];eligibility_receipts=[];cap_support=[]
+                for rep in range(3):
+                    qrep=lookup[shard,rep,"paired"]["qualifications"][key]
+                    identity_keys.append(qrep["identities"]["cap"][execution]["key"])
+                    eligibility_receipts.append(qrep["eligibility"][execution])
+                    cap_support.append(qrep["cap_supported"])
+                need(identity_keys==[identity.key]*3,"cross-repeat tactic identity drift")
+                need(all(x==eligibility_receipts[0] for x in eligibility_receipts),"cross-repeat eligibility drift")
+                need(all(x==cap_support[0] for x in cap_support),"cross-repeat cap-support drift")
                 repeats={rep:block_evidence(lookup[shard,rep,"paired"]["rows"],key,execution) for rep in range(3)}
+                absolute={rep:absolute_native_block_evidence(lookup[shard,rep,"pristine"]["rows"],lookup[shard,rep,"paired"]["rows"],key,execution) for rep in range(3)}
+                absolute_summary=hierarchical_ratio_summary({rep:absolute[rep]["ratios"] for rep in range(3)},seed=int(identity.key[:16],16)^0xA850)
+                pristine_control_values=[x for rep in range(3) for x in absolute[rep]["pristine_controls"]]
+                off_control_values=[x for rep in range(3) for x in absolute[rep]["off_controls"]]
+                pristine_ci=ci90(pristine_control_values,int(identity.key[16:24],16)^0x5151)
+                off_ci=ci90(off_control_values,int(identity.key[24:32],16)^0x0FF0)
+                controls_resolve=(pristine_ci[0]>=1/1.01 and pristine_ci[1]<=1.01 and off_ci[0]>=1/1.01 and off_ci[1]<=1.01)
+                native_record={"case":key[0],"dtype":key[1],"layout":key[2],"split":key[3],"execution_mode":execution,
+                    "shard":shard,"ratio":absolute_summary["ratio"],"CI95":absolute_summary["CI95"],
+                    "block_worst":absolute_summary["block_worst"],"pristine_control_CI90":pristine_ci,
+                    "candidate_native_control_CI90":off_ci,"controls_resolve_one_percent":controls_resolve}
+                native_overlay_records.append(native_record);native_overlay_summaries.append(absolute_summary)
                 folds=crossfit_cell(identity,eligibility,repeats,exact_outputs=True)
                 for fold in folds:
                     held=repeats[fold.held_out_repeat]
@@ -124,11 +195,17 @@ def run(args):
     for mode in EXECUTIONS:
         values=[record["held_out_geomean"] for _,record in selected if record["execution_mode"]==mode]
         by_mode[mode]={"count":len(values),"geomean":geo(values) if values else None,"worst":min(values) if values else None}
+    native_overlay_joint=simultaneous_ratio_lcb(native_overlay_summaries)
+    native_overlay_controls=all(x["controls_resolve_one_percent"] for x in native_overlay_records)
     metrics={"fold_records":len(all_folds),"selected_records":len(selected),"coverage":len(selected)/len(all_folds),
         "selected_geomean":geo(selected_geos) if selected else None,"selected_worst":min(selected_geos) if selected else None,
         "selected_block_worst":min(selected_mins) if selected else None,"selected_joint_min_lcb95":joint,
         "policy_geomean":geo(policy),"policy_worst":min(policy),"by_execution_mode":by_mode,
-        "selected_layouts":sorted(layouts),"selected_dtypes":sorted(dtypes)}
+        "selected_layouts":sorted(layouts),"selected_dtypes":sorted(dtypes),
+        "native_overlay_geomean":geo([x["ratio"] for x in native_overlay_records]),
+        "native_overlay_worst":min(x["ratio"] for x in native_overlay_records),
+        "native_overlay_block_worst":min(x["block_worst"] for x in native_overlay_records),
+        "native_overlay_joint_min_lcb95":native_overlay_joint}
     expected_numeric=len(cases)*len(manifest["dtypes"])*len(manifest["layouts"])*len(manifest["requested_splits"])*3
     requirements={"numerical_exact":numerics==expected_numeric,"native_after_cap_exact":native_after_cap,
         "compiled_kernel_symbol_isolation":len(binary_audits)==args.shards,
@@ -139,6 +216,9 @@ def run(args):
         "selected_block_worst_at_least_0_99":bool(selected) and metrics["selected_block_worst"]>=.99,
         "selected_joint_min_lcb_at_least_0_99":bool(selected) and joint>=.99,
         "policy_worst_at_least_0_99":metrics["policy_worst"]>=.99,
+        "native_overlay_worst_at_least_0_99":metrics["native_overlay_worst"]>=.99,
+        "native_overlay_joint_min_lcb_at_least_0_99":native_overlay_joint>=.99,
+        "native_overlay_controls_resolve_one_percent":native_overlay_controls,
         "held_out_controls_resolve":selected_controls,
         "all_execution_modes_selected":modes==set(EXECUTIONS),"both_layouts_selected":layouts=={"ragged","paged"},
         "both_dtypes_selected":dtypes=={"float16","bfloat16"}}
@@ -149,12 +229,14 @@ def run(args):
         "campaign_source_commit":(args.root/"source/SOURCE_COMMIT.txt").read_text().strip(),
         "analysis_source_sha256":hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
         "binary_audits":binary_audits,"telemetry":telemetry,
-        "records":cell_receipts,"default_promotion":False,"serving_promotion":False}
+        "records":cell_receipts,"native_overlay_records":native_overlay_records,
+        "default_promotion":False,"serving_promotion":False}
     args.out.mkdir(parents=True);(args.out/"summary.json").write_text(json.dumps(result,indent=2,allow_nan=False)+"\n")
     lines=["# Selector v4 safe-autotune qualification","",f"**{args.gpu}: {'PASS' if result['pass'] else 'HOLD'}**","",
         f"- Cross-fit records: {metrics['fold_records']}; selected {metrics['selected_records']} ({metrics['coverage']:.1%}).",
         f"- Held-out selected geomean {ratio_text(metrics['selected_geomean'])}; point worst {ratio_text(metrics['selected_worst'])}; block worst {ratio_text(metrics['selected_block_worst'])}; joint-min LCB {ratio_text(joint)}.",
         f"- Whole-policy geomean {ratio_text(metrics['policy_geomean'])}; worst {ratio_text(metrics['policy_worst'])}.",
+        f"- Candidate-native / pristine geomean {ratio_text(metrics['native_overlay_geomean'])}; worst {ratio_text(metrics['native_overlay_worst'])}; joint-min LCB {ratio_text(metrics['native_overlay_joint_min_lcb95'])}.",
         f"- Requirements: `{json.dumps(requirements,sort_keys=True)}`"]
     (args.out/"RESULTS.md").write_text("\n".join(lines)+"\n");print("\n".join(lines))
 
