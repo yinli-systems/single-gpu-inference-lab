@@ -2,6 +2,7 @@
 from __future__ import annotations
 from pathlib import Path
 import argparse, hashlib, itertools, json, os
+from policy import candidate_pool
 
 
 def thash(t) -> str:
@@ -39,6 +40,10 @@ def run_layout(torch,flashinfer,layout,policy,ref_dir):
         call=lambda out,lse:wrapper.run(q,(kp,vp),out=out,lse=lse,return_lse=True)
     if policy is not None: wrapper._sgi_resource_policy=policy
     plan(); info=[int(x) for x in wrapper._plan_info]
+    if policy in (0,1) and info[-1]!=policy:raise RuntimeError('forced policy bit')
+    if policy==2:
+        expected=candidate_pool(q=qlens,cached=cached,padded_batch_size=info[0],num_qo_heads=32,num_kv_heads=8,num_sms=torch.cuda.get_device_properties(0).multi_processor_count,split_kv=bool(info[14])).eligible
+        if bool(info[-1])!=expected:raise RuntimeError('candidate-pool mismatch')
     out=torch.empty_like(q);lse=torch.empty((q.shape[0],32),device='cuda',dtype=torch.float32)
     call(out,lse);torch.cuda.synchronize()
     graph=torch.cuda.CUDAGraph();

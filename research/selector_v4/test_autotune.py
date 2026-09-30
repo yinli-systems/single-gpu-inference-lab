@@ -39,3 +39,18 @@ class AutotuneTests(unittest.TestCase):
             path.write_text('{broken');self.assertEqual(TacticStore(path).lookup(identity),'native')
 
 if __name__=='__main__': unittest.main()
+
+class StoreConcurrencyTests(unittest.TestCase):
+    def test_stale_writer_merges_instead_of_clobbering(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path=Path(tmp)/'tactics.json'
+            a=TacticStore(path);b=TacticStore(path)
+            # Hydrate both before either publication to emulate stale processes.
+            self.assertEqual(a.lookup({'environment':{'gpu':'a'},'operation':{'mode':'eager'}}),'native')
+            self.assertEqual(b.lookup({'environment':{'gpu':'b'},'operation':{'mode':'graph'}}),'native')
+            evidence=decide(native_over_cap=grid(1.2),null_controls=grid(1.0),exact_outputs=True,clock_stable=True,candidate_pool=True)
+            ia={'environment':{'gpu':'a'},'operation':{'mode':'eager'}}
+            ib={'environment':{'gpu':'b'},'operation':{'mode':'graph'}}
+            a.publish(ia,evidence);b.publish(ib,evidence)
+            data=json.loads(path.read_text())
+            self.assertEqual(set(data['records']),{canonical_hash(ia),canonical_hash(ib)})

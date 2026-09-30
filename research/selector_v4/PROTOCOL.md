@@ -23,3 +23,11 @@ Persistence is atomic and hydrated once; steady-state lookup performs no file I/
 Canary first verifies both kernel symbols, native/pristine parity, cap parity, ragged/paged and Graph replay on RTX 4090 and 5090. Only then may release consume the 48 frozen cases. Final release reports oracle regret, chosen-tactic worst case, native fallback equivalence, calibration overhead, cache correctness and full output parity by execution mode and GPU.
 
 Nsight/diagnostic profiling is excluded from release timing. Full HTTP serving requires release PASS and separately preserves the historical token-divergence HOLD.
+
+## JIT cache identity
+
+`FLASHINFER_WORKSPACE_BASE`, not merely `XDG_CACHE_HOME`, is bound to a campaign-private path. Pristine and v4 builds use different workspaces. A binary audit must find native and `ResourceKernel` symbols in both generated CUDA source and the compiled shared object. Shared-home cache reuse invalidates the run and is retained as failed tooling evidence.
+
+## Calibration/evaluation separation
+
+Calibration uses three processes and eight ABBA blocks to freeze a tactic JSON. Evaluation uses three additional processes and eight blocks, and binds the exact decision-file SHA256 into every environment record. Whole-GPU release analysis is recomputed from all raw shard evidence; per-shard summaries cannot authorize promotion.

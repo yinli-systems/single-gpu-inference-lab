@@ -1,0 +1,27 @@
+name: Selector v4 contracts
+on:
+  push:
+    paths: ['research/selector_v4/**', '.github/workflows/selector-v4.yml']
+  pull_request:
+    paths: ['research/selector_v4/**', '.github/workflows/selector-v4.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  contracts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - run: python -m unittest discover -s research/selector_v4 -p 'test_*.py' -v
+      - run: python -m compileall -q research/selector_v4
+      - run: bash -n research/selector_v4/smoke.sbatch research/selector_v4/run_pipeline.sbatch
+      - run: git diff --check
+      - uses: actions/upload-artifact@v4
+        with:
+          name: selector-v4-contracts
+          path: research/selector_v4/
+          retention-days: 14
+          if-no-files-found: error

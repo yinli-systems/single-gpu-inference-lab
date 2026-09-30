@@ -147,16 +147,23 @@ class TacticStore:
         return record["tactic"] if record else "native"
 
     def publish(self, identity: dict[str, Any], evidence: CalibrationEvidence) -> None:
-        self.hydrate()
         key = canonical_hash(identity)
         record = dict(identity=identity, tactic=evidence.tactic,
                       evidence=asdict(evidence), published_unix_ns=time.time_ns())
-        self._records[key] = record
         self.path.parent.mkdir(parents=True, exist_ok=True)
         lock_path = self.path.with_suffix(self.path.suffix + ".lock")
         with lock_path.open("a+") as lock:
             fcntl.flock(lock, fcntl.LOCK_EX)
-            payload = json.dumps({"schema": SCHEMA, "records": self._records},
+            records: dict[str, dict[str, Any]] = {}
+            if self.path.exists():
+                try:
+                    raw = json.loads(self.path.read_text())
+                    if raw.get("schema") == SCHEMA and isinstance(raw.get("records"), dict):
+                        records = raw["records"]
+                except Exception:
+                    records = {}
+            records[key] = record
+            payload = json.dumps({"schema": SCHEMA, "records": records},
                                  indent=2, sort_keys=True) + "\n"
             fd, tmp = tempfile.mkstemp(prefix=self.path.name + ".",
                                        dir=str(self.path.parent))
@@ -166,3 +173,5 @@ class TacticStore:
                 os.replace(tmp, self.path)
             finally:
                 if os.path.exists(tmp): os.unlink(tmp)
+            self._records = records
+            self._hydrated = True
