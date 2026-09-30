@@ -3,7 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 import argparse, hashlib, json, os, shutil, tarfile
 from .manifest_v4 import load
-from .prepare_overlay import EXPECTED, prepare
+from .prepare_overlay import EXPECTED, prepare, link_or_copy
 
 
 def sha(path: Path) -> str: return hashlib.sha256(path.read_bytes()).hexdigest()
@@ -37,9 +37,9 @@ def prepare_campaign(*, root: Path, pristine_source: Path, source_archive: Path,
         target=root/"source"/rel
         if not target.is_file() or sha(target)!=expected: raise RuntimeError("source ledger mismatch "+rel)
     # Copy pristine with independent metadata while hard-linking immutable package files.
-    shutil.copytree(pristine_source/"flashinfer",root/"overlays/pristine/flashinfer",copy_function=os.link,ignore=shutil.ignore_patterns("__pycache__","*.pyc"))
+    shutil.copytree(pristine_source/"flashinfer",root/"overlays/pristine/flashinfer",copy_function=link_or_copy,ignore=shutil.ignore_patterns("__pycache__","*.pyc"))
     for metadata in pristine_source.glob("*.dist-info"):
-        shutil.copytree(metadata,root/"overlays/pristine"/metadata.name,copy_function=os.link)
+        shutil.copytree(metadata,root/"overlays/pristine"/metadata.name,copy_function=link_or_copy)
     binding=prepare(pristine_source,root/"overlays/candidate")
     if len(official_overlay_sha256)!=64 or any(c not in "0123456789abcdef" for c in official_overlay_sha256):
         raise ValueError("invalid official overlay identity")

@@ -1,7 +1,7 @@
 """Build a source-bound FlashInfer 0.7 overlay with isolated native/capped symbols."""
 from __future__ import annotations
 from pathlib import Path
-import argparse, difflib, hashlib, json, os, shutil
+import argparse, difflib, errno, hashlib, json, os, shutil
 from .kernel_isolation import patch_resource_declarations, patch_resource_jinja, patch_resource_prefill
 from .native_policy import clone_host_run, patch_native_binding, patch_python_dispatch
 from .source_audit import audit_native_sources
@@ -18,6 +18,15 @@ EXPECTED = {
  'flashinfer/data/csrc/batch_prefill_paged_kernel_inst.jinja':'1e41a0ea9795847272674c1058a9d72f220facf296037cbf1f95ce6b77225a63',
 }
 
+def link_or_copy(source, destination):
+    try:
+        return os.link(source, destination)
+    except OSError as exc:
+        if exc.errno != errno.EXDEV:
+            raise
+        return shutil.copy2(source, destination)
+
+
 def sha_bytes(data: bytes) -> str: return hashlib.sha256(data).hexdigest()
 def sha_text(text: str) -> str: return sha_bytes(text.encode())
 
@@ -28,9 +37,9 @@ def prepare(source: Path, out: Path) -> dict:
         data=(source/rel).read_bytes()
         if sha_bytes(data)!=expected: raise ValueError('unreviewed source '+rel)
         originals[rel]=data.decode()
-    shutil.copytree(source/'flashinfer',out/'flashinfer',ignore=shutil.ignore_patterns('__pycache__','*.pyc'),copy_function=os.link)
+    shutil.copytree(source/'flashinfer',out/'flashinfer',ignore=shutil.ignore_patterns('__pycache__','*.pyc'),copy_function=link_or_copy)
     for metadata in source.glob('*.dist-info'):
-        shutil.copytree(metadata,out/metadata.name,copy_function=os.link)
+        shutil.copytree(metadata,out/metadata.name,copy_function=link_or_copy)
     patched_prefill,symbol_hashes=patch_resource_prefill(originals['flashinfer/data/include/flashinfer/attention/prefill.cuh'])
     batch=patch_resource_declarations(originals['flashinfer/data/csrc/batch_prefill.cu'])
     batch,_,_=clone_host_run(batch,paged=False)

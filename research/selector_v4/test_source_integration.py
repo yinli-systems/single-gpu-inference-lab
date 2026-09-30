@@ -11,7 +11,7 @@ from .source_audit import audit_native_sources
 class SourceIntegrationTests(unittest.TestCase):
     def test_official_source_identity_and_resource_ops_are_distinct(self):
         source=Path(os.environ['SGI_PRISTINE_SOURCE'])
-        with tempfile.TemporaryDirectory() as tmp:
+        with tempfile.TemporaryDirectory(dir=source.parent) as tmp:
             out=Path(tmp)/'candidate';receipt=prepare(source,out)
             self.assertTrue(receipt['native_source_audit']['native_source_identity'])
             self.assertEqual(receipt['plan_vector_size'],15)
