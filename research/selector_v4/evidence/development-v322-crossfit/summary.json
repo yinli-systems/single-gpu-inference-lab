@@ -1,0 +1,35 @@
+{
+  "scope": "EXPOSED DEVELOPMENT DATA ONLY",
+  "thresholds": {
+    "train_geomean": 1.05,
+    "train_lcb95": 1.01,
+    "train_block_min": 0.99,
+    "control_equivalence": 0.005,
+    "min_training_blocks": 16,
+    "bootstrap_draws": 10000
+  },
+  "gpus": {
+    "gpu_4090": {
+      "records": 2160,
+      "eligible": 2160,
+      "selected": 1418,
+      "selected_coverage_of_eligible": 0.6564814814814814,
+      "selected_geomean": 1.2410125292980474,
+      "selected_worst": 1.0486099803411602,
+      "selected_block_worst": 1.0238841232745746,
+      "policy_geomean": 1.1522913891410773,
+      "policy_worst": 1.0
+    },
+    "gpu_5090": {
+      "records": 2160,
+      "eligible": 2016,
+      "selected": 1368,
+      "selected_coverage_of_eligible": 0.6785714285714286,
+      "selected_geomean": 1.2668940038355019,
+      "selected_worst": 1.0660219275253289,
+      "selected_block_worst": 1.0566881318842731,
+      "policy_geomean": 1.1616327414012926,
+      "policy_worst": 1.0
+    }
+  }
+}
