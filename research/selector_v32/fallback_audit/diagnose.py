@@ -7,6 +7,53 @@ from pathlib import Path
 def digest_file(p):return hashlib.sha256(Path(p).read_bytes()).hexdigest()
 def save(p,obj):
  p=Path(p);q=p.with_suffix(p.suffix+'.tmp');q.write_text(json.dumps(obj,indent=2,allow_nan=False)+'\n');q.replace(p)
+def _cuda_checked(result, op):
+ if not isinstance(result, tuple) or not result:raise RuntimeError(f'{op}: unexpected binding result')
+ err,*values=result
+ if int(err)!=0:raise RuntimeError(f'{op} failed with CUDA error {int(err)}')
+ if len(values)==1:return values[0]
+ return tuple(values)
+
+def graph_data_compat(graph, runtime_module=None, driver_module=None):
+ """Graph topology/config without cudaGraphNodeGetToolsId (CUDA<13.1 compatible)."""
+ if runtime_module is None:
+  import cuda.bindings.runtime as runtime_module
+ if driver_module is None:
+  import cuda.bindings.driver as driver_module
+ rt=runtime_module;drv=driver_module;raw=graph.raw_cuda_graph()
+ _unused,num=_cuda_checked(rt.cudaGraphGetNodes(raw,numNodes=0),'cudaGraphGetNodes(count)')
+ nodes,num=_cuda_checked(rt.cudaGraphGetNodes(raw,numNodes=int(num)),'cudaGraphGetNodes(data)')
+ type_names={
+  rt.cudaGraphNodeType.cudaGraphNodeTypeKernel:'kernel',rt.cudaGraphNodeType.cudaGraphNodeTypeMemcpy:'memcpy',
+  rt.cudaGraphNodeType.cudaGraphNodeTypeMemset:'memset',rt.cudaGraphNodeType.cudaGraphNodeTypeHost:'host',
+  rt.cudaGraphNodeType.cudaGraphNodeTypeGraph:'child_graph',rt.cudaGraphNodeType.cudaGraphNodeTypeEmpty:'empty',
+  rt.cudaGraphNodeType.cudaGraphNodeTypeWaitEvent:'wait_event',rt.cudaGraphNodeType.cudaGraphNodeTypeEventRecord:'event_record',
+  rt.cudaGraphNodeType.cudaGraphNodeTypeMemAlloc:'mem_alloc',rt.cudaGraphNodeType.cudaGraphNodeTypeMemFree:'mem_free'}
+ handle_to_idx={};infos=[]
+ for i in range(int(num)):
+  node=nodes[i];handle_to_idx[int(node)]=i;ntype=_cuda_checked(rt.cudaGraphNodeGetType(node),'cudaGraphNodeGetType')
+  info=dict(index=i,node_type=type_names.get(ntype,str(ntype)),kernel_name=None,grid_dim=None,block_dim=None,shared_mem_bytes=None,dependencies=[],dependents=[])
+  if ntype==rt.cudaGraphNodeType.cudaGraphNodeTypeKernel:
+   cu_node=drv.CUgraphNode(init_value=int(node));err,params=drv.cuGraphKernelNodeGetParams(cu_node)
+   if int(err)!=int(drv.CUresult.CUDA_SUCCESS):raise RuntimeError(f'cuGraphKernelNodeGetParams failed {int(err)}')
+   info['grid_dim']=[int(params.gridDimX),int(params.gridDimY),int(params.gridDimZ)]
+   info['block_dim']=[int(params.blockDimX),int(params.blockDimY),int(params.blockDimZ)]
+   info['shared_mem_bytes']=int(params.sharedMemBytes)
+   if int(params.func):
+    func=drv.CUfunction(init_value=int(params.func));err,name=drv.cuFuncGetName(func)
+    if int(err)==int(drv.CUresult.CUDA_SUCCESS):info['kernel_name']=name.decode() if isinstance(name,bytes) else str(name)
+    else:info['kernel_name']=f'func_handle:{int(params.func)}'
+  infos.append(info)
+ _a,_b,_c,num_edges=_cuda_checked(rt.cudaGraphGetEdges(raw,numEdges=0),'cudaGraphGetEdges(count)')
+ if int(num_edges):
+  frm,to,_edge_data,num_edges=_cuda_checked(rt.cudaGraphGetEdges(raw,numEdges=int(num_edges)),'cudaGraphGetEdges(data)')
+  for i in range(int(num_edges)):
+   src=handle_to_idx.get(int(frm[i]));dst=handle_to_idx.get(int(to[i]))
+   if src is not None and dst is not None:infos[src]['dependents'].append(dst);infos[dst]['dependencies'].append(src)
+ for info in infos:info['dependencies'].sort();info['dependents'].sort()
+ graph_id=_cuda_checked(rt.cudaGraphGetId(raw),'cudaGraphGetId') if hasattr(rt,'cudaGraphGetId') else None
+ return dict(graph_id=None if graph_id is None else int(graph_id),tools_id_available=False,nodes=infos)
+
 def normalized_graph(meta):
  fields=('node_type','kernel_name','grid_dim','block_dim','shared_mem_bytes','dependencies','dependents')
  return [{'index':n.get('index'),**{k:n.get(k) for k in fields}} for n in meta['nodes']]
@@ -53,7 +100,7 @@ def run(args):
     for _ in range(count):rt.call(q)
    g.instantiate();rt.out.fill_(float('nan'));rt.lse.fill_(float('nan'));g.replay();torch.cuda.synchronize()
    if not torch.equal(rt.out.cpu(),ref['out']) or not torch.equal(rt.lse.cpu(),ref['lse']):raise RuntimeError('graph/reference parity')
-   meta=g.get_graph_data();return {'graph':g,'plan':info,'metadata':meta,'signature':signature(meta),'pointers':rt.pointers(q,k,v),'runtime':rt}
+   meta=graph_data_compat(g);return {'graph':g,'plan':info,'metadata':meta,'signature':signature(meta),'pointers':rt.pointers(q,k,v),'runtime':rt}
   independent={arm:runtime(arm) for arm in ('off','guarded')};shared=runtime('off')
   scenarios={name:{} for name in conf['scenarios']}
   for count in (1,16):
