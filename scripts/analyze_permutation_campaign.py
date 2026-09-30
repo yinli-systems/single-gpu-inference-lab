@@ -12,7 +12,9 @@ Per (config, layout seed) cell:
 - P3  order-null vs same: 90% bootstrap CI of the paired median difference inside [-eps, +eps] (TOST
       at alpha 0.05), eps = max(0.5 ms, 2% of median T(same)).
 - P5  eqC-a vs eqC-b: the same equivalence test (n4, n8, n16).
-- P6  measured / predicted range, predicted = 3.23 ms/M x (C_max - C_min) (A100 Qwen3-4B M2n slope).
+- P6  measured / predicted range, predicted = slope x (C_max - C_min), inside the registered band. The
+      slope is the GPU's c_X (M2n cross-attention coefficient, split-term.json): 3.23 ms/M on the A100,
+      band 0.6-1.0 (the defaults); 6.33 ms/M on the L20, band 0.8-1.15 (addendum 1).
 - floor (T_max - T_min) / 2 over the state medians: the minimax floor of any marginal-only predictor
   on this collision class.
 Across layout seeds of one config:
@@ -20,6 +22,7 @@ Across layout seeds of one config:
       [-eps, +eps], and Spearman rho of the state medians across seeds.
 
   python scripts/analyze_permutation_campaign.py --input perm.json --output verdicts.json [--boot 10000]
+      [--slope 3.23 --p6-band 0.6 1.0]
 """
 
 from __future__ import annotations
@@ -31,7 +34,6 @@ from pathlib import Path
 
 import numpy as np
 
-SLOPE = 3.23
 
 
 def hodges_lehmann(d):
@@ -63,10 +65,12 @@ def main():
     ap.add_argument("--input", type=Path, required=True)
     ap.add_argument("--output", type=Path)
     ap.add_argument("--boot", type=int, default=10000)
+    ap.add_argument("--slope", type=float, default=3.23, help="c_X in ms/M for P6")
+    ap.add_argument("--p6-band", type=float, nargs=2, default=(0.6, 1.0), metavar=("LO", "HI"))
     args = ap.parse_args()
     data = json.load(open(args.input))
     rnd = np.random.default_rng(0)
-    out = {"cells": {}, "layout": {}}
+    out = {"cells": {}, "layout": {}, "p6_slope_ms_per_M": args.slope, "p6_band": list(args.p6_band)}
     for key, c in sorted(data.items()):
         st = c["states"]
         med = {k: v["median_ms"] for k, v in st.items() if v["median_ms"] is not None}
@@ -91,8 +95,9 @@ def main():
             res["P5"] = -eps < res["P5_ci90"][0] and res["P5_ci90"][1] < eps
         rng_meas = med["same"] - med["opposite"]
         res["P6_measured_ms"] = rng_meas
-        res["P6_predicted_ms"] = SLOPE * (c["C_max_M"] - c["C_min_M"])
+        res["P6_predicted_ms"] = args.slope * (c["C_max_M"] - c["C_min_M"])
         res["P6_ratio"] = rng_meas / res["P6_predicted_ms"]
+        res["P6"] = args.p6_band[0] <= res["P6_ratio"] <= args.p6_band[1]
         res["floor_ms"] = (max(med[k] for k in distinct) - min(med[k] for k in distinct)) / 2
         out["cells"][key] = res
         print(f"{key:16s} rho {res.get('P1_rho', float('nan')):+.2f} | same-opp HL {res['P2_hl_ms']:+6.2f} ms CI95 "

@@ -54,3 +54,38 @@ coupling C and the median step time over the distinct pairings is ≥ 0.8.
   A100 pairing swap came out at 0.65–0.89 of the partition slope).
 - **Reported, not predicted:** the minimax floor (max − min state median)/2 per cell, the number of
   missing trials, and GPU clock/temperature ranges.
+
+## Addendum 1 (2026-10-01): execution on the L20
+
+Committed before any L20 campaign data exists.
+
+**Why.** The A100 pod became unreachable while the campaign was running and no data from it was ever
+retrieved or looked at. The A100 registration above stays as it is and is reported as registered and
+not executed. The same campaign runs on the lab's L20 instead, as a registered replication on a third
+architecture (Ada, sm89), not as a substitute for the A100 result.
+
+**What changes.**
+- Hardware and software: NVIDIA L20 48 GB (driver 580.159.04), vLLM 0.29.0 extracted unmodified from the
+  PyPI wheel with tracer v2 applied by `apply_tracer_v2.py` (the two patched files are byte-identical to
+  that patch applied to the pristine wheel; every other vLLM file matches the wheel), torch 2.13.0+cu130,
+  Qwen3-4B bf16 with safetensors matching the published `Qwen/Qwen3-4B` LFS hashes. FLASH_ATTN as selected
+  by vLLM, expected FA2 on sm89, so the P5 expectation is unchanged. Campaign script
+  `benchmarks/results/l20-pairing-permutations/campaign/campaign_l20_permutations.sh` checks all of this
+  before running.
+- P6 uses the L20's own slope and band. The slope in the A100 text, 3.23 ms/M, is c_X, the cross-attention
+  coefficient of the M2n split fit for A100 Qwen3-4B (`h100-prefill-cost-geometry/split-term.json`, 3.229).
+  The same fit gives c_X = 6.33 ms/M for L20 Qwen3-4B (6.331). Band rule, taken from the A100 choice: the
+  A100 band 0.6–1.0 bracketed the A100 pairing-swap ratios, 0.667–0.906 in `split-term.json` (the text
+  above says 0.65–0.89; the file is the source), with about 0.07 below and 0.1 above. The L20 pairing-swap
+  ratios are 0.887–1.033, so the L20 band is **0.8–1.15**:
+  **P6 (L20).** T(same) − T(opposite) is 0.8–1.15 × 6.33 ms/M × (C_max − C_min) in every cell.
+- `analyze_permutation_campaign.py` takes `--slope` and `--p6-band` (defaults 3.23 and 0.6–1.0, the A100
+  registration) and now reports a P6 verdict per cell; the L20 analysis runs with
+  `--slope 6.33 --p6-band 0.8 1.15`.
+
+**What does not change.** Configs, states, design (12 randomized blocks, 2 warm-up rounds, layout seeds 0
+and 1, cell order), exclusions, and the P1–P5 criteria.
+
+**Smoke run.** As on the A100, one short harness smoke (n16, two blocks) may run first to check that every
+state's requests land in one engine step. Only capture counts are read; its timing is not looked at and its
+files are deleted.
