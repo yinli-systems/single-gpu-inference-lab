@@ -6,7 +6,7 @@ from research.selector_v4.manifest_v4 import digest, load
 class ManifestTests(unittest.TestCase):
     def test_counts_hash_and_internal_freshness(self):
         data=load();self.assertEqual(data["families"],{"dev":2,"canary":10,"release":48,"stress":12})
-        self.assertEqual(data["case_hash"],digest(data["cases"]))
+        self.assertEqual(data["case_hash"],digest(data["cases"]));self.assertEqual(data["qualification_revision"],"4.1.0");self.assertEqual(data["blocks"],16)
         fresh=[c for c in data["cases"] if not c.get("exposed_development")]
         keys=[(tuple(c["q"]),tuple(c["cached"])) for c in fresh]
         self.assertEqual(len(keys),len(set(keys)))

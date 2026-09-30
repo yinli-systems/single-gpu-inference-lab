@@ -1,0 +1,1499 @@
+{
+  "schema": 1,
+  "selector_version": "4.0",
+  "generator_seed_text": "selector-v4-isolated-kernel-autotune-holdout-2026-09-30",
+  "generator_seed": 16247612270606272427,
+  "case_hash": "281cbb0daad58f80e5e2168a38db31a6314183cbf41158fff4f9ee97e4b58e53",
+  "release_hash": "ee80e2cce74be6c17c94e2ebc98e3911d7ce634ade54a79e303b5f6972b4ca16",
+  "primary": "autotuned",
+  "dtypes": [
+    "float16",
+    "bfloat16"
+  ],
+  "layouts": [
+    "ragged",
+    "paged"
+  ],
+  "splits": [
+    "auto",
+    "unsplit"
+  ],
+  "execution_modes": [
+    "eager_full_call",
+    "graph1_replay",
+    "graph16_replay"
+  ],
+  "tactics": [
+    "native",
+    "cap",
+    "autotuned"
+  ],
+  "calibration_process_repeats": 3,
+  "calibration_blocks": 8,
+  "evaluation_process_repeats": 3,
+  "evaluation_blocks": 8,
+  "full_model": false,
+  "default_promotion": false,
+  "cases": [
+    {
+      "id": "canary-v4-00",
+      "family": "canary",
+      "regime": "opposite",
+      "batch_size": 6,
+      "q": [
+        2,
+        38,
+        122,
+        158,
+        258,
+        358
+      ],
+      "cached": [
+        28704,
+        22080,
+        14768,
+        9088,
+        384,
+        304
+      ],
+      "generator_variant": 1000
+    },
+    {
+      "id": "canary-v4-01",
+      "family": "canary",
+      "regime": "tied-opposite",
+      "batch_size": 8,
+      "q": [
+        65,
+        133,
+        217,
+        269,
+        269,
+        421,
+        449,
+        517
+      ],
+      "cached": [
+        22208,
+        14688,
+        9072,
+        4384,
+        4384,
+        656,
+        192,
+        320
+      ],
+      "generator_variant": 1001
+    },
+    {
+      "id": "canary-v4-02",
+      "family": "canary",
+      "regime": "near-opposite",
+      "batch_size": 10,
+      "q": [
+        65,
+        165,
+        201,
+        237,
+        289,
+        341,
+        425,
+        525,
+        577,
+        693
+      ],
+      "cached": [
+        36896,
+        28864,
+        22032,
+        9120,
+        14752,
+        4464,
+        2016,
+        672,
+        336,
+        96
+      ],
+      "generator_variant": 1002
+    },
+    {
+      "id": "canary-v4-03",
+      "family": "canary",
+      "regime": "same-paired",
+      "batch_size": 6,
+      "q": [
+        5,
+        73,
+        125,
+        225,
+        277,
+        305
+      ],
+      "cached": [
+        432,
+        800,
+        1792,
+        4528,
+        9184,
+        28704
+      ],
+      "generator_variant": 1003
+    },
+    {
+      "id": "canary-v4-04",
+      "family": "canary",
+      "regime": "mixed",
+      "batch_size": 8,
+      "q": [
+        2,
+        102,
+        170,
+        222,
+        250,
+        286,
+        338,
+        422
+      ],
+      "cached": [
+        752,
+        28768,
+        36960,
+        22128,
+        4480,
+        160,
+        9088,
+        384
+      ],
+      "generator_variant": 1004
+    },
+    {
+      "id": "canary-v4-05",
+      "family": "canary",
+      "regime": "bimodal",
+      "batch_size": 10,
+      "q": [
+        33,
+        85,
+        105,
+        133,
+        161,
+        213,
+        241,
+        309,
+        377,
+        541
+      ],
+      "cached": [
+        28864,
+        14784,
+        4496,
+        672,
+        128,
+        36896,
+        22128,
+        9152,
+        1952,
+        368
+      ],
+      "generator_variant": 1005
+    },
+    {
+      "id": "canary-v4-06",
+      "family": "canary",
+      "regime": "opposite",
+      "batch_size": 6,
+      "q": [
+        65,
+        93,
+        193,
+        277,
+        305,
+        333
+      ],
+      "cached": [
+        28736,
+        22208,
+        9072,
+        4576,
+        256,
+        240
+      ],
+      "generator_variant": 1006
+    },
+    {
+      "id": "canary-v4-07",
+      "family": "canary",
+      "regime": "tied-opposite",
+      "batch_size": 8,
+      "q": [
+        65,
+        93,
+        193,
+        293,
+        293,
+        373,
+        409,
+        509
+      ],
+      "cached": [
+        37056,
+        22112,
+        14800,
+        4448,
+        4448,
+        880,
+        416,
+        224
+      ],
+      "generator_variant": 1007
+    },
+    {
+      "id": "holdout-v4-00",
+      "family": "release",
+      "regime": "opposite",
+      "batch_size": 5,
+      "q": [
+        65,
+        117,
+        201,
+        301,
+        401
+      ],
+      "cached": [
+        28736,
+        22144,
+        784,
+        352,
+        192
+      ],
+      "generator_variant": 2000
+    },
+    {
+      "id": "holdout-v4-01",
+      "family": "release",
+      "regime": "tied-opposite",
+      "batch_size": 10,
+      "q": [
+        5,
+        33,
+        53,
+        81,
+        133,
+        133,
+        269,
+        337,
+        405,
+        473
+      ],
+      "cached": [
+        36896,
+        28896,
+        22064,
+        14784,
+        9088,
+        9088,
+        1856,
+        704,
+        368,
+        288
+      ],
+      "generator_variant": 2001
+    },
+    {
+      "id": "holdout-v4-02",
+      "family": "release",
+      "regime": "near-opposite",
+      "batch_size": 9,
+      "q": [
+        5,
+        41,
+        125,
+        177,
+        205,
+        305,
+        373,
+        457,
+        541
+      ],
+      "cached": [
+        36864,
+        22096,
+        28832,
+        9056,
+        4384,
+        1968,
+        768,
+        448,
+        272
+      ],
+      "generator_variant": 2002
+    },
+    {
+      "id": "holdout-v4-03",
+      "family": "release",
+      "regime": "same-paired",
+      "batch_size": 8,
+      "q": [
+        65,
+        117,
+        217,
+        253,
+        281,
+        333,
+        401,
+        485
+      ],
+      "cached": [
+        224,
+        256,
+        1904,
+        4576,
+        9152,
+        14832,
+        22272,
+        28832
+      ],
+      "generator_variant": 2003
+    },
+    {
+      "id": "holdout-v4-04",
+      "family": "release",
+      "regime": "mixed",
+      "batch_size": 7,
+      "q": [
+        3,
+        31,
+        67,
+        95,
+        163,
+        199,
+        331
+      ],
+      "cached": [
+        22176,
+        96,
+        8992,
+        14832,
+        400,
+        1856,
+        28896
+      ],
+      "generator_variant": 2004
+    },
+    {
+      "id": "holdout-v4-05",
+      "family": "release",
+      "regime": "bimodal",
+      "batch_size": 6,
+      "q": [
+        2,
+        30,
+        98,
+        150,
+        250,
+        302
+      ],
+      "cached": [
+        22272,
+        768,
+        144,
+        28736,
+        4528,
+        416
+      ],
+      "generator_variant": 2005
+    },
+    {
+      "id": "holdout-v4-06",
+      "family": "release",
+      "regime": "opposite",
+      "batch_size": 6,
+      "q": [
+        5,
+        105,
+        173,
+        209,
+        277,
+        313
+      ],
+      "cached": [
+        28848,
+        14816,
+        9216,
+        4400,
+        1792,
+        160
+      ],
+      "generator_variant": 2006
+    },
+    {
+      "id": "holdout-v4-07",
+      "family": "release",
+      "regime": "tied-opposite",
+      "batch_size": 5,
+      "q": [
+        5,
+        33,
+        33,
+        153,
+        269
+      ],
+      "cached": [
+        37104,
+        22112,
+        22112,
+        9040,
+        4352
+      ],
+      "generator_variant": 2007
+    },
+    {
+      "id": "holdout-v4-08",
+      "family": "release",
+      "regime": "near-opposite",
+      "batch_size": 10,
+      "q": [
+        65,
+        101,
+        169,
+        197,
+        297,
+        365,
+        449,
+        533,
+        585,
+        613
+      ],
+      "cached": [
+        37040,
+        22208,
+        28736,
+        14736,
+        9024,
+        4544,
+        1840,
+        704,
+        416,
+        240
+      ],
+      "generator_variant": 2008
+    },
+    {
+      "id": "holdout-v4-09",
+      "family": "release",
+      "regime": "same-paired",
+      "batch_size": 9,
+      "q": [
+        17,
+        117,
+        153,
+        253,
+        305,
+        389,
+        441,
+        477,
+        577
+      ],
+      "cached": [
+        256,
+        256,
+        688,
+        1920,
+        4544,
+        14640,
+        22048,
+        28672,
+        36880
+      ],
+      "generator_variant": 2009
+    },
+    {
+      "id": "holdout-v4-10",
+      "family": "release",
+      "regime": "mixed",
+      "batch_size": 8,
+      "q": [
+        33,
+        85,
+        121,
+        189,
+        289,
+        373,
+        473,
+        669
+      ],
+      "cached": [
+        4496,
+        128,
+        1920,
+        9152,
+        36880,
+        22240,
+        240,
+        672
+      ],
+      "generator_variant": 2010
+    },
+    {
+      "id": "holdout-v4-11",
+      "family": "release",
+      "regime": "bimodal",
+      "batch_size": 7,
+      "q": [
+        5,
+        73,
+        141,
+        241,
+        277,
+        305,
+        357
+      ],
+      "cached": [
+        14816,
+        4400,
+        352,
+        37008,
+        9152,
+        704,
+        144
+      ],
+      "generator_variant": 2011
+    },
+    {
+      "id": "holdout-v4-12",
+      "family": "release",
+      "regime": "opposite",
+      "batch_size": 7,
+      "q": [
+        5,
+        57,
+        157,
+        185,
+        253,
+        289,
+        373
+      ],
+      "cached": [
+        36992,
+        28912,
+        22144,
+        14848,
+        4592,
+        1792,
+        352
+      ],
+      "generator_variant": 2012
+    },
+    {
+      "id": "holdout-v4-13",
+      "family": "release",
+      "regime": "tied-opposite",
+      "batch_size": 6,
+      "q": [
+        17,
+        69,
+        105,
+        105,
+        225,
+        293
+      ],
+      "cached": [
+        14624,
+        9104,
+        1888,
+        1888,
+        368,
+        288
+      ],
+      "generator_variant": 2013
+    },
+    {
+      "id": "holdout-v4-14",
+      "family": "release",
+      "regime": "near-opposite",
+      "batch_size": 5,
+      "q": [
+        65,
+        117,
+        153,
+        237,
+        337
+      ],
+      "cached": [
+        14784,
+        4528,
+        288,
+        1824,
+        272
+      ],
+      "generator_variant": 2014
+    },
+    {
+      "id": "holdout-v4-15",
+      "family": "release",
+      "regime": "same-paired",
+      "batch_size": 10,
+      "q": [
+        3,
+        103,
+        187,
+        255,
+        323,
+        359,
+        387,
+        423,
+        459,
+        511
+      ],
+      "cached": [
+        320,
+        352,
+        656,
+        1856,
+        4384,
+        9008,
+        14848,
+        22080,
+        28848,
+        36992
+      ],
+      "generator_variant": 2015
+    },
+    {
+      "id": "holdout-v4-16",
+      "family": "release",
+      "regime": "mixed",
+      "batch_size": 9,
+      "q": [
+        5,
+        73,
+        109,
+        193,
+        293,
+        361,
+        397,
+        425,
+        589
+      ],
+      "cached": [
+        9072,
+        4352,
+        28752,
+        160,
+        36928,
+        22016,
+        864,
+        432,
+        14848
+      ],
+      "generator_variant": 2016
+    },
+    {
+      "id": "holdout-v4-17",
+      "family": "release",
+      "regime": "bimodal",
+      "batch_size": 8,
+      "q": [
+        33,
+        133,
+        161,
+        229,
+        313,
+        349,
+        401,
+        485
+      ],
+      "cached": [
+        28688,
+        9056,
+        864,
+        304,
+        37088,
+        14592,
+        4464,
+        416
+      ],
+      "generator_variant": 2017
+    },
+    {
+      "id": "holdout-v4-18",
+      "family": "release",
+      "regime": "opposite",
+      "batch_size": 8,
+      "q": [
+        3,
+        71,
+        139,
+        207,
+        243,
+        343,
+        427,
+        455
+      ],
+      "cached": [
+        37056,
+        28832,
+        22128,
+        14784,
+        9120,
+        4592,
+        1856,
+        320
+      ],
+      "generator_variant": 2018
+    },
+    {
+      "id": "holdout-v4-19",
+      "family": "release",
+      "regime": "tied-opposite",
+      "batch_size": 7,
+      "q": [
+        33,
+        61,
+        81,
+        81,
+        233,
+        301,
+        369
+      ],
+      "cached": [
+        36992,
+        22176,
+        14704,
+        14704,
+        800,
+        272,
+        288
+      ],
+      "generator_variant": 2019
+    },
+    {
+      "id": "holdout-v4-20",
+      "family": "release",
+      "regime": "near-opposite",
+      "batch_size": 6,
+      "q": [
+        3,
+        71,
+        171,
+        271,
+        323,
+        351
+      ],
+      "cached": [
+        28736,
+        4432,
+        22112,
+        672,
+        416,
+        176
+      ],
+      "generator_variant": 2020
+    },
+    {
+      "id": "holdout-v4-21",
+      "family": "release",
+      "regime": "same-paired",
+      "batch_size": 5,
+      "q": [
+        33,
+        101,
+        129,
+        229,
+        329
+      ],
+      "cached": [
+        288,
+        1952,
+        4432,
+        9120,
+        14784
+      ],
+      "generator_variant": 2021
+    },
+    {
+      "id": "holdout-v4-22",
+      "family": "release",
+      "regime": "mixed",
+      "batch_size": 10,
+      "q": [
+        65,
+        93,
+        121,
+        189,
+        273,
+        301,
+        401,
+        437,
+        537,
+        701
+      ],
+      "cached": [
+        1984,
+        37024,
+        8992,
+        368,
+        22096,
+        64,
+        28768,
+        14752,
+        4400,
+        704
+      ],
+      "generator_variant": 2022
+    },
+    {
+      "id": "holdout-v4-23",
+      "family": "release",
+      "regime": "bimodal",
+      "batch_size": 9,
+      "q": [
+        65,
+        133,
+        217,
+        285,
+        337,
+        421,
+        505,
+        573,
+        625
+      ],
+      "cached": [
+        28736,
+        14688,
+        4432,
+        256,
+        37088,
+        22192,
+        8992,
+        672,
+        144
+      ],
+      "generator_variant": 2023
+    },
+    {
+      "id": "holdout-v4-24",
+      "family": "release",
+      "regime": "opposite",
+      "batch_size": 9,
+      "q": [
+        2,
+        102,
+        202,
+        254,
+        282,
+        350,
+        378,
+        446,
+        530
+      ],
+      "cached": [
+        37104,
+        28704,
+        22176,
+        8976,
+        4416,
+        1920,
+        752,
+        288,
+        128
+      ],
+      "generator_variant": 2024
+    },
+    {
+      "id": "holdout-v4-25",
+      "family": "release",
+      "regime": "tied-opposite",
+      "batch_size": 8,
+      "q": [
+        33,
+        101,
+        129,
+        181,
+        181,
+        277,
+        305,
+        421
+      ],
+      "cached": [
+        37072,
+        28704,
+        22240,
+        14640,
+        14640,
+        1984,
+        848,
+        224
+      ],
+      "generator_variant": 2025
+    },
+    {
+      "id": "holdout-v4-26",
+      "family": "release",
+      "regime": "near-opposite",
+      "batch_size": 7,
+      "q": [
+        65,
+        117,
+        185,
+        285,
+        353,
+        421,
+        449
+      ],
+      "cached": [
+        37072,
+        28864,
+        14736,
+        22176,
+        1984,
+        448,
+        144
+      ],
+      "generator_variant": 2026
+    },
+    {
+      "id": "holdout-v4-27",
+      "family": "release",
+      "regime": "same-paired",
+      "batch_size": 6,
+      "q": [
+        2,
+        38,
+        66,
+        94,
+        146,
+        246
+      ],
+      "cached": [
+        352,
+        800,
+        14736,
+        22112,
+        28768,
+        37008
+      ],
+      "generator_variant": 2027
+    },
+    {
+      "id": "holdout-v4-28",
+      "family": "release",
+      "regime": "mixed",
+      "batch_size": 5,
+      "q": [
+        2,
+        86,
+        114,
+        182,
+        378
+      ],
+      "cached": [
+        432,
+        22208,
+        28896,
+        160,
+        36944
+      ],
+      "generator_variant": 2028
+    },
+    {
+      "id": "holdout-v4-29",
+      "family": "release",
+      "regime": "bimodal",
+      "batch_size": 10,
+      "q": [
+        65,
+        165,
+        249,
+        333,
+        385,
+        469,
+        537,
+        565,
+        617,
+        653
+      ],
+      "cached": [
+        28672,
+        14640,
+        4416,
+        832,
+        176,
+        37072,
+        22208,
+        9056,
+        1936,
+        224
+      ],
+      "generator_variant": 2029
+    },
+    {
+      "id": "holdout-v4-30",
+      "family": "release",
+      "regime": "opposite",
+      "batch_size": 10,
+      "q": [
+        5,
+        89,
+        157,
+        225,
+        293,
+        345,
+        413,
+        513,
+        541,
+        593
+      ],
+      "cached": [
+        37120,
+        28848,
+        22176,
+        14720,
+        9040,
+        4384,
+        2016,
+        688,
+        320,
+        128
+      ],
+      "generator_variant": 2030
+    },
+    {
+      "id": "holdout-v4-31",
+      "family": "release",
+      "regime": "tied-opposite",
+      "batch_size": 9,
+      "q": [
+        33,
+        133,
+        161,
+        213,
+        213,
+        365,
+        449,
+        477,
+        545
+      ],
+      "cached": [
+        37056,
+        28912,
+        22240,
+        8992,
+        8992,
+        1856,
+        864,
+        240,
+        224
+      ],
+      "generator_variant": 2031
+    },
+    {
+      "id": "holdout-v4-32",
+      "family": "release",
+      "regime": "near-opposite",
+      "batch_size": 8,
+      "q": [
+        3,
+        71,
+        99,
+        135,
+        163,
+        199,
+        251,
+        279
+      ],
+      "cached": [
+        28896,
+        14800,
+        8960,
+        4512,
+        1808,
+        320,
+        736,
+        208
+      ],
+      "generator_variant": 2032
+    },
+    {
+      "id": "holdout-v4-33",
+      "family": "release",
+      "regime": "same-paired",
+      "batch_size": 7,
+      "q": [
+        3,
+        103,
+        203,
+        255,
+        355,
+        391,
+        491
+      ],
+      "cached": [
+        192,
+        288,
+        1968,
+        4512,
+        9024,
+        28912,
+        36992
+      ],
+      "generator_variant": 2033
+    },
+    {
+      "id": "holdout-v4-34",
+      "family": "release",
+      "regime": "mixed",
+      "batch_size": 6,
+      "q": [
+        2,
+        54,
+        74,
+        110,
+        210,
+        278
+      ],
+      "cached": [
+        37120,
+        240,
+        128,
+        28688,
+        832,
+        4448
+      ],
+      "generator_variant": 2034
+    },
+    {
+      "id": "holdout-v4-35",
+      "family": "release",
+      "regime": "bimodal",
+      "batch_size": 5,
+      "q": [
+        33,
+        117,
+        153,
+        181,
+        249
+      ],
+      "cached": [
+        22160,
+        256,
+        36992,
+        14784,
+        240
+      ],
+      "generator_variant": 2035
+    },
+    {
+      "id": "holdout-v4-36",
+      "family": "release",
+      "regime": "opposite",
+      "batch_size": 5,
+      "q": [
+        17,
+        53,
+        105,
+        205,
+        305
+      ],
+      "cached": [
+        37056,
+        22240,
+        4528,
+        288,
+        192
+      ],
+      "generator_variant": 2036
+    },
+    {
+      "id": "holdout-v4-37",
+      "family": "release",
+      "regime": "tied-opposite",
+      "batch_size": 10,
+      "q": [
+        3,
+        103,
+        131,
+        183,
+        211,
+        211,
+        395,
+        495,
+        531,
+        727
+      ],
+      "cached": [
+        37056,
+        28736,
+        22160,
+        14720,
+        8992,
+        8992,
+        1920,
+        672,
+        272,
+        192
+      ],
+      "generator_variant": 2037
+    },
+    {
+      "id": "holdout-v4-38",
+      "family": "release",
+      "regime": "near-opposite",
+      "batch_size": 9,
+      "q": [
+        5,
+        73,
+        173,
+        209,
+        245,
+        297,
+        397,
+        481,
+        565
+      ],
+      "cached": [
+        36928,
+        28768,
+        14688,
+        22128,
+        4448,
+        1904,
+        832,
+        256,
+        144
+      ],
+      "generator_variant": 2038
+    },
+    {
+      "id": "holdout-v4-39",
+      "family": "release",
+      "regime": "same-paired",
+      "batch_size": 8,
+      "q": [
+        17,
+        69,
+        169,
+        237,
+        305,
+        333,
+        401,
+        485
+      ],
+      "cached": [
+        160,
+        320,
+        688,
+        4416,
+        9184,
+        22128,
+        28704,
+        36864
+      ],
+      "generator_variant": 2039
+    },
+    {
+      "id": "holdout-v4-40",
+      "family": "release",
+      "regime": "mixed",
+      "batch_size": 7,
+      "q": [
+        17,
+        53,
+        81,
+        109,
+        137,
+        165,
+        265
+      ],
+      "cached": [
+        4384,
+        22208,
+        288,
+        1984,
+        368,
+        9200,
+        28864
+      ],
+      "generator_variant": 2040
+    },
+    {
+      "id": "holdout-v4-41",
+      "family": "release",
+      "regime": "bimodal",
+      "batch_size": 6,
+      "q": [
+        17,
+        85,
+        113,
+        165,
+        233,
+        261
+      ],
+      "cached": [
+        9024,
+        1792,
+        240,
+        14624,
+        4400,
+        256
+      ],
+      "generator_variant": 2041
+    },
+    {
+      "id": "holdout-v4-42",
+      "family": "release",
+      "regime": "opposite",
+      "batch_size": 6,
+      "q": [
+        3,
+        103,
+        203,
+        231,
+        259,
+        287
+      ],
+      "cached": [
+        28784,
+        22144,
+        14720,
+        4496,
+        2016,
+        800
+      ],
+      "generator_variant": 2042
+    },
+    {
+      "id": "holdout-v4-43",
+      "family": "release",
+      "regime": "tied-opposite",
+      "batch_size": 5,
+      "q": [
+        5,
+        57,
+        57,
+        185,
+        317
+      ],
+      "cached": [
+        14704,
+        4352,
+        4352,
+        432,
+        288
+      ],
+      "generator_variant": 2043
+    },
+    {
+      "id": "holdout-v4-44",
+      "family": "release",
+      "regime": "near-opposite",
+      "batch_size": 10,
+      "q": [
+        2,
+        102,
+        154,
+        222,
+        250,
+        302,
+        354,
+        406,
+        434,
+        534
+      ],
+      "cached": [
+        36912,
+        28800,
+        22080,
+        14768,
+        9088,
+        1840,
+        4576,
+        768,
+        224,
+        240
+      ],
+      "generator_variant": 2044
+    },
+    {
+      "id": "holdout-v4-45",
+      "family": "release",
+      "regime": "same-paired",
+      "batch_size": 9,
+      "q": [
+        3,
+        71,
+        99,
+        151,
+        235,
+        263,
+        331,
+        399,
+        483
+      ],
+      "cached": [
+        96,
+        352,
+        880,
+        1824,
+        8992,
+        14800,
+        22112,
+        28704,
+        37104
+      ],
+      "generator_variant": 2045
+    },
+    {
+      "id": "holdout-v4-46",
+      "family": "release",
+      "regime": "mixed",
+      "batch_size": 8,
+      "q": [
+        33,
+        101,
+        137,
+        205,
+        305,
+        405,
+        489,
+        637
+      ],
+      "cached": [
+        4416,
+        1904,
+        37072,
+        288,
+        22112,
+        8992,
+        28800,
+        14672
+      ],
+      "generator_variant": 2046
+    },
+    {
+      "id": "holdout-v4-47",
+      "family": "release",
+      "regime": "bimodal",
+      "batch_size": 7,
+      "q": [
+        5,
+        105,
+        157,
+        209,
+        237,
+        305,
+        341
+      ],
+      "cached": [
+        28800,
+        4496,
+        832,
+        36944,
+        22048,
+        1856,
+        80
+      ],
+      "generator_variant": 2047
+    }
+  ]
+}

@@ -3,6 +3,7 @@ import json, shutil, tempfile, unittest
 from pathlib import Path
 from research.selector_v4.authorize_v4 import authorize
 from research.selector_v4.manifest_v4 import load
+from research.selector_v4.schema import QUALIFICATION_REVISION
 
 class AuthorizationTests(unittest.TestCase):
     def setUp(self):
@@ -13,7 +14,7 @@ class AuthorizationTests(unittest.TestCase):
         self.case_hash=load(manifest)['case_hash']
         for gpu in ('gpu_4090','gpu_5090'):
             d=self.root/f'analysis/canary-{gpu}';d.mkdir();(d/'summary.json').write_text(json.dumps({
-                'pass':True,'qualification_revision':'4.0.0','case_hash':self.case_hash,
+                'pass':True,'qualification_revision':QUALIFICATION_REVISION,'case_hash':self.case_hash,
                 'source_archive_sha256':'a'*64,'official_overlay_sha256':'b'*64,
                 'metrics':{'policy_worst':1.0},'hardware':{'0':{'gpu_name':gpu}}
             }))

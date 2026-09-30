@@ -1,0 +1,123 @@
+{
+  "schema": 1,
+  "campaign": {
+    "schema": 2,
+    "root": "/ssd/scxi253/single-gpu-inference-selector-v4-smoke-r2-20260930T191835Z",
+    "source_commit": "f930fa6532cbedf05e0ab86b1faf841dd00cbdd9",
+    "source_archive_sha256": "d9ead6b68b3dbf632f9c3da7fbe943b70e0ce3d670cc56712ff6ee4e992d0c4f",
+    "case_hash": "281cbb0daad58f80e5e2168a38db31a6314183cbf41158fff4f9ee97e4b58e53",
+    "release_hash": "ee80e2cce74be6c17c94e2ebc98e3911d7ce634ade54a79e303b5f6972b4ca16",
+    "jit_cache": "campaign-private FLASHINFER_WORKSPACE_BASE; pristine/v4 separated",
+    "supersedes": "/ssd/scxi253/single-gpu-inference-selector-v4-canary-20260930T185501Z",
+    "release_cases_consumed": 0,
+    "default_promotion": false,
+    "serving_promotion": false,
+    "historical_token_divergence_resolved": false,
+    "submitted_utc": "2026-09-30T19:19:21.093350+00:00",
+    "jobs": {
+      "gpu_4090": "1643750",
+      "gpu_5090": "1643751"
+    }
+  },
+  "jobs": {
+    "gpu_4090": {
+      "id": "1643750",
+      "slurm_state": "FAILED",
+      "tool_failure": "old audit searched JIT wrapper source instead of source-bound overlay header"
+    },
+    "gpu_5090": {
+      "id": "1643751",
+      "slurm_state": "FAILED",
+      "tool_failure": "same old audit source-location assumption"
+    }
+  },
+  "gpu": {
+    "gpu_4090": {
+      "pristine_sha256": "6fb2fedeaf86666ca78e9a22be3ce487fd2af382237c442d32a42d538de5c032",
+      "v4_sha256": "897d736fd70d45ee565d969202653d94fa89aaf067c58d185ae9f3009c6cf060",
+      "binary_audit_sha256": "e193aed7730fdd5179377ddd4d2e25fa40ffa5bdd726f4a8e9830e4405815312",
+      "policies": {
+        "ragged|0": {
+          "plan_bit": 0,
+          "exact": true
+        },
+        "ragged|1": {
+          "plan_bit": 1,
+          "exact": true
+        },
+        "ragged|2": {
+          "plan_bit": 1,
+          "exact": true
+        },
+        "paged|0": {
+          "plan_bit": 0,
+          "exact": true
+        },
+        "paged|1": {
+          "plan_bit": 1,
+          "exact": true
+        },
+        "paged|2": {
+          "plan_bit": 1,
+          "exact": true
+        }
+      },
+      "binary_sha256": [
+        "ee68f2fa4dd265a730b6cead3353557e1448eef57b19282baa1c53cbdebae357"
+      ],
+      "symbol_hits": {
+        "ragged_native": 176,
+        "ragged_resource": 176,
+        "paged_native": 176,
+        "paged_resource": 176
+      },
+      "smoke_kernel_result": "PASS",
+      "job_exit_result": "FAILED_TOOLING_AFTER_RESULTS"
+    },
+    "gpu_5090": {
+      "pristine_sha256": "da32c5d8ea6a8baabb264f2e971542382f84914fef2b1b929095f399a5f3f273",
+      "v4_sha256": "a13c4b7c5c57f477a079f1e3ccc3956c51087bdbaa1f12aa264a644b1632f6c6",
+      "binary_audit_sha256": "0abef8338a44e4be44f1d0019af2060a343684a1248cb064bfa65944874d886a",
+      "policies": {
+        "ragged|0": {
+          "plan_bit": 0,
+          "exact": true
+        },
+        "ragged|1": {
+          "plan_bit": 1,
+          "exact": true
+        },
+        "ragged|2": {
+          "plan_bit": 0,
+          "exact": true
+        },
+        "paged|0": {
+          "plan_bit": 0,
+          "exact": true
+        },
+        "paged|1": {
+          "plan_bit": 1,
+          "exact": true
+        },
+        "paged|2": {
+          "plan_bit": 0,
+          "exact": true
+        }
+      },
+      "binary_sha256": [
+        "034f92ffb153c7b1f338c9dc53d6754c588ca6d2e596c817e0ccc10edf346420"
+      ],
+      "symbol_hits": {
+        "ragged_native": 176,
+        "ragged_resource": 176,
+        "paged_native": 176,
+        "paged_resource": 176
+      },
+      "smoke_kernel_result": "PASS",
+      "job_exit_result": "FAILED_TOOLING_AFTER_RESULTS"
+    }
+  },
+  "release_cases_consumed": 0,
+  "default_promotion": false,
+  "serving_promotion": false
+}

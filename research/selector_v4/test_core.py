@@ -15,18 +15,22 @@ def identity(execution="graph16_replay", split="unsplit", uuid="GPU-test"):
         environment={"gpu_name":"NVIDIA Test","gpu_uuid":uuid,"num_sms":170,"driver":"580.82.07",
             "cuda":"13.0","torch":"2.13.0","flashinfer":"0.7.0","nvcc":"13.0",
             "backend_source_sha256":"a"*64,"official_overlay_sha256":"b"*64,
-            "max_smem_per_sm":102400,"max_smem_per_block_optin":101376},
+            "resource_binding_sha256":"c"*64,"max_smem_per_sm":102400,"max_smem_per_block_optin":101376},
         operation={"execution_mode":execution,"backend":"fa2","causal":True,"layout":"paged",
             "dtype":"float16","actual_split":split,"num_qo_heads":32,"num_kv_heads":8,
             "head_dim_qk":128,"head_dim_vo":128,"page_size":16,"q":[3,35,99,163,259],
             "cached":[32768,16384,8192,2048,64],"plan_signature":[40]+[0]*14},
-        measurement_policy={"execution_mode":execution,"timer":"deployment_wall","qualification_revision":"4.0.0"},
+        measurement_policy={"execution_mode":execution,"timer":"deployment_wall","qualification_revision":"4.1.0"},
     )
 
 class IdentityEligibilityTests(unittest.TestCase):
     def test_identity_binds_execution_and_environment(self):
         self.assertNotEqual(identity().key, identity("eager_full_call").key)
         self.assertNotEqual(identity().key, identity(uuid="GPU-other").key)
+        x=identity();env=dict(x.environment);env["resource_binding_sha256"]="d"*64
+        self.assertNotEqual(x.key,TacticIdentity(env,x.operation,x.measurement_policy).key)
+        env=dict(x.environment);env["max_smem_per_sm"]+=1
+        self.assertNotEqual(x.key,TacticIdentity(env,x.operation,x.measurement_policy).key)
 
     def test_tactic_flag_is_rejected_from_operation_identity(self):
         a=identity();op=dict(a.operation);op["plan_signature"]=[40]+[0]*15
@@ -41,16 +45,16 @@ class IdentityEligibilityTests(unittest.TestCase):
 class SafeTunerTests(unittest.TestCase):
     def test_strong_evidence_selects_cap(self):
         x=identity(); e=evaluate_eligibility(x)
-        r=choose_tactic(x,e,[1.20]*16,[1.0]*16,[1.0]*16,exact_outputs=True)
+        r=choose_tactic(x,e,[1.20]*32,[1.0]*32,[1.0]*32,exact_outputs=True)
         self.assertEqual(r.tactic,TACTIC_CAP);self.assertTrue(r.passed)
     def test_control_or_gain_failure_falls_back(self):
         x=identity();e=evaluate_eligibility(x)
-        self.assertEqual(choose_tactic(x,e,[1.02]*16,[1.0]*16,[1.0]*16,exact_outputs=True).tactic,TACTIC_NATIVE)
-        self.assertEqual(choose_tactic(x,e,[1.20]*16,[1.02]*16,[1.0]*16,exact_outputs=True).tactic,TACTIC_NATIVE)
-        self.assertEqual(choose_tactic(x,e,[1.20]*16,[1.0]*16,[1.0]*16,exact_outputs=False).tactic,TACTIC_NATIVE)
+        self.assertEqual(choose_tactic(x,e,[1.02]*32,[1.0]*32,[1.0]*32,exact_outputs=True).tactic,TACTIC_NATIVE)
+        self.assertEqual(choose_tactic(x,e,[1.20]*32,[1.02]*32,[1.0]*32,exact_outputs=True).tactic,TACTIC_NATIVE)
+        self.assertEqual(choose_tactic(x,e,[1.20]*32,[1.0]*32,[1.0]*32,exact_outputs=False).tactic,TACTIC_NATIVE)
     def test_crossfit_never_applies_failed_tactic(self):
         x=identity();e=evaluate_eligibility(x)
-        reps={0:RepeatEvidence((1.2,)*8,(1.,)*8,(1.,)*8),1:RepeatEvidence((1.2,)*8,(1.,)*8,(1.,)*8),2:RepeatEvidence((.98,)*8,(1.,)*8,(1.,)*8)}
+        reps={0:RepeatEvidence((1.2,)*16,(1.,)*16,(1.,)*16),1:RepeatEvidence((1.2,)*16,(1.,)*16,(1.,)*16),2:RepeatEvidence((.98,)*16,(1.,)*16,(1.,)*16)}
         folds=crossfit_cell(x,e,reps,exact_outputs=True)
         self.assertEqual(folds[2].receipt.tactic,TACTIC_CAP)
         self.assertLess(folds[2].policy_geomean,1.0)
@@ -63,7 +67,7 @@ class ReportBoundaryTests(unittest.TestCase):
 
 class CacheTests(unittest.TestCase):
     def test_atomic_publish_lookup_corruption_and_env_isolation(self):
-        x=identity();e=evaluate_eligibility(x);receipt=choose_tactic(x,e,[1.2]*16,[1.]*16,[1.]*16,exact_outputs=True).to_dict()
+        x=identity();e=evaluate_eligibility(x);receipt=choose_tactic(x,e,[1.2]*32,[1.]*32,[1.]*32,exact_outputs=True).to_dict()
         with tempfile.TemporaryDirectory() as tmp:
             cache=SafeTacticCache(tmp,x);path=cache.publish(x,receipt,provenance={"job":"test"})
             self.assertEqual(cache.lookup(x)["tactic"],TACTIC_CAP)
@@ -71,13 +75,13 @@ class CacheTests(unittest.TestCase):
             path.write_text("not json");cache.reload();self.assertIsNone(cache.lookup(x))
             with self.assertRaises(ValueError):SafeTacticCache(tmp,identity(uuid="other")).publish(x,receipt,provenance={})
     def test_corrupt_manifest_disables_cache_without_crashing_lookup(self):
-        x=identity();receipt=choose_tactic(x,evaluate_eligibility(x),[1.2]*16,[1.]*16,[1.]*16,exact_outputs=True).to_dict()
+        x=identity();receipt=choose_tactic(x,evaluate_eligibility(x),[1.2]*32,[1.]*32,[1.]*32,exact_outputs=True).to_dict()
         with tempfile.TemporaryDirectory() as tmp:
             cache=SafeTacticCache(tmp,x);manifest=cache.env_dir/'manifest.json';manifest.write_text('corrupt')
             disabled=SafeTacticCache(tmp,x);self.assertIsNone(disabled.lookup(x))
             with self.assertRaisesRegex(ValueError,'manifest is unusable'):disabled.publish(x,receipt,provenance={})
     def test_conflicting_publication_is_rejected_under_lock(self):
-        x=identity();receipt=choose_tactic(x,evaluate_eligibility(x),[1.2]*16,[1.]*16,[1.]*16,exact_outputs=True).to_dict()
+        x=identity();receipt=choose_tactic(x,evaluate_eligibility(x),[1.2]*32,[1.]*32,[1.]*32,exact_outputs=True).to_dict()
         with tempfile.TemporaryDirectory() as tmp:
             cache=SafeTacticCache(tmp,x);cache.publish(x,receipt,provenance={'job':'a'})
             with self.assertRaisesRegex(ValueError,'conflicting tactic publication'):

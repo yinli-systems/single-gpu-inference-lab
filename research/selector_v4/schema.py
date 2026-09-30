@@ -3,7 +3,7 @@ from dataclasses import asdict, dataclass
 from typing import Any, Mapping
 
 SCHEMA_VERSION = 4
-QUALIFICATION_REVISION = "4.0.0"
+QUALIFICATION_REVISION = "4.1.0"
 TACTIC_NATIVE = "native"
 TACTIC_CAP = "resource_cap"
 VALID_TACTICS = frozenset((TACTIC_NATIVE, TACTIC_CAP))
@@ -14,8 +14,8 @@ class DecisionThresholds:
     train_lcb95: float = 1.01
     train_block_min: float = 0.99
     control_equivalence: float = 0.005
-    min_training_blocks: int = 16
-    bootstrap_draws: int = 10000
+    min_training_blocks: int = 32
+    bootstrap_draws: int = 20000
 
     def validate(self) -> None:
         if not (1.0 < self.train_geomean and 1.0 <= self.train_lcb95):

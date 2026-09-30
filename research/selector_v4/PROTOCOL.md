@@ -1,35 +1,57 @@
-# Selector v4: safe deployment-matched tactic autotuning
+# Selector v4.1 — isolated tactics and fail-closed deployment-matched autotuning
 
-## Decision and scope
+## Scope and immutable history
 
-V3.2.2 is permanently HOLD and its 30 release geometries are exposed development data. V4 does not relax its 0.99 safety gate or relabel those cases as fresh. It replaces the static guarded selector with two explicit tactics: `native` and `resource_cap`. Static logic only determines physical eligibility; a tactic is selected separately for each full environment/operation/execution identity by deployment-matched measurement. Until a valid cache entry exists, native is mandatory.
+The complete v3.2.2 release remains development evidence and remains HOLD. Its 96/96 runs must not be repeated or relabeled fresh. RTX4090 exposed strong selected gains but fallback/disabled-overlay regressions; RTX5090 additionally exposed a selected `opp-04` regression. Those 30 shapes and every earlier v3/v4 manifest are in the historical deduplication ledger.
 
-This remains a research prototype. Historical 2/432 full-model token divergence is unresolved, so even a dual-GPU release PASS authorizes only controlled full-serving validation, never default enablement.
+The sibling v4-autotune branch established development evidence for separate native/resource kernel symbols in private JIT caches on RTX4090/5090. V4.1 integrates that mechanism with the safe-autotune identity, cache, cross-fit and freshness contracts. The sibling smoke is supporting evidence only; this source revision requires its own smoke.
 
-## Identity and cache contract
+Default and serving promotion remain OFF. The historical 2/432 full-model token divergence is unresolved and independently blocks production promotion.
 
-Environment identity includes GPU name/UUID/SM count, driver, CUDA, Torch, FlashInfer, NVCC, backend source hash, official overlay hash and shared-memory limits. Operation identity includes eager/Graph1/Graph16 mode, layout, dtype, actual split, heads/dimensions/page size, ordered q/cached geometry, tactic-neutral plan-core signature and frozen timing window. Measurement policy is identity-bearing.
+## Mechanism: isolate mutable CUDA function state
 
-The cache is content-addressed below `v4/<environment_hash>/entries/`. Each entry embeds the full canonical identity, selected tactic, evidence receipt and provenance. Publication uses a same-directory temporary file plus `os.replace`. Missing, malformed, foreign, stale or runtime-rejected entries are cache misses and fall back to native. A cap entry is invalid unless its exact frozen thresholds passed.
+`cudaFuncSetAttribute` targets a concrete device function. V4.1 therefore duplicates the ragged and paged FA2 prefill kernels into distinct `...ResourceKernel` symbols. The native kernel source span is byte-identical to official FlashInfer0.7. Only the resource clone receives the 64KiB dynamic-shared-memory attribute and launch. The legacy plan entry remains ABI-visible and defaults to native policy0; an explicit research plan entry supports only native0 and resource-cap1.
 
-## Static eligibility
+Every GPU job uses campaign-private pristine/candidate JIT roots. After compilation, `audit_binary.py` requires native/resource ragged and paged symbols to be co-resident in compiled tactic modules. A candidate cache hit is rejected at runtime unless the wrapper exposes both `plan_resource` and `resource_kernel_isolation=True`.
 
-Eligibility is deliberately broad and fail-closed: standard causal FA2, FP16/BF16, supported 32/8 heads with D128, ragged/page16 layout, batch at least five, cached prefix at least8192, actual unsplit plan, and sufficient shared-memory capability. Eligibility is not a performance prediction.
+## Eligibility and unsupported paths
 
-## Frozen tuner threshold
+Static eligibility is deliberately broad and physical: FA2, causal, D128 QK/VO, 32/8 heads, supported dtype/layout, actual unsplit plan, batch>=5, max cached prefix>=8192, valid device shared-memory limits. It is not the final selector.
 
-Using only exposed v3.2.2 development data, leave-one-process-out analysis froze: training geomean native/cap at least1.05, paired bootstrap95% LCB at least1.01, every training block at least0.99, exact outputs, native/cap duplicate controls within reciprocal±0.5%, and at least16 training blocks. Failure of any check selects native. These thresholds cannot change after v4 canary starts.
+A cap arm is executed only when static eligibility passes and the source-bound runtime probe succeeds. Split/ineligible/unsupported cells use a second independent native wrapper as an explicitly recorded null arm; they cannot publish or apply a cap tactic. Every paired cell records actual tactic, cap support, probe error if any, plan flags, exact output/LSE and a `native -> cap -> native` isolation check.
 
-## Measurement and cross-fitting
+## Identity, cache and deployment modes
 
-Each cell is measured in three independent processes. Every process has eight ABBA/BAAB blocks comparing native and cap in the same candidate binary. Eager measures recurring plan+run wall time. Graph1 and Graph16 use independently captured graphs. Pristine pilots freeze all timing-window counts; every scored window is at least12ms and the same count is reused by every arm and process.
+Tactic identity binds GPU name/UUID/SM count, driver, CUDA, Torch, FlashInfer, nvcc, official overlay, candidate source, resource-binding hash, shared-memory limits, full ordered q/cached geometry, dtype/layout/page size, actual split, plan signature, and execution-specific measurement policy.
 
-For each of three folds, two process repeats train the tuner and the third is an untouched held-out evaluation. Native fallback contributes exactly1.0 to policy performance. Promotion requires exact output/LSE, selected held-out point and block worst at least0.99, simultaneous joint-min95% LCB at least0.99, whole-policy worst at least0.99, resolved held-out controls, nonempty selection in all three execution modes, and both dtypes/layouts.
+Eager full-call, Graph1 replay and Graph16 replay are distinct identities. A tactic from one mode/GPU/software environment cannot alias another. The cache is content-addressed, atomically published under a lock, corruption/conflict rejecting, environment isolated and native-on-miss. Runtime validation occurs before plan/capture; every failure falls back native.
 
-## Fresh data hierarchy
+## Measurement and cross-fit
 
-The deterministic manifest contains10 canary,48 release and12 stress cases. It records hashes for every historical manifest and rejects any exact `(q,cached)` collision. Canary must PASS on both4090 and5090 before release. Release must PASS on both GPUs before stress or controlled full-serving work. Stress is transfer evidence, not a substitute for release.
+Each cell covers FP16/BF16, ragged/paged and requested auto/unsplit. Pristine references and candidate paired runs are separate processes on one physical GPU per shard. Three process repeats use process order pristine/paired, paired/pristine, pristine/paired.
 
-## Primary design references
+Each process uses 16 ABBA/BAAB blocks. Eager and graph windows target >=96ms and every scored window must be >=12ms. Release timings are unprofiled. Nsight/Nsight Compute mechanism profiles are separate evidence because profiling can alter clocks, caches, replay and launch serialization.
 
-FlashInfer Autotuner v2 PR3861 provides the managed environment-hashed cache, atomic per-entry publication, deployment-matched `MeasurementPolicy`, self-describing tactic validation, and default-candidate coverage guard used as design precedent. NVIDIA Nsight Compute profiling remains diagnostic-only because profiler replay/cache/clock controls can change the execution boundary. No profiler timing enters release qualification.
+For every identity, two repeats train and the third is held out, rotating across all three folds. Selection requires exact outputs, static/runtime eligibility, >=32 training blocks, training geomean>=1.05, bootstrap95% LCB>=1.01, every training block>=0.99, and native/cap duplicate controls within +/-0.5%. Any failed condition chooses native. Held-out results are never used to alter that fold's choice.
+
+## Qualification gates
+
+Canary/release require:
+
+- exact complete output and LSE for every arm and eager/Graph1/Graph16 replay;
+- native-after-cap exactness;
+- compiled symbol isolation and stable active-clock telemetry for every shard;
+- nonempty cap selection across both dtypes, layouts and all execution modes;
+- selected held-out geomean>=1.05;
+- selected point worst, block worst and simultaneous joint-min95% LCB >=0.99;
+- whole-policy worst>=0.99;
+- held-out controls resolved;
+- cache publication/reload round trip.
+
+No 0.99 threshold may be loosened after seeing canary or release. A failed canary makes its shapes development evidence; selector/threshold changes require a new untouched holdout.
+
+## Freshness and stages
+
+The manifest contains 2 exposed dev cases, 10 untouched canary cases, 48 untouched release cases and 12 untouched stress cases. Fresh q/cached pairs, q vectors and cached vectors are exactly deduplicated against all recorded historical manifests, including the sibling v4 branch.
+
+Order is mandatory: CPU/source validation -> dual-GPU private-cache smoke -> dual-GPU canary -> dual-GPU release -> stress -> paired full HTTP. Full HTTP additionally requires complete token parity and nonregressive throughput/goodput/TTFT/TPOT. The unresolved historical divergence remains a separate blocker even if performance passes.

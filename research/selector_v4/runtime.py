@@ -19,7 +19,8 @@ def validate_wrapper(identity: TacticIdentity, entry: dict[str, Any], wrapper: A
         if getattr(wrapper, "_backend", None) != "fa2" or getattr(wrapper, "_jit_module", None) is not None:
             return False
         module = getattr(wrapper, "_cached_module", None)
-        if module is None or getattr(module, "plan_resource", None) is None:
+        if (module is None or getattr(module, "plan_resource", None) is None or
+                getattr(module, "resource_kernel_isolation", False) is not True):
             return False
         if entry["tactic"] == TACTIC_CAP and not evaluate_eligibility(identity).eligible:
             return False
