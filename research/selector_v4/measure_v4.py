@@ -98,7 +98,7 @@ def run(args):
     binding_path = root / "RESOURCE_BINDING.json"; binding = None
     if candidate:
         binding = json.loads(binding_path.read_text())
-        if (binding.get("selector_version") != "4.1.0" or binding.get("kernel_symbol_isolation") is not True or
+        if (binding.get("selector_version") != QUALIFICATION_REVISION or binding.get("kernel_symbol_isolation") is not True or
                 binding.get("native_runtime_policy") is not True or binding.get("default_policy") != "native"):
             raise RuntimeError("candidate binding mismatch")
         for rel, expected in binding["modified_hashes"].items():

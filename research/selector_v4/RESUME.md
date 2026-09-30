@@ -61,3 +61,7 @@ A pre-canary audit found that v4.1 cross-fit correctly measures off/cap but trea
 ## Linux freshness-ledger correction
 
 The v4.1 manifest previously recorded `research/parity_remediation/evidence/manifest.json`, while the tracked file is `MANIFEST.json`. macOS case-insensitive lookup hid this; ParaCloud Linux validation rejected it. The key is corrected without changing any case geometry, case hash, stage hash, selector rule, threshold, or consumed evidence. A new source commit and exact-source smoke are required before canary.
+
+## Qualification revision 4.1.1
+
+The native-overlay gate changes promotion semantics, so cache/measurement/binding identity is bumped from 4.1.0 to 4.1.1. Authorization now recomputes and binds the exact analyzer SHA, measurement-manifest SHA, campaign source commit, source archive, overlay, stage/gpu identity, and explicit native-overlay requirements. Old 4.1.0 summaries or caches cannot authorize a 4.1.1 canary. The currently running two-case dev campaign remains immutable 8ea2169/4.1.0 development evidence only; after analysis, exact-source 4.1.1 smoke and dev qualification are mandatory before touching canary.
