@@ -14,7 +14,7 @@ def authorize(root: Path, stage: str) -> dict:
     for gpu in ("gpu_4090","gpu_5090"):
         path=root/f"analysis/canary-{gpu}/summary.json";need(path.exists(),"missing canary "+gpu)
         value=json.loads(path.read_text());need(value.get("pass") is True,"canary HOLD "+gpu)
-        need(value.get("qualification_revision")==QUALIFICATION_REVISION and value.get("case_hash")==manifest["case_hash"],"canary identity "+gpu)
+        need(value.get("qualification_revision")==QUALIFICATION_REVISION and value.get("case_hash")==manifest["case_hash"] and value.get("stage_hash")==manifest["stage_hashes"]["canary"],"canary identity "+gpu)
         need(value.get("source_archive_sha256")==source and value.get("official_overlay_sha256")==overlay,"canary provenance "+gpu)
         canaries[gpu]={"metrics":value["metrics"],"hardware":value["hardware"]}
     out={"authorized_stage":stage,"qualification_revision":QUALIFICATION_REVISION,"case_hash":manifest["case_hash"],
@@ -23,7 +23,7 @@ def authorize(root: Path, stage: str) -> dict:
     if stage=="stress":
         for gpu in ("gpu_4090","gpu_5090"):
             path=root/f"analysis/release-{gpu}/summary.json";need(path.exists(),"missing release "+gpu)
-            value=json.loads(path.read_text());need(value.get("pass") is True,"release HOLD "+gpu)
+            value=json.loads(path.read_text());need(value.get("pass") is True,"release HOLD "+gpu);need(value.get("stage_hash")==manifest["stage_hashes"]["release"],"release identity "+gpu)
         out["release_passed_both_gpus"]=True
     return out
 

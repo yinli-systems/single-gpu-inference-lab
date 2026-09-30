@@ -15,7 +15,7 @@ class AuthorizationTests(unittest.TestCase):
         for gpu in ('gpu_4090','gpu_5090'):
             d=self.root/f'analysis/canary-{gpu}';d.mkdir();(d/'summary.json').write_text(json.dumps({
                 'pass':True,'qualification_revision':QUALIFICATION_REVISION,'case_hash':self.case_hash,
-                'source_archive_sha256':'a'*64,'official_overlay_sha256':'b'*64,
+                'source_archive_sha256':'a'*64,'official_overlay_sha256':'b'*64,'stage_hash':load(manifest)['stage_hashes']['canary'],
                 'metrics':{'policy_worst':1.0},'hardware':{'0':{'gpu_name':gpu}}
             }))
     def test_dual_pass_authorizes_release_only(self):
