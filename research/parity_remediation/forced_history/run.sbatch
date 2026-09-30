@@ -16,6 +16,9 @@ export PATH=$CUDA_HOME/bin:$E/bin:$PATH LD_LIBRARY_PATH=$CUDA_HOME/lib:${LD_LIBR
 export OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 MAX_JOBS=4 TRITON_CACHE_DIR=$LOCAL/triton
 CCCL=$P/overlays/pristine/flashinfer/data/cccl
 export CPATH=$CCCL/libcudacxx/include:$CCCL/cub:$CCCL/thrust NVCC_PREPEND_FLAGS="-I$CCCL/libcudacxx/include -I$CCCL/cub -I$CCCL/thrust"
+export SGLANG_JIT_CACHE_DIR=$LOCAL/sglang-jit
+export SGLANG_CACHE_DIR=$LOCAL/sglang-runtime
+export SGLANG_CUTE_AOT_CACHE_DIR=$LOCAL/cute-aot
 cd "$SOURCE"; sha256sum -c source.sha256
 ROOT=$(dirname "$SOURCE");mkdir -p "$ROOT/runs/$SLURM_JOB_ID" "$ROOT/logs";R="$ROOT/runs/$SLURM_JOB_ID"
 scontrol show job "$SLURM_JOB_ID" -o > "$R/slurm.txt";nvidia-smi --query-gpu=name,uuid,driver_version,power.limit --format=csv > "$R/hardware.csv"
