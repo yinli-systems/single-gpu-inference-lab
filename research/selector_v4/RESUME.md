@@ -39,3 +39,9 @@
 ## Reasoning-setting limitation
 
 The UI showed Pro power5/5, but an option explicitly named Max could not be verified. Do not claim Max was enabled.
+
+## Campaign preparation failures and stage-hash fix
+
+Two preparation attempts produced no GPU work. The first failed in the shell before Python because output redirection targeted a root that did not exist. The second generated an overlay but failed before campaign receipt creation on a missing sibling-only `release_hash`; its partial root and receipt are retained. No jobs were submitted and no dev/canary/release/stress case was consumed.
+
+V4.1 now records immutable `stage_hashes` for each family and validates them in the manifest contract. The full38-test contract passes after this fix. Build the next source archive from the commit containing this note; do not submit from `e3121b0`.

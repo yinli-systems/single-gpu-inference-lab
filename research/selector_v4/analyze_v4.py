@@ -145,7 +145,7 @@ def run(args):
     result={"qualification_revision":QUALIFICATION_REVISION,"stage":args.stage,"gpu":args.gpu,
         "pass":all(requirements.values()),"requirements":requirements,"metrics":metrics,"hardware":hardware,
         "source_archive_sha256":next(iter(source)),"official_overlay_sha256":next(iter(overlay)),
-        "case_hash":manifest["case_hash"],"measurement_manifest_sha256":hashlib.sha256(measurement_manifest_path.read_bytes()).hexdigest(),
+        "case_hash":manifest["case_hash"],"stage_hash":manifest["stage_hashes"][args.stage],"measurement_manifest_sha256":hashlib.sha256(measurement_manifest_path.read_bytes()).hexdigest(),
         "campaign_source_commit":(args.root/"source/SOURCE_COMMIT.txt").read_text().strip(),
         "analysis_source_sha256":hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
         "binary_audits":binary_audits,"telemetry":telemetry,

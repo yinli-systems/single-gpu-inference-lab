@@ -49,7 +49,7 @@ def prepare_campaign(*, root: Path, pristine_source: Path, source_archive: Path,
     (root/"receipts/resource-binding.sha256").write_text(binding_sha+"\n")
     campaign={"schema":4,"qualification_revision":manifest["qualification_revision"],"root":str(root),"stage":stage,
         "source_commit":source_commit,"source_archive_sha256":archive_sha,"official_overlay_sha256":official,
-        "resource_binding_sha256":binding_sha,"case_hash":manifest["case_hash"],"release_hash":manifest["release_hash"],
+        "resource_binding_sha256":binding_sha,"case_hash":manifest["case_hash"],"stage_hash":manifest["stage_hashes"][stage],
         "shards":shards,"blocks":manifest["blocks"],"release_cases_consumed":0,"default_promotion":False,
         "serving_promotion":False,"historical_token_divergence_resolved":False,"binding":binding,"jobs":{}}
     (root/"receipts/campaign.json").write_text(json.dumps(campaign,indent=2)+"\n")

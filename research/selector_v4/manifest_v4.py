@@ -165,12 +165,15 @@ def generate(repo: Path, output: Path) -> dict[str, Any]:
         "historical_manifest_hashes": history_hashes, "cases": cases,
     }
     payload["case_hash"] = digest(cases)
+    payload["stage_hashes"] = {family: digest([c for c in cases if c["family"] == family]) for family in payload["families"]}
     output.write_text(json.dumps(payload, indent=2) + "\n")
     return payload
 
 def load(path: Path | None = None) -> dict[str, Any]:
     path = path or Path(__file__).with_name("manifest.json")
     data = json.loads(path.read_text())
-    if data.get("schema") != SCHEMA or data.get("case_hash") != digest(data.get("cases")):
+    expected_stages = {family: digest([c for c in data.get("cases", []) if c.get("family") == family]) for family in data.get("families", {})}
+    if (data.get("schema") != SCHEMA or data.get("case_hash") != digest(data.get("cases")) or
+            data.get("stage_hashes") != expected_stages):
         raise ValueError("manifest contract mismatch")
     return data
