@@ -29,7 +29,8 @@ def run(a):
    oe=load_env(old);ne=load_env(new);key=('release',3,6,rep,mode)
    require((oe['stage'],oe['shard'],oe['shards'],oe['rep'],oe['mode'])==key,'old identity')
    require((ne['stage'],ne['shard'],ne['shards'],ne['rep'],ne['mode'])==key,'new identity')
-   source|={oe['source_commit'],ne['source_commit']};replacement_hw.add(ne['hardware']['out'].strip())
+   require((old/'source_commit.txt').is_file() and (new/'source_commit.txt').is_file(),'source commit receipt missing')
+   source|={ (old/'source_commit.txt').read_text().strip(), (new/'source_commit.txt').read_text().strip() };replacement_hw.add(ne['hardware']['out'].strip())
    base=dict(superseded=old.relative_to(a.root).as_posix(),replacement=new.relative_to(a.root).as_posix(),
     key=dict(shard=3,rep=rep,mode=mode),old_job=a.old_job,replacement_job=a.replacement_job,
     replacement_complete_sha256=sha(new/'complete.json'))
