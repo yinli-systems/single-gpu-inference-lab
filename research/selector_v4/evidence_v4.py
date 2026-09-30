@@ -23,7 +23,7 @@ def expected_sequence(mode: str, block: int) -> tuple[tuple[str, str], ...]:
     arms = ("off","cap","cap","off") if block % 2 == 0 else ("cap","off","off","cap")
     return tuple((arm, "A" if arm == "off" else "B") for arm in arms)
 
-def validate_run(path: Path, *, mode: str, stage: str, rep: int, shard: int, shards: int) -> dict[str, Any]:
+def validate_run(path: Path, *, mode: str, stage: str, rep: int, shard: int, shards: int, manifest: dict[str, Any] | None = None) -> dict[str, Any]:
     path = Path(path); complete = json.loads((path / "complete.json").read_text())
     need(complete.get("complete") is True, "incomplete run")
     required = {"environment.json","measurements.json","qualification.json","memory.json","progress.json"}
@@ -34,7 +34,7 @@ def validate_run(path: Path, *, mode: str, stage: str, rep: int, shard: int, sha
     quals = json.loads((path / "qualification.json").read_text()); memory = json.loads((path / "memory.json").read_text())
     need((env["mode"],env["stage"],env["rep"],env["shard"],env["shards"]) == (mode,stage,rep,shard,shards), "run identity")
     need(env["measurement_contract_revision"] == QUALIFICATION_REVISION and env["profiled"] is False, "measurement identity")
-    manifest = load(); cases = [c for i,c in enumerate([x for x in manifest["cases"] if x["family"] == stage]) if i % shards == shard]
+    manifest = manifest or load(); cases = [c for i,c in enumerate([x for x in manifest["cases"] if x["family"] == stage]) if i % shards == shard]
     need(env["case_hash"] == manifest["case_hash"] and env["cases"] == cases, "manifest/shard mismatch")
     basics = {(c["id"],dt,layout,split) for c in cases for dt in manifest["dtypes"] for layout in manifest["layouts"] for split in manifest["requested_splits"]}
     qmap = {}

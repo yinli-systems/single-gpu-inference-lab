@@ -1,5 +1,5 @@
 from __future__ import annotations
-import argparse, json, math, tempfile
+import argparse, hashlib, json, math, tempfile
 from pathlib import Path
 from typing import Any
 import numpy as np
@@ -37,14 +37,15 @@ def block_evidence(rows, key, execution):
     return RepeatEvidence(tuple(treatment),tuple(native),tuple(cap))
 
 def run(args):
-    manifest=load();cases=[c for c in manifest["cases"] if c["family"]==args.stage];lookup={};hardware={};source=set();overlay=set()
+    measurement_manifest_path=args.root/"source/research/selector_v4/manifest.json"
+    manifest=load(measurement_manifest_path);cases=[c for c in manifest["cases"] if c["family"]==args.stage];lookup={};hardware={};source=set();overlay=set()
     for shard in range(args.shards):
         subset=[c for i,c in enumerate(cases) if i%args.shards==shard]
         need(bool(subset),"empty shard")
         for rep in range(3):
             for mode in ("pristine","paired"):
                 paths=list((args.root/"runs").glob(f"{args.stage}-{args.gpu}-s{shard}-r{rep}-{mode}-*"));need(len(paths)==1,f"run discovery {shard} {rep} {mode}")
-                lookup[shard,rep,mode]=validate_run(paths[0],mode=mode,stage=args.stage,rep=rep,shard=shard,shards=args.shards)
+                lookup[shard,rep,mode]=validate_run(paths[0],mode=mode,stage=args.stage,rep=rep,shard=shard,shards=args.shards,manifest=manifest)
         envs=[lookup[shard,rep,mode]["environment"] for rep in range(3) for mode in ("pristine","paired")]
         uuids={x["gpu_uuid"] for x in envs};drivers={x["driver"] for x in envs};need(len(uuids)==len(drivers)==1,"shard hardware drift")
         hardware[str(shard)]={"uuid":next(iter(uuids)),"driver":next(iter(drivers)),"gpu_name":envs[0]["gpu_name"]}
@@ -111,7 +112,10 @@ def run(args):
     result={"qualification_revision":QUALIFICATION_REVISION,"stage":args.stage,"gpu":args.gpu,
         "pass":all(requirements.values()),"requirements":requirements,"metrics":metrics,"hardware":hardware,
         "source_archive_sha256":next(iter(source)),"official_overlay_sha256":next(iter(overlay)),
-        "case_hash":manifest["case_hash"],"records":cell_receipts,"default_promotion":False,"serving_promotion":False}
+        "case_hash":manifest["case_hash"],"measurement_manifest_sha256":hashlib.sha256(measurement_manifest_path.read_bytes()).hexdigest(),
+        "campaign_source_commit":(args.root/"source/SOURCE_COMMIT.txt").read_text().strip(),
+        "analysis_source_sha256":hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+        "records":cell_receipts,"default_promotion":False,"serving_promotion":False}
     args.out.mkdir(parents=True);(args.out/"summary.json").write_text(json.dumps(result,indent=2,allow_nan=False)+"\n")
     lines=["# Selector v4 safe-autotune qualification","",f"**{args.gpu}: {'PASS' if result['pass'] else 'HOLD'}**","",
         f"- Cross-fit records: {metrics['fold_records']}; selected {metrics['selected_records']} ({metrics['coverage']:.1%}).",
