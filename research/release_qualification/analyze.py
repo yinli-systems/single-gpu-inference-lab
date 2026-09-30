@@ -14,31 +14,55 @@ def safe_rel(root,value):
  require(not p.is_absolute() and '..' not in p.parts,'unsafe recovery path')
  return root/p
 
+def verify_complete(path,expected_sha=None):
+ require((path/'complete.json').exists() and (path/'launcher-complete.txt').exists(),'completed evidence missing')
+ if expected_sha is not None:require(sha(path/'complete.json')==expected_sha,'complete receipt changed')
+ c=json.loads((path/'complete.json').read_text());require(c.get('complete') is True,'completion flag missing')
+ for f,h in c.get('files',{}).items():
+  require(Path(f).name==f and (path/f).is_file() and sha(path/f)==h,'completed evidence hash mismatch')
+ return c
+
 def recovery_map(root,stage,gpu):
- p=root/'receipts'/'recovery-map.json'
- if not p.exists():return {},[],set()
- x=json.loads(p.read_text());require(x.get('schema')==1 and x.get('stage')==stage and x.get('gpu')==gpu,'wrong recovery map')
+ final=root/'receipts'/'recovery-map-final.json';first=root/'receipts'/'recovery-map.json'
+ p=final if final.exists() else first
+ if not p.exists():return {},dict(map=None,retained_incomplete_runs=[],superseded_complete_runs=[],unscored_recovery_attempts=[]),set()
+ x=json.loads(p.read_text());require(x.get('stage')==stage and x.get('gpu')==gpu,'wrong recovery map')
  require(x.get('measurement_source_commit'),'missing recovery source binding')
- skipped={};retained=[];replacement_paths=set()
+ schema=x.get('schema');require(schema in (1,2),'unsupported recovery schema')
+ if schema==2:
+  require(first.exists() and sha(first)==x['prior_map_sha256'],'prior recovery map changed')
+ skipped={};replacement_paths=set();info=dict(map=p.relative_to(root).as_posix(),map_sha256=sha(p),
+  retained_incomplete_runs=[],superseded_complete_runs=[],unscored_recovery_attempts=[])
  for e in x.get('entries',[]):
   old=safe_rel(root,e['superseded']);new=safe_rel(root,e['replacement'])
   require(old.is_dir() and new.is_dir(),'missing recovery directory')
-  require(not (old/'complete.json').exists() and not (old/'failure.json').exists(),'superseded run must be retained partial')
-  require((old/'environment.json').exists() and (old/'progress.json').exists(),'partial evidence missing')
-  require(sha(old/'environment.json')==e['old_environment_sha256'] and sha(old/'progress.json')==e['old_progress_sha256'],'partial evidence changed')
   env=json.loads((old/'environment.json').read_text());key=(env['shard'],env['rep'],env['mode'])
   require(key==(e['key']['shard'],e['key']['rep'],e['key']['mode']),'recovery key mismatch')
-  require((new/'complete.json').exists() and (new/'launcher-complete.txt').exists(),'replacement incomplete')
-  require(sha(new/'complete.json')==e['replacement_complete_sha256'],'replacement receipt changed')
+  kind=e.get('superseded_kind','partial')
+  if kind=='partial':
+   require(not (old/'complete.json').exists() and not (old/'failure.json').exists(),'superseded partial changed state')
+   require((old/'progress.json').exists(),'partial progress missing')
+   require(sha(old/'environment.json')==e['old_environment_sha256'] and sha(old/'progress.json')==e['old_progress_sha256'],'partial evidence changed')
+   info['retained_incomplete_runs'].append(dict(path=e['superseded'],progress=json.loads((old/'progress.json').read_text()),reason=e['reason'],old_job=e['old_job'],old_state=e['old_state'],replacement=e['replacement']))
+  elif kind=='complete':
+   verify_complete(old,e['old_complete_sha256'])
+   info['superseded_complete_runs'].append(dict(path=e['superseded'],reason=e['reason'],old_job=e['old_job'],replacement=e['replacement']))
+  else:raise ValueError('unknown superseded kind')
+  verify_complete(new,e['replacement_complete_sha256'])
+  newenv=json.loads((new/'environment.json').read_text());require((newenv['shard'],newenv['rep'],newenv['mode'])==key,'replacement identity mismatch')
   rel=old.relative_to(root).as_posix();require(rel not in skipped,'duplicate superseded path')
   skipped[rel]=e;replacement_paths.add(new.relative_to(root).as_posix())
-  retained.append(dict(path=rel,progress=json.loads((old/'progress.json').read_text()),reason=e['reason'],old_job=e['old_job'],old_state=e['old_state'],replacement=new.relative_to(root).as_posix()))
- require(retained,'empty recovery map')
- return skipped,retained,replacement_paths
+ for e in x.get('unscored_attempts',[]):
+  q=safe_rel(root,e['path']);verify_complete(q,e['complete_sha256'])
+  rel=q.relative_to(root).as_posix();require(rel not in skipped,'duplicate unscored path');skipped[rel]=e
+  info['unscored_recovery_attempts'].append(dict(path=rel,job=e['job'],reason=e['reason'],hardware=json.loads((q/'environment.json').read_text())['hardware']['out'].strip()))
+ require(x.get('entries'),'empty recovery map')
+ return skipped,info,replacement_paths
+
 def load(root,stage,gpu):
  sys.path.insert(0,str(root/'source'));from manifest import load,digest
  m=load();runs=[];seen=set();source=set();physical=defaultdict(set)
- skipped,retained,replacement_paths=recovery_map(root,stage,gpu);loaded_paths=set()
+ skipped,recovery,replacement_paths=recovery_map(root,stage,gpu);loaded_paths=set()
  for path in sorted((root/'runs').glob(stage+'-'+gpu+'-*')):
   if not path.is_dir():continue
   rel=path.relative_to(root).as_posix()
@@ -94,7 +118,7 @@ def load(root,stage,gpu):
    for mode in ['off','cap','guarded']:
     q=values[(rep,mode)]
     require(q['out_sha256']==base['out_sha256'] and q['lse_sha256']==base['lse_sha256'],'cross-mode hash parity failure')
- return m,runs,physical,retained
+ return m,runs,physical,recovery
 
 @lru_cache(None)
 def weights(shard,arm):
@@ -106,10 +130,10 @@ def weights(shard,arm):
  return w/24
 
 def run(a):
- require(not a.out.exists(),'preserve analysis output');m,rs,physical,retained=load(a.root,a.stage,a.gpu)
+ require(not a.out.exists(),'preserve analysis output');m,rs,physical,recovery=load(a.root,a.stage,a.gpu)
  receipt=dict(stage=a.stage,gpu=a.gpu,complete=True,processes=len(rs),timing_rows=sum(len(r['index']) for r in rs),
   qualifications=sum(len(r['qual']) for r in rs),source_hashes=rs[0]['env']['source'],manifest_hash=m['case_hash'],
-  hardware={str(k):sorted(v) for k,v in physical.items()},retained_incomplete_runs=retained,default_promotion=False,serving_promotion=False)
+  hardware={str(k):sorted(v) for k,v in physical.items()},recovery_evidence=recovery,default_promotion=False,serving_promotion=False)
  receipt['numerics']={mode:dict(qualifications=sum(len(r['qual']) for r in rs if r['env']['mode']==mode),
   exact_full_outputs=sum(q['pristine_exact'] for r in rs if r['env']['mode']==mode for q in r['qual'].values()),
   max_abs_vs_pristine=max(q['pristine_full_max_abs'] for r in rs if r['env']['mode']==mode for q in r['qual'].values()),
