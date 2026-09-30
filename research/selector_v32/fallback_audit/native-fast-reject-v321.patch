@@ -1,0 +1,11 @@
+--- a/flashinfer/data/csrc/batch_prefill.cu
++++ b/flashinfer/data/csrc/batch_prefill.cu
+@@ -78,7 +78,7 @@
+     plan_info.resource_cap = false;
+   } else if (resource_policy == 1) {
+     plan_info.resource_cap = true;
+-  } else {
++  } else if (!plan_info.split_kv && batch_size >= 5) {
+     // Selector v3: an execution-plan tactic, not a semantic workload rule.
+     // It requires anti-monotone q/cached coupling, sufficient strict pairs,
+     // an unsplit plan, and a hardware-normalized descriptor threshold.
