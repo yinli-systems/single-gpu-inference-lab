@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "parent_source_commit": "a849cf4c9894d2d123d66dc27e417e162526e1c6",
+  "parent_campaign": "/ssd/scxi253/single-gpu-inference-selector-v321-native-20260930T100521Z",
+  "cases": [
+    {
+      "case": "canary-v32-below",
+      "dtype": "bfloat16",
+      "layout": "ragged",
+      "split": "auto"
+    },
+    {
+      "case": "canary-v32-below",
+      "dtype": "bfloat16",
+      "layout": "ragged",
+      "split": "unsplit"
+    },
+    {
+      "case": "canary-v32-both",
+      "dtype": "bfloat16",
+      "layout": "ragged",
+      "split": "unsplit"
+    }
+  ],
+  "repeats": 3,
+  "blocks": 8,
+  "scenarios": [
+    "independent",
+    "same_storage",
+    "same_graph_null"
+  ],
+  "timers": [
+    "legacy_events",
+    "pooled_events",
+    "wall_only"
+  ],
+  "executions": [
+    "graph1_replay",
+    "graph16_replay"
+  ],
+  "release_evidence": false,
+  "default_promotion": false
+}
