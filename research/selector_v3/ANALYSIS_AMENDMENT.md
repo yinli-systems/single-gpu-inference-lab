@@ -8,3 +8,6 @@ This later analysis revision adds two fail-closed checks without changing the ex
 2. the preregistered 30-case gate remains primary, while a separately labelled 28-case sensitivity excludes two release geometries that exactly duplicate canary boundary cases.
 
 The sensitivity result cannot override a failed 30-case primary gate. Neither analysis may promote serving or default enablement while the historical 2/432 token divergence remains unresolved.
+
+3. release qualification validates the frozen selector expectation against the actual plan: a split plan must remain disabled, while an actual unsplit plan must match the per-GPU manifest expectation;
+4. each analyzed cell retains the 24 process/block log-timing bases for main and repeat arms. A separately preregistered strict-freshness extension can therefore be combined with the 28 primary-fresh cases using independent campaign bootstrap weights, without changing point measurements or the original 30-case primary.
