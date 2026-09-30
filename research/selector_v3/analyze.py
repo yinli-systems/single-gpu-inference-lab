@@ -99,13 +99,17 @@ def load(root,stage,gpu):
    index[k]=row
   require(set(index)==expected and len(rows)==c['rows']==c['expected'],'matrix incomplete')
   quals=json.loads((path/'qualification.json').read_text());qmap={}
+  case_by_id={case['id']:case for case in expectedcases}
   for q in quals:
    k=(q['case'],q['dtype'],q['layout'],q['split']);require(k in basic and k not in qmap,'qualification coverage')
    require(q['eager_graph_exact'] is True,'graph parity missing')
    require(q['pristine_exact'] is True and q['pristine_full_max_abs']==0,'nonexact resource-only output')
    require(q['FP32']['vectors']>0 and all(math.isfinite(q['FP32'][z]) for z in ['max_abs','rmse','lse_max_abs']),'bad FP32 receipt')
    require(set(q.get('tactic_identities',{}))=={'eager','graph1','graph16'} and len(set(q['tactic_identities'].values()))==3,'incomplete/non-distinct tactic identities')
-   if e['mode']=='guarded': require(q['resource_cap_plan']==q['guard_expected'],'guard decision mismatch')
+   if e['mode']=='guarded':
+    require(q['resource_cap_plan']==q['guard_expected'],'guard decision mismatch')
+    if stage=='canary':
+     require(q['guard_expected'] is bool(case_by_id[q['case']]['expected_selector'][gpu]),'canary selector boundary mismatch')
    if e['mode']=='off': require(q['resource_cap_plan'] is False,'off plan enabled cap')
    if e['mode']=='cap': require(q['resource_cap_plan'] is True,'cap plan disabled')
    qmap[k]=q
