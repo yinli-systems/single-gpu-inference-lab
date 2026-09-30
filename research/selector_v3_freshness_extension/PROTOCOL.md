@@ -1,0 +1,9 @@
+# Selector-v3 strict-freshness extension
+
+This is a **separately preregistered sensitivity extension**, not a mutation of the original selector-v3 30-case primary. The primary manifest and primary measurement source remain frozen at commit `8edd481c9f43be76b82a4c77a37930f34df0a7d2` and case hash `88416fa71efe90fce758d82b20e810e474a28698a0e143d5494694f77000dc17`.
+
+A geometry-only audit, performed before any primary release candidate/pristine timing-ratio analysis, found that `holdout-v3-opp-00` and `holdout-v3-opp-01` exactly duplicated two canary geometries. The original 30-case analysis remains the preregistered primary and must be reported as 28 strictly fresh cases plus two boundary-continuity cases. This extension adds two new exact geometries so a separate strict-freshness sensitivity can use 28 original fresh cases plus these two extension cases.
+
+The extension contains one alternate descriptor-43 strict-opposite geometry and its matched one-swap near-opposite control. The q-length vector is different from every primary/canary case while retaining the same descriptor count by `sum(ceil(q_i/32)) = 43`. The cached-prefix marginals are identical within the pair. The frozen selector rule, candidate source, modes, dtypes, ragged/paged layouts, auto/unsplit requests, eager/Graph1/Graph16 execution modes, eight ABBA/BAAB blocks, three process repeats, exact output/LSE requirements, and environment/operation identity contract are unchanged.
+
+The extension runs in a separate campaign root and source archive. It may reuse the already verified immutable FlashInfer 0.7.0 overlays, but its run directories, receipts, raw measurements, analyses, and source-archive identity must not be mixed with the primary campaign. Nsight Compute/CUPTI profiling remains excluded from release timings. No standalone result or combined sensitivity can promote serving unless the original per-GPU primary gate also passes.
