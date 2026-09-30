@@ -1,7 +1,7 @@
 {
-  "schema": 4,
+  "schema": 5,
   "qualification_revision": "4.1.1",
-  "state": "V411_CONTRACT_VALIDATED_EXACT_SOURCE_SMOKE_REQUIRED",
+  "state": "V411_DEV_HOLD_V42_NATIVE_TRANSPARENCY_REQUIRED",
   "default_promotion": false,
   "serving_promotion": false,
   "historical_token_divergence_resolved": false,
@@ -61,5 +61,116 @@
   "canary_cases_consumed": 0,
   "release_cases_consumed": 0,
   "v411_contract_evidence": "evidence/v411-contract-validation/",
-  "v411_clean_archive_sha256": "054401c074135ad4a65e98180db44be6481ff5d5698a4150d7b3e8dd8654ba04"
+  "v411_clean_archive_sha256": "054401c074135ad4a65e98180db44be6481ff5d5698a4150d7b3e8dd8654ba04",
+  "exact_source_commit": "50f182dda4e611151a7b799dc2db73ae87b8d7b8",
+  "exact_source_archive_sha256": "9cbae6dee22dd4fccb7cbb870b83dde6727db5015341f0ad3913f7ca6a083725",
+  "exact_resource_binding_sha256": "5468256db82ad24d5ff20369576802cc504da5fa96f68d2fe24eec9935789263",
+  "v411_dev": {
+    "campaign": "/ssd/scxi253/single-gpu-inference-selector-v411-dev-20260930T211230Z",
+    "jobs": {
+      "gpu_4090": "1643854",
+      "gpu_5090": "1643855"
+    },
+    "terminal": {
+      "gpu_4090": "COMPLETED 0:0",
+      "gpu_5090": "COMPLETED 0:0"
+    },
+    "results": {
+      "gpu_4090": {
+        "pass": false,
+        "metrics": {
+          "fold_records": 144,
+          "selected_records": 131,
+          "coverage": 0.9097222222222222,
+          "selected_geomean": 1.387584906839721,
+          "selected_worst": 1.3201906121938196,
+          "selected_block_worst": 1.286006612290989,
+          "selected_joint_min_lcb95": 1.3153403759764133,
+          "policy_geomean": 1.3471522774553404,
+          "policy_worst": 1.0,
+          "by_execution_mode": {
+            "eager_full_call": {
+              "count": 39,
+              "geomean": 1.3560537291138581,
+              "worst": 1.3201906121938196
+            },
+            "graph1_replay": {
+              "count": 44,
+              "geomean": 1.400134561008727,
+              "worst": 1.3742903892604825
+            },
+            "graph16_replay": {
+              "count": 48,
+              "geomean": 1.402123049159815,
+              "worst": 1.3743503512037996
+            }
+          },
+          "selected_layouts": [
+            "paged",
+            "ragged"
+          ],
+          "selected_dtypes": [
+            "bfloat16",
+            "float16"
+          ],
+          "native_overlay_geomean": 0.9987211625800273,
+          "native_overlay_worst": 0.9958785433620769,
+          "native_overlay_block_worst": 0.9599264046412852,
+          "native_overlay_joint_min_lcb95": 0.9927031583818556
+        },
+        "failed_requirements": [
+          "held_out_controls_resolve"
+        ]
+      },
+      "gpu_5090": {
+        "pass": false,
+        "metrics": {
+          "fold_records": 144,
+          "selected_records": 108,
+          "coverage": 0.75,
+          "selected_geomean": 1.4000256057401848,
+          "selected_worst": 1.307094037984549,
+          "selected_block_worst": 1.2951027183539618,
+          "selected_joint_min_lcb95": 1.3052025342028248,
+          "policy_geomean": 1.287069456228467,
+          "policy_worst": 1.0,
+          "by_execution_mode": {
+            "eager_full_call": {
+              "count": 36,
+              "geomean": 1.3781584823280393,
+              "worst": 1.307094037984549
+            },
+            "graph1_replay": {
+              "count": 36,
+              "geomean": 1.410855513425514,
+              "worst": 1.3439980378523468
+            },
+            "graph16_replay": {
+              "count": 36,
+              "geomean": 1.4113223988336172,
+              "worst": 1.344422302642488
+            }
+          },
+          "selected_layouts": [
+            "paged",
+            "ragged"
+          ],
+          "selected_dtypes": [
+            "bfloat16",
+            "float16"
+          ],
+          "native_overlay_geomean": 0.999169612760455,
+          "native_overlay_worst": 0.9949109377110048,
+          "native_overlay_block_worst": 0.9783673415913128,
+          "native_overlay_joint_min_lcb95": 0.9889796871742721
+        },
+        "failed_requirements": [
+          "native_overlay_joint_min_lcb_at_least_0_99"
+        ]
+      }
+    },
+    "evidence": "evidence/v411-exact-dev/"
+  },
+  "next_action": "Create v4.2 with official legacy native plan/run unchanged; cap-only resource run; stronger controls; rerun exposed dev before canary.",
+  "stress_cases_consumed": 0
 }
