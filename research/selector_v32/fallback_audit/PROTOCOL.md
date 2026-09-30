@@ -11,3 +11,7 @@ For each coordinate capture independent off/guarded runtimes, then off/guarded g
 Measure Graph1x16 and Graph16x1 separately, eight ABBA/BAAB blocks. Compare three explicitly diagnostic timers: old per-window events; pre-materialized persistent events; full wall with stream completion and no event instrumentation. Record wall stages, thread CPU time, voluntary/involuntary switches, and device spans when available. Keep every observation. Positive-control host sleeps after GPU completion validate detector sensitivity but are excluded from all performance aggregates.
 
 No diagnostic dataset can overturn the old canary verdict, qualify release, or resolve historical2/432 full-model divergence. Any subsequent measured-path change requires a new version and new canaries. Both correctness and whole-policy release gates stay mandatory.
+
+## Pre-execution amendment
+
+Before any diagnostic GPU submission, the completed4090 canary reports two additional failed FP16/ragged near-opposite coordinates, requested auto andunsplit, both Graph16. Include these two exposed coordinates, for five total; this is not a release-set addition. Record their device and host behavior separately from the cited5090 host-span spike. All other controls/counts stay unchanged.

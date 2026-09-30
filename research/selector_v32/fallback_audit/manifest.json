@@ -20,6 +20,18 @@
       "dtype": "bfloat16",
       "layout": "ragged",
       "split": "unsplit"
+    },
+    {
+      "case": "canary-v32-near",
+      "dtype": "float16",
+      "layout": "ragged",
+      "split": "auto"
+    },
+    {
+      "case": "canary-v32-near",
+      "dtype": "float16",
+      "layout": "ragged",
+      "split": "unsplit"
     }
   ],
   "repeats": 3,
@@ -39,5 +51,6 @@
     "graph16_replay"
   ],
   "release_evidence": false,
-  "default_promotion": false
+  "default_promotion": false,
+  "amendment": "Before any diagnostic GPU submission: include both newly completed 4090 failing canary coordinates; no rule/gate/release changes."
 }
