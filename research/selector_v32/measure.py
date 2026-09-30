@@ -10,6 +10,15 @@ ARMS=("off","cap","guarded")
 EXECUTIONS=("eager_full_call","graph1_replay","graph16_replay")
 KERNEL_CALLS={"eager_full_call":16,"graph1_replay":16,"graph16_replay":16}
 
+def replace_plan_flag(plan_info, value):
+ values=[int(x) for x in plan_info]
+ if len(values)!=16:raise RuntimeError(f"candidate plan vector size {len(values)}")
+ values[15]=int(bool(value))
+ rebuilt=type(plan_info)(values)
+ roundtrip=[int(x) for x in rebuilt]
+ if roundtrip!=values:raise RuntimeError("immutable plan reconstruction changed values")
+ return rebuilt,values
+
 def sha(p):return hashlib.sha256(Path(p).read_bytes()).hexdigest()
 def save(p,x):
  p=Path(p);tmp=p.with_suffix(p.suffix+'.tmp');tmp.write_text(json.dumps(x,indent=2,allow_nan=False)+'\n');tmp.replace(p)
@@ -58,10 +67,11 @@ class Runtime:
   if self.candidate:
    if len(info)!=16:raise RuntimeError('candidate plan vector size')
    original=bool(info[15])
-   if self.arm=='off':self.wrapper._plan_info[15]=0
-   elif self.arm=='cap':self.wrapper._plan_info[15]=1
-   elif self.arm!='guarded':raise ValueError(self.arm)
-   info=[int(x) for x in self.wrapper._plan_info]
+   if self.arm=='off':flag=False
+   elif self.arm=='cap':flag=True
+   elif self.arm=='guarded':flag=original
+   else:raise ValueError(self.arm)
+   self.wrapper._plan_info,info=replace_plan_flag(self.wrapper._plan_info,flag)
    return info,original
   if len(info)!=15:raise RuntimeError('pristine plan vector size')
   return info,False
