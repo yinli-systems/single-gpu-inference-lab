@@ -32,7 +32,8 @@ for REP in 0 1 2; do
     [[ "$MODE" == pristine ]] && OVERLAY=pristine || OVERLAY=candidate
     export PYTHONPATH="$P/source:$P/overlays/$OVERLAY"
     export FLASHINFER_WORKSPACE_BASE="$P/cache/$SLURM_JOB_PARTITION/$OVERLAY"
-    export XDG_CACHE_HOME="$LOCAL/cache-$MODE-r$REP"
+    export XDG_CACHE_HOME="$P/cache/$SLURM_JOB_PARTITION/$OVERLAY/xdg-$MODE-r$REP"
+    mkdir -p "$XDG_CACHE_HOME"
     OUT="$P/runs/$STAGE-$SLURM_JOB_PARTITION-s$SHARD-r$REP-$MODE-$SLURM_JOB_ID"
     "$E/bin/python" -m research.selector_v4.measure_v4 --mode "$MODE" --stage "$STAGE" --rep "$REP" --shard "$SHARD" --shards "$SHARDS" --refs "$P/refs/$SLURM_JOB_PARTITION/s$SHARD" --out "$OUT"
     cp "$P/source/SOURCE_COMMIT.txt" "$OUT/source_commit.txt"; date -u +%FT%TZ > "$OUT/launcher-complete.txt"
