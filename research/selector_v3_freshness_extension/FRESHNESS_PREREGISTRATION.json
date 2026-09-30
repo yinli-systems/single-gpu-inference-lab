@@ -1,0 +1,47 @@
+{
+  "schema": 1,
+  "recorded_utc": "2026-09-30T07:20:09.406188+00:00",
+  "status": "frozen-before-primary-release-ratio-analysis",
+  "primary_measurement_source_commit": "8edd481c9f43be76b82a4c77a37930f34df0a7d2",
+  "primary_manifest_case_hash": "88416fa71efe90fce758d82b20e810e474a28698a0e143d5494694f77000dc17",
+  "reason": "two original release geometries exactly duplicated canary geometries; preserve the original 30-case primary unchanged and add a separately labelled two-case strict-freshness extension",
+  "information_used": [
+    "case IDs",
+    "q arrays",
+    "cached-prefix arrays",
+    "descriptor labels",
+    "canary selector decisions",
+    "job state/progress"
+  ],
+  "information_not_used": [
+    "primary release candidate/pristine timing ratios",
+    "primary release gate metrics",
+    "selected worst case",
+    "confidence intervals"
+  ],
+  "extension_case_hash": "8291c9e3bc0c1700f2d1d21310e0a6cf604b32993343ce4481b7ac7911477f42",
+  "cases": [
+    {
+      "id": "fresh-ext-v3-opp-43-alt",
+      "geometry_sha256": "610a8ebdb64fd7f2cd818d6d8908364a6218ec05a72a4014323f1f8dcafd405b",
+      "descriptor_count": 43,
+      "expected_selector": {
+        "gpu_4090": true,
+        "gpu_5090": true
+      }
+    },
+    {
+      "id": "fresh-ext-v3-near-43-alt",
+      "geometry_sha256": "996877cccfdc6e3e6b00dc39e472c1ddca0aebb44c326203ed055b3c59387371",
+      "descriptor_count": 43,
+      "expected_selector": {
+        "gpu_4090": false,
+        "gpu_5090": false
+      }
+    }
+  ],
+  "selector_rule_changed": false,
+  "primary_manifest_changed": false,
+  "merge_into_primary_claim": false,
+  "default_promotion": false
+}

@@ -1,0 +1,95 @@
+{
+  "schema": 4,
+  "primary": "guarded",
+  "modes": [
+    "pristine",
+    "off",
+    "cap",
+    "guarded"
+  ],
+  "dtypes": [
+    "float16",
+    "bfloat16"
+  ],
+  "layouts": [
+    "ragged",
+    "paged"
+  ],
+  "splits": [
+    "auto",
+    "unsplit"
+  ],
+  "blocks": 8,
+  "execution_modes": [
+    "eager",
+    "graph1",
+    "graph16"
+  ],
+  "full_model": false,
+  "case_hash": "8291c9e3bc0c1700f2d1d21310e0a6cf604b32993343ce4481b7ac7911477f42",
+  "source": "separately preregistered strict-freshness extension; frozen before any primary release performance-ratio analysis; never merged into the original 30-case primary",
+  "strict_freshness_extension": true,
+  "primary_manifest_case_hash": "88416fa71efe90fce758d82b20e810e474a28698a0e143d5494694f77000dc17",
+  "excluded_primary_duplicates": [
+    "holdout-v3-opp-00",
+    "holdout-v3-opp-01"
+  ],
+  "cases": [
+    {
+      "id": "fresh-ext-v3-opp-43-alt",
+      "family": "release",
+      "regime": "opposite",
+      "q": [
+        21,
+        51,
+        103,
+        177,
+        207,
+        239,
+        463
+      ],
+      "cached": [
+        24576,
+        16384,
+        12288,
+        8192,
+        2048,
+        512,
+        0
+      ],
+      "descriptor_count": 43,
+      "expected_selector": {
+        "gpu_4090": true,
+        "gpu_5090": true
+      }
+    },
+    {
+      "id": "fresh-ext-v3-near-43-alt",
+      "family": "release",
+      "regime": "near-opposite",
+      "q": [
+        21,
+        51,
+        103,
+        177,
+        207,
+        239,
+        463
+      ],
+      "cached": [
+        24576,
+        12288,
+        16384,
+        8192,
+        2048,
+        512,
+        0
+      ],
+      "descriptor_count": 43,
+      "expected_selector": {
+        "gpu_4090": false,
+        "gpu_5090": false
+      }
+    }
+  ]
+}
