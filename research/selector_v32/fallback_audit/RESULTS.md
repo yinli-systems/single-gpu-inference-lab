@@ -62,3 +62,7 @@ The corrected diagnostic uses the CUDA13.0-compatible graph-management APIs alre
 ### Second compatibility correction
 
 Corrected-v1 RTX4090 job `1642499` progressed through node/edge/type/kernel-parameter extraction, then failed because `cudaGraphGetId` itself returns CUDA error36 on the frozen driver. That ID is diagnostic-only and excluded from `normalized_graph()`/the topology signature, so corrected-v2 treats graph ID as optional while continuing to require the node/edge/kernel launch metadata. Pending RTX5090 job `1642500` was cancelled before start to avoid repeating the same deterministic tooling failure. Receipts are preserved under `evidence/tooling-v2-failure/`; no performance or release evidence was produced.
+
+### Corrected-v2 diagnostic execution
+
+CUDA13.0 compatibility source `3057b3e42b9e83532cc1f55eefeb4a3b20eac2cd` is frozen in campaign `/ssd/scxi253/sgi-fallback-diagnosis-v3-20260930T125400Z`. Jobs: RTX4090 `1642536`, RTX5090 `1642537`. At 2026-09-30 12:55:07UTC, 4090 was RUNNING and had completed its first full case with577 rows; this proves the compatibility path progressed past both prior metadata failures. RTX5090 remained PENDING(Priority). These are diagnostic jobs only; no release case or full HTTP run was launched.
