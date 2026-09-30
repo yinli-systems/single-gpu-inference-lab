@@ -51,8 +51,14 @@ def graph_data_compat(graph, runtime_module=None, driver_module=None):
    src=handle_to_idx.get(int(frm[i]));dst=handle_to_idx.get(int(to[i]))
    if src is not None and dst is not None:infos[src]['dependents'].append(dst);infos[dst]['dependencies'].append(src)
  for info in infos:info['dependencies'].sort();info['dependents'].sort()
- graph_id=_cuda_checked(rt.cudaGraphGetId(raw),'cudaGraphGetId') if hasattr(rt,'cudaGraphGetId') else None
- return dict(graph_id=None if graph_id is None else int(graph_id),tools_id_available=False,nodes=infos)
+ graph_id=None;graph_id_available=False
+ if hasattr(rt,'cudaGraphGetId'):
+  try:
+   graph_id=_cuda_checked(rt.cudaGraphGetId(raw),'cudaGraphGetId');graph_id_available=True
+  except RuntimeError:
+   # Optional diagnostic identity only; topology/launch signature does not use it.
+   graph_id=None
+ return dict(graph_id=None if graph_id is None else int(graph_id),graph_id_available=graph_id_available,tools_id_available=False,nodes=infos)
 
 def normalized_graph(meta):
  fields=('node_type','kernel_name','grid_dim','block_dim','shared_mem_bytes','dependencies','dependents')

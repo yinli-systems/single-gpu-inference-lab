@@ -45,8 +45,36 @@ class CompatGraphDataTests(unittest.TestCase):
   class G:
    def raw_cuda_graph(self):return 999
   meta=graph_data_compat(G(),RT,DRV)
-  self.assertFalse(meta['tools_id_available']);self.assertEqual(meta['graph_id'],77);self.assertEqual(len(meta['nodes']),2)
+  self.assertFalse(meta['tools_id_available']);self.assertTrue(meta['graph_id_available']);self.assertEqual(meta['graph_id'],77);self.assertEqual(len(meta['nodes']),2)
   k=meta['nodes'][0];self.assertEqual(k['kernel_name'],'kernel_x');self.assertEqual(k['grid_dim'],[42,1,8]);self.assertEqual(k['block_dim'],[32,4,1]);self.assertEqual(k['shared_mem_bytes'],49152);self.assertEqual(k['dependents'],[1]);self.assertEqual(meta['nodes'][1]['dependencies'],[0])
+
+ def test_graph_id_not_supported_is_nonfatal(self):
+  class NT:
+   cudaGraphNodeTypeKernel=0;cudaGraphNodeTypeMemcpy=1;cudaGraphNodeTypeMemset=2;cudaGraphNodeTypeHost=3;cudaGraphNodeTypeGraph=4;cudaGraphNodeTypeEmpty=5;cudaGraphNodeTypeWaitEvent=6;cudaGraphNodeTypeEventRecord=7;cudaGraphNodeTypeMemAlloc=8;cudaGraphNodeTypeMemFree=9
+  class RT:
+   cudaGraphNodeType=NT
+   @staticmethod
+   def cudaGraphGetNodes(graph,numNodes=0):return (0,None,1) if numNodes==0 else (0,[101],1)
+   @staticmethod
+   def cudaGraphNodeGetType(node):return (0,5)
+   @staticmethod
+   def cudaGraphGetEdges(graph,numEdges=0):return (0,None,None,None,0)
+   @staticmethod
+   def cudaGraphGetId(graph):return (36,None)
+  class Result:CUDA_SUCCESS=0
+  class DRV:
+   CUresult=Result
+   @staticmethod
+   def CUgraphNode(init_value):return init_value
+   @staticmethod
+   def CUfunction(init_value):return init_value
+   @staticmethod
+   def cuGraphKernelNodeGetParams(node):raise AssertionError('empty node')
+   @staticmethod
+   def cuFuncGetName(func):raise AssertionError('empty node')
+  class G:
+   def raw_cuda_graph(self):return 999
+  meta=graph_data_compat(G(),RT,DRV);self.assertIsNone(meta['graph_id']);self.assertFalse(meta['graph_id_available']);self.assertEqual(len(meta['nodes']),1)
  def test_signature_is_stable_without_graph_id(self):
   m={'graph_id':1,'tools_id_available':False,'nodes':[{'index':0,'node_type':'kernel','kernel_name':'x','grid_dim':[1,1,1],'block_dim':[32,1,1],'shared_mem_bytes':0,'dependencies':[],'dependents':[]}]}
   n=dict(m,graph_id=2);self.assertEqual(signature(m),signature(n))
