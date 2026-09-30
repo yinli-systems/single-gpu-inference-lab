@@ -6,6 +6,7 @@ from research.selector_v4.crossfit import RepeatEvidence, crossfit_cell
 from research.selector_v4.eligibility import evaluate_eligibility
 from research.selector_v4.identity import TacticIdentity
 from research.selector_v4.safe_tuner import choose_tactic
+from research.selector_v4.analyze_v4 import ratio_text
 from research.selector_v4.schema import DEFAULT_THRESHOLDS, TACTIC_CAP, TACTIC_NATIVE
 
 
@@ -56,6 +57,10 @@ class SafeTunerTests(unittest.TestCase):
         self.assertEqual(folds[0].receipt.tactic,TACTIC_NATIVE)
         self.assertEqual(folds[0].policy_geomean,1.0)
 
+class ReportBoundaryTests(unittest.TestCase):
+    def test_no_selection_formats_without_crash(self):
+        self.assertEqual(ratio_text(None),'n/a');self.assertEqual(ratio_text(1.0),'1.000000x')
+
 class CacheTests(unittest.TestCase):
     def test_atomic_publish_lookup_corruption_and_env_isolation(self):
         x=identity();e=evaluate_eligibility(x);receipt=choose_tactic(x,e,[1.2]*16,[1.]*16,[1.]*16,exact_outputs=True).to_dict()
@@ -65,6 +70,18 @@ class CacheTests(unittest.TestCase):
             self.assertFalse(any(p.suffix==".tmp" for p in path.parent.iterdir()))
             path.write_text("not json");cache.reload();self.assertIsNone(cache.lookup(x))
             with self.assertRaises(ValueError):SafeTacticCache(tmp,identity(uuid="other")).publish(x,receipt,provenance={})
+    def test_corrupt_manifest_disables_cache_without_crashing_lookup(self):
+        x=identity();receipt=choose_tactic(x,evaluate_eligibility(x),[1.2]*16,[1.]*16,[1.]*16,exact_outputs=True).to_dict()
+        with tempfile.TemporaryDirectory() as tmp:
+            cache=SafeTacticCache(tmp,x);manifest=cache.env_dir/'manifest.json';manifest.write_text('corrupt')
+            disabled=SafeTacticCache(tmp,x);self.assertIsNone(disabled.lookup(x))
+            with self.assertRaisesRegex(ValueError,'manifest is unusable'):disabled.publish(x,receipt,provenance={})
+    def test_conflicting_publication_is_rejected_under_lock(self):
+        x=identity();receipt=choose_tactic(x,evaluate_eligibility(x),[1.2]*16,[1.]*16,[1.]*16,exact_outputs=True).to_dict()
+        with tempfile.TemporaryDirectory() as tmp:
+            cache=SafeTacticCache(tmp,x);cache.publish(x,receipt,provenance={'job':'a'})
+            with self.assertRaisesRegex(ValueError,'conflicting tactic publication'):
+                cache.publish(x,receipt,provenance={'job':'b'})
     def test_invalid_cap_receipt_not_published(self):
         x=identity();bad={"identity_key":x.key,"tactic":TACTIC_CAP,"passed":False,"reason":"no","thresholds":DEFAULT_THRESHOLDS.to_dict()}
         with tempfile.TemporaryDirectory() as tmp:

@@ -18,6 +18,9 @@ def need(value: bool, message: str) -> None:
 def geo(values):
     return math.exp(sum(math.log(float(x)) for x in values) / len(values))
 
+def ratio_text(value):
+    return "n/a" if value is None else f"{value:.6f}x"
+
 def ci90(values, seed):
     logs=np.log(np.asarray(values,dtype=np.float64));rng=np.random.default_rng(seed)
     idx=rng.integers(0,len(logs),size=(10000,len(logs)));return [float(x) for x in np.exp(np.quantile(logs[idx].mean(1),(.05,.95)))]
@@ -112,8 +115,8 @@ def run(args):
     args.out.mkdir(parents=True);(args.out/"summary.json").write_text(json.dumps(result,indent=2,allow_nan=False)+"\n")
     lines=["# Selector v4 safe-autotune qualification","",f"**{args.gpu}: {'PASS' if result['pass'] else 'HOLD'}**","",
         f"- Cross-fit records: {metrics['fold_records']}; selected {metrics['selected_records']} ({metrics['coverage']:.1%}).",
-        f"- Held-out selected geomean {metrics['selected_geomean']:.6f}x; point worst {metrics['selected_worst']:.6f}x; block worst {metrics['selected_block_worst']:.6f}x; joint-min LCB {joint:.6f}x.",
-        f"- Whole-policy geomean {metrics['policy_geomean']:.6f}x; worst {metrics['policy_worst']:.6f}x.",
+        f"- Held-out selected geomean {ratio_text(metrics['selected_geomean'])}; point worst {ratio_text(metrics['selected_worst'])}; block worst {ratio_text(metrics['selected_block_worst'])}; joint-min LCB {ratio_text(joint)}.",
+        f"- Whole-policy geomean {ratio_text(metrics['policy_geomean'])}; worst {ratio_text(metrics['policy_worst'])}.",
         f"- Requirements: `{json.dumps(requirements,sort_keys=True)}`"]
     (args.out/"RESULTS.md").write_text("\n".join(lines)+"\n");print("\n".join(lines))
 
