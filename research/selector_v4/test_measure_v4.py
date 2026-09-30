@@ -11,4 +11,4 @@ class MeasurementIdentityTests(unittest.TestCase):
         core=[40]+[0]*14
         off=operation_identity(env,case,'float16','paged','unsplit',core+[0],'graph16_replay',windows)
         cap=operation_identity(env,case,'float16','paged','unsplit',core+[1],'graph16_replay',windows)
-        self.assertEqual(off.key,cap.key);self.assertEqual(len(off.operation['plan_signature']),15)
+        self.assertEqual(off.key,cap.key);self.assertEqual(len(off.operation['plan_signature']),15);self.assertEqual(off.operation["window_config"],{"replays":4})

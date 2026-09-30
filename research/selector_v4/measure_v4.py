@@ -60,7 +60,8 @@ def operation_identity(env, case, dtype_name, layout, requested_split, info, exe
         "head_dim_qk": 128, "head_dim_vo": 128,
         "page_size": 1 if layout == "ragged" else 16,
         "q": list(case["q"]), "cached": list(case["cached"]),
-        "plan_signature": list(info[:-1] if len(info) == 16 else info), "window_config": windows[execution],
+        "plan_signature": list(info[:-1] if len(info) == 16 else info),
+        "window_config": {k: windows[execution][k] for k in ("calls", "replays") if k in windows[execution]},
     }
     environment = {
         "gpu_name": env["gpu_name"], "gpu_uuid": env["gpu_uuid"],
