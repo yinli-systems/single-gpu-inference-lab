@@ -79,7 +79,7 @@ def run(args):
    elif timer=='pooled_events':events=pool
    elif timer=='wall_only':events=None
    else:raise ValueError(timer)
-   r0=resource.getrusage(resource.RUSAGE_THREAD);cpu0=time.thread_time_ns();restore=gc.isenabled();gc.disable()
+   stamp=time.time_ns();r0=resource.getrusage(resource.RUSAGE_THREAD);cpu0=time.thread_time_ns();restore=gc.isenabled();gc.disable()
    try:
     t0=time.perf_counter_ns()
     if events:events[0].record()
@@ -96,7 +96,7 @@ def run(args):
     if restore:gc.enable()
    cpu1=time.thread_time_ns();r1=resource.getrusage(resource.RUSAGE_THREAD)
    device=None if events is None else events[0].elapsed_time(events[1])*1000/16
-   result=dict(wall_us=(t4-t0)/1000/16,device_us=device,record_us=(t1-t0)/1000,enqueue_us=(t2-t1)/1000,wait_us=(t3-t2)/1000,post_wait_us=(t4-t3)/1000,window_wall_us=(t4-t0)/1000,thread_cpu_us=(cpu1-cpu0)/1000,voluntary_switches=r1.ru_nvcsw-r0.ru_nvcsw,involuntary_switches=r1.ru_nivcsw-r0.ru_nivcsw,attention_invocations=16,positive_control=inject)
+   result=dict(timestamp_unix_ns=stamp,wall_us=(t4-t0)/1000/16,device_us=device,record_us=(t1-t0)/1000,enqueue_us=(t2-t1)/1000,wait_us=(t3-t2)/1000,post_wait_us=(t4-t3)/1000,window_wall_us=(t4-t0)/1000,thread_cpu_us=(cpu1-cpu0)/1000,voluntary_switches=r1.ru_nvcsw-r0.ru_nvcsw,involuntary_switches=r1.ru_nivcsw-r0.ru_nivcsw,attention_invocations=16,positive_control=inject)
    result.update(anomaly(result));return result
   rng=random.Random(62173+args.rep*1009+int(cell[:8],16))
   for block in range(conf['blocks']):
