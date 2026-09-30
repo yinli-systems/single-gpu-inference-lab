@@ -65,3 +65,9 @@ The v4.1 manifest previously recorded `research/parity_remediation/evidence/mani
 ## Qualification revision 4.1.1
 
 The native-overlay gate changes promotion semantics, so cache/measurement/binding identity is bumped from 4.1.0 to 4.1.1. Authorization now recomputes and binds the exact analyzer SHA, measurement-manifest SHA, campaign source commit, source archive, overlay, stage/gpu identity, and explicit native-overlay requirements. Old 4.1.0 summaries or caches cannot authorize a 4.1.1 canary. The currently running two-case dev campaign remains immutable 8ea2169/4.1.0 development evidence only; after analysis, exact-source 4.1.1 smoke and dev qualification are mandatory before touching canary.
+
+## V4.1.1 exact-source dev final verdict
+
+Campaign `/ssd/scxi253/single-gpu-inference-selector-v411-dev-20260930T211230Z`, jobs1643854/1643855, source `50f182d`, completed0:0 with12/12 run receipts and no failures. 4090 retains +38.76% selected geomean and +32.02% selected worst, but seven selected folds fail held-out duplicate-control equivalence. 5090 retains +40.00% selected geomean and +30.71% selected worst; all tactic controls pass, but candidate-native/pristine simultaneous joint-min95% LCB is0.988980x. Exact artifacts and remote hashes are under `evidence/v411-exact-dev/`.
+
+Do not submit canary. V4.2 must preserve official native plan/run and put cap behind a separate resource-only run entry; increase measurement resolution without relaxing gates. The10 canary,48 release and12 stress shapes remain untouched.
