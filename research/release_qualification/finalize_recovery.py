@@ -11,6 +11,15 @@ def require(x,m):
  if not x:raise ValueError(m)
 def sha(p):return hashlib.sha256(Path(p).read_bytes()).hexdigest()
 def load_env(p):return json.loads((p/'environment.json').read_text())
+def source_commit(root,path,env,allow_campaign_fallback=False):
+ receipt=path/'source_commit.txt'
+ if receipt.is_file():return receipt.read_text().strip()
+ require(allow_campaign_fallback,'source commit receipt missing '+str(path))
+ frozen=root/'source'/'SOURCE_COMMIT.txt';require(frozen.is_file(),'campaign source commit missing')
+ sources=env.get('source');require(isinstance(sources,dict) and sources,'partial source hashes missing')
+ for name,h in sources.items():
+  q=root/'source'/name;require(q.is_file() and sha(q)==h,'partial source hash mismatch '+name)
+ return frozen.read_text().strip()
 def verify_complete(p):
  c=json.loads((p/'complete.json').read_text());require(c.get('complete') is True,'completion flag '+str(p))
  require((p/'launcher-complete.txt').exists(),'launcher receipt '+str(p))
@@ -29,8 +38,8 @@ def run(a):
    oe=load_env(old);ne=load_env(new);key=('release',3,6,rep,mode)
    require((oe['stage'],oe['shard'],oe['shards'],oe['rep'],oe['mode'])==key,'old identity')
    require((ne['stage'],ne['shard'],ne['shards'],ne['rep'],ne['mode'])==key,'new identity')
-   require((old/'source_commit.txt').is_file() and (new/'source_commit.txt').is_file(),'source commit receipt missing')
-   source|={ (old/'source_commit.txt').read_text().strip(), (new/'source_commit.txt').read_text().strip() };replacement_hw.add(ne['hardware']['out'].strip())
+   old_is_partial=(rep==2 and mode=='pristine')
+   source|={source_commit(a.root,old,oe,allow_campaign_fallback=old_is_partial),source_commit(a.root,new,ne)};replacement_hw.add(ne['hardware']['out'].strip())
    base=dict(superseded=old.relative_to(a.root).as_posix(),replacement=new.relative_to(a.root).as_posix(),
     key=dict(shard=3,rep=rep,mode=mode),old_job=a.old_job,replacement_job=a.replacement_job,
     replacement_complete_sha256=sha(new/'complete.json'))
