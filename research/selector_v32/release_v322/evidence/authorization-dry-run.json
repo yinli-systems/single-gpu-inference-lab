@@ -1,0 +1,70 @@
+{
+  "release_qualification_authorized": true,
+  "qualification_revision": "3.2.2",
+  "measurement_contract_revision": "3.2.1",
+  "case_hash": "e6fb15cb7f9d240e1dca6943d3a9c4802af7c239dad2cbc57336aa218ae0df13",
+  "parent_source_archive_sha256": "4547b66c6d5ed84eb78a1d95acb6d5ae14273ba6b81e9d6bec8ece183787eaa4",
+  "official_overlay_sha256": "6aa5a8578141fd60d2644d962eac02aa11b2118c8fce71a9029089a4fa524295",
+  "canaries": {
+    "gpu_4090": {
+      "hardware": {
+        "0": {
+          "uuid": "GPU-3eb94f7d-0163-0d5c-c437-05daacdb72e2",
+          "driver": "580.82.07"
+        }
+      },
+      "historical_requirements": {
+        "numerical_exact": true,
+        "selected_nonempty": true,
+        "selected_point_worst_at_least_0_98": true,
+        "policy_point_worst_at_least_0_98": false,
+        "disabled_overlay_point_worst_at_least_0_98": true,
+        "paired_policy_point_worst_at_least_0_98": false
+      },
+      "historical_pass": false
+    },
+    "gpu_5090": {
+      "hardware": {
+        "0": {
+          "uuid": "GPU-820b2a37-25e1-5ebc-f21e-cc4b0d25375c",
+          "driver": "580.82.07"
+        }
+      },
+      "historical_requirements": {
+        "numerical_exact": true,
+        "selected_nonempty": true,
+        "selected_point_worst_at_least_0_98": true,
+        "policy_point_worst_at_least_0_98": false,
+        "disabled_overlay_point_worst_at_least_0_98": true,
+        "paired_policy_point_worst_at_least_0_98": true
+      },
+      "historical_pass": false
+    }
+  },
+  "diagnosis": {
+    "gpu_4090": {
+      "independent_pooled_worst": 0.9998982791176332,
+      "independent_pooled_min_lcb": 0.9944706665093245,
+      "independent_wall_worst": 0.9998487036815016,
+      "independent_wall_min_lcb": 0.9903945161689309,
+      "same_graph_null_pooled_worst": 0.9996893052650233,
+      "same_graph_null_pooled_min_lcb": 0.9943316808257777,
+      "hardware": "name, uuid, driver_version, power.limit [W]\nNVIDIA GeForce RTX 4090, GPU-d52f4369-4ae9-d9de-f578-055ed6ecf520, 580.82.07, 450.00 W\n"
+    },
+    "gpu_5090": {
+      "independent_pooled_worst": 0.9998108909295813,
+      "independent_pooled_min_lcb": 0.9995593848712063,
+      "independent_wall_worst": 0.9999095858571968,
+      "independent_wall_min_lcb": 0.9994501537605933,
+      "same_graph_null_pooled_worst": 0.9998098528760943,
+      "same_graph_null_pooled_min_lcb": 0.99934386911966,
+      "hardware": "name, uuid, driver_version, power.limit [W]\nNVIDIA GeForce RTX 5090, GPU-20b462ec-0729-3cf8-acac-b41308e38bf6, 580.82.07, 575.00 W\n"
+    }
+  },
+  "old_canary_gate_remains_hold": true,
+  "absolute_whole_policy_is_audit_only": true,
+  "release_cases_consumed_at_authorization": 0,
+  "default_promotion": false,
+  "serving_promotion": false,
+  "historical_token_divergence_resolved": false
+}
