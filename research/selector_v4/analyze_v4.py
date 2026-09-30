@@ -188,7 +188,7 @@ def run(args):
     # Held-out oracle uses measurements solely for evaluation, never selection.
     regrets=[];actual_policy=[]
     for fold,record in all_folds:
-        oracle=max(1.0,record['held_out_geomean'])
+        oracle=max(1.0,record['held_out_geomean']) if record['eligible'] else 1.0
         chosen=record['policy_geomean']
         regrets.append(max(0.0,oracle/chosen-1.0))
         key=(record['case'],record['dtype'],record['layout'],record['split'])
