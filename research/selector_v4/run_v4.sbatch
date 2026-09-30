@@ -25,7 +25,9 @@ if [[ "$STAGE" == canary || "$STAGE" == release || "$STAGE" == stress ]]; then
 fi
 "$E/bin/python" -m research.selector_v4.smoke_verdict --root "$P" --verify-only
 scontrol show job "$SLURM_JOB_ID" -o > "$P/receipts/slurm-${SLURM_JOB_ID}.txt"
-nvidia-smi --query-gpu=timestamp,uuid,utilization.gpu,clocks.sm,clocks.mem,power.draw,temperature.gpu --format=csv -l 2 > "$P/logs/telemetry-${SLURM_JOB_ID}.csv" & MON=$!
+export PYTHONPATH="$P/source"
+DEVICE_UUID=$("$E/bin/python" -m research.selector_v4.device_identity)
+nvidia-smi --id="$DEVICE_UUID" --query-gpu=timestamp,uuid,utilization.gpu,clocks.sm,clocks.mem,power.draw,temperature.gpu --format=csv -l 2 > "$P/logs/telemetry-${SLURM_JOB_ID}.csv" & MON=$!
 finish(){ RC=$?; trap - EXIT; kill "$MON" 2>/dev/null || true; printf '%s\n' "$RC" > "$P/receipts/exit-${SLURM_JOB_ID}.txt"; rm -rf "$LOCAL"; exit "$RC"; }; trap finish EXIT
 for REP in 0 1 2; do
   case "$REP" in 0|2) MODES="pristine paired";; 1) MODES="paired pristine";; *) exit 22;; esac
@@ -36,7 +38,7 @@ for REP in 0 1 2; do
     export XDG_CACHE_HOME="$P/cache/$SLURM_JOB_PARTITION/$OVERLAY/xdg-$MODE-r$REP"
     mkdir -p "$XDG_CACHE_HOME"
     OUT="$P/runs/$STAGE-$SLURM_JOB_PARTITION-s$SHARD-r$REP-$MODE-$SLURM_JOB_ID"
-    "$E/bin/python" -m research.selector_v4.measure_v4 --mode "$MODE" --stage "$STAGE" --rep "$REP" --shard "$SHARD" --shards "$SHARDS" --refs "$P/refs/$SLURM_JOB_PARTITION/s$SHARD" --out "$OUT"
+    srun --cpu-bind=cores "$E/bin/python" -m research.selector_v4.measure_v4 --mode "$MODE" --stage "$STAGE" --rep "$REP" --shard "$SHARD" --shards "$SHARDS" --refs "$P/refs/$SLURM_JOB_PARTITION/s$SHARD" --out "$OUT"
     cp "$P/source/SOURCE_COMMIT.txt" "$OUT/source_commit.txt"; date -u +%FT%TZ > "$OUT/launcher-complete.txt"
   done
 done

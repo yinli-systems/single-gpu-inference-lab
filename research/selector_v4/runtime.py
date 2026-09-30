@@ -23,8 +23,12 @@ def validate_wrapper(identity: TacticIdentity, entry: dict[str, Any], wrapper: A
                 not callable(getattr(module, identity.operation["layout"]+"_run_resource", None)) or
                 getattr(module, "resource_kernel_isolation", False) is not True):
             return False
-        if entry["tactic"] == TACTIC_CAP and not evaluate_eligibility(identity).eligible:
-            return False
+        if entry["tactic"] == TACTIC_CAP:
+            if not evaluate_eligibility(identity).eligible:
+                return False
+            current = [int(x) for x in getattr(wrapper, "_plan_info", ())]
+            if current != list(identity.operation["plan_signature"]) or len(current) != 15 or bool(current[14]):
+                return False
         return True
     except Exception:
         return False
@@ -35,7 +39,7 @@ def apply_cached_tactic(
     cache: SafeTacticCache,
     validator: Callable[[TacticIdentity, dict[str, Any], Any], bool] = validate_wrapper,
 ) -> AppliedTactic:
-    """Apply a validated tactic before plan/capture; every failure is native."""
+    """Apply a validated tactic after official planning, before capture; every failure is native."""
     wrapper._sgi_resource_policy = 0
     wrapper._sgi_tactic_run = wrapper.run
     entry = cache.lookup(identity, validator=lambda i, e: validator(i, e, wrapper))

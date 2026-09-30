@@ -10,7 +10,7 @@ from research.selector_v4.test_core import identity
 
 class RuntimeTests(unittest.TestCase):
     def wrapper(self, valid=True):
-        return SimpleNamespace(_backend='fa2' if valid else 'fa3',_jit_module=None,
+        return SimpleNamespace(_backend='fa2' if valid else 'fa3',_jit_module=None,_plan_info=list(identity().operation["plan_signature"]),
             run=lambda: 'native',run_resource=lambda: 'resource',
             _cached_module=SimpleNamespace(paged_run_resource=lambda: None,ragged_run_resource=lambda: None,resource_kernel_isolation=True),_sgi_resource_policy=99)
     def test_miss_is_native_before_plan(self):
@@ -26,6 +26,16 @@ class RuntimeTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             cache=SafeTacticCache(tmp,x);cache.publish(x,receipt,provenance={});cache.reload();w=self.wrapper();w._cached_module.resource_kernel_isolation=False
             r=apply_cached_tactic(w,x,cache);self.assertEqual(r.tactic,TACTIC_NATIVE);self.assertEqual(w._sgi_resource_policy,0)
+    def test_changed_or_unplanned_wrapper_fails_closed(self):
+        x=identity();receipt=choose_tactic(x,evaluate_eligibility(x),[1.2]*32,[1.]*32,[1.]*32,exact_outputs=True).to_dict()
+        with tempfile.TemporaryDirectory() as tmp:
+            cache=SafeTacticCache(tmp,x);cache.publish(x,receipt,provenance={});cache.reload()
+            for plan in ([],[1]*15):
+                w=self.wrapper();w._plan_info=plan
+                r=apply_cached_tactic(w,x,cache)
+                self.assertEqual(r.tactic,TACTIC_NATIVE)
+                self.assertIs(w._sgi_tactic_run,w.run)
+
     def test_unsupported_wrapper_revalidates_to_native(self):
         x=identity();receipt=choose_tactic(x,evaluate_eligibility(x),[1.2]*32,[1.]*32,[1.]*32,exact_outputs=True).to_dict()
         with tempfile.TemporaryDirectory() as tmp:

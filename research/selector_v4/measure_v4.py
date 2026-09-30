@@ -9,6 +9,7 @@ if str(V3) not in sys.path:
     sys.path.insert(0, str(V3))
 import measure as base
 
+from research.selector_v4.device_identity import device_uuid
 from research.selector_v4.eligibility import evaluate_eligibility, effective_eligibility
 from research.selector_v4.identity import TacticIdentity
 from research.selector_v4.manifest_v4 import digest, load
@@ -129,7 +130,8 @@ def run(args):
     torch.set_num_threads(1); torch.backends.cuda.matmul.allow_tf32 = False
     affinity = sorted(os.sched_getaffinity(0)); os.sched_setaffinity(0, set(affinity[:min(2, len(affinity))]))
     props = torch.cuda.get_device_properties(0)
-    hardware = base.command(["nvidia-smi", "--query-gpu=name,uuid,driver_version,power.limit", "--format=csv,noheader"])
+    actual_uuid = device_uuid(torch)
+    hardware = base.command(["nvidia-smi", "--id="+actual_uuid, "--query-gpu=name,uuid,driver_version,power.limit", "--format=csv,noheader"])
     if hardware["rc"] or not hardware["out"].strip(): raise RuntimeError("hardware identity unavailable")
     line = [x.strip() for x in hardware["out"].strip().splitlines()[0].split(",")]
     nvcc = base.command([os.path.join(os.environ.get("CUDA_HOME", ""), "bin", "nvcc"), "--version"])
@@ -137,6 +139,8 @@ def run(args):
     resource_binding_sha = base.sha(binding_path) if candidate else backend_sha
     env = {
         "gpu_name": line[0], "gpu_uuid": line[1], "driver": line[2],
+        "cpu_affinity": sorted(os.sched_getaffinity(0)),
+        "cuda_visible_devices": os.environ.get("CUDA_VISIBLE_DEVICES"),
         "num_sms": props.multi_processor_count, "max_smem_per_sm": props.shared_memory_per_multiprocessor,
         "max_smem_per_block_optin": getattr(props, "shared_memory_per_block_optin", props.shared_memory_per_block),
         "torch": str(torch.__version__), "cuda": str(torch.version.cuda), "flashinfer": flashinfer.__version__,
@@ -152,7 +156,7 @@ def run(args):
         "default_promotion": False, "serving_promotion": False,
     }
     expected_gpu = {"gpu_4090":"NVIDIA GeForce RTX 4090", "gpu_5090":"NVIDIA GeForce RTX 5090"}.get(os.environ.get("SLURM_JOB_PARTITION"))
-    if env["gpu_name"] != expected_gpu or not env["official_overlay_sha256"] or not env["source_archive_sha256"]:
+    if env["gpu_uuid"] != actual_uuid or env["gpu_name"] != expected_gpu or not env["official_overlay_sha256"] or not env["source_archive_sha256"]:
         raise RuntimeError("environment/provenance mismatch")
     base.save(args.out / "environment.json", env)
     rows, qualifications, memory = [], [], []; started = time.monotonic()

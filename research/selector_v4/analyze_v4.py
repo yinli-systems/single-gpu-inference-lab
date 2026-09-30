@@ -123,6 +123,7 @@ def run(args):
                 lookup[shard,rep,mode]=validate_run(paths[0],mode=mode,stage=args.stage,rep=rep,shard=shard,shards=args.shards,manifest=manifest)
         envs=[lookup[shard,rep,mode]["environment"] for rep in range(3) for mode in ("pristine","paired")]
         uuids={x["gpu_uuid"] for x in envs};drivers={x["driver"] for x in envs};need(len(uuids)==len(drivers)==1,"shard hardware drift")
+        need(len({tuple(x["cpu_affinity"]) for x in envs})==1,"shard CPU affinity drift")
         hardware[str(shard)]={"uuid":next(iter(uuids)),"driver":next(iter(drivers)),"gpu_name":envs[0]["gpu_name"]}
         source|={x["source_archive_sha256"] for x in envs};overlay|={x["official_overlay_sha256"] for x in envs}
         paired_path=Path(lookup[shard,0,"paired"]["path"]);job_id=paired_path.name.rsplit("-",1)[-1]

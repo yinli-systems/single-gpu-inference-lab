@@ -128,7 +128,7 @@ def patch_python_dispatch(source: str) -> str:
     if source.count(fa2) != 1: raise ValueError("FA2 module block")
     source = source.replace(
         fa2,
-        fa2 + '''        ragged_run_resource_func = getattr(module, "ragged_run_resource", None)\n        paged_run_resource_func = getattr(module, "paged_run_resource", None)\n        if ragged_run_resource_func is None or paged_run_resource_func is None:\n            raise RuntimeError("resource-only FFI entries unavailable")\n''', 1)
+        fa2 + '''        ragged_run_resource_func = getattr(module, "ragged_run_resource", None)\n        paged_run_resource_func = getattr(module, "paged_run_resource", None)\n''', 1)
 
     ragged = _clone_python_run(source, "ragged_run", "ragged_run_func")
     fake_ragged = _clone_python_fake(source, "_fake_ragged_run")
@@ -144,7 +144,7 @@ def patch_python_dispatch(source: str) -> str:
     if source.count(ret) != 1: raise ValueError("module namespace return")
     source = source.replace(
         ret,
-        '''        ragged_run=ragged_run,\n        paged_run=paged_run,\n        ragged_run_resource=ragged_run_resource if backend == "fa2" else None,\n        paged_run_resource=paged_run_resource if backend == "fa2" else None,\n        resource_kernel_isolation=backend == "fa2",\n        prewarm_paged_kv_stride_variant=prewarm_paged_kv_stride_variant,\n''', 1)
+        '''        ragged_run=ragged_run,\n        paged_run=paged_run,\n        ragged_run_resource=ragged_run_resource if backend == "fa2" else None,\n        paged_run_resource=paged_run_resource if backend == "fa2" else None,\n        resource_kernel_isolation=backend == "fa2" and ragged_run_resource_func is not None and paged_run_resource_func is not None,\n        prewarm_paged_kv_stride_variant=prewarm_paged_kv_stride_variant,\n''', 1)
 
     # Duplicate only the concrete run implementation (overloads remain official).
     for class_name, op in (("BatchPrefillWithRaggedKVCacheWrapper", "ragged"),

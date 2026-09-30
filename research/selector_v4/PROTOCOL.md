@@ -67,7 +67,7 @@ module factory registers additional ops outside recurring native execution.
 
 `run_resource` is opt-in and requires standard FA2, an unsplit official plan and
 matching paged K/V strides. Unsupported resource probes become labeled native null
-arms. `runtime.selected_run` resolves the validated cache choice before capture;
+arms. `runtime.selected_run` resolves the validated cache choice after official planning, before capture;
 the official `wrapper.run` is never replaced. This research cache remains separate
 from upstream Autotuner v2 pending validated integration.
 
@@ -90,3 +90,9 @@ The original case hash and every stage hash are unchanged. Canary/release/stress
 consumption must be recorded at dispatch even if an execution fails. HTTP/default
 promotion remains OFF until the historical 2/432 divergence is explained and full
 serving token parity and SLO/performance gates pass.
+
+V4.2 exact dev uses `srun --cpu-bind=cores`; each process narrows only its allocated
+core set and records affinity. NVML hardware queries and telemetry target the UUID
+reported by Torch for the actual CUDA device. Missing UUID or cross-repeat affinity
+drift is a blocking failure. Resource FFI absence leaves the official native module
+available; cached resource choices are rejected if the actual 15-field plan differs.

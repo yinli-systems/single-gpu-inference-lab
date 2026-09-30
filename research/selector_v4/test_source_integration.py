@@ -16,6 +16,7 @@ class SourceIntegrationTests(unittest.TestCase):
             self.assertTrue(receipt['native_source_audit']['native_source_identity'])
             self.assertEqual(receipt['plan_vector_size'],15)
             py=(out/'flashinfer/prefill.py').read_text();tree=ast.parse(py)
+            self.assertNotIn('resource-only FFI entries unavailable',py)
             factory=next(n for n in tree.body if isinstance(n,ast.FunctionDef) and n.name=='get_batch_prefill_module')
             for name in ('ragged','paged'):
                 for prefix in ('','_fake_'):
