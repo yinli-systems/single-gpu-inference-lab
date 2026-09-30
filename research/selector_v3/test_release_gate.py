@@ -1,6 +1,6 @@
 import copy,math,unittest
 import numpy as np
-from release_gate import evaluate_release_gate
+from release_gate import evaluate_release_gate,subset_gate_inputs
 
 def cell(selected,guarded=1.05,off=1.0,resolved=True,calls=16):
  return {'calls':calls,'metric':'run_device_us','selected':selected,'comparisons':{'guarded':{'ratio':guarded,'controls_resolve':resolved},'off':{'ratio':off,'controls_resolve':True}}}
@@ -27,4 +27,13 @@ class ReleaseGateTests(unittest.TestCase):
  def test_policy_and_overlay_worst_cases_are_gated(self):
   cells=family(True,1.08)+family(False,.98);r=evaluate_release_gate(cells,draws(cells),NUMERICS);self.assertFalse(r['requirements']['policy_worst_point_at_least_0_99'])
   cells=family(True,1.08,off=.98)+family(False,1.0,off=1.0);r=evaluate_release_gate(cells,draws(cells),NUMERICS);self.assertFalse(r['requirements']['off_overlay_worst_point_at_least_0_99'])
+ def test_sensitivity_subset_does_not_replace_primary(self):
+  duplicate=family(True,.98);fresh=family(True,1.08)+family(False,1.0)
+  for c in duplicate:c['case']='duplicate-boundary'
+  for c in fresh:c['case']='strictly-fresh' if c['selected'] else 'fresh-fallback'
+  cells=duplicate+fresh;cache=draws(cells)
+  primary=evaluate_release_gate(cells,cache,NUMERICS);self.assertFalse(primary['pass'])
+  subset,subset_draws=subset_gate_inputs(cells,cache,{'duplicate-boundary'})
+  sensitivity=evaluate_release_gate(subset,subset_draws,NUMERICS);self.assertTrue(sensitivity['pass'])
+  self.assertEqual(len(cells),9);self.assertEqual(len(subset),6)
 if __name__=='__main__':unittest.main()
