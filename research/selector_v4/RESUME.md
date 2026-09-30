@@ -49,3 +49,7 @@ V4.1 now records immutable `stage_hashes` for each family and validates them in 
 ## V4.1 dual-GPU smoke PASS
 
 Immutable source `8ea2169dbc2967e02f12e527ea0b304a264df1ab`, campaign `/ssd/scxi253/single-gpu-inference-selector-v41-smoke-20260930T202814Z`, jobs1643827/1643828 both completed0:0. Exact ragged/paged hashes, native0-cap1-native0 plan sequence and compiled symbol co-residence pass on both GPUs. Smoke authorizes exposed dev qualification only; canary remains untouched and unauthorized until dev controls resolve.
+
+## Persistent JIT launcher correction
+
+Before dev submission, audit found that `run_v4.sbatch` placed XDG JIT binaries in a temporary directory deleted on exit while the required binary audit scanned the persistent campaign workspace. No v4.1 dev job had been submitted. The launcher now uses persistent per-mode/per-repeat XDG roots under the campaign cache; a new exact-source smoke is required before dev.
