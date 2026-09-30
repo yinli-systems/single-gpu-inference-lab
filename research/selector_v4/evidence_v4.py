@@ -51,7 +51,7 @@ def validate_run(path: Path, *, mode: str, stage: str, rep: int, shard: int, sha
                 identity = TacticIdentity(raw["payload"]["environment"], raw["payload"]["operation"], raw["payload"]["measurement_policy"])
                 need(identity.key == raw["key"], "identity digest")
                 need(evaluate_eligibility(identity).to_dict() == q["eligibility"][execution], "eligibility drift")
-                need(raw["payload"]["operation"]["plan_signature"] == item["plan_info"], "plan identity")
+                need(raw["payload"]["operation"]["plan_signature"] == (item["plan_info"][:-1] if len(item["plan_info"]) == 16 else item["plan_info"]), "tactic-neutral plan identity")
         if mode == "paired":
             need(q["candidate_plan_core_equal"] is True and q["arms"]["off"]["plan_info"][-1] == 0 and q["arms"]["cap"]["plan_info"][-1] == 1, "tactic plan contract")
         qmap[key] = q
