@@ -19,6 +19,8 @@ export CPATH=$CCCL/libcudacxx/include:$CCCL/cub:$CCCL/thrust NVCC_PREPEND_FLAGS=
 cd "$SOURCE"; sha256sum -c source.sha256
 ROOT=$(dirname "$SOURCE");mkdir -p "$ROOT/runs/$SLURM_JOB_ID" "$ROOT/logs";R="$ROOT/runs/$SLURM_JOB_ID"
 scontrol show job "$SLURM_JOB_ID" -o > "$R/slurm.txt";nvidia-smi --query-gpu=name,uuid,driver_version,power.limit --format=csv > "$R/hardware.csv"
+nvidia-smi --query-gpu=timestamp,uuid,utilization.gpu,clocks.sm,clocks.mem,power.draw,temperature.gpu --format=csv -l 2 > "$R/telemetry.csv" & MON=$!
+finish(){ RC=$?; trap - EXIT; kill "$MON" 2>/dev/null || true; printf '%s\n' "$RC" > "$R/exit.txt"; exit "$RC"; };trap finish EXIT
 for ITEM in pristine:0 cap:0 cap:1 pristine:1; do
  MODE=${ITEM%:*};REP=${ITEM#*:};OUT="$R/$MODE-$REP"
  export PYTHONPATH=$P/overlays/$MODE:$SOURCE FLASHINFER_WORKSPACE_BASE=$P/cache/$SLURM_JOB_PARTITION/$MODE XDG_CACHE_HOME=$LOCAL/cache-$MODE-$REP

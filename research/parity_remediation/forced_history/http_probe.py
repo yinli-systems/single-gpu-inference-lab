@@ -65,6 +65,9 @@ async def main(a):
   required={f'{t["id"]}-occ0.json' for t in target_cases}|{f'{t["id"]}-occ0.pt' for t in target_cases}
   if not required<=set(captures):raise RuntimeError('target captures incomplete')
   save(a.out/'complete.json',dict(complete=True,mode=a.mode,rep=a.rep,startup_seconds=startup,cases_sha256=sha(a.cases),files={p.name:sha(p) for p in a.out.glob('*.json') if p.name!='complete.json'},captures=captures,diagnostic_only=True,performance_claim=False))
+ except BaseException as exc:
+  save(a.out/'failure.json',dict(type=type(exc).__name__,message=str(exc),server_exit=proc.poll(),mode=a.mode,rep=a.rep,cases_sha256=sha(a.cases),diagnostic_only=True,performance_claim=False))
+  raise
  finally:
   if proc.poll() is None:
    os.killpg(proc.pid,signal.SIGTERM)
