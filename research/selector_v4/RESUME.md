@@ -45,3 +45,7 @@ The UI showed Pro power5/5, but an option explicitly named Max could not be veri
 Two preparation attempts produced no GPU work. The first failed in the shell before Python because output redirection targeted a root that did not exist. The second generated an overlay but failed before campaign receipt creation on a missing sibling-only `release_hash`; its partial root and receipt are retained. No jobs were submitted and no dev/canary/release/stress case was consumed.
 
 V4.1 now records immutable `stage_hashes` for each family and validates them in the manifest contract. The full38-test contract passes after this fix. Build the next source archive from the commit containing this note; do not submit from `e3121b0`.
+
+## V4.1 dual-GPU smoke PASS
+
+Immutable source `8ea2169dbc2967e02f12e527ea0b304a264df1ab`, campaign `/ssd/scxi253/single-gpu-inference-selector-v41-smoke-20260930T202814Z`, jobs1643827/1643828 both completed0:0. Exact ragged/paged hashes, native0-cap1-native0 plan sequence and compiled symbol co-residence pass on both GPUs. Smoke authorizes exposed dev qualification only; canary remains untouched and unauthorized until dev controls resolve.

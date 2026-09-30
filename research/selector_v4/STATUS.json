@@ -1,7 +1,7 @@
 {
   "schema": 4,
   "qualification_revision": "4.1.0",
-  "state": "V41_STAGE_HASH_CPU_VALIDATED_SMOKE_NOT_SUBMITTED",
+  "state": "V41_SMOKE_PASS_DEV_AUTHORIZED",
   "default_promotion": false,
   "serving_promotion": false,
   "historical_token_divergence_resolved": false,
@@ -21,7 +21,10 @@
     "patch_sha256": "bb1d385104b5f0be3ee2ab7552b4e2d5e2c946775d6d7688f25fa5b5f19ecfea"
   },
   "cpu_tests_last_complete": 38,
-  "new_v41_gpu_jobs": {},
+  "new_v41_gpu_jobs": {
+    "smoke_gpu_4090": "1643827",
+    "smoke_gpu_5090": "1643828"
+  },
   "max_ui_verified": false,
   "source_validation_evidence": "evidence/v41-source-validation/",
   "stage_hashes": {
@@ -42,5 +45,13 @@
       "cases_consumed": 0,
       "evidence": "evidence/v41-preparation-failures/"
     }
+  },
+  "smoke": {
+    "pass": true,
+    "campaign": "/ssd/scxi253/single-gpu-inference-selector-v41-smoke-20260930T202814Z",
+    "verdict_sha256": "fc03e1572d6bdea25095f359fe565b641972f17fb98cd545ea673efa66702d33",
+    "evidence": "evidence/v41-smoke-8ea2169/",
+    "canary_authorized": false,
+    "dev_authorized": true
   }
 }

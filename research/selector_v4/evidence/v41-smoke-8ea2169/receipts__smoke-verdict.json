@@ -1,0 +1,152 @@
+{
+  "schema": 1,
+  "verified_utc": "2026-09-30T20:35:26.473879+00:00",
+  "root": "/ssd/scxi253/single-gpu-inference-selector-v41-smoke-20260930T202814Z",
+  "source_commit": "8ea2169dbc2967e02f12e527ea0b304a264df1ab",
+  "jobs": {
+    "gpu_4090": {
+      "job_id": "1643827",
+      "accounting": "1643827|COMPLETED|0:0|00:04:23|wqd10naf05g2",
+      "results_sha256": {
+        "pristine": "93fd27742e895bfa5c68272188fed7cddc8c36968b1cb2b02078c5fdffff080c",
+        "candidate": "420128752af357443b20902123bf1cd51065a96a9f70a4f85a6b0b8def33d9aa",
+        "binary_audit": "75fbbd665fb55d44849e1fc93b3df8929a1118692c918a28aa699a14795b4624"
+      }
+    },
+    "gpu_5090": {
+      "job_id": "1643828",
+      "accounting": "1643828|COMPLETED|0:0|00:03:40|wqd10nbj03g1",
+      "results_sha256": {
+        "pristine": "a297df64d5c643083202467aad5f94ef4bd0e2465ea4c3213f63ad114d0abac0",
+        "candidate": "ebc29421d9e9f00b2e1ed514c5da0d538db4fe244fd045e602e4c63f46f4c0a7",
+        "binary_audit": "50987a0e5be49c0b13d5b9b288c6df5188843d5b24b3471a95a9e78b06dd2c13"
+      }
+    }
+  },
+  "gpu": {
+    "gpu_4090": {
+      "layouts": {
+        "ragged": {
+          "pristine_wall_us": 2830.30859375,
+          "native_before_wall_us": 2823.57109375,
+          "cap_wall_us": 2065.85403125,
+          "native_after_wall_us": 2700.80121875,
+          "native_after_over_before_wall": 1.0454568348635525,
+          "native_after_over_before_device": 1.0454249703222962,
+          "native_over_cap_before": 1.3667815107157029,
+          "native_over_cap_after": 1.3073533647078677,
+          "exact_hashes": true,
+          "plan_policy_sequence": [
+            0,
+            1,
+            0
+          ]
+        },
+        "paged": {
+          "pristine_wall_us": 2773.99540625,
+          "native_before_wall_us": 2702.41021875,
+          "cap_wall_us": 1983.52925,
+          "native_after_wall_us": 2701.7308125,
+          "native_after_over_before_wall": 1.0002514707412213,
+          "native_after_over_before_device": 1.000224779930207,
+          "native_over_cap_before": 1.3624251917384127,
+          "native_over_cap_after": 1.3620826678003362,
+          "exact_hashes": true,
+          "plan_policy_sequence": [
+            0,
+            1,
+            0
+          ]
+        }
+      },
+      "binary_audit": {
+        "kernel_symbol_isolation_compiled": true,
+        "same_module_pairs": {
+          "ragged": true,
+          "paged": true
+        },
+        "binaries": [
+          {
+            "sha256": "d57ba4086ea22c2431c6d86ece47d5443ce45e63ee25a1e2af12ba4265e6d786",
+            "bytes": 2434160,
+            "symbol_hits": {
+              "ragged_native": 176,
+              "ragged_resource": 176,
+              "paged_native": 176,
+              "paged_resource": 176
+            }
+          }
+        ]
+      }
+    },
+    "gpu_5090": {
+      "layouts": {
+        "ragged": {
+          "pristine_wall_us": 1525.7594375,
+          "native_before_wall_us": 1525.07684375,
+          "cap_wall_us": 1623.2774375,
+          "native_after_wall_us": 1524.46971875,
+          "native_after_over_before_wall": 1.0003982532368683,
+          "native_after_over_before_device": 1.0001830668341807,
+          "native_over_cap_before": 0.9395047380802397,
+          "native_over_cap_after": 0.9391307262286765,
+          "exact_hashes": true,
+          "plan_policy_sequence": [
+            0,
+            1,
+            0
+          ]
+        },
+        "paged": {
+          "pristine_wall_us": 1593.67553125,
+          "native_before_wall_us": 1592.5100625,
+          "cap_wall_us": 1695.55796875,
+          "native_after_wall_us": 1592.8418125,
+          "native_after_over_before_wall": 0.9997917244528637,
+          "native_after_over_before_device": 0.9998372889904774,
+          "native_over_cap_before": 0.9392247813703656,
+          "native_over_cap_after": 0.9394204396764302,
+          "exact_hashes": true,
+          "plan_policy_sequence": [
+            0,
+            1,
+            0
+          ]
+        }
+      },
+      "binary_audit": {
+        "kernel_symbol_isolation_compiled": true,
+        "same_module_pairs": {
+          "ragged": true,
+          "paged": true
+        },
+        "binaries": [
+          {
+            "sha256": "0c0e7b8d05593bb72c64b8b517d4d954c9af951d1daca91e019a24dd84cbc971",
+            "bytes": 2651248,
+            "symbol_hits": {
+              "ragged_native": 176,
+              "ragged_resource": 176,
+              "paged_native": 176,
+              "paged_resource": 176
+            }
+          }
+        ]
+      }
+    }
+  },
+  "requirements": {
+    "jobs_completed_zero": true,
+    "ragged_exact": true,
+    "paged_exact": true,
+    "native_after_cap_exact": true,
+    "policy_sequence_native_cap_native": true,
+    "compiled_symbols_co_resident": true,
+    "private_jit_per_gpu": true
+  },
+  "default_promotion": false,
+  "serving_promotion": false,
+  "canary_authorized": true,
+  "historical_token_divergence_resolved": false,
+  "pass": true
+}
