@@ -13,6 +13,9 @@ export CUDA_HOME=/ssd/scxi253/single-gpu-inference-distinguished-20260928/toolch
 export PATH=$CUDA_HOME/bin:$E/bin:$PATH
 export LD_LIBRARY_PATH=$CUDA_HOME/lib:${LD_LIBRARY_PATH:-}
 export OMP_NUM_THREADS=2 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 MAX_JOBS=4
+CCCL=/ssd/scxi253/single-gpu-inference-resource-generalization-20260930/overlays/pristine/flashinfer/data/cccl
+export CPATH=$CCCL/libcudacxx/include:$CCCL/cub:$CCCL/thrust
+export NVCC_PREPEND_FLAGS="-I$CCCL/libcudacxx/include -I$CCCL/cub -I$CCCL/thrust"
 R=$P/upstream-runs/$SLURM_JOB_ID;mkdir -p "$R";scontrol show job "$SLURM_JOB_ID" -o > "$R/slurm.txt";nvidia-smi --query-gpu=name,uuid,driver_version --format=csv > "$R/hardware.csv"
 cleanup(){ RC=$?; trap - EXIT; jobs -pr | xargs -r kill 2>/dev/null || true; echo $RC > "$R/exit.txt"; exit $RC; };trap cleanup EXIT
 for MODE in original patched; do
