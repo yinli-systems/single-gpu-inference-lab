@@ -25,33 +25,7 @@ def patch_scheduler(s,mode):
  body=one(body,'    if (vec.size() != 15) {','    if (vec.size() != 16) {','vector size check')
  body=one(body,'      err_msg << "PrefillPlanInfo::FromVector: vec.size() should be 15, but got " << vec.size();','      err_msg << "PrefillPlanInfo::FromVector: vec.size() should be 16, but got " << vec.size();','vector error')
  body=one(body,'    split_kv = vec[14];\n  }','    split_kv = vec[14];\n    resource_cap = vec[15];\n  }','from vector')
- s=s[:start]+body+s[stop:]
- anchor=(
- '  plan_info.cta_tile_q = cta_tile_q;\n'
- '  plan_info.total_num_rows = total_num_rows;\n'
- '  plan_info.enable_cuda_graph = enable_cuda_graph;\n'
- '  plan_info.padded_batch_size = padded_batch_size;\n'
- '  plan_info.split_kv = split_kv;\n')
- if mode=='off': decision='  plan_info.resource_cap = false;\n'
- elif mode=='cap': decision='  plan_info.resource_cap = true;\n'
- elif mode=='guarded':
-  decision=(
- '  // Conservative release guard: require a long cached prefix and material Q imbalance.\n'
- '  // Integer form of max(q) / mean(q) >= 1.2; no floating-point planner state.\n'
- '  uint64_t sgi_sum_q = 0, sgi_max_q = 0, sgi_max_cached = 0;\n'
- '  for (uint32_t i = 0; i < batch_size; ++i) {\n'
- '    uint64_t q_len = static_cast<uint64_t>(qo_indptr_h[i + 1] - qo_indptr_h[i]);\n'
- '    uint64_t kv_len = static_cast<uint64_t>(kv_indptr_h[i + 1] - kv_indptr_h[i]);\n'
- '    uint64_t cached = kv_len > q_len ? kv_len - q_len : 0;\n'
- '    sgi_sum_q += q_len;\n'
- '    sgi_max_q = std::max(sgi_max_q, q_len);\n'
- '    sgi_max_cached = std::max(sgi_max_cached, cached);\n'
- '  }\n'
- '  plan_info.resource_cap = batch_size > 1 && sgi_max_cached >= 8192 &&\n'
- '                           sgi_max_q * static_cast<uint64_t>(batch_size) * 5 >=\n'
- '                               sgi_sum_q * 6;\n')
- else: raise ValueError(mode)
- return one(s,anchor,anchor+decision,'plan decision')
+ return s[:start]+body+s[stop:]
 
 def patch_prefill(s):
  s=one(s,'float* tmp_s, bool enable_pdl,\n                                                        cudaStream_t stream) {','float* tmp_s, bool enable_pdl,\n                                                        cudaStream_t stream, bool resource_cap) {','ragged impl signature')
@@ -93,6 +67,31 @@ def patch_declarations(s):
  if count not in (1,2):raise ValueError(f'dispatch declarations: {count}')
  return s.replace(old,'                                                   cudaStream_t stream, bool resource_cap);')
 
+def patch_plan_decision(s,mode):
+ marker='  TVM_FFI_ICHECK(status == cudaSuccess)\n      << "Failed to plan prefill with error: " << cudaGetErrorString(status);\n\n  return Array(plan_info.ToVector());'
+ if mode=='off': decision='  plan_info.resource_cap = false;\n'
+ elif mode=='cap': decision='  plan_info.resource_cap = true;\n'
+ elif mode=='guarded':
+  decision=(
+ '  // Select the tactic from actual token lengths. kv_indptr counts pages on paged KV.\n'
+ '  uint64_t sgi_sum_q = 0, sgi_max_q = 0, sgi_max_cached = 0;\n'
+ '  auto* sgi_qo_indptr = static_cast<IdType*>(qo_indptr.data_ptr());\n'
+ '  auto* sgi_kv_len = static_cast<IdType*>(kv_len_arr.data_ptr());\n'
+ '  for (int64_t i = 0; i < batch_size; ++i) {\n'
+ '    uint64_t q_len = static_cast<uint64_t>(sgi_qo_indptr[i + 1] - sgi_qo_indptr[i]);\n'
+ '    uint64_t kv_len = static_cast<uint64_t>(sgi_kv_len[i]);\n'
+ '    uint64_t cached = kv_len > q_len ? kv_len - q_len : 0;\n'
+ '    sgi_sum_q += q_len;\n'
+ '    sgi_max_q = std::max(sgi_max_q, q_len);\n'
+ '    sgi_max_cached = std::max(sgi_max_cached, cached);\n'
+ '  }\n'
+ '  plan_info.resource_cap = batch_size > 1 && sgi_max_cached >= 8192 &&\n'
+ '                           sgi_max_q * static_cast<uint64_t>(batch_size) * 5 >=\n'
+ '                               sgi_sum_q * 6;\n')
+ else: raise ValueError(mode)
+ replacement=marker.replace('  return Array(plan_info.ToVector());',decision+'\n  return Array(plan_info.ToVector());')
+ return one(s,marker,replacement,'plan wrapper decision')
+
 def patch_run(s,paged=False):
  if paged:
   old='PagedParams>(params, tmp_v, tmp_s, enable_pdl, stream);'
@@ -120,7 +119,7 @@ def prepare(source,out,mode):
  changes={
   'flashinfer/data/include/flashinfer/attention/scheduler.cuh':patch_scheduler(originals['flashinfer/data/include/flashinfer/attention/scheduler.cuh'],mode),
   'flashinfer/data/include/flashinfer/attention/prefill.cuh':patch_prefill(originals['flashinfer/data/include/flashinfer/attention/prefill.cuh']),
-  'flashinfer/data/csrc/batch_prefill.cu':patch_run(patch_declarations(originals['flashinfer/data/csrc/batch_prefill.cu'])),
+  'flashinfer/data/csrc/batch_prefill.cu':patch_plan_decision(patch_run(patch_declarations(originals['flashinfer/data/csrc/batch_prefill.cu'])),mode),
   'flashinfer/data/csrc/batch_prefill_paged.cuh':patch_run(originals['flashinfer/data/csrc/batch_prefill_paged.cuh'],True),
   'flashinfer/data/csrc/batch_prefill_paged.cu':patch_declarations(originals['flashinfer/data/csrc/batch_prefill_paged.cu']),
  }
