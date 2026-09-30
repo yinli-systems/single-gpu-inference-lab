@@ -89,3 +89,23 @@ and 1, cell order), exclusions, and the P1–P5 criteria.
 **Smoke run.** As on the A100, one short harness smoke (n16, two blocks) may run first to check that every
 state's requests land in one engine step. Only capture counts are read; its timing is not looked at and its
 files are deleted.
+
+## Outcome (2026-10-01)
+
+**A100:** not executed (see addendum 1); nothing reported.
+
+**L20 (addendum 1):** every registered prediction held. Results in
+[`benchmarks/results/l20-pairing-permutations/`](../../benchmarks/results/l20-pairing-permutations/), verdicts in
+`verdicts.json` there.
+
+| prediction | result |
+| --- | --- |
+| P1 (primary): ρ(C, median T) ≥ 0.8 in all six n ≥ 4 cells | **held**: 0.985–0.997 |
+| P2: T(same) − T(opposite) > 0 (95% CI) in every cell | **held**, 8/8: +36 to +234 ms |
+| P3: order null equivalent to `same` within ±ε | **held**, 8/8 |
+| P4: layout seeds equivalent within ±ε and ρ ≥ 0.9 | **held**, 4/4: ρ 0.991–1.000 |
+| P5: eqC-a vs eqC-b equivalent within ±ε | **held**, 6/6; the differences (0.6–1.3% of the range) are nonzero at 90% |
+| P6 (L20): range / (6.33 ms/M × ΔC) in 0.8–1.15 | **held**, 8/8: 0.92–0.94 |
+
+Reported, not predicted: minimax floor 18–117 ms; 1 missing trial of 1056; SM clock 210–2520 MHz,
+temperature 44–77 °C over the run (including loads and idle gaps).

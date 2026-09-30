@@ -2,7 +2,7 @@
   "category_counts": {
     "active": 6,
     "analysis": 1,
-    "negative": 10,
+    "negative": 11,
     "other": 20,
     "path_proof": 15,
     "positive": 8,
@@ -526,6 +526,18 @@
       "summary": "Four models x 15 cells: partition gap 1.80x (4B) / 1.48x (8B), M2n geometry-OOD MAE 1.7-2.5 ms vs M0 19-57, MLP 23-53, LLMVisor formula 5-20 ms. Pairing swap +5.3-10.5 ms in 10/10 configs, controls <= 0.11 ms; SGLang agrees with vLLM to 2-5%; every isolated kernel (FA2, FA3, FlashInfer) shows the swap, FA3 x 36 layers = 72-102% of the step. FA3 prices a chunk in waves of deep tiles (512->640 tokens at 16k: +7.3 ms, 640->1024: +4.8 ms), so the single slope over- and under-predicts (HP3, HP4, HG2, HM4, HK3-5, VL2 failed)."
     },
     {
+      "category": "negative",
+      "compact_file_count": 1,
+      "has_campaign_summary_json": false,
+      "has_evidence_status_json": false,
+      "has_readme": true,
+      "has_summary_json": false,
+      "path": "benchmarks/results/l20-pairing-permutations",
+      "reference": "l20-pairing-permutations/",
+      "status": "Pre-registered controlled replication (L20, vLLM 0.29; A100 run registered, not executed)",
+      "summary": "Same chunk and depth multisets re-paired in 8-11 ways per config (n = 2-16 prefills): pairing alone moves the step by 36-234 ms (`same` 26-65% slower than `opposite`), so a marginal-only predictor errs by at least 18-117 ms on these states. Spearman rho(C, T) 0.985-0.997, range 0.92-0.94 of the L20 slope; equal-C pairings differ by 0.6-1.3% of the range; submission order and KV layout do not matter. All six registered predictions held."
+    },
+    {
       "category": "other",
       "compact_file_count": 1,
       "has_campaign_summary_json": false,
@@ -874,7 +886,7 @@
       "summary": "Custom three-way serving path evidence; not yet a broad win."
     }
   ],
-  "entry_count": 72,
+  "entry_count": 73,
   "index_path": "benchmarks/results/README.md",
   "result_root": "benchmarks/results",
   "schema_version": 1
