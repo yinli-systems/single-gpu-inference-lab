@@ -13,6 +13,15 @@ export CUDA_HOME=/ssd/scxi253/single-gpu-inference-distinguished-20260928/toolch
 export PATH=$CUDA_HOME/bin:$E/bin:$PATH
 export LD_LIBRARY_PATH=$CUDA_HOME/lib:${LD_LIBRARY_PATH:-}
 export OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 MAX_JOBS=4 TRITON_CACHE_DIR=$LOCAL/triton
+# SGLang JIT kernels include CUDA headers that depend on CCCL's nv/target.
+# Bind the exact CCCL tree shipped with the frozen pristine FlashInfer overlay.
+CCCL=$P/overlays/pristine/flashinfer/data/cccl
+test -d "$CCCL/libcudacxx/include" -a -d "$CCCL/cub" -a -d "$CCCL/thrust"
+export CPATH=$CCCL/libcudacxx/include:$CCCL/cub:$CCCL/thrust
+export NVCC_PREPEND_FLAGS="-I$CCCL/libcudacxx/include -I$CCCL/cub -I$CCCL/thrust"
+export SGLANG_JIT_CACHE_DIR=$LOCAL/sglang-jit
+export SGLANG_CACHE_DIR=$LOCAL/sglang-runtime
+export SGLANG_CUTE_AOT_CACHE_DIR=$LOCAL/cute-aot
 export PYTHONPATH=$P/overlays/pristine:$SOURCE FLASHINFER_WORKSPACE_BASE=$P/cache/$SLURM_JOB_PARTITION/pristine XDG_CACHE_HOME=$LOCAL/cache
 ROOT=$(dirname "$SOURCE");R=$ROOT/probe-runs/$SLURM_JOB_ID;mkdir -p "$R" "$ROOT/logs";scontrol show job $SLURM_JOB_ID -o > "$R/slurm.txt"
 "$E/bin/python" -u "$SOURCE/probe_http.py" --source "$SOURCE" --model "$MODEL" --out "$R/result"
