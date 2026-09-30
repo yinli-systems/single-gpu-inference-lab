@@ -1,0 +1,985 @@
+{
+  "schema": 3,
+  "cases": [
+    {
+      "id": "canary-v3-below",
+      "family": "canary",
+      "regime": "opposite",
+      "q": [
+        29,
+        58,
+        117,
+        154,
+        213,
+        213,
+        405
+      ],
+      "cached": [
+        24576,
+        16384,
+        12288,
+        8192,
+        2048,
+        512,
+        0
+      ],
+      "descriptor_count": 39,
+      "expected_selector": {
+        "gpu_4090": false,
+        "gpu_5090": false
+      }
+    },
+    {
+      "id": "canary-v3-4090",
+      "family": "canary",
+      "regime": "opposite",
+      "q": [
+        29,
+        58,
+        117,
+        154,
+        213,
+        213,
+        437
+      ],
+      "cached": [
+        24576,
+        16384,
+        12288,
+        8192,
+        2048,
+        512,
+        0
+      ],
+      "descriptor_count": 40,
+      "expected_selector": {
+        "gpu_4090": true,
+        "gpu_5090": false
+      }
+    },
+    {
+      "id": "canary-v3-both",
+      "family": "canary",
+      "regime": "opposite",
+      "q": [
+        29,
+        58,
+        117,
+        186,
+        245,
+        245,
+        469
+      ],
+      "cached": [
+        24576,
+        16384,
+        12288,
+        8192,
+        2048,
+        512,
+        0
+      ],
+      "descriptor_count": 44,
+      "expected_selector": {
+        "gpu_4090": true,
+        "gpu_5090": true
+      }
+    },
+    {
+      "id": "canary-v3-near",
+      "family": "canary",
+      "regime": "near-opposite",
+      "q": [
+        29,
+        58,
+        117,
+        186,
+        245,
+        245,
+        469
+      ],
+      "cached": [
+        24576,
+        12288,
+        16384,
+        8192,
+        2048,
+        512,
+        0
+      ],
+      "descriptor_count": 44,
+      "expected_selector": {
+        "gpu_4090": false,
+        "gpu_5090": false
+      }
+    },
+    {
+      "id": "holdout-v3-opp-00",
+      "family": "release",
+      "regime": "opposite",
+      "q": [
+        29,
+        58,
+        117,
+        154,
+        213,
+        213,
+        405
+      ],
+      "cached": [
+        24576,
+        16384,
+        12288,
+        8192,
+        2048,
+        512,
+        0
+      ],
+      "descriptor_count": 39,
+      "expected_selector": {
+        "gpu_4090": false,
+        "gpu_5090": false
+      }
+    },
+    {
+      "id": "holdout-v3-opp-01",
+      "family": "release",
+      "regime": "opposite",
+      "q": [
+        29,
+        58,
+        117,
+        154,
+        213,
+        213,
+        437
+      ],
+      "cached": [
+        24576,
+        16384,
+        12288,
+        8192,
+        2048,
+        512,
+        0
+      ],
+      "descriptor_count": 40,
+      "expected_selector": {
+        "gpu_4090": true,
+        "gpu_5090": false
+      }
+    },
+    {
+      "id": "holdout-v3-opp-02",
+      "family": "release",
+      "regime": "opposite",
+      "q": [
+        29,
+        58,
+        117,
+        154,
+        213,
+        245,
+        468
+      ],
+      "cached": [
+        24576,
+        16384,
+        12288,
+        8192,
+        2048,
+        512,
+        0
+      ],
+      "descriptor_count": 42,
+      "expected_selector": {
+        "gpu_4090": true,
+        "gpu_5090": false
+      }
+    },
+    {
+      "id": "holdout-v3-opp-03",
+      "family": "release",
+      "regime": "opposite",
+      "q": [
+        29,
+        58,
+        117,
+        186,
+        213,
+        245,
+        468
+      ],
+      "cached": [
+        24576,
+        16384,
+        12288,
+        8192,
+        2048,
+        512,
+        0
+      ],
+      "descriptor_count": 43,
+      "expected_selector": {
+        "gpu_4090": true,
+        "gpu_5090": true
+      }
+    },
+    {
+      "id": "holdout-v3-opp-04",
+      "family": "release",
+      "regime": "opposite",
+      "q": [
+        29,
+        58,
+        117,
+        186,
+        245,
+        277,
+        500
+      ],
+      "cached": [
+        24576,
+        16384,
+        12288,
+        8192,
+        2048,
+        512,
+        0
+      ],
+      "descriptor_count": 46,
+      "expected_selector": {
+        "gpu_4090": true,
+        "gpu_5090": true
+      }
+    },
+    {
+      "id": "holdout-v3-opp-05",
+      "family": "release",
+      "regime": "opposite",
+      "q": [
+        35,
+        72,
+        139,
+        206,
+        273,
+        340,
+        503
+      ],
+      "cached": [
+        24576,
+        16384,
+        12288,
+        8192,
+        2048,
+        512,
+        0
+      ],
+      "descriptor_count": 53,
+      "expected_selector": {
+        "gpu_4090": true,
+        "gpu_5090": true
+      }
+    },
+    {
+      "id": "holdout-v3-opp-06",
+      "family": "release",
+      "regime": "opposite",
+      "q": [
+        44,
+        91,
+        170,
+        249,
+        328,
+        407,
+        506
+      ],
+      "cached": [
+        24576,
+        16384,
+        12288,
+        8192,
+        2048,
+        512,
+        0
+      ],
+      "descriptor_count": 59,
+      "expected_selector": {
+        "gpu_4090": true,
+        "gpu_5090": true
+      }
+    },
+    {
+      "id": "holdout-v3-opp-07",
+      "family": "release",
+      "regime": "opposite",
+      "q": [
+        55,
+        112,
+        191,
+        270,
+        349,
+        428,
+        507
+      ],
+      "cached": [
+        24576,
+        16384,
+        12288,
+        8192,
+        2048,
+        512,
+        0
+      ],
+      "descriptor_count": 62,
+      "expected_selector": {
+        "gpu_4090": true,
+        "gpu_5090": true
+      }
+    },
+    {
+      "id": "holdout-v3-near-00",
+      "family": "release",
+      "regime": "near-opposite",
+      "q": [
+        29,
+        58,
+        117,
+        154,
+        213,
+        213,
+        405
+      ],
+      "cached": [
+        24576,
+        12288,
+        16384,
+        8192,
+        2048,
+        512,
+        0
+      ],
+      "descriptor_count": 39,
+      "expected_selector": {
+        "gpu_4090": false,
+        "gpu_5090": false
+      }
+    },
+    {
+      "id": "holdout-v3-near-01",
+      "family": "release",
+      "regime": "near-opposite",
+      "q": [
+        29,
+        58,
+        117,
+        154,
+        213,
+        213,
+        437
+      ],
+      "cached": [
+        24576,
+        12288,
+        16384,
+        8192,
+        2048,
+        512,
+        0
+      ],
+      "descriptor_count": 40,
+      "expected_selector": {
+        "gpu_4090": false,
+        "gpu_5090": false
+      }
+    },
+    {
+      "id": "holdout-v3-near-02",
+      "family": "release",
+      "regime": "near-opposite",
+      "q": [
+        29,
+        58,
+        117,
+        154,
+        213,
+        245,
+        468
+      ],
+      "cached": [
+        24576,
+        12288,
+        16384,
+        8192,
+        2048,
+        512,
+        0
+      ],
+      "descriptor_count": 42,
+      "expected_selector": {
+        "gpu_4090": false,
+        "gpu_5090": false
+      }
+    },
+    {
+      "id": "holdout-v3-near-03",
+      "family": "release",
+      "regime": "near-opposite",
+      "q": [
+        29,
+        58,
+        117,
+        186,
+        213,
+        245,
+        468
+      ],
+      "cached": [
+        24576,
+        12288,
+        16384,
+        8192,
+        2048,
+        512,
+        0
+      ],
+      "descriptor_count": 43,
+      "expected_selector": {
+        "gpu_4090": false,
+        "gpu_5090": false
+      }
+    },
+    {
+      "id": "holdout-v3-near-04",
+      "family": "release",
+      "regime": "near-opposite",
+      "q": [
+        29,
+        58,
+        117,
+        186,
+        245,
+        277,
+        500
+      ],
+      "cached": [
+        24576,
+        12288,
+        16384,
+        8192,
+        2048,
+        512,
+        0
+      ],
+      "descriptor_count": 46,
+      "expected_selector": {
+        "gpu_4090": false,
+        "gpu_5090": false
+      }
+    },
+    {
+      "id": "holdout-v3-near-05",
+      "family": "release",
+      "regime": "near-opposite",
+      "q": [
+        35,
+        72,
+        139,
+        206,
+        273,
+        340,
+        503
+      ],
+      "cached": [
+        24576,
+        12288,
+        16384,
+        8192,
+        2048,
+        512,
+        0
+      ],
+      "descriptor_count": 53,
+      "expected_selector": {
+        "gpu_4090": false,
+        "gpu_5090": false
+      }
+    },
+    {
+      "id": "holdout-v3-near-06",
+      "family": "release",
+      "regime": "near-opposite",
+      "q": [
+        44,
+        91,
+        170,
+        249,
+        328,
+        407,
+        506
+      ],
+      "cached": [
+        24576,
+        12288,
+        16384,
+        8192,
+        2048,
+        512,
+        0
+      ],
+      "descriptor_count": 59,
+      "expected_selector": {
+        "gpu_4090": false,
+        "gpu_5090": false
+      }
+    },
+    {
+      "id": "holdout-v3-near-07",
+      "family": "release",
+      "regime": "near-opposite",
+      "q": [
+        55,
+        112,
+        191,
+        270,
+        349,
+        428,
+        507
+      ],
+      "cached": [
+        24576,
+        12288,
+        16384,
+        8192,
+        2048,
+        512,
+        0
+      ],
+      "descriptor_count": 62,
+      "expected_selector": {
+        "gpu_4090": false,
+        "gpu_5090": false
+      }
+    },
+    {
+      "id": "holdout-v3-same-00",
+      "family": "release",
+      "regime": "same",
+      "q": [
+        29,
+        58,
+        117,
+        154,
+        213,
+        245,
+        468
+      ],
+      "cached": [
+        0,
+        512,
+        2048,
+        8192,
+        12288,
+        16384,
+        24576
+      ],
+      "descriptor_count": 42,
+      "expected_selector": {
+        "gpu_4090": false,
+        "gpu_5090": false
+      }
+    },
+    {
+      "id": "holdout-v3-same-01",
+      "family": "release",
+      "regime": "same",
+      "q": [
+        29,
+        58,
+        117,
+        186,
+        213,
+        245,
+        468
+      ],
+      "cached": [
+        0,
+        512,
+        2048,
+        8192,
+        12288,
+        16384,
+        24576
+      ],
+      "descriptor_count": 43,
+      "expected_selector": {
+        "gpu_4090": false,
+        "gpu_5090": false
+      }
+    },
+    {
+      "id": "holdout-v3-same-02",
+      "family": "release",
+      "regime": "same",
+      "q": [
+        29,
+        58,
+        117,
+        186,
+        245,
+        277,
+        500
+      ],
+      "cached": [
+        0,
+        512,
+        2048,
+        8192,
+        12288,
+        16384,
+        24576
+      ],
+      "descriptor_count": 46,
+      "expected_selector": {
+        "gpu_4090": false,
+        "gpu_5090": false
+      }
+    },
+    {
+      "id": "holdout-v3-same-03",
+      "family": "release",
+      "regime": "same",
+      "q": [
+        35,
+        72,
+        139,
+        206,
+        273,
+        340,
+        503
+      ],
+      "cached": [
+        0,
+        512,
+        2048,
+        8192,
+        12288,
+        16384,
+        24576
+      ],
+      "descriptor_count": 53,
+      "expected_selector": {
+        "gpu_4090": false,
+        "gpu_5090": false
+      }
+    },
+    {
+      "id": "holdout-v3-same-04",
+      "family": "release",
+      "regime": "same",
+      "q": [
+        44,
+        91,
+        170,
+        249,
+        328,
+        407,
+        506
+      ],
+      "cached": [
+        0,
+        512,
+        2048,
+        8192,
+        12288,
+        16384,
+        24576
+      ],
+      "descriptor_count": 59,
+      "expected_selector": {
+        "gpu_4090": false,
+        "gpu_5090": false
+      }
+    },
+    {
+      "id": "holdout-v3-same-05",
+      "family": "release",
+      "regime": "same",
+      "q": [
+        55,
+        112,
+        191,
+        270,
+        349,
+        428,
+        507
+      ],
+      "cached": [
+        0,
+        512,
+        2048,
+        8192,
+        12288,
+        16384,
+        24576
+      ],
+      "descriptor_count": 62,
+      "expected_selector": {
+        "gpu_4090": false,
+        "gpu_5090": false
+      }
+    },
+    {
+      "id": "holdout-v3-mixed-00",
+      "family": "release",
+      "regime": "mixed",
+      "q": [
+        29,
+        58,
+        117,
+        154,
+        213,
+        245,
+        468
+      ],
+      "cached": [
+        0,
+        8192,
+        512,
+        24576,
+        2048,
+        16384,
+        128
+      ],
+      "descriptor_count": 42,
+      "expected_selector": {
+        "gpu_4090": false,
+        "gpu_5090": false
+      }
+    },
+    {
+      "id": "holdout-v3-mixed-01",
+      "family": "release",
+      "regime": "mixed",
+      "q": [
+        29,
+        58,
+        117,
+        186,
+        213,
+        245,
+        468
+      ],
+      "cached": [
+        0,
+        8192,
+        512,
+        24576,
+        2048,
+        16384,
+        128
+      ],
+      "descriptor_count": 43,
+      "expected_selector": {
+        "gpu_4090": false,
+        "gpu_5090": false
+      }
+    },
+    {
+      "id": "holdout-v3-mixed-02",
+      "family": "release",
+      "regime": "mixed",
+      "q": [
+        29,
+        58,
+        117,
+        186,
+        245,
+        277,
+        500
+      ],
+      "cached": [
+        0,
+        8192,
+        512,
+        24576,
+        2048,
+        16384,
+        128
+      ],
+      "descriptor_count": 46,
+      "expected_selector": {
+        "gpu_4090": false,
+        "gpu_5090": false
+      }
+    },
+    {
+      "id": "holdout-v3-mixed-03",
+      "family": "release",
+      "regime": "mixed",
+      "q": [
+        35,
+        72,
+        139,
+        206,
+        273,
+        340,
+        503
+      ],
+      "cached": [
+        0,
+        8192,
+        512,
+        24576,
+        2048,
+        16384,
+        128
+      ],
+      "descriptor_count": 53,
+      "expected_selector": {
+        "gpu_4090": false,
+        "gpu_5090": false
+      }
+    },
+    {
+      "id": "holdout-v3-tied-00",
+      "family": "release",
+      "regime": "opposite-ties",
+      "q": [
+        29,
+        58,
+        117,
+        186,
+        245,
+        277,
+        500
+      ],
+      "cached": [
+        24576,
+        16384,
+        16384,
+        8192,
+        2048,
+        512,
+        0
+      ],
+      "descriptor_count": 46,
+      "expected_selector": {
+        "gpu_4090": true,
+        "gpu_5090": true
+      }
+    },
+    {
+      "id": "holdout-v3-tied-01",
+      "family": "release",
+      "regime": "opposite-ties",
+      "q": [
+        35,
+        72,
+        139,
+        206,
+        273,
+        340,
+        503
+      ],
+      "cached": [
+        24576,
+        16384,
+        16384,
+        8192,
+        2048,
+        512,
+        0
+      ],
+      "descriptor_count": 53,
+      "expected_selector": {
+        "gpu_4090": true,
+        "gpu_5090": true
+      }
+    },
+    {
+      "id": "holdout-v3-tied-02",
+      "family": "release",
+      "regime": "opposite-ties",
+      "q": [
+        44,
+        91,
+        170,
+        249,
+        328,
+        407,
+        506
+      ],
+      "cached": [
+        24576,
+        16384,
+        16384,
+        8192,
+        2048,
+        512,
+        0
+      ],
+      "descriptor_count": 59,
+      "expected_selector": {
+        "gpu_4090": true,
+        "gpu_5090": true
+      }
+    },
+    {
+      "id": "holdout-v3-tied-03",
+      "family": "release",
+      "regime": "opposite-ties",
+      "q": [
+        55,
+        112,
+        191,
+        270,
+        349,
+        428,
+        507
+      ],
+      "cached": [
+        24576,
+        16384,
+        16384,
+        8192,
+        2048,
+        512,
+        0
+      ],
+      "descriptor_count": 62,
+      "expected_selector": {
+        "gpu_4090": true,
+        "gpu_5090": true
+      }
+    }
+  ],
+  "case_hash": "88416fa71efe90fce758d82b20e810e474a28698a0e143d5494694f77000dc17",
+  "primary": "guarded",
+  "modes": [
+    "pristine",
+    "off",
+    "cap",
+    "guarded"
+  ],
+  "dtypes": [
+    "float16",
+    "bfloat16"
+  ],
+  "layouts": [
+    "ragged",
+    "paged"
+  ],
+  "splits": [
+    "auto",
+    "unsplit"
+  ],
+  "blocks": 8,
+  "execution_modes": [
+    "eager",
+    "graph1",
+    "graph16"
+  ],
+  "full_model": false,
+  "source": "fresh v3 boundary and near-counterexample families; all v1/v2 families excluded"
+}
