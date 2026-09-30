@@ -82,3 +82,7 @@ executed resource eligibility guards and source mutation rejection. Measurement
 uses 384ms target/120ms minimum windows and 24 balanced blocks, 3 process repeats.
 Native SASS identity and actual policy/pristine performance are blocking gates.
 Holdout case geometry/hash is unchanged. Exact-source dual-GPU smoke is next.
+
+## 2026-10-01 exact v4.2 dual-GPU smoke PASS; dev dispatched
+
+Frozen measured source `b769e7c18e93c9d6cfdcd79b58edf76955313859`, archive `60ffb32e73e8e9b2ce0e84f2ca20ad3c4559ecbc651cd86c5e168c03074f3d7e`. Campaign `/ssd/scxi253/single-gpu-inference-selector-v42-20260930T230508Z`. CPU 51 PASS. Smoke 1644061/1644062 COMPLETED 0:0; both native SASS identity true, both dtypes/layouts native/resource/native exact with official 15-field plans. Exposed dev two shards per GPU: 4090 1644068/1644069; 5090 1644070/1644071. Both analyzed PASS required before canary. Holdouts 10/48/12 untouched; all defaults OFF. Exact smoke receipts and compressed raw disassembly archived under `evidence/v42-exact-smoke`. Earlier smoke 1643997/1643998 failed missing nvdisasm and remain supporting numerical evidence, never authorizing dev. NVIDIA cuobjdump/nvdisasm 13.0.85 packages now SHA256 verified.

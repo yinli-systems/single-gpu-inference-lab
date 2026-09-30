@@ -1,7 +1,7 @@
 {
-  "schema": 5,
-  "qualification_revision": "4.1.1",
-  "state": "V42_IMPLEMENTED_CPU_PASS_GPU_PENDING",
+  "schema": 6,
+  "qualification_revision": "4.2.0",
+  "state": "V42_EXACT_DUAL_GPU_SMOKE_PASS_DEV_RUNNING",
   "default_promotion": false,
   "serving_promotion": false,
   "historical_token_divergence_resolved": false,
@@ -13,14 +13,7 @@
     "release_untouched": 48,
     "stress_untouched": 12
   },
-  "source_isolation": {
-    "native_kernel_byte_identical": true,
-    "candidate_clone_symbols": true,
-    "legacy_default_native": true,
-    "binding_sha256": "7a8778e8dea2892cdd5d317c0d4a8c47365c36400177aaede46af189a8e68354",
-    "patch_sha256": "bb1d385104b5f0be3ee2ab7552b4e2d5e2c946775d6d7688f25fa5b5f19ecfea"
-  },
-  "cpu_tests_last_complete": 44,
+  "cpu_tests_last_complete": 51,
   "new_v41_gpu_jobs": {
     "smoke_gpu_4090": "1643827",
     "smoke_gpu_5090": "1643828"
@@ -48,22 +41,41 @@
   },
   "smoke": {
     "pass": true,
-    "campaign": "/ssd/scxi253/single-gpu-inference-selector-v41-smoke-20260930T202814Z",
-    "verdict_sha256": "fc03e1572d6bdea25095f359fe565b641972f17fb98cd545ea673efa66702d33",
-    "evidence": "evidence/v41-smoke-8ea2169/",
+    "qualification_revision": "4.2.0",
+    "source_archive_sha256": "60ffb32e73e8e9b2ce0e84f2ca20ad3c4559ecbc651cd86c5e168c03074f3d7e",
+    "jobs": {
+      "gpu_4090": "1644061",
+      "gpu_5090": "1644062"
+    },
+    "artifacts": {
+      "runs/gpu_4090/pristine-1644061/results.json": "f439c50f6bb898bf03b095012a72f53efb7622c47dc6892137750c1dbdf461c6",
+      "runs/gpu_4090/candidate-1644061/results.json": "0cbbc302f163654e2a1a9798740375670e839703f0e0c7c3b9cdc0af4d337f5a",
+      "receipts/binary-audit-1644061.json": "30f5c95bc60e40c9c3e190db92f5788e049d4d48d4cfd015e4f2abf1ff714698",
+      "runs/gpu_5090/pristine-1644062/results.json": "30bcd348b1b51e9ebba602913f9d394db50eebb8d7ce1b5cab5291f9288acfae",
+      "runs/gpu_5090/candidate-1644062/results.json": "57b3636916b76743aceb48fd0cb183d27f26c054a673fb0e43c4769b7f38c8aa",
+      "receipts/binary-audit-1644062.json": "a9025c669ac7370b61ae2ab21558313ca876940a7465015c8324851d968c53c8"
+    },
+    "authorized_stage": "dev",
+    "canary_cases_consumed": 0,
+    "release_cases_consumed": 0,
+    "stress_cases_consumed": 0,
+    "default_promotion": false,
+    "serving_promotion": false,
+    "campaign": "/ssd/scxi253/single-gpu-inference-selector-v42-20260930T230508Z",
+    "evidence": "evidence/v42-exact-smoke/",
     "canary_authorized": false,
     "dev_authorized": true
   },
   "launcher_fix": "persistent per-mode/per-repeat XDG JIT roots under campaign cache for post-run binary audit",
   "dev_submitted": true,
-  "dev_campaign": "/ssd/scxi253/single-gpu-inference-selector-v41-dev-20260930T203824Z",
-  "dev_source_commit": "8ea2169dbc2967e02f12e527ea0b304a264df1ab",
+  "dev_campaign": "/ssd/scxi253/single-gpu-inference-selector-v42-20260930T230508Z",
+  "dev_source_commit": "b769e7c18e93c9d6cfdcd79b58edf76955313859",
   "canary_cases_consumed": 0,
   "release_cases_consumed": 0,
   "v411_contract_evidence": "evidence/v411-contract-validation/",
   "v411_clean_archive_sha256": "054401c074135ad4a65e98180db44be6481ff5d5698a4150d7b3e8dd8654ba04",
-  "exact_source_commit": "50f182dda4e611151a7b799dc2db73ae87b8d7b8",
-  "exact_source_archive_sha256": "9cbae6dee22dd4fccb7cbb870b83dde6727db5015341f0ad3913f7ca6a083725",
+  "exact_source_commit": "b769e7c18e93c9d6cfdcd79b58edf76955313859",
+  "exact_source_archive_sha256": "60ffb32e73e8e9b2ce0e84f2ca20ad3c4559ecbc651cd86c5e168c03074f3d7e",
   "exact_resource_binding_sha256": "5468256db82ad24d5ff20369576802cc504da5fa96f68d2fe24eec9935789263",
   "v411_dev": {
     "campaign": "/ssd/scxi253/single-gpu-inference-selector-v411-dev-20260930T211230Z",
@@ -171,14 +183,14 @@
     },
     "evidence": "evidence/v411-exact-dev/"
   },
-  "next_action": "Create v4.2 with official legacy native plan/run unchanged; cap-only resource run; stronger controls; rerun exposed dev before canary.",
+  "next_action": "Finish source-bound precision dev; analyze both GPUs; only dual PASS authorizes untouched canary.",
   "stress_cases_consumed": 0,
   "v42": {
     "qualification_revision": "4.2.0",
-    "cpu_tests_passed": 48,
+    "cpu_tests_passed": 51,
     "native_plan_vector_size": 15,
     "native_source_identity": true,
-    "native_sass_identity": "pending GPU",
+    "native_sass_identity": true,
     "canary_cases_consumed": 0,
     "release_cases_consumed": 0,
     "stress_cases_consumed": 0,
@@ -187,6 +199,56 @@
     "blocks": 24,
     "repeats": 3,
     "default_promotion": false,
-    "serving_promotion": false
+    "serving_promotion": false,
+    "source_commit": "b769e7c18e93c9d6cfdcd79b58edf76955313859",
+    "source_archive_sha256": "60ffb32e73e8e9b2ce0e84f2ca20ad3c4559ecbc651cd86c5e168c03074f3d7e",
+    "smoke_jobs": {
+      "gpu_4090": "1644061",
+      "gpu_5090": "1644062"
+    },
+    "dev_jobs": {
+      "gpu_4090": {
+        "0": "1644068",
+        "1": "1644069"
+      },
+      "gpu_5090": {
+        "0": "1644070",
+        "1": "1644071"
+      }
+    },
+    "dev_shards": 2,
+    "dev_state": "RUNNING"
+  },
+  "v41_source_isolation_history": {
+    "native_kernel_byte_identical": true,
+    "candidate_clone_symbols": true,
+    "legacy_default_native": true,
+    "binding_sha256": "7a8778e8dea2892cdd5d317c0d4a8c47365c36400177aaede46af189a8e68354",
+    "patch_sha256": "bb1d385104b5f0be3ee2ab7552b4e2d5e2c946775d6d7688f25fa5b5f19ecfea"
+  },
+  "v41_smoke_history": {
+    "pass": true,
+    "campaign": "/ssd/scxi253/single-gpu-inference-selector-v41-smoke-20260930T202814Z",
+    "verdict_sha256": "fc03e1572d6bdea25095f359fe565b641972f17fb98cd545ea673efa66702d33",
+    "evidence": "evidence/v41-smoke-8ea2169/",
+    "canary_authorized": false,
+    "dev_authorized": true
+  },
+  "source_isolation": {
+    "native_source_identity": true,
+    "native_sass_identity": true,
+    "official_plan_vector_size": 15,
+    "resource_only_entry": true,
+    "resource_binding_sha256": "f39d2eb862536fec0e3d6498d62766148ec2e809ccf9e077b04bd513ccc9ec7b"
+  },
+  "dev_jobs": {
+    "gpu_4090": {
+      "0": "1644068",
+      "1": "1644069"
+    },
+    "gpu_5090": {
+      "0": "1644070",
+      "1": "1644071"
+    }
   }
 }
