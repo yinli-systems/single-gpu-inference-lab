@@ -45,7 +45,8 @@ def run(a):
   if sha(head)!=EXPECTED['flashinfer/data/include/flashinfer/attention/prefill.cuh']:raise RuntimeError('pristine source mismatch')
  else:
   binding=json.loads((pkg.parent/'RESOURCE_BINDING.json').read_text())
-  if binding['mode']!=a.mode or sha(head)!=binding['modified_sha256']:raise RuntimeError('candidate binding mismatch')
+  expected=binding['modified_hashes']['flashinfer/data/include/flashinfer/attention/prefill.cuh']
+  if binding['mode']!=a.mode or sha(head)!=expected:raise RuntimeError('candidate binding mismatch')
  a.out.mkdir(parents=True);a.refs.mkdir(parents=True,exist_ok=True)
  torch.set_num_threads(1);torch.backends.cuda.matmul.allow_tf32=False
  affinity=sorted(os.sched_getaffinity(0));os.sched_setaffinity(0,set(affinity[:min(2,len(affinity))]))
