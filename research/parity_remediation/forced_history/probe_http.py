@@ -18,7 +18,7 @@ async def main(a):
  if a.out.exists():raise FileExistsError(a.out)
  a.out.mkdir(parents=True);poslog=a.out/'positions.jsonl'
  with socket.socket() as sock:sock.bind(('127.0.0.1',0));port=sock.getsockname()[1]
- url=f'http://127.0.0.1:{port}';cmd=[os.sys.executable,str(a.source/'server_entry.py'),'--model-path',str(a.model),'--host','127.0.0.1','--port',str(port),'--attention-backend','flashinfer','--dtype','bfloat16','--mem-fraction-static','0.8','--context-length','8192','--chunked-prefill-size','1024','--max-running-requests','4','--cuda-graph-max-bs-decode','4','--page-size','16','--skip-tokenizer-init','--disable-radix-cache','--enable-custom-logit-processor','--random-seed','2026093074']
+ url=f'http://127.0.0.1:{port}';cmd=[os.sys.executable,str(a.source/'probe_server_entry.py'),'--model-path',str(a.model),'--host','127.0.0.1','--port',str(port),'--attention-backend','flashinfer','--dtype','bfloat16','--mem-fraction-static','0.8','--context-length','8192','--chunked-prefill-size','1024','--max-running-requests','4','--cuda-graph-max-bs-decode','4','--page-size','16','--skip-tokenizer-init','--disable-radix-cache','--enable-custom-logit-processor','--random-seed','2026093074']
  env=dict(os.environ,SGI_FORCE_POSITION_LOG=str(poslog),HF_HUB_OFFLINE='1',TRANSFORMERS_OFFLINE='1');log=(a.out/'server.log').open('w');p=subprocess.Popen(cmd,stdout=log,stderr=subprocess.STDOUT,env=env,start_new_session=True)
  try:
   await health(url,p);forced=[101,202,303,404];payload=dict(rid='position-probe',input_ids=[500+i%17 for i in range(128)],sampling_params=dict(temperature=0,max_new_tokens=5,ignore_eos=True,custom_params={'forced_tokens':forced}),custom_logit_processor=PositionProbeProcessor.to_str(),stream=False)
