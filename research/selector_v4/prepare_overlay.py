@@ -2,8 +2,9 @@
 from __future__ import annotations
 from pathlib import Path
 import argparse, difflib, hashlib, json, os, shutil
-from .kernel_isolation import patch_scheduler, patch_declarations, patch_jinja, patch_run, patch_prefill
-from .native_policy import patch_native_entry, patch_native_binding, patch_python_dispatch
+from .kernel_isolation import patch_resource_declarations, patch_resource_jinja, patch_resource_prefill
+from .native_policy import clone_host_run, patch_native_binding, patch_python_dispatch
+from .source_audit import audit_native_sources
 
 EXPECTED = {
  'flashinfer/prefill.py':'bd4aaa0a24462efbb6e6ddb12b3c98da9507e7b6ff6b22da3f40167ca66beb12',
@@ -30,31 +31,31 @@ def prepare(source: Path, out: Path) -> dict:
     shutil.copytree(source/'flashinfer',out/'flashinfer',ignore=shutil.ignore_patterns('__pycache__','*.pyc'),copy_function=os.link)
     for metadata in source.glob('*.dist-info'):
         shutil.copytree(metadata,out/metadata.name,copy_function=os.link)
-    patched_prefill,symbol_hashes=patch_prefill(originals['flashinfer/data/include/flashinfer/attention/prefill.cuh'])
-    batch=patch_declarations(originals['flashinfer/data/csrc/batch_prefill.cu'])
-    batch=patch_run(batch,paged=False);batch=patch_native_entry(batch)
+    patched_prefill,symbol_hashes=patch_resource_prefill(originals['flashinfer/data/include/flashinfer/attention/prefill.cuh'])
+    batch=patch_resource_declarations(originals['flashinfer/data/csrc/batch_prefill.cu'])
+    batch,_,_=clone_host_run(batch,paged=False)
     changes={
-      'flashinfer/data/include/flashinfer/attention/scheduler.cuh':patch_scheduler(originals['flashinfer/data/include/flashinfer/attention/scheduler.cuh']),
       'flashinfer/data/include/flashinfer/attention/prefill.cuh':patched_prefill,
       'flashinfer/data/csrc/batch_prefill.cu':batch,
       'flashinfer/data/csrc/batch_prefill_jit_binding.cu':patch_native_binding(originals['flashinfer/data/csrc/batch_prefill_jit_binding.cu']),
       'flashinfer/prefill.py':patch_python_dispatch(originals['flashinfer/prefill.py']),
-      'flashinfer/data/csrc/batch_prefill_paged.cuh':patch_run(originals['flashinfer/data/csrc/batch_prefill_paged.cuh'],paged=True),
-      'flashinfer/data/csrc/batch_prefill_paged.cu':patch_declarations(originals['flashinfer/data/csrc/batch_prefill_paged.cu']),
-      'flashinfer/data/csrc/batch_prefill_ragged_kernel_inst.jinja':patch_jinja(originals['flashinfer/data/csrc/batch_prefill_ragged_kernel_inst.jinja']),
-      'flashinfer/data/csrc/batch_prefill_paged_kernel_inst.jinja':patch_jinja(originals['flashinfer/data/csrc/batch_prefill_paged_kernel_inst.jinja']),
+      'flashinfer/data/csrc/batch_prefill_paged.cuh':clone_host_run(originals['flashinfer/data/csrc/batch_prefill_paged.cuh'],paged=True)[0],
+      'flashinfer/data/csrc/batch_prefill_paged.cu':patch_resource_declarations(originals['flashinfer/data/csrc/batch_prefill_paged.cu'],paged_only=True),
+      'flashinfer/data/csrc/batch_prefill_ragged_kernel_inst.jinja':patch_resource_jinja(originals['flashinfer/data/csrc/batch_prefill_ragged_kernel_inst.jinja'],paged=False),
+      'flashinfer/data/csrc/batch_prefill_paged_kernel_inst.jinja':patch_resource_jinja(originals['flashinfer/data/csrc/batch_prefill_paged_kernel_inst.jinja'],paged=True),
     }
     diffs=[];modified={}
     for rel,new in changes.items():
         target=out/rel;target.unlink();target.write_text(new);modified[rel]=sha_text(new)
         diffs.extend(difflib.unified_diff(originals[rel].splitlines(True),new.splitlines(True),fromfile='a/'+rel,tofile='b/'+rel))
-    record={'schema':2,'selector_version':'4.1.1','base_version':'0.7.0','base_hashes':EXPECTED,'modified_hashes':modified,
-      'plan_vector_size':16,'policies':{'native':0,'resource_cap':1},'default_policy':'native','native_runtime_policy':True,
+    record={'schema':3,'selector_version':'4.2.0','base_version':'0.7.0','base_hashes':EXPECTED,'modified_hashes':modified,
+      'plan_vector_size':15,'policies':{'native':0,'resource_cap':1},'default_policy':'native','native_runtime_policy':False,'resource_only_entry':True,
       'kernel_symbol_isolation':True,'native_kernel_source_unchanged':True,'symbol_hashes':symbol_hashes,
       'final_tactic':'environment/operation/execution-specific confidence-gated cache; miss/reject => native',
       'device_math_unchanged':True,'descriptor_order_unchanged':True,'production_promoted':False}
+    record['native_source_audit'] = audit_native_sources(originals, {**originals, **changes})
     (out/'RESOURCE_BINDING.json').write_text(json.dumps(record,indent=2)+'\n')
-    (out/'resource-v4.1.1.patch').write_text(''.join(diffs));return record
+    (out/'resource-v4.2.0.patch').write_text(''.join(diffs));return record
 
 if __name__=='__main__':
     p=argparse.ArgumentParser();p.add_argument('--source',type=Path,required=True);p.add_argument('--out',type=Path,required=True)

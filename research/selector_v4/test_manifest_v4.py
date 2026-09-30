@@ -7,7 +7,7 @@ from research.selector_v4.schema import QUALIFICATION_REVISION
 class ManifestTests(unittest.TestCase):
     def test_counts_hash_and_internal_freshness(self):
         data=load();self.assertEqual(data["families"],{"dev":2,"canary":10,"release":48,"stress":12})
-        self.assertEqual(data["case_hash"],digest(data["cases"]));self.assertEqual(data["qualification_revision"],QUALIFICATION_REVISION);self.assertEqual(data["blocks"],16);self.assertEqual(data["stage_hashes"],{f:digest([c for c in data["cases"] if c["family"]==f]) for f in data["families"]})
+        self.assertEqual(data["case_hash"],digest(data["cases"]));self.assertEqual(data["qualification_revision"],QUALIFICATION_REVISION);self.assertEqual(data["blocks"],24);self.assertEqual(data["stage_hashes"],{f:digest([c for c in data["cases"] if c["family"]==f]) for f in data["families"]})
         fresh=[c for c in data["cases"] if not c.get("exposed_development")]
         keys=[(tuple(c["q"]),tuple(c["cached"])) for c in fresh]
         self.assertEqual(len(keys),len(set(keys)))

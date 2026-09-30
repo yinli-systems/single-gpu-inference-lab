@@ -5,6 +5,9 @@ from .manifest_v4 import load
 from .schema import QUALIFICATION_REVISION
 
 NATIVE_OVERLAY_REQUIREMENTS = (
+    "native_source_identity",
+    "native_sass_identity",
+    "actual_policy_vs_pristine_worst_at_least_0_99",
     "native_overlay_worst_at_least_0_99",
     "native_overlay_joint_min_lcb_at_least_0_99",
     "native_overlay_controls_resolve_one_percent",
@@ -39,6 +42,12 @@ def validate_summary(root: Path, stage: str, gpu: str, manifest: dict, source: s
 def authorize(root: Path, stage: str) -> dict:
     root=Path(root);manifest=load(root/"source/research/selector_v4/manifest.json")
     source=(root/"receipts/source-archive.sha256").read_text().strip();overlay=(root/"receipts/official-overlay.sha256").read_text().strip()
+    if stage == 'canary':
+        dev={gpu:validate_summary(root,'dev',gpu,manifest,source,overlay) for gpu in ('gpu_4090','gpu_5090')}
+        return {'authorized_stage':'canary','qualification_revision':QUALIFICATION_REVISION,
+                'source_archive_sha256':source,'official_overlay_sha256':overlay,
+                'dev_summary_sha256':{gpu:sha(root/f'analysis/dev-{gpu}/summary.json') for gpu in dev},
+                'default_promotion':False,'serving_promotion':False}
     canaries={}
     for gpu in ("gpu_4090","gpu_5090"):
         value=validate_summary(root,"canary",gpu,manifest,source,overlay)
@@ -55,5 +64,5 @@ def authorize(root: Path, stage: str) -> dict:
     return out
 
 if __name__=="__main__":
-    p=argparse.ArgumentParser();p.add_argument("--root",type=Path,required=True);p.add_argument("--stage",choices=["release","stress"],required=True)
+    p=argparse.ArgumentParser();p.add_argument("--root",type=Path,required=True);p.add_argument("--stage",choices=["canary","release","stress"],required=True)
     args=p.parse_args();print(json.dumps(authorize(args.root,args.stage),indent=2))

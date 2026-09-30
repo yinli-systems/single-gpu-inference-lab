@@ -16,13 +16,24 @@ from research.selector_v4.schema import QUALIFICATION_REVISION, TACTIC_CAP, TACT
 
 ARMS = ("off", "cap")
 EXECUTIONS = ("eager_full_call", "graph1_replay", "graph16_replay")
-TARGET_WINDOW_US = 96000.0
-MIN_WINDOW_US = 12000.0
+TARGET_WINDOW_US = 384000.0
+MIN_WINDOW_US = 120000.0
 _EXPECTED_CAP_ERRORS = ("invalid argument", "cudaerrorinvalidvalue")
 
 
 def _power_two(value: int) -> int:
     return 1 << max(0, value - 1).bit_length()
+
+
+def calibrate_eager(rt, q, torch):
+    pilots = []
+    for _ in range(2):
+        rt.plan(inspect=False); rt.call(q); torch.cuda.synchronize()
+        tick = time.perf_counter_ns()
+        for __ in range(16): rt.plan(inspect=False); rt.call(q)
+        torch.cuda.synchronize(); pilots.append((time.perf_counter_ns()-tick)/1000.0)
+    calls = min(4096, _power_two(max(16, math.ceil(TARGET_WINDOW_US / (min(pilots)/16)))))
+    return calls, pilots
 
 
 def calibrate_graph(rt, count, torch) -> tuple[int, list[float]]:
@@ -59,7 +70,7 @@ def operation_identity(env, case, dtype_name, layout, requested_split, info, exe
         "head_dim_qk": 128, "head_dim_vo": 128,
         "page_size": 1 if layout == "ragged" else 16,
         "q": list(case["q"]), "cached": list(case["cached"]),
-        "plan_signature": list(info[:-1] if len(info) == 16 else info),
+        "plan_signature": list(info),
         "window_config": {k: windows[execution][k] for k in ("calls", "replays") if k in windows[execution]},
     }
     environment = {
@@ -78,8 +89,15 @@ def operation_identity(env, case, dtype_name, layout, requested_split, info, exe
 
 def _runtime(base_module, flashinfer, torch, layout, qi, ks, vs, k, v, lengths, dtype,
              requested_split, arm, candidate, paged_bundle):
+    # Always use the unmodified official planner; tactic is a separate run entry.
     rt = base_module.Runtime(flashinfer, torch, layout, qi, ks, vs, k, v, lengths,
-                             dtype, requested_split, arm, candidate, paged_bundle)
+                             dtype, requested_split, arm, False, paged_bundle)
+    if candidate and arm == "cap":
+        if layout == "ragged":
+            rt._call = lambda q: rt.wrapper.run_resource(q, k, v, out=rt.out, lse=rt.lse, return_lse=True)
+        else:
+            kp, vp = paged_bundle[-2:]
+            rt._call = lambda q: rt.wrapper.run_resource(q, (kp, vp), out=rt.out, lse=rt.lse, return_lse=True)
     return rt
 
 
@@ -99,7 +117,7 @@ def run(args):
     if candidate:
         binding = json.loads(binding_path.read_text())
         if (binding.get("selector_version") != QUALIFICATION_REVISION or binding.get("kernel_symbol_isolation") is not True or
-                binding.get("native_runtime_policy") is not True or binding.get("default_policy") != "native"):
+                binding.get("resource_only_entry") is not True or binding.get("plan_vector_size") != 15 or binding.get("default_policy") != "native"):
             raise RuntimeError("candidate binding mismatch")
         for rel, expected in binding["modified_hashes"].items():
             if base.sha(root / rel) != expected: raise RuntimeError("candidate source drift " + rel)
@@ -184,7 +202,7 @@ def run(args):
                 if baseline["inputs"] != inputs or baseline.get("measurement_revision") != QUALIFICATION_REVISION: raise RuntimeError("stale pristine reference")
                 if not torch.equal(rt.out.cpu(), baseline["out"]) or not torch.equal(rt.lse.cpu(), baseline["lse"]): raise RuntimeError("pristine repeat numerics changed")
             else:
-                eager_calls, eager_pilots = base.calibrate_eager(rt, q, torch)
+                eager_calls, eager_pilots = calibrate_eager(rt, q, torch)
                 graph1_replays, graph1_pilots = calibrate_graph(rt, 1, torch)
                 graph16_replays, graph16_pilots = calibrate_graph(rt, 16, torch)
                 windows = {
@@ -212,7 +230,7 @@ def run(args):
             if should_probe:
                 cap = _runtime(base, flashinfer, torch, layout, qi, ks, vs, k, v, lengths, dtype, requested_split, "cap", True, paged_bundle)
                 cap.attach(q); cap_info, _ = cap.plan(); plans["cap"] = cap_info
-                if plans["off"][:-1] != cap_info[:-1] or cap_info[-1] != 1: raise RuntimeError("candidate plan pairing contract")
+                if plans["off"] != cap_info or len(cap_info) != 15: raise RuntimeError("candidate plan pairing contract")
                 try:
                     cap.call(q); torch.cuda.synchronize(); cap_supported = True
                 except RuntimeError as exc:
@@ -222,7 +240,7 @@ def run(args):
             if cap is None:
                 cap = _runtime(base, flashinfer, torch, layout, qi, ks, vs, k, v, lengths, dtype, requested_split, "off", True, paged_bundle)
                 cap.attach(q); cap_info, _ = cap.plan(); plans["cap"] = cap_info
-                if plans["off"][:-1] != cap_info[:-1] or cap_info[-1] != 0: raise RuntimeError("native fallback plan contract")
+                if plans["off"] != cap_info or len(cap_info) != 15: raise RuntimeError("native fallback plan contract")
             runtimes["cap"] = cap; actual_tactics["cap"] = TACTIC_CAP if cap_supported else TACTIC_NATIVE
 
         # Warmup/capture in explicit native -> cap -> native order.
@@ -256,7 +274,7 @@ def run(args):
         qualification = {
             **key, "inputs_sha256":inputs, "reference_sha256":base.sha(ref_path), "arms":arm_quals,
             "identities":identities, "eligibility":eligibility, "windows":windows, "FP32":fp32,
-            "candidate_plan_core_equal": (plans["off"][:-1] == plans["cap"][:-1] if candidate else None),
+            "candidate_plan_core_equal": (plans["off"] == plans["cap"] if candidate else None),
             "cap_supported": cap_supported, "cap_probe_error": cap_probe_error,
             "native_after_cap_exact": native_after_cap_exact,
             "measurement_contract_revision":QUALIFICATION_REVISION,

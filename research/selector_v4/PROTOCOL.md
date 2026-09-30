@@ -56,3 +56,37 @@ No 0.99 threshold may be loosened after seeing canary or release. A failed canar
 The manifest contains 2 exposed dev cases, 10 untouched canary cases, 48 untouched release cases and 12 untouched stress cases. Fresh q/cached pairs, q vectors and cached vectors are exactly deduplicated against all recorded historical manifests, including the sibling v4 branch.
 
 Order is mandatory: CPU/source validation -> dual-GPU private-cache smoke -> dual-GPU canary -> dual-GPU release -> stress -> paired full HTTP. Full HTTP additionally requires complete token parity and nonregressive throughput/goodput/TTFT/TPOT. The unresolved historical divergence remains a separate blocker even if performance passes.
+
+## V4.2.0 superseding contract (2026-10-01)
+
+V4.1 history above is retained as development evidence. V4.2 restores the official
+15-field plan. Scheduler, C++ plan/native host runs/native dispatch/native kernels,
+Python wrapper methods and native module custom ops are source-identical. Only
+resource run/dispatch/kernel symbols and resource custom ops are appended. The
+module factory registers additional ops outside recurring native execution.
+
+`run_resource` is opt-in and requires standard FA2, an unsplit official plan and
+matching paged K/V strides. Unsupported resource probes become labeled native null
+arms. `runtime.selected_run` resolves the validated cache choice before capture;
+the official `wrapper.run` is never replaced. This research cache remains separate
+from upstream Autotuner v2 pending validated integration.
+
+Frozen measurement: 3 independent process repeats, 24 ABBA/BAAB blocks, pristine
+calibrated >=384ms target windows and >=120ms minimum scored windows, no sample
+trimming. Eager includes official plan+run; Graph1/Graph16 are replay only, not full
+serving steps. Every binary audit compares all native attention SASS against the
+independent pristine build, normalizing only PC labels and whitespace. Missing,
+extra or differing native kernels block qualification.
+
+Smoke covers both dtypes/layouts and native->resource->native. Source-bound dual-GPU
+smoke authorizes exposed dev only. Both dev passes authorize canary; both canary
+passes authorize release; both release passes authorize stress. All original 0.99
+floors remain, including candidate-native/pristine simultaneous LCB. Actual chosen
+policy/pristine point worst is additionally required >=0.99. Held-out oracle regret
+is reported as `oracle latency / chosen latency - 1`, including P50/P90/P99, worst
+and >1% counts. Oracle evidence never trains the tactic.
+
+The original case hash and every stage hash are unchanged. Canary/release/stress
+consumption must be recorded at dispatch even if an execution fails. HTTP/default
+promotion remains OFF until the historical 2/432 divergence is explained and full
+serving token parity and SLO/performance gates pass.

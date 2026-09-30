@@ -1,7 +1,7 @@
 {
   "schema": 5,
   "qualification_revision": "4.1.1",
-  "state": "V411_DEV_HOLD_V42_NATIVE_TRANSPARENCY_REQUIRED",
+  "state": "V42_IMPLEMENTED_CPU_PASS_GPU_PENDING",
   "default_promotion": false,
   "serving_promotion": false,
   "historical_token_divergence_resolved": false,
@@ -172,5 +172,21 @@
     "evidence": "evidence/v411-exact-dev/"
   },
   "next_action": "Create v4.2 with official legacy native plan/run unchanged; cap-only resource run; stronger controls; rerun exposed dev before canary.",
-  "stress_cases_consumed": 0
+  "stress_cases_consumed": 0,
+  "v42": {
+    "qualification_revision": "4.2.0",
+    "cpu_tests_passed": 48,
+    "native_plan_vector_size": 15,
+    "native_source_identity": true,
+    "native_sass_identity": "pending GPU",
+    "canary_cases_consumed": 0,
+    "release_cases_consumed": 0,
+    "stress_cases_consumed": 0,
+    "target_window_ms": 384,
+    "minimum_window_ms": 120,
+    "blocks": 24,
+    "repeats": 3,
+    "default_promotion": false,
+    "serving_promotion": false
+  }
 }

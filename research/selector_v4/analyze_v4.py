@@ -109,7 +109,7 @@ def validate_binary_audit(path: Path) -> dict[str, Any]:
     need(value.get('kernel_symbol_isolation_compiled') is True,'compiled symbol isolation')
     need(value.get('same_module_pairs')=={'ragged':True,'paged':True},'native/resource co-residence')
     need(bool(value.get('binaries')),'missing compiled tactic binaries')
-    return {'sha256':hashlib.sha256(Path(path).read_bytes()).hexdigest(),'binaries':[{'sha256':x['sha256'],'bytes':x['bytes']} for x in value['binaries']], 'same_module_pairs':value['same_module_pairs']}
+    return {'sha256':hashlib.sha256(Path(path).read_bytes()).hexdigest(),'binaries':[{'sha256':x['sha256'],'bytes':x['bytes']} for x in value['binaries']], 'same_module_pairs':value['same_module_pairs'], 'native_sass_identity':value.get('native_sass_identity',False)}
 
 def run(args):
     measurement_manifest_path=args.root/"source/research/selector_v4/manifest.json"
@@ -184,6 +184,16 @@ def run(args):
                     with tempfile.TemporaryDirectory(prefix="v4-cache-check-") as tmp:
                         cache=SafeTacticCache(tmp,identity);cache.publish(identity,fold.receipt.to_dict(),provenance={"stage":args.stage,"fold":fold.held_out_repeat});cache.reload()
                         cache_ok&=cache.lookup(identity) is not None
+    # Held-out oracle uses measurements solely for evaluation, never selection.
+    regrets=[];actual_policy=[]
+    for fold,record in all_folds:
+        oracle=max(1.0,record['held_out_geomean'])
+        chosen=record['policy_geomean']
+        regrets.append(max(0.0,oracle/chosen-1.0))
+        key=(record['case'],record['dtype'],record['layout'],record['split'])
+        shard=record['shard'];rep=record['held_out_repeat'];execution=record['execution_mode']
+        native=absolute_native_block_evidence(lookup[shard,rep,'pristine']['rows'],lookup[shard,rep,'paired']['rows'],key,execution)
+        actual_policy.append(geo(native['ratios'])*chosen)
     selected=[(fold,record) for fold,record in all_folds if record["selected"]]
     policy=[record["policy_geomean"] for _,record in all_folds]
     selected_geos=[record["held_out_geomean"] for _,record in selected]
@@ -206,9 +216,17 @@ def run(args):
         "native_overlay_worst":min(x["ratio"] for x in native_overlay_records),
         "native_overlay_block_worst":min(x["block_worst"] for x in native_overlay_records),
         "native_overlay_joint_min_lcb95":native_overlay_joint}
+    metrics['regret']={'definition':'held-out oracle latency / chosen latency - 1; native=1 in same-module tactic comparison',
+        'p50':float(np.quantile(regrets,.5)),'p90':float(np.quantile(regrets,.9)),
+        'p99':float(np.quantile(regrets,.99)),'worst':max(regrets),
+        'above_one_percent_count':sum(x>.01 for x in regrets),'records':len(regrets)}
+    metrics['actual_policy_vs_pristine_geomean']=geo(actual_policy)
+    metrics['actual_policy_vs_pristine_worst']=min(actual_policy)
     expected_numeric=len(cases)*len(manifest["dtypes"])*len(manifest["layouts"])*len(manifest["requested_splits"])*3
     requirements={"numerical_exact":numerics==expected_numeric,"native_after_cap_exact":native_after_cap,
         "compiled_kernel_symbol_isolation":len(binary_audits)==args.shards,
+        "native_sass_identity":all(x.get("native_sass_identity") is True for x in binary_audits.values()),
+        "native_source_identity":json.loads((args.root/"overlays/candidate/RESOURCE_BINDING.json").read_text()).get("native_source_audit",{}).get("native_source_identity") is True,
         "telemetry_stable":len(telemetry)==args.shards and all(x["stable"] for x in telemetry.values()),
         "cache_roundtrip":cache_ok,"selected_nonempty":bool(selected),
         "selected_geomean_at_least_1_05":bool(selected) and metrics["selected_geomean"]>=1.05,
@@ -216,6 +234,7 @@ def run(args):
         "selected_block_worst_at_least_0_99":bool(selected) and metrics["selected_block_worst"]>=.99,
         "selected_joint_min_lcb_at_least_0_99":bool(selected) and joint>=.99,
         "policy_worst_at_least_0_99":metrics["policy_worst"]>=.99,
+        "actual_policy_vs_pristine_worst_at_least_0_99":min(actual_policy)>=.99,
         "native_overlay_worst_at_least_0_99":metrics["native_overlay_worst"]>=.99,
         "native_overlay_joint_min_lcb_at_least_0_99":native_overlay_joint>=.99,
         "native_overlay_controls_resolve_one_percent":native_overlay_controls,

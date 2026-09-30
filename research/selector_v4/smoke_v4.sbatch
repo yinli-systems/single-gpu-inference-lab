@@ -16,4 +16,4 @@ export FLASHINFER_WORKSPACE_BASE="$P/cache/$SLURM_JOB_PARTITION/pristine";export
 "$E/bin/python" -m research.selector_v4.smoke_gpu --mode pristine --refs "$P/refs/$SLURM_JOB_PARTITION" --out "$P/runs/$SLURM_JOB_PARTITION/pristine-$SLURM_JOB_ID"
 export FLASHINFER_WORKSPACE_BASE="$P/cache/$SLURM_JOB_PARTITION/candidate";export XDG_CACHE_HOME="$FLASHINFER_WORKSPACE_BASE/xdg";export PYTHONPATH="$P/source:$P/overlays/candidate"
 "$E/bin/python" -m research.selector_v4.smoke_gpu --mode candidate --refs "$P/refs/$SLURM_JOB_PARTITION" --out "$P/runs/$SLURM_JOB_PARTITION/candidate-$SLURM_JOB_ID"
-"$E/bin/python" -m research.selector_v4.audit_binary --workspace "$P/cache/$SLURM_JOB_PARTITION/candidate" --overlay "$P/overlays/candidate" --out "$P/receipts/binary-audit-$SLURM_JOB_ID.json"
+"$E/bin/python" -m research.selector_v4.audit_binary --workspace "$P/cache/$SLURM_JOB_PARTITION/candidate" --pristine-workspace "$P/cache/$SLURM_JOB_PARTITION/pristine" --overlay "$P/overlays/candidate" --out "$P/receipts/binary-audit-$SLURM_JOB_ID.json"

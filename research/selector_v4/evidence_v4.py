@@ -50,10 +50,10 @@ def validate_run(path: Path, *, mode: str, stage: str, rep: int, shard: int, sha
             need(isinstance(q.get("cap_supported"), bool), "cap support receipt")
             need(q.get("native_after_cap_exact") is True and q.get("candidate_plan_core_equal") is True, "native/cap isolation receipt")
             off = q["arms"]["off"]; cap = q["arms"]["cap"]
-            need(off["plan_info"][-1] == 0 and off["actual_tactic"] == TACTIC_NATIVE, "off tactic contract")
+            need(len(off["plan_info"]) == 15 and off["actual_tactic"] == TACTIC_NATIVE, "off tactic contract")
             expected_cap_flag = 1 if q["cap_supported"] else 0
             expected_cap_tactic = TACTIC_CAP if q["cap_supported"] else TACTIC_NATIVE
-            need(cap["plan_info"][-1] == expected_cap_flag and cap["actual_tactic"] == expected_cap_tactic, "cap/fallback tactic contract")
+            need(cap["plan_info"] == off["plan_info"] and cap["actual_tactic"] == expected_cap_tactic, "cap/fallback tactic contract")
             if not q["cap_supported"] and q.get("cap_probe_error") is not None:
                 need(isinstance(q["cap_probe_error"], str) and q["cap_probe_error"], "cap probe error receipt")
         for arm, item in q["arms"].items():
@@ -68,7 +68,7 @@ def validate_run(path: Path, *, mode: str, stage: str, rep: int, shard: int, sha
                 else:
                     expected_eligibility = evaluate_eligibility(identity).to_dict()
                 need(expected_eligibility == q["eligibility"][execution], "eligibility drift")
-                need(raw["payload"]["operation"]["plan_signature"] == (item["plan_info"][:-1] if len(item["plan_info"]) == 16 else item["plan_info"]), "tactic-neutral plan identity")
+                need(raw["payload"]["operation"]["plan_signature"] == item["plan_info"], "tactic-neutral plan identity")
         if mode == "paired":
             for execution in EXECUTIONS:
                 need(q["identities"]["off"][execution]["key"] == q["identities"]["cap"][execution]["key"], "off/cap identity alias")
@@ -83,7 +83,7 @@ def validate_run(path: Path, *, mode: str, stage: str, rep: int, shard: int, sha
         need((row["arm"],row["role"],row["comparison_group"]) == (arm,role,"position" if mode == "pristine" else "cap"), "ABBA/BAAB contract")
         expected_actual = qmap[k]["arms"][arm]["actual_tactic"]
         need(row.get("actual_tactic") == expected_actual, "actual tactic row drift")
-        need(math.isfinite(row["wall_us"]) and row["wall_us"] > 0 and row["window_elapsed_us"] >= 12000, "timing validity")
+        need(math.isfinite(row["wall_us"]) and row["wall_us"] > 0 and row["window_elapsed_us"] >= 120000, "timing validity")
         need(math.isclose(row["window_elapsed_us"], row["wall_us"] * row["kernel_calls"], rel_tol=1e-10), "timing normalization")
         need(row["tactic_identity"] == qmap[k]["identities"][arm][row["execution_mode"]]["key"], "row identity")
     need(observed == expected and len(rows) == complete["rows"] == complete["expected"], "incomplete timing matrix")

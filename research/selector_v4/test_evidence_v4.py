@@ -21,7 +21,7 @@ class EvidenceContractTests(unittest.TestCase):
             'candidate_plan_core_equal':True,'cap_supported':True,'cap_probe_error':None,'native_after_cap_exact':True,
             'arms':{},'identities':{},'eligibility':{}}
         for arm,flag,tactic in [('off',0,TACTIC_NATIVE),('cap',1,TACTIC_CAP)]:
-            self.qual['arms'][arm]={'pristine_exact':True,'execution_checks':dict.fromkeys(EXECUTIONS,True),'out_sha256':'1'*64,'lse_sha256':'2'*64,'plan_info':core+[flag],'actual_tactic':tactic}
+            self.qual['arms'][arm]={'pristine_exact':True,'execution_checks':dict.fromkeys(EXECUTIONS,True),'out_sha256':'1'*64,'lse_sha256':'2'*64,'plan_info':list(core),'actual_tactic':tactic}
             self.qual['identities'][arm]={}
             for execution in EXECUTIONS:
                 operation={'execution_mode':execution,'backend':'fa2','causal':True,'layout':'paged','dtype':'float16','actual_split':'unsplit','num_qo_heads':32,'num_kv_heads':8,
@@ -35,8 +35,8 @@ class EvidenceContractTests(unittest.TestCase):
             for execution in EXECUTIONS:
                 for position,(arm,role) in enumerate(expected_sequence('paired',block)):
                     self.rows.append({'case':'fixture-v4','dtype':'float16','layout':'paged','split':'unsplit','block':block,'execution_mode':execution,'position':position,
-                        'arm':arm,'actual_tactic':self.qual['arms'][arm]['actual_tactic'],'role':role,'comparison_group':'cap','wall_us':1000.0,'kernel_calls':16,
-                        'window_elapsed_us':16000.0,'tactic_identity':self.qual['identities'][arm][execution]['key']})
+                        'arm':arm,'actual_tactic':self.qual['arms'][arm]['actual_tactic'],'role':role,'comparison_group':'cap','wall_us':1000.0,'kernel_calls':128,
+                        'window_elapsed_us':128000.0,'tactic_identity':self.qual['identities'][arm][execution]['key']})
         self.flush()
 
     def flush(self):
@@ -49,7 +49,7 @@ class EvidenceContractTests(unittest.TestCase):
     def test_complete_fixture_passes(self):
         result=self.validate();self.assertEqual(len(result['rows']),24);self.assertEqual(len(result['qualifications']),1)
     def test_tactic_plan_flag_corruption_rejected(self):
-        self.qual['arms']['cap']['plan_info'][-1]=0;self.flush()
+        self.qual['arms']['cap']['plan_info'][0]=41;self.flush()
         with self.assertRaisesRegex(ValueError,'cap/fallback tactic contract'):self.validate()
     def test_native_fallback_for_unsupported_cap_passes(self):
         self.qual['cap_supported']=False;self.qual['cap_probe_error']=None;self.qual['arms']['cap']['plan_info'][-1]=0;self.qual['arms']['cap']['actual_tactic']=TACTIC_NATIVE

@@ -20,9 +20,10 @@ export SGI_SOURCE_ARCHIVE_SHA256=$(cat "$P/receipts/source-archive.sha256")
 LOCAL=$(mktemp -d /tmp/sgi-v4-${SLURM_JOB_ID}-XXXXXX)
 mkdir -p "$P/receipts" "$P/logs" "$P/runs" "$P/cache/$SLURM_JOB_PARTITION" "$P/refs/$SLURM_JOB_PARTITION/s$SHARD"
 cd "$P/source"; sha256sum -c source.sha256
-if [[ "$STAGE" == release || "$STAGE" == stress ]]; then
+if [[ "$STAGE" == canary || "$STAGE" == release || "$STAGE" == stress ]]; then
   "$E/bin/python" -m research.selector_v4.authorize_v4 --root "$P" --stage "$STAGE" > "$P/receipts/${STAGE}-authorization-${SLURM_JOB_ID}.json"
 fi
+"$E/bin/python" -m research.selector_v4.smoke_verdict --root "$P" --verify-only
 scontrol show job "$SLURM_JOB_ID" -o > "$P/receipts/slurm-${SLURM_JOB_ID}.txt"
 nvidia-smi --query-gpu=timestamp,uuid,utilization.gpu,clocks.sm,clocks.mem,power.draw,temperature.gpu --format=csv -l 2 > "$P/logs/telemetry-${SLURM_JOB_ID}.csv" & MON=$!
 finish(){ RC=$?; trap - EXIT; kill "$MON" 2>/dev/null || true; printf '%s\n' "$RC" > "$P/receipts/exit-${SLURM_JOB_ID}.txt"; rm -rf "$LOCAL"; exit "$RC"; }; trap finish EXIT
@@ -43,6 +44,6 @@ done
 # The candidate JIT must contain co-resident native/resource symbols.
 export PYTHONPATH="$P/source:$P/overlays/candidate"
 "$E/bin/python" -m research.selector_v4.audit_binary \
-  --workspace "$P/cache/$SLURM_JOB_PARTITION/candidate" \
+  --workspace "$P/cache/$SLURM_JOB_PARTITION/candidate" --pristine-workspace "$P/cache/$SLURM_JOB_PARTITION/pristine" \
   --overlay "$P/overlays/candidate" \
   --out "$P/receipts/binary-audit-${SLURM_JOB_ID}.json"

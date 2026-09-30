@@ -11,7 +11,8 @@ from research.selector_v4.test_core import identity
 class RuntimeTests(unittest.TestCase):
     def wrapper(self, valid=True):
         return SimpleNamespace(_backend='fa2' if valid else 'fa3',_jit_module=None,
-            _cached_module=SimpleNamespace(plan_resource=object(),resource_kernel_isolation=True),_sgi_resource_policy=99)
+            run=lambda: 'native',run_resource=lambda: 'resource',
+            _cached_module=SimpleNamespace(paged_run_resource=lambda: None,ragged_run_resource=lambda: None,resource_kernel_isolation=True),_sgi_resource_policy=99)
     def test_miss_is_native_before_plan(self):
         x=identity()
         with tempfile.TemporaryDirectory() as tmp:

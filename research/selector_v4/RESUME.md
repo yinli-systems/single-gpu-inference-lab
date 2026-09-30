@@ -71,3 +71,14 @@ The native-overlay gate changes promotion semantics, so cache/measurement/bindin
 Campaign `/ssd/scxi253/single-gpu-inference-selector-v411-dev-20260930T211230Z`, jobs1643854/1643855, source `50f182d`, completed0:0 with12/12 run receipts and no failures. 4090 retains +38.76% selected geomean and +32.02% selected worst, but seven selected folds fail held-out duplicate-control equivalence. 5090 retains +40.00% selected geomean and +30.71% selected worst; all tactic controls pass, but candidate-native/pristine simultaneous joint-min95% LCB is0.988980x. Exact artifacts and remote hashes are under `evidence/v411-exact-dev/`.
 
 Do not submit canary. V4.2 must preserve official native plan/run and put cap behind a separate resource-only run entry; increase measurement resolution without relaxing gates. The10 canary,48 release and12 stress shapes remain untouched.
+
+## V4.2 native-transparent implementation
+
+Continue on `kevin/selector-v42-native-transparent-20261001`. Official 15-field plan,
+native Python/C++ host runs, native dispatch and kernel source are audited unchanged.
+New opt-in `run_resource` entries are used by the measurement runtime. CPU/source
+integration: 48 tests pass, including distinct torch custom/fake op registration,
+executed resource eligibility guards and source mutation rejection. Measurement
+uses 384ms target/120ms minimum windows and 24 balanced blocks, 3 process repeats.
+Native SASS identity and actual policy/pristine performance are blocking gates.
+Holdout case geometry/hash is unchanged. Exact-source dual-GPU smoke is next.

@@ -46,152 +46,135 @@ def duplicate_kernel(source: str, original: str, clone: str) -> tuple[str, str, 
     return patched, sha_text(original_block), sha_text(clone_block)
 
 
-def patch_scheduler(source: str) -> str:
-    start = source.index("struct PrefillPlanInfo {")
-    stop = source.index("template <bool MATERIALIZE", start)
-    body = source[start:stop]
-    body = replace_one(body, "  bool enable_cuda_graph;\n  bool split_kv;",
-                       "  bool enable_cuda_graph;\n  bool split_kv;\n  bool resource_cap;", "plan field")
-    body = replace_one(body, "        enable_cuda_graph(false),\n        split_kv(false) {}",
-                       "        enable_cuda_graph(false),\n        split_kv(false),\n        resource_cap(false) {}", "plan init")
-    body = replace_one(body, "            block_valid_mask_offset,\n            enable_cuda_graph,\n            split_kv};",
-                       "            block_valid_mask_offset,\n            enable_cuda_graph,\n            split_kv,\n            resource_cap};", "to vector")
-    body = replace_one(body, "    if (vec.size() != 15) {", "    if (vec.size() != 16) {", "vector size")
-    body = replace_one(body, "vec.size() should be 15", "vec.size() should be 16", "vector error")
-    body = replace_one(body, "    split_kv = vec[14];\n  }",
-                       "    split_kv = vec[14];\n    resource_cap = vec[15];\n  }", "from vector")
-    return source[:start] + body + source[stop:]
+# V4.2 resource-only additions.  Every official native function/declaration is
+# retained byte-for-byte; only parallel resource symbols are appended.
+def _clone_template_function(source: str, original: str, clone: str,
+                             replacements: tuple[tuple[str, str], ...] = ()) -> tuple[str, str, str]:
+    if clone + "(" in source:
+        raise ValueError("clone already exists " + clone)
+    start, end = template_function_span(source, original)
+    native = source[start:end]
+    copied = native.replace(original, clone, 1)
+    for old, new in replacements:
+        if old not in copied:
+            raise ValueError("clone transform missing " + old)
+        copied = copied.replace(old, new)
+    return source[:end] + "\n\n" + copied + source[end:], sha_text(native), sha_text(copied)
 
 
-def patch_declarations(source: str) -> str:
-    old = "                                                   cudaStream_t stream);"
-    count = source.count(old)
-    if count not in (1, 2):
-        raise ValueError(f"dispatch declarations: {count}")
-    return source.replace(old, "                                                   cudaStream_t stream, bool resource_cap);")
+def _declaration_span(source: str, function_name: str) -> tuple[int, int]:
+    pos = source.index(function_name + "(")
+    start = source.rfind("template <", 0, pos)
+    if start < 0:
+        raise ValueError("template declaration start " + function_name)
+    end = source.index(";", pos) + 1
+    return start, end
 
 
-def patch_jinja(source: str) -> str:
-    return replace_one(source, "bool enable_pdl, cudaStream_t stream);",
-                       "bool enable_pdl, cudaStream_t stream, bool resource_cap);", "jinja")
+def clone_template_declaration(source: str, original: str, clone: str) -> str:
+    if clone + "(" in source:
+        raise ValueError("declaration clone exists")
+    start, end = _declaration_span(source, original)
+    block = source[start:end]
+    if block.count(original) != 1:
+        raise ValueError("ambiguous declaration " + original)
+    return source[:end] + "\n\n" + block.replace(original, clone, 1) + source[end:]
 
 
-def patch_run(source: str, *, paged: bool) -> str:
-    if paged:
-        old = "PagedParams>(params, tmp_v, tmp_s, enable_pdl, stream);"
-        if source.count(old) != 3:
-            raise ValueError("paged run calls")
-        return source.replace(old, "PagedParams>(params, tmp_v, tmp_s, enable_pdl, stream, plan_info.resource_cap);")
-    return replace_one(source,
-                       "RaggedParams>(params, tmp_v, tmp_s, enable_pdl, stream);",
-                       "RaggedParams>(params, tmp_v, tmp_s, enable_pdl, stream, plan_info.resource_cap);",
-                       "ragged run call")
+def clone_template_instantiation(source: str, original: str, clone: str) -> str:
+    if clone + "<" in source:
+        raise ValueError("instantiation clone exists")
+    needle = "template cudaError_t " + original + "<"
+    pos = source.index(needle)
+    start = source.rfind("\n", 0, pos) + 1
+    end = source.index(";", pos) + 1
+    block = source[start:end]
+    if block.count(original) != 1:
+        raise ValueError("ambiguous instantiation " + original)
+    return source[:end] + "\n" + block.replace(original, clone, 1) + source[end:]
 
 
-def patch_prefill(source: str) -> tuple[str, dict[str, str]]:
+def _resource_eligibility(kernel_line: str) -> str:
+    return kernel_line + """
+          const bool sgi_eligible = HEAD_DIM_QK == 128 && HEAD_DIM_VO == 128 &&
+              CTA_TILE_Q == 128 && sizeof(DTypeQ) == 2 && sizeof(DTypeKV) == 2 &&
+              AttentionVariant::use_softmax && tmp_v == nullptr && smem_size == 49152 &&
+              max_smem_per_sm >= 102400 && max_smem_per_block_optin >= 65536;
+          if (!sgi_eligible) return cudaErrorInvalidValue;
+          smem_size = 65536;"""
+
+
+def patch_resource_prefill(source: str) -> tuple[str, dict[str, str]]:
     source, ragged_native, ragged_clone = duplicate_kernel(
-        source, "BatchPrefillWithRaggedKVCacheKernel", "BatchPrefillWithRaggedKVCacheResourceKernel")
+        source, "BatchPrefillWithRaggedKVCacheKernel",
+        "BatchPrefillWithRaggedKVCacheResourceKernel")
     source, paged_native, paged_clone = duplicate_kernel(
-        source, "BatchPrefillWithPagedKVCacheKernel", "BatchPrefillWithPagedKVCacheResourceKernel")
-    source = replace_one(source,
-        "float* tmp_s, bool enable_pdl,\n                                                        cudaStream_t stream) {",
-        "float* tmp_s, bool enable_pdl,\n                                                        cudaStream_t stream, bool resource_cap) {",
-        "ragged impl signature")
-    source = replace_one(source,
-        "float* tmp_s, bool enable_pdl,\n                                                    cudaStream_t stream) {",
-        "float* tmp_s, bool enable_pdl,\n                                                    cudaStream_t stream, bool resource_cap = false) {",
-        "ragged outer signature")
-    source = replace_one(source,
-        "      params, tmp_v, tmp_s, enable_pdl, stream))",
-        "      params, tmp_v, tmp_s, enable_pdl, stream, resource_cap))",
-        "ragged impl call")
-    source = replace_one(source,
-        "                                                       bool enable_pdl, cudaStream_t stream) {",
-        "                                                       bool enable_pdl, cudaStream_t stream,\n                                                       bool resource_cap) {",
-        "paged impl signature")
-    source = replace_one(source,
-        "                                                   float* tmp_s, bool enable_pdl,\n                                                   cudaStream_t stream) {",
-        "                                                   float* tmp_s, bool enable_pdl,\n                                                   cudaStream_t stream, bool resource_cap = false) {",
-        "paged outer signature")
-    source = replace_one(source,
-        "                                                                      enable_pdl, stream))",
-        "                                                                      enable_pdl, stream, resource_cap))",
-        "paged impl call")
+        source, "BatchPrefillWithPagedKVCacheKernel",
+        "BatchPrefillWithPagedKVCacheResourceKernel")
 
-    for suffix, original, clone, smem_decl in (
-        ("Ragged", "BatchPrefillWithRaggedKVCacheKernel", "BatchPrefillWithRaggedKVCacheResourceKernel",
-         "size_t smem_size = sizeof(SmemStorage);"),
-        ("Paged", "BatchPrefillWithPagedKVCacheKernel", "BatchPrefillWithPagedKVCacheResourceKernel",
-         "size_t smem_size = sizeof(typename KTraits::SharedStoragePaged);"),
-    ):
-        start = source.index("cudaError_t BatchPrefillWith" + suffix + "KVCacheDispatchedImpl(")
-        stop = source.index("cudaError_t BatchPrefillWith" + suffix + "KVCacheDispatched(", start)
-        body = source[start:stop]
-        marker = "  const int max_smem_per_threadblock ="
-        eligibility = (
-            "\n  // v4 candidate eligibility; final tactic is selected by deployment-mode calibration.\n"
-            "  const bool sgi_eligible = HEAD_DIM_QK == 128 && HEAD_DIM_VO == 128 &&\n"
-            "      CTA_TILE_Q == 128 && sizeof(DTypeQ) == 2 && sizeof(DTypeKV) == 2 &&\n"
-            "      AttentionVariant::use_softmax && tmp_v == nullptr &&\n"
-            "      max_smem_per_sm >= 102400 && max_smem_per_block_optin >= 65536;\n")
-        if body.count(marker) != 1:
-            raise ValueError("resource budget anchor " + suffix)
-        body = body.replace(marker, eligibility + marker)
-        if body.count(smem_decl) != 1:
-            raise ValueError("smem anchor " + suffix)
-        old_kernel = ("auto kernel = " + original + "<KTraits, Params>;" if suffix == "Ragged" else
-                      "auto kernel = " + original + "<SAME_KV_STRIDES, KTraits, Params>;")
-        native_expr = (original + "<KTraits, Params>" if suffix == "Ragged" else
-                       original + "<SAME_KV_STRIDES, KTraits, Params>")
-        cap_expr = (clone + "<KTraits, Params>" if suffix == "Ragged" else
-                    clone + "<SAME_KV_STRIDES, KTraits, Params>")
-        replacement = smem_decl + (
-            "\n          const bool sgi_use_cap = resource_cap && sgi_eligible && smem_size == 49152;\n"
-            "          if (resource_cap && !sgi_use_cap) return cudaErrorInvalidValue;\n"
-            f"          auto native_kernel = {native_expr};\n"
-            f"          auto capped_kernel = {cap_expr};\n"
-            "          auto kernel = sgi_use_cap ? capped_kernel : native_kernel;\n"
-            "          if (sgi_use_cap) smem_size = 65536;\n"
-            "          // Attribute state is isolated because the two tactics use distinct symbols.\n")
-        body = replace_one(body, smem_decl + "\n          " + old_kernel, replacement,
-                           "isolated kernel launch " + suffix)
-        source = source[:start] + body + source[stop:]
+    source, ragged_impl_native, ragged_impl_clone = _clone_template_function(
+        source, "BatchPrefillWithRaggedKVCacheDispatchedImpl",
+        "BatchPrefillWithRaggedKVCacheResourceDispatchedImpl",
+        (("BatchPrefillWithRaggedKVCacheKernel",
+          "BatchPrefillWithRaggedKVCacheResourceKernel"),))
+    line = "          auto kernel = BatchPrefillWithRaggedKVCacheResourceKernel<KTraits, Params>;"
+    if source.count(line) != 1:
+        raise ValueError("ragged resource kernel anchor")
+    source = source.replace(line, _resource_eligibility(line), 1)
+    source, ragged_outer_native, ragged_outer_clone = _clone_template_function(
+        source, "BatchPrefillWithRaggedKVCacheDispatched",
+        "BatchPrefillWithRaggedKVCacheResourceDispatched",
+        (("BatchPrefillWithRaggedKVCacheDispatchedImpl",
+          "BatchPrefillWithRaggedKVCacheResourceDispatchedImpl"),))
+
+    source, paged_impl_native, paged_impl_clone = _clone_template_function(
+        source, "BatchPrefillWithPagedKVCacheDispatchedImpl",
+        "BatchPrefillWithPagedKVCacheResourceDispatchedImpl",
+        (("BatchPrefillWithPagedKVCacheKernel",
+          "BatchPrefillWithPagedKVCacheResourceKernel"),))
+    line = "          auto kernel = BatchPrefillWithPagedKVCacheResourceKernel<SAME_KV_STRIDES, KTraits, Params>;"
+    if source.count(line) != 1:
+        raise ValueError("paged resource kernel anchor")
+    source = source.replace(line, _resource_eligibility(line), 1)
+    source, paged_outer_native, paged_outer_clone = _clone_template_function(
+        source, "BatchPrefillWithPagedKVCacheDispatched",
+        "BatchPrefillWithPagedKVCacheResourceDispatched",
+        (("BatchPrefillWithPagedKVCacheDispatchedImpl",
+          "BatchPrefillWithPagedKVCacheResourceDispatchedImpl"),))
+
+    start,end = template_function_span(source, "BatchPrefillWithRaggedKVCacheResourceDispatchedImpl")
+    ragged_impl_clone = sha_text(source[start:end])
+    start,end = template_function_span(source, "BatchPrefillWithPagedKVCacheResourceDispatchedImpl")
+    paged_impl_clone = sha_text(source[start:end])
     return source, {
         "ragged_native_sha256": ragged_native,
         "ragged_clone_sha256": ragged_clone,
         "paged_native_sha256": paged_native,
         "paged_clone_sha256": paged_clone,
+        "ragged_dispatch_impl_native_sha256": ragged_impl_native,
+        "ragged_dispatch_impl_clone_sha256": ragged_impl_clone,
+        "ragged_dispatch_native_sha256": ragged_outer_native,
+        "ragged_dispatch_clone_sha256": ragged_outer_clone,
+        "paged_dispatch_impl_native_sha256": paged_impl_native,
+        "paged_dispatch_impl_clone_sha256": paged_impl_clone,
+        "paged_dispatch_native_sha256": paged_outer_native,
+        "paged_dispatch_clone_sha256": paged_outer_clone,
     }
 
 
-def selector_decision_cpp() -> str:
-    return '''  // Selector v4 candidate-pool gate. It never overrides a calibrated native decision.
-  auto* sgi_qo_indptr = static_cast<IdType*>(qo_indptr.data_ptr());
-  auto* sgi_kv_len = static_cast<IdType*>(kv_len_arr.data_ptr());
-  uint64_t sgi_max_cached = 0, sgi_discordant = 0, sgi_concordant = 0;
-  for (int64_t i = 0; i < batch_size; ++i) {
-    int64_t qi = static_cast<int64_t>(sgi_qo_indptr[i + 1] - sgi_qo_indptr[i]);
-    int64_t kvi = static_cast<int64_t>(sgi_kv_len[i]);
-    uint64_t ci = kvi > qi ? static_cast<uint64_t>(kvi - qi) : 0;
-    sgi_max_cached = std::max(sgi_max_cached, ci);
-    for (int64_t j = 0; j < i; ++j) {
-      int64_t qj = static_cast<int64_t>(sgi_qo_indptr[j + 1] - sgi_qo_indptr[j]);
-      int64_t kvj = static_cast<int64_t>(sgi_kv_len[j]);
-      int64_t cj = kvj > qj ? kvj - qj : 0;
-      int64_t dq = qi - qj, dc = static_cast<int64_t>(ci) - cj;
-      if ((dq > 0 && dc > 0) || (dq < 0 && dc < 0)) ++sgi_concordant;
-      else if ((dq > 0 && dc < 0) || (dq < 0 && dc > 0)) ++sgi_discordant;
-    }
-  }
-  int sgi_dev_id = 0, sgi_num_sm = 0;
-  TVM_FFI_ICHECK(cudaGetDevice(&sgi_dev_id) == cudaSuccess) << "Failed to query CUDA device";
-  TVM_FFI_ICHECK(cudaDeviceGetAttribute(&sgi_num_sm, cudaDevAttrMultiProcessorCount, sgi_dev_id) == cudaSuccess)
-      << "Failed to query SM count";
-  const uint64_t sgi_den = 5 * static_cast<uint64_t>(num_kv_heads);
-  const uint64_t sgi_wave_threshold = std::max<uint64_t>(40,
-      (12 * static_cast<uint64_t>(sgi_num_sm) + sgi_den - 1) / sgi_den);
-  const bool sgi_pairing_gate = batch_size >= 5 && sgi_max_cached >= 8192 &&
-      sgi_concordant == 0 && sgi_discordant >= static_cast<uint64_t>(batch_size - 1);
-  plan_info.resource_cap = sgi_pairing_gate && !plan_info.split_kv &&
-      static_cast<uint64_t>(plan_info.padded_batch_size) >= sgi_wave_threshold;
-'''
+def patch_resource_declarations(source: str, *, paged_only: bool = False) -> str:
+    if not paged_only:
+        source = clone_template_declaration(
+            source, "BatchPrefillWithRaggedKVCacheDispatched",
+            "BatchPrefillWithRaggedKVCacheResourceDispatched")
+    return clone_template_declaration(
+        source, "BatchPrefillWithPagedKVCacheDispatched",
+        "BatchPrefillWithPagedKVCacheResourceDispatched")
+
+
+def patch_resource_jinja(source: str, *, paged: bool) -> str:
+    original = ("BatchPrefillWithPagedKVCacheDispatched" if paged
+                else "BatchPrefillWithRaggedKVCacheDispatched")
+    clone = ("BatchPrefillWithPagedKVCacheResourceDispatched" if paged
+             else "BatchPrefillWithRaggedKVCacheResourceDispatched")
+    return clone_template_instantiation(source, original, clone)
