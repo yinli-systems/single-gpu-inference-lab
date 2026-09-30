@@ -49,6 +49,14 @@ def mode_build_identity(env):
  require(isinstance(env.get('source'),dict) and env['source'],'missing measurement source identity')
  return dict(mode=env['mode'],header_sha256=env['header_sha256'],measurement_source_digest=json_digest(env['source']))
 
+def validate_frozen_selector_expectation(q,case,gpu):
+ require(gpu in case.get('expected_selector',{}),'missing frozen selector expectation')
+ actual_split=bool(q['plan_info'][14])
+ expected=False if actual_split else bool(case['expected_selector'][gpu])
+ require(bool(q['guard_expected'])==expected,'frozen selector expectation mismatch')
+ if q.get('split')=='unsplit':require(not actual_split,'forced-unsplit request produced split plan')
+ return expected
+
 def freshness_sensitivity_amendment(root,measurement_commit,measured_cases):
  p=root/'receipts'/'freshness-sensitivity-amendment-v2.json'
  require(p.is_file(),'strict-freshness amendment missing')
@@ -157,8 +165,7 @@ def load(root,stage,gpu):
    require(set(q.get('tactic_identities',{}))=={'eager','graph1','graph16'} and len(set(q['tactic_identities'].values()))==3,'incomplete/non-distinct tactic identities')
    if e['mode']=='guarded':
     require(q['resource_cap_plan']==q['guard_expected'],'guard decision mismatch')
-    if stage=='canary':
-     require(q['guard_expected'] is bool(case_by_id[q['case']]['expected_selector'][gpu]),'canary selector boundary mismatch')
+    validate_frozen_selector_expectation(q,case_by_id[q['case']],gpu)
    if e['mode']=='off': require(q['resource_cap_plan'] is False,'off plan enabled cap')
    if e['mode']=='cap': require(q['resource_cap_plan'] is True,'cap plan disabled')
    qmap[k]=q
@@ -222,16 +229,18 @@ def run(a):
    r=lookup[(shard,0,'pristine')]
    for k in r['qual']:
     for calls,metric in itertools.product([0,1,16],['run_device_us','cycle_us']):
-     grids={};aa={}
+     grids={};repeats={};aa={}
      for mode in m['modes']:
       grids[mode]=np.array([[np.mean([lookup[(shard,rep,mode)]['index'][(k,b,calls,pos)][metric] for pos in range(4) if lookup[(shard,rep,mode)]['index'][(k,b,calls,pos)]['label']=='main']) for b in range(8)] for rep in range(3)])
-      repeated=np.array([[np.mean([lookup[(shard,rep,mode)]['index'][(k,b,calls,pos)][metric] for pos in range(4) if lookup[(shard,rep,mode)]['index'][(k,b,calls,pos)]['label']=='repeat']) for b in range(8)] for rep in range(3)])
-      draws=weights(shard,mode)@np.log(grids[mode]/repeated).reshape(24);lo,hi=np.exp(np.quantile(draws,[.05,.95]))
+      repeats[mode]=np.array([[np.mean([lookup[(shard,rep,mode)]['index'][(k,b,calls,pos)][metric] for pos in range(4) if lookup[(shard,rep,mode)]['index'][(k,b,calls,pos)]['label']=='repeat']) for b in range(8)] for rep in range(3)])
+      draws=weights(shard,mode)@np.log(grids[mode]/repeats[mode]).reshape(24);lo,hi=np.exp(np.quantile(draws,[.05,.95]))
       aa[mode]=dict(CI90=[float(lo),float(hi)],resolves1pct=bool(lo>=1/1.005 and hi<=1.005))
      guard_flags={lookup[(shard,rep,'guarded')]['qual'][k]['guard_expected'] for rep in range(3)}
      require(len(guard_flags)==1,'guard decision changed across repeats')
      row=dict(case=k[0],dtype=k[1],layout=k[2],split=k[3],calls=calls,metric=metric,shard=shard,
-      selected=bool(next(iter(guard_flags))),AA=aa,comparisons={})
+      selected=bool(next(iter(guard_flags))),AA=aa,comparisons={},
+      bootstrap_basis={mode:dict(main_log=[float(x) for x in np.log(grids[mode]).reshape(24)],
+       repeat_log=[float(x) for x in np.log(repeats[mode]).reshape(24)]) for mode in m['modes']})
      for mode in ['off','cap','guarded']:
       bs=np.log(grids['pristine']).reshape(24);cs=np.log(grids[mode]).reshape(24)
       draws=weights(shard,'pristine')@bs-weights(shard,mode)@cs
