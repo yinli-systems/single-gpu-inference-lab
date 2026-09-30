@@ -156,15 +156,22 @@ def generate(repo: Path, output: Path) -> dict[str, Any]:
             seen.add(key); seen_q.add(q_key); seen_cached.add(cached_key); cases.append(case)
     payload: dict[str, Any] = {
         "schema": SCHEMA, "generator_seed": GENERATOR_SEED,
-        "qualification_revision": "4.0.0",
+        "qualification_revision": "4.1.1",
         "dtypes": ["float16", "bfloat16"], "layouts": ["ragged", "paged"],
         "requested_splits": ["auto", "unsplit"],
         "executions": ["eager_full_call", "graph1_replay", "graph16_replay"],
-        "blocks": 8, "repeats": 3,
+        "blocks": 16, "repeats": 3,
         "families": {"dev": 2, "canary": 10, "release": 48, "stress": 12},
         "historical_manifest_hashes": history_hashes, "cases": cases,
     }
     payload["case_hash"] = digest(cases)
+    payload["measurement_revision"] = "4.1.1"
+    payload["measurement_changes"] = [
+        "isolated native/cap kernel symbols", "96ms deployment windows",
+        "16 ABBA/BAAB blocks per process", "compiled-symbol and telemetry gates",
+        "candidate-native / official-pristine blocking equivalence gate",
+        "analyzer/source/manifest authorization binding",
+    ]
     payload["stage_hashes"] = {family: digest([c for c in cases if c["family"] == family]) for family in payload["families"]}
     output.write_text(json.dumps(payload, indent=2) + "\n")
     return payload

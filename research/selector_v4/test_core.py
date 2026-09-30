@@ -7,7 +7,7 @@ from research.selector_v4.eligibility import evaluate_eligibility
 from research.selector_v4.identity import TacticIdentity
 from research.selector_v4.safe_tuner import choose_tactic
 from research.selector_v4.analyze_v4 import ratio_text
-from research.selector_v4.schema import DEFAULT_THRESHOLDS, TACTIC_CAP, TACTIC_NATIVE
+from research.selector_v4.schema import DEFAULT_THRESHOLDS, QUALIFICATION_REVISION, TACTIC_CAP, TACTIC_NATIVE
 
 
 def identity(execution="graph16_replay", split="unsplit", uuid="GPU-test"):
@@ -20,7 +20,7 @@ def identity(execution="graph16_replay", split="unsplit", uuid="GPU-test"):
             "dtype":"float16","actual_split":split,"num_qo_heads":32,"num_kv_heads":8,
             "head_dim_qk":128,"head_dim_vo":128,"page_size":16,"q":[3,35,99,163,259],
             "cached":[32768,16384,8192,2048,64],"plan_signature":[40]+[0]*14},
-        measurement_policy={"execution_mode":execution,"timer":"deployment_wall","qualification_revision":"4.1.0"},
+        measurement_policy={"execution_mode":execution,"timer":"deployment_wall","qualification_revision":QUALIFICATION_REVISION},
     )
 
 class IdentityEligibilityTests(unittest.TestCase):

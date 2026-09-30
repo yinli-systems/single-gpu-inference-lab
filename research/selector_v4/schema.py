@@ -3,7 +3,7 @@ from dataclasses import asdict, dataclass
 from typing import Any, Mapping
 
 SCHEMA_VERSION = 4
-QUALIFICATION_REVISION = "4.1.0"
+QUALIFICATION_REVISION = "4.1.1"
 TACTIC_NATIVE = "native"
 TACTIC_CAP = "resource_cap"
 VALID_TACTICS = frozenset((TACTIC_NATIVE, TACTIC_CAP))

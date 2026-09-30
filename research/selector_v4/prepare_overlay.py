@@ -48,13 +48,13 @@ def prepare(source: Path, out: Path) -> dict:
     for rel,new in changes.items():
         target=out/rel;target.unlink();target.write_text(new);modified[rel]=sha_text(new)
         diffs.extend(difflib.unified_diff(originals[rel].splitlines(True),new.splitlines(True),fromfile='a/'+rel,tofile='b/'+rel))
-    record={'schema':2,'selector_version':'4.1.0','base_version':'0.7.0','base_hashes':EXPECTED,'modified_hashes':modified,
+    record={'schema':2,'selector_version':'4.1.1','base_version':'0.7.0','base_hashes':EXPECTED,'modified_hashes':modified,
       'plan_vector_size':16,'policies':{'native':0,'resource_cap':1},'default_policy':'native','native_runtime_policy':True,
       'kernel_symbol_isolation':True,'native_kernel_source_unchanged':True,'symbol_hashes':symbol_hashes,
       'final_tactic':'environment/operation/execution-specific confidence-gated cache; miss/reject => native',
       'device_math_unchanged':True,'descriptor_order_unchanged':True,'production_promoted':False}
     (out/'RESOURCE_BINDING.json').write_text(json.dumps(record,indent=2)+'\n')
-    (out/'resource-v4.1.patch').write_text(''.join(diffs));return record
+    (out/'resource-v4.1.1.patch').write_text(''.join(diffs));return record
 
 if __name__=='__main__':
     p=argparse.ArgumentParser();p.add_argument('--source',type=Path,required=True);p.add_argument('--out',type=Path,required=True)
