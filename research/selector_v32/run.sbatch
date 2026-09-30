@@ -5,7 +5,7 @@
 #SBATCH --gres=gpu:1
 #SBATCH --cpus-per-task=6
 #SBATCH --time=01:00:00
-#SBATCH --job-name=sgi-selector-v32
+#SBATCH --job-name=sgi-selector-v321
 set -euo pipefail
 P=${1:?campaign root}; STAGE=${2:?canary or release}; SHARD=${3:-0}; SHARDS=${4:-1}
 [[ "$STAGE" == canary || "$STAGE" == release ]]
@@ -20,6 +20,9 @@ export SGI_SOURCE_ARCHIVE_SHA256=$(cat "$P/receipts/source-archive.sha256")
 LOCAL=$(mktemp -d /tmp/sgi-v32-${SLURM_JOB_ID}-XXXXXX)
 mkdir -p "$P/receipts" "$P/logs" "$P/runs" "$P/cache/$SLURM_JOB_PARTITION" "$P/refs/$SLURM_JOB_PARTITION/s$SHARD"
 cd "$P/source"; sha256sum -c source.sha256
+if [[ "$STAGE" == release ]]; then
+  "$E/bin/python" authorize_release.py --root "$P" > "$P/receipts/release-preflight-${SLURM_JOB_ID}.json"
+fi
 scontrol show job "$SLURM_JOB_ID" -o > "$P/receipts/slurm-${SLURM_JOB_ID}.txt"
 nvidia-smi --query-gpu=timestamp,uuid,utilization.gpu,clocks.sm,clocks.mem,power.draw,temperature.gpu --format=csv -l 2 > "$P/logs/telemetry-${SLURM_JOB_ID}.csv" &
 MON=$!
@@ -38,3 +41,8 @@ for REP in $REPS; do
   cp SOURCE_COMMIT.txt "$R/source_commit.txt"; date -u +%FT%TZ > "$R/launcher-complete.txt"
  done
 done
+
+# Persist a canary verdict from raw files; this never authorizes serving.
+if [[ "$STAGE" == canary ]]; then
+  "$E/bin/python" analyze.py --root "$P" --out "$P/analysis/canary-${SLURM_JOB_PARTITION}-${SLURM_JOB_ID}" --stage canary --gpu "$SLURM_JOB_PARTITION" --shards 1
+fi

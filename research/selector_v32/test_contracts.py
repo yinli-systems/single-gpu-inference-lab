@@ -24,16 +24,16 @@ class ManifestTests(unittest.TestCase):
 
 class GateTests(unittest.TestCase):
  def cell(self,selected,execution,ratio=1.05,off=1.0,resolved=True):
-  return {'selected':selected,'execution_mode':execution,'comparisons':{'guarded':{'ratio':ratio,'controls_resolve':resolved},'off':{'ratio':off,'controls_resolve':True}}}
+  return {'selected':selected,'execution_mode':execution,'comparisons':{'guarded':{'ratio':ratio,'controls_resolve':resolved},'off':{'ratio':off,'controls_resolve':True,'disabled_overlay_resolves_one_percent':True},'paired_guarded':{'ratio':ratio/off,'controls_resolve':resolved}}}
  def draws(self,cells):
-  return {(i,m):np.full(10000,math.log(c['comparisons'][m]['ratio'])) for i,c in enumerate(cells) for m in ('guarded','off')}
+  return {(i,m):np.full(10000,math.log(c['comparisons'][m]['ratio'])) for i,c in enumerate(cells) for m in ('guarded','off','paired_guarded')}
  def numerics(self):return {m:{'qualifications':10,'exact_full_outputs':10,'max_abs_vs_pristine':0.0} for m in ('pristine','off','cap','guarded')}
  def test_pass_and_fail_closed(self):
   cells=[]
   for ex in ('eager_full_call','graph1_replay','graph16_replay'):
    cells+=[self.cell(True,ex,1.08),self.cell(False,ex,1.0)]
   self.assertTrue(evaluate(cells,self.draws(cells),self.numerics())['pass'])
-  bad=[dict(c) for c in cells];bad[0]={**bad[0],'comparisons':{'guarded':{'ratio':.985,'controls_resolve':True},'off':{'ratio':1.,'controls_resolve':True}}}
+  bad=[dict(c) for c in cells];bad[0]={**bad[0],'comparisons':{'guarded':{'ratio':.985,'controls_resolve':True},'off':{'ratio':1.,'controls_resolve':True,'disabled_overlay_resolves_one_percent':True},'paired_guarded':{'ratio':.985,'controls_resolve':True}}}
   self.assertFalse(evaluate(bad,self.draws(bad),self.numerics())['pass'])
  def test_control_and_numerics_block(self):
   cells=[self.cell(True,x,1.08) for x in ('eager_full_call','graph1_replay','graph16_replay')]
