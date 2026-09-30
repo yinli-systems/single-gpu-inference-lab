@@ -7,13 +7,20 @@ import numpy as np
 def require(c,m):
  if not c:raise ValueError(m)
 def sha(p):return hashlib.sha256(Path(p).read_bytes()).hexdigest()
+def expected_files(blocks):
+ return {f'{w}-b{b}.json' for w in ('guarded_prefix','balanced_prefix','short_prefill','decode','mixed') for b in range(blocks)}
+def allowed_seed_files(blocks):
+ return {f'seed-{w}-b{b}.json' for w in ('guarded_prefix','balanced_prefix','mixed') for b in range(blocks)}
 def read_mode(path,stage,blocks):
  require(not (path/'failure.json').exists(),'failed mode '+str(path))
  c=json.loads((path/'complete.json').read_text());require(c['complete'] and c['stage']==stage and c['full_model'] and c['HTTP'],'wrong completion')
  for f,h in c['files'].items():require(Path(f).name==f and sha(path/f)==h,'hash mismatch '+str(path/f))
+ expected=expected_files(blocks);present={f.name for f in path.glob('*-b*.json')}
+ require(expected<=present,'incomplete workload matrix')
+ require(present-expected<=allowed_seed_files(blocks),'unexpected measured JSON')
  data={}
- for f in sorted(path.glob('*-b*.json')):
-  x=json.loads(f.read_text());require(not x['errors'],'request errors '+str(f));require(len(x['requests']) in (6,8),'coverage')
+ for name in sorted(expected):
+  f=path/name;x=json.loads(f.read_text());require(not x['errors'],'request errors '+str(f));require(len(x['requests']) in (6,8),'coverage')
   require(len({r['rid'] for r in x['requests']})==len(x['requests']),'RID reuse')
   for r in x['requests']:
    require(len(r['tokens'])==len(r['token_times']) and r['tokens'],'missing tokens')
@@ -21,9 +28,7 @@ def read_mode(path,stage,blocks):
   require(x['output_tokens']==sum(len(r['tokens']) for r in x['requests']),'throughput numerator')
   require(abs(x['output_tokens']/x['elapsed']-x['output_tokens_per_second'])<1e-8,'throughput formula')
   if x['workload'] in ('guarded_prefix','balanced_prefix'):require(x['cached_min']>=8192,'prefix miss')
-  data[f.name]=x
- expected={f'{w}-b{b}.json' for w in ('guarded_prefix','balanced_prefix','short_prefill','decode','mixed') for b in range(blocks)}
- require(set(data)==expected,'incomplete workload matrix')
+  data[name]=x
  return c,data
 
 def numeric_logprobs(x):
@@ -80,7 +85,17 @@ def run(a):
       first=next((i for i,(u,v) in enumerate(zip(tok,baseids[rid])) if u!=v),min(len(tok),len(baseids[rid])))
       mismatches.append(dict(job=j['job'],file=f,mode=mode,id=rid,first_difference=first))
  report['cross_arm_token_mismatches']=mismatches
- if a.stage=='correctness':
+ if a.stage=='smoke':
+  require(len(jobs)==1,'one smoke allocation required')
+  prof={};first=jobs[0]
+  for mode in ('pristine','off','cap','guarded'):
+   q=first['root']/mode/'profile-evidence.json';require(q.exists(),'missing smoke profile '+mode);prof[mode]=json.loads(q.read_text())
+  require(prof['guarded']['guarded_prefix']['launches_64KiB']>0,'guard did not activate')
+  require(prof['guarded']['balanced_prefix']['launches_64KiB']==0,'guard activated on balanced control')
+  require(prof['pristine']['guarded_prefix']['launches_64KiB']==0 and prof['off']['guarded_prefix']['launches_64KiB']==0,'control has cap launch')
+  report.update(smoke_pass=True,token_parity=not mismatches,profile_gate=prof,performance_gate=False,
+   statistical_scope='Single allocation smoke: source, HTTP, cache-hit and launch-path qualification only; no performance inference.')
+ elif a.stage=='correctness':
   require(len(jobs)>=1,'correctness jobs')
   max_logprob=0.;comparisons=0
   for j in jobs:
