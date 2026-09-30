@@ -35,3 +35,11 @@ def evaluate_eligibility(identity: TacticIdentity) -> EligibilityDecision:
     if int(env.get("max_smem_per_block_optin", 65536)) < 65536:
         reasons.append("insufficient_optin_smem")
     return EligibilityDecision(not reasons, tuple(reasons))
+
+def effective_eligibility(identity: TacticIdentity, *, cap_supported: bool, runtime_reason: str | None = None) -> EligibilityDecision:
+    """Combine static physical eligibility with a source-bound runtime support probe."""
+    base = evaluate_eligibility(identity)
+    reasons = list(base.reasons)
+    if not cap_supported:
+        reasons.append(runtime_reason or "runtime_cap_unsupported")
+    return EligibilityDecision(not reasons, tuple(dict.fromkeys(reasons)))

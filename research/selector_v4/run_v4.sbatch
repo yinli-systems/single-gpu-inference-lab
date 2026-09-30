@@ -38,3 +38,10 @@ for REP in 0 1 2; do
     cp "$P/source/SOURCE_COMMIT.txt" "$OUT/source_commit.txt"; date -u +%FT%TZ > "$OUT/launcher-complete.txt"
   done
 done
+
+# The candidate JIT must contain co-resident native/resource symbols.
+export PYTHONPATH="$P/source:$P/overlays/candidate"
+"$E/bin/python" -m research.selector_v4.audit_binary \
+  --workspace "$P/cache/$SLURM_JOB_PARTITION/candidate" \
+  --overlay "$P/overlays/candidate" \
+  --out "$P/receipts/binary-audit-${SLURM_JOB_ID}.json"

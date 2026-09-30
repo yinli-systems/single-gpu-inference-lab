@@ -7,6 +7,7 @@ from .schema import QUALIFICATION_REVISION, require_fields
 _ENV_FIELDS = (
     "gpu_name", "gpu_uuid", "num_sms", "driver", "cuda", "torch", "flashinfer",
     "nvcc", "backend_source_sha256", "official_overlay_sha256",
+    "resource_binding_sha256", "max_smem_per_sm", "max_smem_per_block_optin",
 )
 _OP_FIELDS = (
     "execution_mode", "backend", "causal", "layout", "dtype", "actual_split",

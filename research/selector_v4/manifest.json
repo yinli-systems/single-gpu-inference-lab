@@ -1,7 +1,7 @@
 {
   "schema": 4,
   "generator_seed": 73194721,
-  "qualification_revision": "4.0.0",
+  "qualification_revision": "4.1.0",
   "dtypes": [
     "float16",
     "bfloat16"
@@ -19,7 +19,7 @@
     "graph1_replay",
     "graph16_replay"
   ],
-  "blocks": 8,
+  "blocks": 16,
   "repeats": 3,
   "families": {
     "dev": 2,
@@ -35,7 +35,8 @@
     "research/selector_v3/manifest.json": "673898cbdd4d430af324491fa4bf306484f8502a660f67163af241838f73dce9",
     "research/selector_v32/fallback_audit/manifest.json": "77b66b9ab250e2b4b6dc9d918d07ae62704580f9e54d1f25e7630eaa4a3d7119",
     "research/selector_v32/manifest.json": "507b66f415eb6595235a3db45d8666259191e21a5c4179f9058553f8670fb564",
-    "research/selector_v3_freshness_extension/manifest.json": "bb848a90dd05b1bfd595758cffc68f6b4c4ecf244dbee427cc859cfae87fcd80"
+    "research/selector_v3_freshness_extension/manifest.json": "bb848a90dd05b1bfd595758cffc68f6b4c4ecf244dbee427cc859cfae87fcd80",
+    "research/selector_v4/evidence/historical-manifests/autotune-branch-manifest.json": "19e132fe7784cba686a892b6ff34b6f1264be1cd57b9b8d755e4f673b13eb6d3"
   },
   "cases": [
     {
@@ -2329,5 +2330,12 @@
       "generator_seed": 77905820
     }
   ],
-  "case_hash": "d54cc31596183165d9f2d18b3a8804d894c5de9d0a7ad4af038079ef316819b8"
+  "case_hash": "d54cc31596183165d9f2d18b3a8804d894c5de9d0a7ad4af038079ef316819b8",
+  "measurement_revision": "4.1.0",
+  "measurement_changes": [
+    "isolated native/cap kernel symbols",
+    "96ms deployment windows",
+    "16 ABBA/BAAB blocks per process",
+    "compiled-symbol and telemetry gates"
+  ]
 }

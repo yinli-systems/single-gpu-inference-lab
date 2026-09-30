@@ -1,40 +1,27 @@
 {
-  "qualification_revision": "4.0.0",
-  "state": "CPU_VALIDATED_OLD_OVERLAY_DEV_REANALYZED",
-  "v3_2_2_final_verdict": "HOLD_BOTH_GPUS",
-  "manifest_case_hash": "d54cc31596183165d9f2d18b3a8804d894c5de9d0a7ad4af038079ef316819b8",
-  "families": {
-    "dev": 2,
-    "canary": 10,
-    "release": 48,
-    "stress": 12
-  },
-  "cpu_tests_passed": 27,
+  "schema": 4,
+  "qualification_revision": "4.1.0",
+  "state": "V41_CPU_SOURCE_VALIDATED_SMOKE_NOT_SUBMITTED",
   "default_promotion": false,
   "serving_promotion": false,
   "historical_token_divergence_resolved": false,
-  "source_validation_archive_sha256": "6cbc77f885a73d6edafb26b37a8b57c5a173fb95d7392b899ff8c0dd1f1585cc",
-  "development_crossfit": {
-    "gpu_4090": {
-      "selected_geomean": 1.241013,
-      "selected_worst": 1.04861,
-      "block_worst": 1.023884,
-      "policy_geomean": 1.152291,
-      "policy_worst": 1.0
-    },
-    "gpu_5090": {
-      "selected_geomean": 1.266894,
-      "selected_worst": 1.066022,
-      "block_worst": 1.056688,
-      "policy_geomean": 1.161633,
-      "policy_worst": 1.0
-    }
+  "v3_2_2_release_repeated": false,
+  "manifest_case_hash": "d54cc31596183165d9f2d18b3a8804d894c5de9d0a7ad4af038079ef316819b8",
+  "fresh_counts": {
+    "dev_exposed": 2,
+    "canary_untouched": 10,
+    "release_untouched": 48,
+    "stress_untouched": 12
   },
-  "freshness_contract": "unique q, cached, and pair versus history and all fresh families",
-  "latest_validation_archive_sha256": "ed69c3adc5976405ca79f975a4c62b6f833d154c09bc6be179db29ee8692a35b",
-  "campaign_manifest_reanalysis": {
-    "gpu_4090": "HOLD_CONTROLS_UNRESOLVED",
-    "gpu_5090": "HOLD_CONTROLS_UNRESOLVED",
-    "evidence": "evidence/campaign-manifest-reanalysis/"
-  }
+  "source_isolation": {
+    "native_kernel_byte_identical": true,
+    "candidate_clone_symbols": true,
+    "legacy_default_native": true,
+    "binding_sha256": "7a8778e8dea2892cdd5d317c0d4a8c47365c36400177aaede46af189a8e68354",
+    "patch_sha256": "bb1d385104b5f0be3ee2ab7552b4e2d5e2c946775d6d7688f25fa5b5f19ecfea"
+  },
+  "cpu_tests_last_complete": 38,
+  "new_v41_gpu_jobs": {},
+  "max_ui_verified": false,
+  "source_validation_evidence": "evidence/v41-source-validation/"
 }
