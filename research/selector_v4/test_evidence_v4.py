@@ -1,7 +1,6 @@
 from __future__ import annotations
 import hashlib, json, tempfile, unittest
 from pathlib import Path
-from unittest.mock import patch
 from research.selector_v4.evidence_v4 import EXECUTIONS, expected_sequence, validate_run
 from research.selector_v4.eligibility import evaluate_eligibility
 from research.selector_v4.identity import TacticIdentity
@@ -56,8 +55,7 @@ class EvidenceContractTests(unittest.TestCase):
         (self.path/'complete.json').write_text(json.dumps(complete))
 
     def validate(self):
-        with patch('research.selector_v4.evidence_v4.load',return_value=self.manifest):
-            return validate_run(self.path,mode='paired',stage='dev',rep=0,shard=0,shards=1)
+        return validate_run(self.path,mode='paired',stage='dev',rep=0,shard=0,shards=1,manifest=self.manifest)
 
     def test_complete_fixture_passes(self):
         result=self.validate();self.assertEqual(len(result['rows']),24);self.assertEqual(len(result['qualifications']),1)
