@@ -1,7 +1,7 @@
 import copy,json,tempfile,unittest
 from pathlib import Path
 
-from analyze import deployment_environment_identity,freshness_sensitivity_amendment,mode_build_identity
+from analyze import deployment_environment_identity,freshness_sensitivity_amendment,mode_build_identity,validate_frozen_selector_expectation
 
 
 def environment(uuid='GPU-a',driver='580.82.07',header='a'*64,mode='guarded'):
@@ -29,6 +29,15 @@ class AnalysisContractTests(unittest.TestCase):
         self.assertEqual(mode_build_identity(a),mode_build_identity(b))
         b['header_sha256']='1'*64
         self.assertNotEqual(mode_build_identity(a),mode_build_identity(b))
+
+    def test_frozen_selector_expectation_is_actual_plan_aware(self):
+        case={'expected_selector':{'gpu_4090':True,'gpu_5090':True}}
+        q={'plan_info':[0]*15,'guard_expected':True,'split':'unsplit'}
+        self.assertTrue(validate_frozen_selector_expectation(q,case,'gpu_5090'))
+        split=copy.deepcopy(q);split['plan_info'][14]=True;split['guard_expected']=False;split['split']='auto'
+        self.assertFalse(validate_frozen_selector_expectation(split,case,'gpu_5090'))
+        bad=copy.deepcopy(q);bad['guard_expected']=False
+        with self.assertRaises(ValueError):validate_frozen_selector_expectation(bad,case,'gpu_5090')
 
     def test_freshness_amendment_is_measurement_commit_bound(self):
         commit='1'*40
