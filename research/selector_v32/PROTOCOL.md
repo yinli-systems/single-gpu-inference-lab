@@ -1,27 +1,35 @@
-# Selector-v3.2 paired fresh qualification
+# Selector-v3.2.1 native-policy measurement qualification
 
-## Why v3.2 exists
+## Version, exposure, and default state
 
-The original v3 30-case campaign is exposed development evidence. Its release analyzer incorrectly treated eager device-event time as full recurring eager-call latency, and its within-arm duplicate labels were described too broadly as treatment ABBA. The raw v3 data and HOLD verdict remain immutable. They cannot promote v3.2.
+The selector expression and v3.2 manifest are unchanged. The original v3 30-case release is exposed development data. The v3.2 canaries at `672e156` are retained, including job1641803's eager/disabled-overlay HOLD. They cannot qualify this revision. The same four v3.2 canaries are development fixtures; the thirty v3.2 release geometries remain unexecuted at revision freeze. No threshold has been loosened to manufacture a pass.
 
-## Frozen selector and fresh geometry
+This revision requires a new source archive, isolated overlays, and new canaries. A pending/running earlier-version job must not be duplicated or have its source modified. Legacy plan entry defaults OFF. The historical 2/432 full-model token divergence independently prevents default promotion.
 
-The selector rule is unchanged: strict anti-monotone query/cached-prefix coupling, at least five requests, max cached prefix at least 8192, an unsplit actual plan, and `padded_batch_size >= max(40, floor(2*num_sms/num_kv_heads)+1)`. `manifest.json` contains four new canaries and thirty new release geometries. `FRESHNESS_RECEIPT.json` proves zero exact geometry overlap with v3 and its extension before any v3.2 GPU timing.
+## Native operation and timing boundary
 
-## Measurement boundaries
+The isolated FA2 binary exposes an explicit native plan policy: OFF=0, forced cap=1, unchanged guard=2. The existing native plan argument list is retained and forwards to OFF. Python wrapper dispatch uses a private experimental attribute only on standard FA2; unsupported/custom backends fail closed. No Python plan-vector inspection, reconstruction, or round-trip audit occurs inside scored eager calls. This is a research ABI, not a claimed compatible upstream patch.
 
-One official FlashInfer 0.7.0 process measures pristine. One guarded candidate binary measures `off`, `cap`, and `guarded` in the same process by changing only `PrefillPlanInfo.resource_cap` after an otherwise identical native plan. Candidate plan vectors must be identical except for that final flag. This removes candidate build and process identity from the off-versus-guarded comparison.
+Eager scores complete recurring `plan + run` wall time. Two unscored sixteen-call pristine pilots set a power-of-two call count, at least16 and at most4096, targeting at least48ms at the faster pilot rate. That count and reference are frozen on first pristine execution for every later arm/process in the same shard. Every scored eager window must be at least12ms; a shorter window fails with its duration retained, rather than being silently rerun or discarded. Graph1 scores sixteen single-replay launches; Graph16 scores one sixteen-call replay. Both are normalized per kernel invocation and remain separate modes.
 
-Eager scoring uses recurring `plan + run` wall latency in a repeated window of at least 12 ms, divided by the number of calls. CUDA Graph scoring uses captured Graph1 and Graph16 replay latency. Device-only eager timing is diagnostic and cannot enter the release gate. Release timing is unprofiled; Nsight Compute/CUPTI evidence is mechanism-only.
+Each process repeat contains eight blocks. Actual off/guarded and off/cap comparisons use ABBA on even blocks and BAAB on odd blocks inside one candidate process. Three process repeats use one physical GPU per shard; process order is pristine/paired, paired/pristine, pristine/paired. Canary uses one process repeat and two blocks. Only unprofiled timings enter qualification; profiler-controlled clocks/cache/replay are separate diagnostic evidence.
 
-Each process repeat contains eight blocks. The paired candidate process executes real treatment ABBA/BAAB for `off` versus `guarded`; a separate paired sequence compares `off` versus forced `cap`. Pristine has a within-arm position-balance control. Three process repeats run on one physical GPU per shard, with pristine/paired process order balanced across repeats.
+## Correctness and provenance
 
-## Correctness and identity
+Every eager, Graph1, and Graph16 check separately poisons output and LSE before execution and requires exact equality against an independent pristine full output/LSE. FP32 reference sampling is retained but not mislabeled as exhaustive FP32 checking. Case-local tensor/graph ownership ends before the next case; garbage collection is outside timing. Device input hashes, references, calibrated counts, raw ordered operation/plan/environment identity payloads and their hashes are retained.
 
-Every arm uses identical Q/K/V inputs and is compared bit-for-bit against an independently executed pristine full output and LSE. Ragged/paged, FP16/BF16, requested auto/unsplit, eager/Graph1/Graph16, complete plan vectors, environment identity, candidate binary digest, window count, GPU UUID, driver, CUDA, Torch, FlashInfer, official overlay and source archive are recorded. A result cannot cross GPU family or execution identity.
+The analyzer verifies artifact hashes, source revision, full expected matrix, exact ABBA roles/positions, actual native policy flags, frozen selector calculation, separate replay checks, calibrated counts, normalization, and hardware/runtime identity. A legacy `candidate_binary_sha256` field denotes the explicitly labeled backend SOURCE-file digest, not proof of a loaded compiled binary. Campaign-private JIT storage and source binding do not substitute for future upstream binary/ABI validation.
 
-## Gate
+## Canary and release gate
 
-Promotion is fail-closed. It requires exact numerics; all selected-cell position controls to fit inside a 0.5% 90% equivalence interval; pristine/off disabled-overlay controls to fit inside a 1% 90% equivalence interval; selected and whole-policy point worst at least 0.99; selected conditional joint-min 95% lower bound at least 0.99; Graph16 selected aggregate 95% lower bound above 1; and disabled-overlay point worst at least 0.99. These are conditional claims on frozen devices/geometries, not hardware-population guarantees.
+Canary requires exact numerics, nonempty selection, selected/whole-policy/disabled-overlay absolute point worst >=0.98, and paired whole-policy point worst >=0.98. Passing canary is not release or serving evidence.
 
-No full HTTP validation may start unless both GPU families pass this fresh gate. The historical 2/432 token divergence remains unresolved and independently blocks default promotion.
+Release preserves the original absolute gates and also requires independent paired gates: selected and whole-policy point worst >=0.99; selected joint-min95% lower bound >=0.99; selected Graph16 aggregate95% lower bound >1; all selected position-control90% intervals inside reciprocal +/-0.5%; disabled-overlay90% intervals inside reciprocal +/-1%, with disabled-overlay point worst >=0.99 and every disabled-overlay +/-1% equivalence check resolved. The selected-position +/-0.5% condition is not silently imposed on unselected positions. Bounds are conditional bootstrap summaries on frozen measured devices/geometries, not population-wide safety guarantees.
+
+`run.sbatch` now calls `authorize_release.py` before release execution. The preflight recomputes both GPU canaries from current-revision raw files and refuses missing, stale, corrupt, or failing evidence; it never submits jobs. A canary pass authorizes only release qualification, not default use or HTTP testing. Full paired HTTP additionally requires both GPU release gates and keeps the historical numerical investigation separate.
+
+## Reproduction
+
+Run `python -m unittest discover -s research/selector_v32 -p 'test_*.py' -v` in a Python environment with NumPy. Use `prepare_guarded.py` only against the hash-bound isolated official-0.7 source. Freeze all source, manifest, protocol, and prior-failure hashes in a new campaign; never overwrite the source of an existing job. Execute canary on each GPU family first and run `analyze.py --stage canary --shards 1` against that campaign. All previous failed and superseded attempts remain available.
+
+Primary references: FlashInfer Autotuner v2 (2026-09-22), https://flashinfer.ai/2026/09/22/autotuner-v2.html ; NVIDIA Nsight Compute Profiling Guide, https://docs.nvidia.com/nsight-compute/ProfilingGuide/ ; NVIDIA CUDA Graph numerical troubleshooting, https://docs.nvidia.com/dl-cuda-graph/troubleshooting/numerical-errors.html . These motivate measurement/lifetime checks; they do not establish this project's performance or diagnose its old token divergences.

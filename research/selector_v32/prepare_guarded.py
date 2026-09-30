@@ -2,7 +2,10 @@
 from __future__ import annotations
 from pathlib import Path
 import argparse,difflib,hashlib,json,os,shutil
+from native_policy import patch_native_entry,patch_native_binding,patch_python_dispatch
 EXPECTED={
+ 'flashinfer/prefill.py':'bd4aaa0a24462efbb6e6ddb12b3c98da9507e7b6ff6b22da3f40167ca66beb12',
+ 'flashinfer/data/csrc/batch_prefill_jit_binding.cu':'dad0d81c55b92f71a634cb8240dcb0d150aa6ffd391ef3ef5d87b6207eeca4fc',
  'flashinfer/data/include/flashinfer/attention/prefill.cuh':'e66bce2652c0a3c5b54f88510aff2b4b48ff6a52c4ee23fa97f91fa06a935b87',
  'flashinfer/data/include/flashinfer/attention/scheduler.cuh':'425ba78815ba77ae848c67507d1af6b024d05edd257a7d9b331166afcef9b17c',
  'flashinfer/data/csrc/batch_prefill.cu':'4190105e8b5c93621af44356b9aa50861560a5fbf8ff3279301487860604d932',
@@ -125,7 +128,7 @@ def patch_jinja(s):
  return s.replace(old,'bool enable_pdl, cudaStream_t stream, bool resource_cap);')
 
 def prepare(source,out,mode):
- if mode not in ('off','cap','guarded'):raise ValueError(mode)
+ if mode != 'guarded':raise ValueError('v3.2.1 uses one native-policy binary')
  if out.exists():raise FileExistsError(out)
  originals={}
  for rel,h in EXPECTED.items():
@@ -137,7 +140,9 @@ def prepare(source,out,mode):
  changes={
   'flashinfer/data/include/flashinfer/attention/scheduler.cuh':patch_scheduler(originals['flashinfer/data/include/flashinfer/attention/scheduler.cuh'],mode),
   'flashinfer/data/include/flashinfer/attention/prefill.cuh':patch_prefill(originals['flashinfer/data/include/flashinfer/attention/prefill.cuh']),
-  'flashinfer/data/csrc/batch_prefill.cu':patch_plan_decision(patch_run(patch_declarations(originals['flashinfer/data/csrc/batch_prefill.cu'])),mode),
+  'flashinfer/data/csrc/batch_prefill.cu':patch_native_entry(patch_plan_decision(patch_run(patch_declarations(originals['flashinfer/data/csrc/batch_prefill.cu'])),mode)),
+  'flashinfer/data/csrc/batch_prefill_jit_binding.cu':patch_native_binding(originals['flashinfer/data/csrc/batch_prefill_jit_binding.cu']),
+  'flashinfer/prefill.py':patch_python_dispatch(originals['flashinfer/prefill.py']),
   'flashinfer/data/csrc/batch_prefill_paged.cuh':patch_run(originals['flashinfer/data/csrc/batch_prefill_paged.cuh'],True),
   'flashinfer/data/csrc/batch_prefill_paged.cu':patch_declarations(originals['flashinfer/data/csrc/batch_prefill_paged.cu']),
  }
@@ -151,7 +156,7 @@ def prepare(source,out,mode):
   diffs.extend(difflib.unified_diff(originals[rel].splitlines(True),new.splitlines(True),fromfile='a/'+rel,tofile='b/'+rel))
  rec=dict(mode=mode,base_version='0.7.0',base_hashes=EXPECTED,modified_hashes=hashes,
   plan_vector_size=16,guard_rule='strict_opposite && !split_kv && padded_batch_size>=max(40,floor(2*num_sms/num_kv_heads)+1)',
-  selector_version=3,tactic_identity_schema='environment+ordered-geometry+execution-mode+plan-signature',
+  selector_version=3,measurement_revision='3.2.1',native_runtime_policy=True,default_policy='off',tactic_identity_schema='environment+ordered-geometry+execution-mode+plan-signature',
   descriptor_order_unchanged=True,device_math_unchanged=True,production_promoted=False)
  (out/'RESOURCE_BINDING.json').write_text(json.dumps(rec,indent=2)+'\n')
  (out/'resource-guard.patch').write_text(''.join(diffs))

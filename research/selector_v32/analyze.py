@@ -4,10 +4,14 @@ from pathlib import Path
 import numpy as np
 from manifest import load,digest
 from release_gate import evaluate
+from evidence_contract import validate_run
+from measurement_contract import REVISION
+from functools import lru_cache
 
 def sha(p):return hashlib.sha256(Path(p).read_bytes()).hexdigest()
 def require(x,msg):
  if not x:raise RuntimeError(msg)
+@lru_cache(maxsize=8)
 def weights(shard,n=10000):
  rng=np.random.default_rng(332211+shard*1009);w=np.zeros((n,24))
  for d in range(n):
@@ -17,7 +21,7 @@ def weights(shard,n=10000):
 
 def qci(draw,q=(.025,.975)):return [float(x) for x in np.exp(np.quantile(draw,q))]
 def load_run(path,mode,rep,stage,cases,blocks):
- e=json.loads((path/'environment.json').read_text());c=json.loads((path/'complete.json').read_text());rows=json.loads((path/'measurements.json').read_text());quals=json.loads((path/'qualification.json').read_text())
+ e,c,rows,quals=validate_run(path,mode,rep,stage,cases,blocks)
  require(c['complete'] and e['mode']==mode and e['rep']==rep and e['stage']==stage,'run identity')
  basic=set(itertools.product([x['id'] for x in cases],['float16','bfloat16'],['ragged','paged'],['auto','unsplit']))
  expected_rows=len(basic)*blocks*3*(4 if mode=='pristine' else 8);require(len(rows)==expected_rows==c['rows'],'row count')
@@ -34,14 +38,14 @@ def load_run(path,mode,rep,stage,cases,blocks):
 def process_grid(run,k,execution,arm,group,blocks):
  vals=np.empty((blocks,),float)
  for b in range(blocks):
-  xs=[r['wall_us'] for (kk,bb,ex,g,p),r in run['index'].items() if kk==k and bb==b and ex==execution and g==group and r['arm']==arm]
+  xs=[run['index'][(k,b,execution,group,p)]['wall_us'] for p in range(4) if run['index'][(k,b,execution,group,p)]['arm']==arm]
   require(len(xs)==(4 if arm=='pristine' else 2),f'observation multiplicity {arm} {group}');vals[b]=math.exp(sum(math.log(x) for x in xs)/len(xs))
  return vals
 
 def duplicate_grid(run,k,execution,arm,group,blocks):
  out=[]
  for b in range(blocks):
-  xs=[r['wall_us'] for (kk,bb,ex,g,p),r in sorted(run['index'].items(),key=lambda z:z[0][-1]) if kk==k and bb==b and ex==execution and g==group and r['arm']==arm]
+  xs=[run['index'][(k,b,execution,group,p)]['wall_us'] for p in range(4) if run['index'][(k,b,execution,group,p)]['arm']==arm]
   require(len(xs)==2 if arm!='pristine' else len(xs)==4,'duplicate multiplicity')
   if arm=='pristine':out.append(math.log(math.sqrt(xs[0]*xs[-1]))-math.log(math.sqrt(xs[1]*xs[2])))
   else:out.append(math.log(xs[0])-math.log(xs[1]))
@@ -71,6 +75,10 @@ def run(a):
    qs=[]
    for rep in reps:
     pq=lookup[(shard,rep,'pristine')]['qual'][k];cq=lookup[(shard,rep,'paired')]['qual'][k];require(cq['candidate_plan_core_equal'] is True,'candidate plan core');require(cq['inputs_sha256']==pq['inputs_sha256'],'input mismatch');require(cq['guard_expected']==cq['arms']['guarded']['plan_info'][-1],'guard plan mismatch')
+    require(pq['eager_calls']==cq['eager_calls'],'cross-process calibrated window mismatch')
+    require(pq['reference_sha256']==cq['reference_sha256'],'cross-process reference snapshot mismatch')
+    for arm in ('off','cap','guarded'):
+     require(cq['arms'][arm]['out_sha256']==pq['arms']['pristine']['out_sha256'] and cq['arms'][arm]['lse_sha256']==pq['arms']['pristine']['lse_sha256'],'independent pristine tensor hash mismatch')
     qs.append((pq,cq))
     numerics['pristine']['qualifications']+=1;numerics['pristine']['exact_full_outputs']+=int(pq['arms']['pristine']['pristine_exact'])
     for arm in ('off','cap','guarded'):numerics[arm]['qualifications']+=1;numerics[arm]['exact_full_outputs']+=int(cq['arms'][arm]['pristine_exact'])
@@ -96,15 +104,15 @@ def run(a):
      drawcache[(len(cells),mode)]=d
     cells.append(dict(case=k[0],dtype=k[1],layout=k[2],split=k[3],execution_mode=execution,shard=shard,selected=selected,comparisons=comparisons))
  if a.stage=='canary':
-  req=dict(numerical_exact=all(v['qualifications']==v['exact_full_outputs'] for v in numerics.values()),selected_nonempty=any(x['selected'] for x in canary_points),selected_point_worst_at_least_0_98=min(x['guarded_ratio'] for x in canary_points if x['selected'])>=.98,policy_point_worst_at_least_0_98=min(x['guarded_ratio'] for x in canary_points)>=.98,disabled_overlay_point_worst_at_least_0_98=min(x['off_ratio'] for x in canary_points)>=.98)
-  result=dict(stage=a.stage,gpu=a.gpu,canary_gate={'pass':all(req.values()),'requirements':req},canary_points=canary_points,numerics=numerics,hardware=hardware,case_hash=m['case_hash'],source_archive_sha256=next(iter(source_archives)),official_overlay_sha256=next(iter(official)),single_gpu_release_gate_pass=False)
+  req=dict(numerical_exact=all(v['qualifications']==v['exact_full_outputs'] for v in numerics.values()),selected_nonempty=any(x['selected'] for x in canary_points),selected_point_worst_at_least_0_98=min(x['guarded_ratio'] for x in canary_points if x['selected'])>=.98,policy_point_worst_at_least_0_98=min(x['guarded_ratio'] for x in canary_points)>=.98,disabled_overlay_point_worst_at_least_0_98=min(x['off_ratio'] for x in canary_points)>=.98,paired_policy_point_worst_at_least_0_98=min(x['paired_ratio'] for x in canary_points)>=.98)
+  result=dict(measurement_contract_revision=REVISION,stage=a.stage,gpu=a.gpu,canary_gate={'pass':all(req.values()),'requirements':req},canary_points=canary_points,numerics=numerics,hardware=hardware,case_hash=m['case_hash'],source_archive_sha256=next(iter(source_archives)),official_overlay_sha256=next(iter(official)),single_gpu_release_gate_pass=False)
  else:
-  gate=evaluate(cells,drawcache,numerics);result=dict(stage=a.stage,gpu=a.gpu,release_gate=gate,cells=cells,numerics=numerics,hardware=hardware,case_hash=m['case_hash'],source_archive_sha256=next(iter(source_archives)),official_overlay_sha256=next(iter(official)),single_gpu_release_gate_pass=gate['pass'])
+  gate=evaluate(cells,drawcache,numerics);result=dict(measurement_contract_revision=REVISION,stage=a.stage,gpu=a.gpu,release_gate=gate,cells=cells,numerics=numerics,hardware=hardware,case_hash=m['case_hash'],source_archive_sha256=next(iter(source_archives)),official_overlay_sha256=next(iter(official)),single_gpu_release_gate_pass=gate['pass'])
  a.out.mkdir(parents=True);(a.out/'summary.json').write_text(json.dumps(result,indent=2,allow_nan=False)+'\n')
  if a.stage=='canary':
-  md=['# Selector-v3.2 paired canary','',f'**Canary gate: {"PASS" if result["canary_gate"]["pass"] else "HOLD"}**','',f'- Requirements: `{json.dumps(result["canary_gate"]["requirements"],sort_keys=True)}`']
+  md=['# Selector-v3.2.1 paired canary','',f'**Canary gate: {"PASS" if result["canary_gate"]["pass"] else "HOLD"}**','',f'- Requirements: `{json.dumps(result["canary_gate"]["requirements"],sort_keys=True)}`']
  else:
-  g=result['release_gate'];md=['# Selector-v3.2 paired release','',f'**Single-GPU release gate: {"PASS" if g["pass"] else "HOLD"}**','',f'- Selected cells: {g["selected"]["count"]}; geomean {g["selected"]["ratio"]:.6f}; point worst {g["selected"]["worst_point_ratio"]:.6f}; joint-min LCB {g["selected"]["simultaneous_worst_CI95"][0]:.6f}.',f'- Graph16 selected geomean {g["graph16_selected"]["ratio"]:.6f}; 95% CI [{g["graph16_selected"]["CI95"][0]:.6f}, {g["graph16_selected"]["CI95"][1]:.6f}].',f'- Requirements: `{json.dumps(g["requirements"],sort_keys=True)}`']
+  g=result['release_gate'];md=['# Selector-v3.2.1 paired release','',f'**Single-GPU release gate: {"PASS" if g["pass"] else "HOLD"}**','',f'- Selected cells: {g["selected"]["count"]}; geomean {g["selected"]["ratio"]:.6f}; point worst {g["selected"]["worst_point_ratio"]:.6f}; joint-min LCB {g["selected"]["simultaneous_worst_CI95"][0]:.6f}.',f'- Graph16 selected geomean {g["graph16_selected"]["ratio"]:.6f}; 95% CI [{g["graph16_selected"]["CI95"][0]:.6f}, {g["graph16_selected"]["CI95"][1]:.6f}].',f'- Requirements: `{json.dumps(g["requirements"],sort_keys=True)}`']
  (a.out/'RESULTS.md').write_text('\n'.join(md)+'\n');print('\n'.join(md))
 
 if __name__=='__main__':
