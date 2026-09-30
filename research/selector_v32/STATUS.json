@@ -1,52 +1,25 @@
 {
-  "recorded_utc": "2026-09-30T10:10:35.642740+00:00",
+  "last_audit_utc": "2026-09-30T10:52:32Z",
+  "phase": "fallback-diagnosis",
   "implementation_revision": "3.2.1",
-  "selector_rule_changed": false,
-  "manifest_case_hash": "e6fb15cb7f9d240e1dca6943d3a9c4802af7c239dad2cbc57336aa218ae0df13",
-  "release_cases_consumed": 0,
-  "cpu_tests_passed": 38,
-  "python": "3.12.13",
-  "numpy": "2.3.5",
-  "cuda_compile_verified": false,
-  "new_revision_gpu_jobs_submitted": true,
-  "old_jobs": {
-    "1641802": "FAILED CUDA OOM at final paired coordinate; 31/32",
-    "1641803": "COMPLETED; canary HOLD"
+  "parent_source_commit": "a849cf4c9894d2d123d66dc27e417e162526e1c6",
+  "parent_jobs": {
+    "1641933": "COMPLETED/HOLD",
+    "1641934": "COMPLETED/HOLD"
   },
-  "pr27_head": "672822f29953c3f466212bdd00de48b1d32f847d",
-  "historical_2_of_432_resolved": false,
+  "diagnostic_source_commit": "80b6f5c5634e1ad41404213abc3e95c1d6544c3e",
+  "diagnostic_campaign": "/ssd/scxi253/sgi-fallback-diagnosis-20260930T104231Z",
+  "diagnostic_jobs": {
+    "1641985": "PENDING/Priority (5090)",
+    "1641986": "PENDING/Priority (4090)"
+  },
+  "diagnostic_cpu_tests_passed": 11,
+  "fresh_release_cases_consumed": 0,
+  "native_fast_reject_applied": false,
+  "new_diagnostic_gpu_results": false,
+  "historical_token_divergence_resolved": false,
   "default_enabled": false,
   "serving_promotion": false,
-  "gui_max_verified": false,
-  "tested_python_source_sha256": {
-    "test_contracts.py": "ba19cc437200e36fe4fa43fb0238b51f8e498e0f7bf828c064cd92480377e309",
-    "measure.py": "1b2d4134d6d70d7f01849af07c80e1697700fcb2ba5a8c7e9c38975c4021bdbc",
-    "authorize_release.py": "5db3ea9e474cd33bb05ffb2d768ddce041deb5030f53adcabfc16dffa13d0f03",
-    "manifest.py": "e621d40be2478140ccd27d3e469124aff937640fc3bf221b04e10694561e9f28",
-    "audit_v31_contract.py": "4b21cf57708e9d76332979c7079c76062bf8fe7f15b528e02f9c61ce8eb4e178",
-    "native_policy.py": "2931cd2c0cc209446bc4b0758d572937db5ab63317f0872bac875099ee0d7947",
-    "measurement_contract.py": "1d1902eaa9c631164cd9c5d03b248b42e24d4e2c57ff389b156df444ad879bcd",
-    "test_revision321.py": "19239e20dfe76fb5b452571056dcdc0a53b54e50abfc434fff6a30b0dc245b87",
-    "test_measure_helpers.py": "d1f0b22aacf0b1ca512e10afc80cee729124d58b4188b4a1444f727fca487fb0",
-    "test_identity.py": "034e33c27f7cdc2e9699de1563a83b0b4d51aa5fbea720156b5652b682782774",
-    "prepare_guarded.py": "cd41fc012f13ee1d5a4d1a6fa214b208a07670e5f9e0b69ce4a41c46f905a8d7",
-    "evidence_contract.py": "e21330b9c4957073843c53ae2754d7d97256d3a7d0cc6eb2448bc1bc2cad54d1",
-    "release_gate.py": "d291592378ba4299bd3a09ef85ed08eb8017441a7bd40429a1c9f79e492fb484",
-    "analyze.py": "a60840adf9d8f254302df07e5ef1dfc2c7970968169ab0e556541f05a758da1d",
-    "test_analyzer_helpers.py": "3e4216320897cae720df008515d13ffdfbc65f29a56179014af97f01499e11e8"
-  },
-  "source_commit": "a849cf4c9894d2d123d66dc27e417e162526e1c6",
-  "source_archive_sha256": "4547b66c6d5ed84eb78a1d95acb6d5ae14273ba6b81e9d6bec8ece183787eaa4",
-  "canary_jobs": {
-    "gpu_4090": "1641933",
-    "gpu_5090": "1641934"
-  },
-  "queue_snapshot": "1641933|sgi-selector-v321-4090|PENDING|0:00|(Priority)|gres/gpu:1\n1641934|sgi-selector-v321-5090|PENDING|0:00|(Priority)|gres/gpu:1\n",
-  "gpu_qualification_complete": false,
-  "canary_receipts": "evidence/recovery-20260930T0934Z/v321-submission/",
-  "implementation_ci": {
-    "head": "a849cf4c9894d2d123d66dc27e417e162526e1c6",
-    "workflows_passed": 4,
-    "selector_contract_run": 36700075692
-  }
+  "pr27_head": "672822f29953c3f466212bdd00de48b1d32f847d",
+  "gui_max_verified": false
 }
