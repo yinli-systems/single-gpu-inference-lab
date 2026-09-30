@@ -17,14 +17,17 @@ def run(a):
         source_hits['paged_resource']+=text.count('BatchPrefillWithPagedKVCacheResourceKernel')
     symbol_hits={k:0 for k in source_hits};binaries=[]
     mapping={'ragged_native':'BatchPrefillWithRaggedKVCacheKernel','ragged_resource':'BatchPrefillWithRaggedKVCacheResourceKernel','paged_native':'BatchPrefillWithPagedKVCacheKernel','paged_resource':'BatchPrefillWithPagedKVCacheResourceKernel'}
+    per_binary=[]
     for path in shared:
         proc=subprocess.run(['nm','-C',str(path)],capture_output=True,text=True,timeout=60)
-        text=proc.stdout+proc.stderr
-        for key,name in mapping.items():symbol_hits[key]+=text.count(name)
-        binaries.append({'path':str(path.relative_to(base)),'sha256':sha(path),'bytes':path.stat().st_size,'nm_returncode':proc.returncode})
+        text=proc.stdout+proc.stderr;counts={key:text.count(name) for key,name in mapping.items()}
+        for key,count in counts.items():symbol_hits[key]+=count
+        item={'path':str(path.relative_to(base)),'sha256':sha(path),'bytes':path.stat().st_size,'nm_returncode':proc.returncode,'symbol_hits':counts};binaries.append(item);per_binary.append(counts)
     if not all(source_hits.values()):raise RuntimeError('generated source lacks isolated symbols '+str(source_hits))
     if not all(symbol_hits.values()):raise RuntimeError('compiled binary lacks isolated symbols '+str(symbol_hits))
-    result={'schema':1,'workspace':str(a.workspace),'private_cache':str(base),'source_hits':source_hits,'symbol_hits':symbol_hits,'binaries':binaries,'kernel_symbol_isolation_compiled':True}
+    ragged_same=any(x['ragged_native'] and x['ragged_resource'] for x in per_binary);paged_same=any(x['paged_native'] and x['paged_resource'] for x in per_binary)
+    if not ragged_same or not paged_same:raise RuntimeError('native/resource symbols are not co-resident in compiled tactic module')
+    result={'schema':1,'workspace':str(a.workspace),'private_cache':str(base),'source_hits':source_hits,'symbol_hits':symbol_hits,'same_module_pairs':{'ragged':ragged_same,'paged':paged_same},'binaries':binaries,'kernel_symbol_isolation_compiled':True}
     Path(a.out).write_text(json.dumps(result,indent=2)+'\n');print(json.dumps(result,indent=2))
 if __name__=='__main__':
     p=argparse.ArgumentParser();p.add_argument('--workspace',type=Path,required=True);p.add_argument('--out',type=Path,required=True);run(p.parse_args())

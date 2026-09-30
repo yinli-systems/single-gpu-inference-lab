@@ -17,7 +17,7 @@ class AuditBinaryTests(unittest.TestCase):
   nm='BatchPrefillWithRaggedKVCacheKernel\nBatchPrefillWithPagedKVCacheKernel\nBatchPrefillWithRaggedKVCacheResourceKernel\nBatchPrefillWithPagedKVCacheResourceKernel\n'
   with patch('audit_binary.subprocess.run',return_value=SimpleNamespace(stdout=nm,stderr='',returncode=0)):
    run(SimpleNamespace(workspace=root,out=out))
-  self.assertTrue(json.loads(out.read_text())['kernel_symbol_isolation_compiled'])
+  data=json.loads(out.read_text());self.assertTrue(data['kernel_symbol_isolation_compiled']);self.assertEqual(data['same_module_pairs'],{'ragged':True,'paged':True})
  def test_missing_resource_symbol_fails(self):
   tmp,root=self.fixture(resource=False);self.addCleanup(tmp.cleanup)
   with patch('audit_binary.subprocess.run',return_value=SimpleNamespace(stdout='',stderr='',returncode=0)),self.assertRaisesRegex(RuntimeError,'generated source'):
