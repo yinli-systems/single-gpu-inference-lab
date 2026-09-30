@@ -1,0 +1,7 @@
+# Forced-history divergence protocol
+
+This diagnostic addresses the already-exposed `1639805/decode-b1` token differences without treating later zero-mismatch runs as a cure. It regenerates the original 16 deterministic input-ID prompts. Requests 0–7 replay their complete 128-token pristine trajectories as admission ballast. Requests 8–15 replay a pristine prefix through the real autoregressive decode/KV path; only output index 74 or 114 is sampled naturally. A custom logit processor forces preceding tokens but does not change model forward tensors. All request IDs are unique.
+
+Pristine and unconditional-cap servers run in ABBA order on one allocated RTX 4090. At the natural target step, a low-intrusion observer saves raw logits, the exact logical history, batch/graph coordinates, request page tables, all 36-layer logical K/V prefixes, and layer/QKV/attention boundary tensors. Hooks retain graph-buffer references during capture and copy only at the target step; no clone operation is inserted into the captured graph. This is diagnostic execution and never a performance measurement.
+
+Causal comparison requires an identical complete logical batch signature. Physical page numbers may differ across fresh servers, but logical K/V tensors selected through each page table must be compared exactly. If histories or batch signatures differ, the analyzer reports the pair as unmatched rather than attributing an operator. The original uninstrumented failure remains unresolved unless its first differing state is reproduced under this frozen protocol.
