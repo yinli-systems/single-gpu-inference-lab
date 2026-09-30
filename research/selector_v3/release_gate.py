@@ -44,6 +44,33 @@ def _summary(indices: list[int], mode: str, cells: list[dict[str, Any]], drawcac
     }
 
 
+def subset_gate_inputs(
+    cells: list[dict[str, Any]],
+    drawcache: dict[tuple[int, str], np.ndarray],
+    excluded_cases: set[str],
+) -> tuple[list[dict[str, Any]], dict[tuple[int, str], np.ndarray]]:
+    """Return a re-indexed sensitivity subset without changing the primary gate.
+
+    This helper is analysis-only. It never mutates cells, selector decisions, or the
+    frozen measurement manifest. Every retained comparison arm must have draws.
+    """
+    _require(bool(excluded_cases), "empty sensitivity exclusion")
+    retained = [i for i, cell in enumerate(cells) if cell.get("case") not in excluded_cases]
+    observed = {str(cell.get("case")) for cell in cells if cell.get("case") in excluded_cases}
+    _require(observed == excluded_cases, "sensitivity exclusion not present in measured cells")
+    _require(retained and len(retained) < len(cells), "invalid sensitivity subset")
+    subset = [cells[i] for i in retained]
+    remapped: dict[tuple[int, str], np.ndarray] = {}
+    for new_index, old_index in enumerate(retained):
+        modes = set(cells[old_index].get("comparisons", {}))
+        _require({"off", "guarded"} <= modes, "incomplete comparison arms")
+        for mode in modes:
+            key = (old_index, mode)
+            _require(key in drawcache, "missing sensitivity draws")
+            remapped[(new_index, mode)] = np.asarray(drawcache[key], dtype=float)
+    return subset, remapped
+
+
 def evaluate_release_gate(cells: list[dict[str, Any]], drawcache: dict[tuple[int, str], np.ndarray], numerics: dict[str, dict[str, Any]]) -> dict[str, Any]:
     primary = [i for i, c in enumerate(cells) if c["calls"] == 16 and c["metric"] == "run_device_us"]
     all_execution = [i for i, c in enumerate(cells) if c["calls"] in (0, 1, 16) and c["metric"] == "run_device_us"]

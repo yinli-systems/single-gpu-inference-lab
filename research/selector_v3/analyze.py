@@ -1,11 +1,12 @@
 """Fail-closed per-stage analysis. No model quality is inferred from kernel timings."""
 from __future__ import annotations
-import argparse,hashlib,itertools,json,math,sys
+import argparse,csv,hashlib,io,itertools,json,math,re,sys
 from pathlib import Path
 from collections import defaultdict
 from functools import lru_cache
 import numpy as np
-from release_gate import evaluate_release_gate
+import release_gate as release_gate_module
+from release_gate import evaluate_release_gate,subset_gate_inputs
 
 def require(c,m):
  if not c:raise ValueError(m)
@@ -14,6 +15,52 @@ def safe_rel(root,value):
  p=Path(value)
  require(not p.is_absolute() and '..' not in p.parts,'unsafe recovery path')
  return root/p
+
+def json_digest(value):
+ return hashlib.sha256(json.dumps(value,sort_keys=True,separators=(',',':')).encode()).hexdigest()
+
+def hardware_identity(env):
+ out=env.get('hardware',{}).get('out','')
+ rows=list(csv.DictReader(io.StringIO(out)))
+ require(len(rows)==1,'single visible GPU required')
+ row={str(k).strip():str(v).strip() for k,v in rows[0].items()}
+ required={'name','uuid','driver_version','power.limit [W]'}
+ require(required<=set(row) and all(row[k] for k in required),'incomplete hardware identity')
+ require(row['name']==env.get('gpu'),'hardware/environment GPU mismatch')
+ return dict(name=row['name'],uuid=row['uuid'],driver=row['driver_version'],power_limit_w=row['power.limit [W]'])
+
+def deployment_environment_identity(env):
+ required=('partition','case_hash','gpu','num_sm','cuda','torch','flashinfer','official_overlay_sha256',
+  'source_archive_sha256','profiling_mode','profiled','nsight_compute_excluded','clocks_locked',
+  'whole_node_exclusive','full_model','output_seed')
+ require(all(k in env for k in required),'incomplete deployment environment identity')
+ hw=hardware_identity(env)
+ return dict(partition=env['partition'],case_hash=env['case_hash'],gpu=env['gpu'],num_sm=int(env['num_sm']),
+  driver=hw['driver'],power_limit_w=hw['power_limit_w'],cuda=env['cuda'],torch=env['torch'],
+  flashinfer=env['flashinfer'],official_overlay_sha256=env['official_overlay_sha256'],
+  source_archive_sha256=env['source_archive_sha256'],profiling_mode=env['profiling_mode'],
+  profiled=env['profiled'],nsight_compute_excluded=env['nsight_compute_excluded'],
+  clocks_locked=env['clocks_locked'],whole_node_exclusive=env['whole_node_exclusive'],
+  full_model=env['full_model'],output_seed=env['output_seed'])
+
+def mode_build_identity(env):
+ require(env.get('mode') in {'pristine','off','cap','guarded'},'unknown mode identity')
+ require(isinstance(env.get('header_sha256'),str) and len(env['header_sha256'])==64,'missing header identity')
+ require(isinstance(env.get('source'),dict) and env['source'],'missing measurement source identity')
+ return dict(mode=env['mode'],header_sha256=env['header_sha256'],measurement_source_digest=json_digest(env['source']))
+
+def freshness_sensitivity_amendment(root,measurement_commit,measured_cases):
+ p=root/'receipts'/'freshness-sensitivity-amendment-v2.json'
+ require(p.is_file(),'strict-freshness amendment missing')
+ x=json.loads(p.read_text())
+ require(x.get('schema')==2 and x.get('measurement_source_commit')==measurement_commit,'wrong freshness amendment identity')
+ require(x.get('selector_rule_changed') is False and x.get('measurement_manifest_changed') is False,'freshness amendment changed frozen experiment')
+ require(x.get('original_30_case_primary_gate_unchanged') is True,'primary gate was not preserved')
+ require(x.get('registered_before_any_release_performance_ratio_analysis') is True and x.get('canary_performance_used') is False,'post-performance freshness amendment')
+ excluded=set(x.get('secondary_strict_freshness_sensitivity_excludes',[]))
+ require(excluded and excluded<set(measured_cases),'invalid strict-freshness exclusion')
+ require(int(x.get('strictly_fresh_relative_to_canary_case_count',-1))==len(set(measured_cases)-excluded),'fresh case count mismatch')
+ return dict(path=p.relative_to(root).as_posix(),sha256=sha(p),excluded_cases=sorted(excluded),receipt=x)
 
 def verify_complete(path,expected_sha=None):
  require((path/'complete.json').exists() and (path/'launcher-complete.txt').exists(),'completed evidence missing')
@@ -62,7 +109,7 @@ def recovery_map(root,stage,gpu):
 
 def load(root,stage,gpu):
  sys.path.insert(0,str(root/'source'));from manifest import load,digest
- m=load();runs=[];seen=set();source=set();physical=defaultdict(set)
+ m=load();runs=[];seen=set();source=set();physical=defaultdict(set);common_environment=set();mode_builds=defaultdict(set);device_uuids=defaultdict(set)
  skipped,recovery,replacement_paths=recovery_map(root,stage,gpu);loaded_paths=set()
  for path in sorted((root/'runs').glob(stage+'-'+gpu+'-*')):
   if not path.is_dir():continue
@@ -79,8 +126,10 @@ def load(root,stage,gpu):
   for f,h in c['files'].items():require(Path(f).name==f and sha(path/f)==h,'hash mismatch '+f)
   key=(e['shard'],e['rep'],e['mode']);require(key not in seen,'duplicate run');seen.add(key)
   source.add(digest(e['source']))
-  hardware=e['hardware']['out'].strip().splitlines();require(len(hardware)==2,'single visible GPU required')
-  physical[e['shard']].add(hardware[1].strip())
+  hw=hardware_identity(e);physical[e['shard']].add(e['hardware']['out'].strip().splitlines()[1].strip())
+  common_environment.add(json.dumps(deployment_environment_identity(e),sort_keys=True,separators=(',',':')))
+  mode_builds[e['mode']].add(json.dumps(mode_build_identity(e),sort_keys=True,separators=(',',':')))
+  device_uuids[e['shard']].add(hw['uuid'])
   wanted=('canary',) if stage=='canary' else ('release',)
   allcases=[x for x in m['cases'] if x['family'] in wanted]
   expectedcases=[x for i,x in enumerate(allcases) if i%e['shards']==e['shard']]
@@ -122,6 +171,12 @@ def load(root,stage,gpu):
  shards=runs[0]['env']['shards'];reps=1 if stage=='canary' else 3
  require(seen==set(itertools.product(range(shards),range(reps),m['modes'])),'incomplete declared mode/repeat/shard group')
  require(all(len(v)==1 for v in physical.values()),'within-shard hardware/driver changed')
+ require(len(common_environment)==1,'deployment environment changed across shards')
+ require(set(mode_builds)==set(m['modes']) and all(len(v)==1 for v in mode_builds.values()),'mode build identity changed across shards')
+ require(all(len(v)==1 for v in device_uuids.values()),'within-shard GPU UUID changed')
+ environment_receipt=dict(common=json.loads(next(iter(common_environment))),
+  mode_builds={mode:json.loads(next(iter(values))) for mode,values in sorted(mode_builds.items())},
+  gpu_uuids={str(shard):sorted(values) for shard,values in sorted(device_uuids.items())})
  by=defaultdict(dict)
  for r in runs:
   for k,q in r['qual'].items():by[k][(r['env']['rep'],r['env']['mode'])]=q
@@ -132,7 +187,7 @@ def load(root,stage,gpu):
    for mode in ['off','cap','guarded']:
     q=values[(rep,mode)]
     require(q['out_sha256']==base['out_sha256'] and q['lse_sha256']==base['lse_sha256'],'cross-mode hash parity failure')
- return m,runs,physical,recovery
+ return m,runs,physical,recovery,environment_receipt
 
 @lru_cache(None)
 def weights(shard,arm):
@@ -144,10 +199,17 @@ def weights(shard,arm):
  return w/24
 
 def run(a):
- require(not a.out.exists(),'preserve analysis output');m,rs,physical,recovery=load(a.root,a.stage,a.gpu)
+ require(not a.out.exists(),'preserve analysis output')
+ require(re.fullmatch(r'[0-9a-f]{40}',a.analysis_commit or '') is not None,'invalid analysis commit')
+ m,rs,physical,recovery,environment=load(a.root,a.stage,a.gpu)
+ measurement_commit=(a.root/'source'/'SOURCE_COMMIT.txt').read_text().strip()
+ require(re.fullmatch(r'[0-9a-f]{40}',measurement_commit) is not None,'invalid measurement commit')
  receipt=dict(stage=a.stage,gpu=a.gpu,complete=True,processes=len(rs),timing_rows=sum(len(r['index']) for r in rs),
   qualifications=sum(len(r['qual']) for r in rs),source_hashes=rs[0]['env']['source'],manifest_hash=m['case_hash'],
-  hardware={str(k):sorted(v) for k,v in physical.items()},recovery_evidence=recovery,default_promotion=False,serving_promotion=False)
+  measurement_source_commit=measurement_commit,analysis_source_commit=a.analysis_commit,
+  analysis_source_sha256={'analyze.py':sha(Path(__file__)),'release_gate.py':sha(Path(release_gate_module.__file__))},
+  deployment_environment=environment,hardware={str(k):sorted(v) for k,v in physical.items()},
+  recovery_evidence=recovery,default_promotion=False,serving_promotion=False)
  receipt['numerics']={mode:dict(qualifications=sum(len(r['qual']) for r in rs if r['env']['mode']==mode),
   exact_full_outputs=sum(q['pristine_exact'] for r in rs if r['env']['mode']==mode for q in r['qual'].values()),
   max_abs_vs_pristine=max(q['pristine_full_max_abs'] for r in rs if r['env']['mode']==mode for q in r['qual'].values()),
@@ -186,15 +248,22 @@ def run(a):
     cells=len(selected),controls_failed=sum(not c['comparisons'][mode]['controls_resolve'] for c in selected),
     worst_ratio=min(c['comparisons'][mode]['ratio'] for c in selected),point_regressions_gt1pct=sum(c['comparisons'][mode]['ratio']<1/1.01 for c in selected)))
   gate=evaluate_release_gate(cells,drawcache,receipt['numerics'])
+  measured_cases={c['case'] for c in cells};amendment=freshness_sensitivity_amendment(a.root,measurement_commit,measured_cases)
+  sensitivity_cells,sensitivity_draws=subset_gate_inputs(cells,drawcache,set(amendment['excluded_cases']))
+  sensitivity_gate=evaluate_release_gate(sensitivity_cells,sensitivity_draws,receipt['numerics'])
   receipt.update(cells=cells,summaries=summaries,release_gate=gate,
-   single_gpu_release_gate_pass=gate['pass'],
-   statistical_scope='Independent arm process/block bootstrap, common weights only within a physical allocation; conditional on frozen geometries/devices. Not a hardware-population guarantee.')
+   strict_freshness_sensitivity=dict(amendment=amendment,release_gate=sensitivity_gate,
+    measured_case_count=len(measured_cases),strictly_fresh_case_count=len({c['case'] for c in sensitivity_cells})),
+   single_gpu_release_gate_pass=gate['pass'],strict_freshness_sensitivity_gate_pass=sensitivity_gate['pass'],
+   statistical_scope='Independent arm process/block bootstrap, common weights only within a physical allocation; conditional on frozen geometries/devices. The 30-case primary is unchanged; the 28-case sensitivity only removes exact canary duplicates. Not a hardware-population guarantee.')
   md+=['**Single-GPU release gate: %s**'%('PASS' if gate['pass'] else 'HOLD'),'',
    '- Selected Graph16 cells: %s; geomean %.6f; 95%% CI [%.6f, %.6f]; point worst %.6f; joint-min LCB %.6f.'%(
     gate['selected']['count'],gate['selected']['ratio'],*gate['selected']['CI95'],gate['selected']['worst_point_ratio'],gate['selected']['simultaneous_worst_CI95'][0]),
-   '- Requirements: `'+json.dumps(gate['requirements'],sort_keys=True)+'`','',
+   '- Requirements: `'+json.dumps(gate['requirements'],sort_keys=True)+'`',
+   '- Strict-freshness sensitivity (28 cases; two exact canary duplicates excluded): **%s**; selected geomean %.6f; point worst %.6f; joint-min LCB %.6f.'%(
+    'PASS' if sensitivity_gate['pass'] else 'HOLD',sensitivity_gate['selected']['ratio'],sensitivity_gate['selected']['worst_point_ratio'],sensitivity_gate['selected']['simultaneous_worst_CI95'][0]),'',
    '|layout|calls|metric|mode|pristine/candidate [95% CI]|worst|unresolved controls|','|---|---:|---|---|---|---:|---:|']
   for s in summaries:md.append('|%s|%s|%s|%s|%.6f [%.6f,%.6f]|%.6f|%s|'%(s['layout'],s['calls'],s['metric'],s['mode'],s['ratio'],*s['CI95'],s['worst_ratio'],s['controls_failed']))
  a.out.mkdir(parents=True);(a.out/'summary.json').write_text(json.dumps(receipt,indent=2,allow_nan=False)+'\n');(a.out/'RESULTS.md').write_text('\n'.join(md)+'\n');print(json.dumps({k:v for k,v in receipt.items() if k not in ['cells','source_hashes']},indent=2))
 if __name__=='__main__':
- p=argparse.ArgumentParser();p.add_argument('--root',type=Path,required=True);p.add_argument('--out',type=Path,required=True);p.add_argument('--stage',choices=['canary','release'],required=True);p.add_argument('--gpu',choices=['gpu_4090','gpu_5090'],required=True);run(p.parse_args())
+ p=argparse.ArgumentParser();p.add_argument('--root',type=Path,required=True);p.add_argument('--out',type=Path,required=True);p.add_argument('--stage',choices=['canary','release'],required=True);p.add_argument('--gpu',choices=['gpu_4090','gpu_5090'],required=True);p.add_argument('--analysis-commit',required=True);run(p.parse_args())
