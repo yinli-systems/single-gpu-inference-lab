@@ -29,7 +29,7 @@ def _queries(total: int, batch: int, rng: random.Random) -> list[int]:
     values = [32 * (tile - 1) + rng.randint(2, 30) for tile in tiles]
     return sorted(values)
 
-def _cached(batch: int, maximum: int) -> list[int]:
+def _cached(batch: int, maximum: int, rng: random.Random) -> list[int]:
     if maximum < 1024:
         raise ValueError("invalid cached maximum")
     minimum = 64
@@ -38,9 +38,15 @@ def _cached(batch: int, maximum: int) -> list[int]:
     ratio = (minimum / maximum) ** (1.0 / (batch - 1))
     values = [max(minimum, int(round(maximum * ratio**i / 64)) * 64) for i in range(batch)]
     values[0], values[-1] = maximum, minimum
-    for i in range(1, len(values)):
-        values[i] = min(values[i], values[i - 1] - 64)
-    return [max(minimum, x) for x in values]
+    for i in range(1, len(values) - 1):
+        lower = minimum + (len(values) - 1 - i) * 64
+        upper = values[i - 1] - 64
+        jittered = values[i] + rng.randint(-7, 7) * 64
+        values[i] = max(lower, min(upper, jittered))
+    values[-1] = minimum
+    if any(values[i] <= values[i + 1] for i in range(len(values) - 1)):
+        raise AssertionError("cached prefix ordering lost")
+    return values
 
 def _regime(values: list[int], regime: str, rng: random.Random) -> list[int]:
     out = list(values)
@@ -61,8 +67,10 @@ def _regime(values: list[int], regime: str, rng: random.Random) -> list[int]:
         return out
     raise ValueError(regime)
 
-def _historical(repo: Path, exclude: Path | None = None) -> tuple[set[tuple[tuple[int, ...], tuple[int, ...]]], dict[str, str]]:
+def _historical(repo: Path, exclude: Path | None = None) -> tuple[set[tuple[tuple[int, ...], tuple[int, ...]]], set[tuple[int, ...]], set[tuple[int, ...]], dict[str, str]]:
     keys: set[tuple[tuple[int, ...], tuple[int, ...]]] = set()
+    q_vectors: set[tuple[int, ...]] = set()
+    cached_vectors: set[tuple[int, ...]] = set()
     hashes: dict[str, str] = {}
     excluded = None if exclude is None else exclude.resolve()
     self_manifest = (repo / "research/selector_v4/manifest.json").resolve()
@@ -76,14 +84,15 @@ def _historical(repo: Path, exclude: Path | None = None) -> tuple[set[tuple[tupl
         hashes[str(path.relative_to(repo))] = hashlib.sha256(raw).hexdigest()
         for case in data.get("cases", []):
             if "q" in case and "cached" in case:
-                keys.add((tuple(map(int, case["q"])), tuple(map(int, case["cached"]))))
-    return keys, hashes
+                q = tuple(map(int, case["q"])); cached = tuple(map(int, case["cached"]))
+                keys.add((q, cached)); q_vectors.add(q); cached_vectors.add(cached)
+    return keys, q_vectors, cached_vectors, hashes
 
 def _make_case(case_id: str, family: str, index: int, *, batch: int, descriptors: int,
                maximum: int, regime: str, seed: int) -> dict[str, Any]:
     rng = random.Random(seed)
     q = _queries(descriptors, batch, rng)
-    cached = _regime(_cached(batch, maximum), regime, rng)
+    cached = _regime(_cached(batch, maximum, rng), regime, rng)
     actual = sum((x + 31) // 32 for x in q)
     if actual != descriptors:
         raise AssertionError("descriptor count mismatch")
@@ -121,9 +130,9 @@ def _specs(family: str, count: int, offset: int) -> Iterable[dict[str, Any]]:
         yield dict(batch=batch, descriptors=desc, maximum=maximum, regime=regime)
 
 def generate(repo: Path, output: Path) -> dict[str, Any]:
-    history, history_hashes = _historical(repo, output)
+    history, history_q, history_cached, history_hashes = _historical(repo, output)
     cases: list[dict[str, Any]] = []
-    seen = set(history)
+    seen = set(history); seen_q = set(history_q); seen_cached = set(history_cached)
     dev_cases = [
         {"id":"dev-v4-v32-below","family":"dev","index":0,"regime":"historical-below","batch_size":7,"descriptor_count":39,
          "q":[3,39,107,143,211,247,379],"cached":[22528,16512,11840,8256,2624,672,80],"max_cached":22528,
@@ -139,12 +148,12 @@ def generate(repo: Path, output: Path) -> dict[str, Any]:
             for attempt in range(1000):
                 seed = GENERATOR_SEED + offset * 100000 + i * 1009 + attempt
                 case = _make_case(f"{family}-v4-{i:02d}", family, i, seed=seed, **spec)
-                key = (tuple(case["q"]), tuple(case["cached"]))
-                if key not in seen:
+                q_key = tuple(case["q"]); cached_key = tuple(case["cached"]); key = (q_key, cached_key)
+                if key not in seen and q_key not in seen_q and cached_key not in seen_cached:
                     break
             else:
                 raise RuntimeError("failed to generate fresh case")
-            seen.add(key); cases.append(case)
+            seen.add(key); seen_q.add(q_key); seen_cached.add(cached_key); cases.append(case)
     payload: dict[str, Any] = {
         "schema": SCHEMA, "generator_seed": GENERATOR_SEED,
         "qualification_revision": "4.0.0",
