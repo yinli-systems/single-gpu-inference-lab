@@ -1,5 +1,7 @@
-import unittest
+import sys,types,unittest
+sys.modules.setdefault('numpy',types.SimpleNamespace())
 from workloads import prefix_tokens,work_specs,update
+from analyze import expected_files,allowed_seed_files
 class ServingTests(unittest.TestCase):
  def test_prefix(self):self.assertEqual(len(prefix_tokens()),8448)
  def test_workloads(self):
@@ -7,6 +9,9 @@ class ServingTests(unittest.TestCase):
   self.assertEqual(sum(len(x['input_ids'])-8448 for x in w['guarded_prefix']['cells']),1008)
   self.assertEqual(len({len(x['input_ids']) for x in w['balanced_prefix']['cells']}),1)
   self.assertTrue(all(x['expect_cached']==8192 for x in w['guarded_prefix']['cells']))
+ def test_analysis_file_contract(self):
+  expected=expected_files(1);seeds=allowed_seed_files(1)
+  self.assertEqual(len(expected),5);self.assertEqual(len(seeds),3);self.assertTrue(expected.isdisjoint(seeds))
  def test_delta(self):self.assertEqual(update([1,2],2,[3],3),([1,2,3],3,1))
  def test_cumulative(self):self.assertEqual(update([1,2],2,[1,2,3],3),([1,2,3],3,1))
 if __name__=='__main__':unittest.main()
