@@ -1,5 +1,5 @@
 from __future__ import annotations
-import contextlib, hashlib, json, os, tempfile
+import contextlib, fcntl, hashlib, json, os, tempfile
 from pathlib import Path
 from typing import Any, Callable
 from .identity import TacticIdentity, canonical_json
@@ -39,8 +39,14 @@ class SafeTacticCache:
         }
         manifest["manifest_sha256"] = hashlib.sha256(canonical_json(manifest).encode()).hexdigest()
         path = self.env_dir / "manifest.json"
+        self.usable = True
         if not path.exists():
             _atomic_json(path, manifest)
+        else:
+            try:
+                self.usable = json.loads(path.read_text()) == manifest
+            except (OSError, json.JSONDecodeError, TypeError):
+                self.usable = False
 
     def _path(self, identity: TacticIdentity) -> Path:
         if identity.environment_hash != self.environment_hash:
@@ -70,6 +76,8 @@ class SafeTacticCache:
             return False
 
     def lookup(self, identity: TacticIdentity, validator: Validator | None = None) -> dict[str, Any] | None:
+        if not self.usable:
+            return None
         key = identity.key
         if key in self._memo:
             return self._memo[key]
@@ -99,8 +107,22 @@ class SafeTacticCache:
         }
         if tactic not in VALID_TACTICS or not self.validate_entry(identity, entry):
             raise ValueError("refusing invalid tactic publication")
-        path = self._path(identity)
-        _atomic_json(path, entry)
+        if not self.usable:
+            raise ValueError("cache manifest is unusable")
+        path = self._path(identity); lock_path = path.with_suffix(".lock")
+        lock_path.parent.mkdir(parents=True, exist_ok=True)
+        with lock_path.open("a+") as lock:
+            fcntl.flock(lock.fileno(), fcntl.LOCK_EX)
+            if path.exists():
+                try:
+                    existing = json.loads(path.read_text())
+                except (OSError, json.JSONDecodeError):
+                    raise ValueError("refusing to overwrite corrupt cache entry")
+                if canonical_json(existing) != canonical_json(entry):
+                    raise ValueError("conflicting tactic publication")
+                self._memo[identity.key] = existing
+                return path
+            _atomic_json(path, entry)
         self._memo[identity.key] = entry
         return path
 
