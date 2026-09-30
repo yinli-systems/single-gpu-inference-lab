@@ -5,6 +5,7 @@ from pathlib import Path
 from collections import defaultdict
 from functools import lru_cache
 import numpy as np
+from release_gate import evaluate_release_gate
 
 def require(c,m):
  if not c:raise ValueError(m)
@@ -152,7 +153,10 @@ def run(a):
       repeated=np.array([[np.mean([lookup[(shard,rep,mode)]['index'][(k,b,calls,pos)][metric] for pos in range(4) if lookup[(shard,rep,mode)]['index'][(k,b,calls,pos)]['label']=='repeat']) for b in range(8)] for rep in range(3)])
       draws=weights(shard,mode)@np.log(grids[mode]/repeated).reshape(24);lo,hi=np.exp(np.quantile(draws,[.05,.95]))
       aa[mode]=dict(CI90=[float(lo),float(hi)],resolves1pct=bool(lo>=1/1.005 and hi<=1.005))
-     row=dict(case=k[0],dtype=k[1],layout=k[2],split=k[3],calls=calls,metric=metric,shard=shard,AA=aa,comparisons={})
+     guard_flags={lookup[(shard,rep,'guarded')]['qual'][k]['guard_expected'] for rep in range(3)}
+     require(len(guard_flags)==1,'guard decision changed across repeats')
+     row=dict(case=k[0],dtype=k[1],layout=k[2],split=k[3],calls=calls,metric=metric,shard=shard,
+      selected=bool(next(iter(guard_flags))),AA=aa,comparisons={})
      for mode in ['off','cap','guarded']:
       bs=np.log(grids['pristine']).reshape(24);cs=np.log(grids[mode]).reshape(24)
       draws=weights(shard,'pristine')@bs-weights(shard,mode)@cs
@@ -168,8 +172,15 @@ def run(a):
    summaries.append(dict(layout=layout,calls=calls,metric=metric,mode=mode,ratio=point,CI95=[float(x) for x in np.exp(np.quantile(draws,[.025,.975]))],
     cells=len(selected),controls_failed=sum(not c['comparisons'][mode]['controls_resolve'] for c in selected),
     worst_ratio=min(c['comparisons'][mode]['ratio'] for c in selected),point_regressions_gt1pct=sum(c['comparisons'][mode]['ratio']<1/1.01 for c in selected)))
-  receipt.update(cells=cells,summaries=summaries,statistical_scope='Independent arm process/block bootstrap, common weights only within a physical allocation; conditional on frozen geometries/devices. Not a population or simultaneous guarantee.')
-  md+=['|layout|calls|metric|mode|pristine/candidate [95% CI]|worst|unresolved controls|','|---|---:|---|---|---|---:|---:|']
+  gate=evaluate_release_gate(cells,drawcache,receipt['numerics'])
+  receipt.update(cells=cells,summaries=summaries,release_gate=gate,
+   single_gpu_release_gate_pass=gate['pass'],
+   statistical_scope='Independent arm process/block bootstrap, common weights only within a physical allocation; conditional on frozen geometries/devices. Not a hardware-population guarantee.')
+  md+=['**Single-GPU release gate: %s**'%('PASS' if gate['pass'] else 'HOLD'),'',
+   '- Selected Graph16 cells: %s; geomean %.6f; 95%% CI [%.6f, %.6f]; point worst %.6f; joint-min LCB %.6f.'%(
+    gate['selected']['count'],gate['selected']['ratio'],*gate['selected']['CI95'],gate['selected']['worst_point_ratio'],gate['selected']['simultaneous_worst_CI95'][0]),
+   '- Requirements: `'+json.dumps(gate['requirements'],sort_keys=True)+'`','',
+   '|layout|calls|metric|mode|pristine/candidate [95% CI]|worst|unresolved controls|','|---|---:|---|---|---|---:|---:|']
   for s in summaries:md.append('|%s|%s|%s|%s|%.6f [%.6f,%.6f]|%.6f|%s|'%(s['layout'],s['calls'],s['metric'],s['mode'],s['ratio'],*s['CI95'],s['worst_ratio'],s['controls_failed']))
  a.out.mkdir(parents=True);(a.out/'summary.json').write_text(json.dumps(receipt,indent=2,allow_nan=False)+'\n');(a.out/'RESULTS.md').write_text('\n'.join(md)+'\n');print(json.dumps({k:v for k,v in receipt.items() if k not in ['cells','source_hashes']},indent=2))
 if __name__=='__main__':
