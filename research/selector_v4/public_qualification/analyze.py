@@ -1,7 +1,6 @@
 """Prospective complete-data analysis of source-bound public qualification."""
 
 import argparse
-import csv
 import hashlib
 import json
 import math
@@ -12,6 +11,7 @@ import numpy as np
 
 from research.selector_v4.public_qualification.choice_integrity import verify_choice_record
 from research.selector_v4.public_qualification.contract import CONTRACT, digest, full_call_choice
+from research.selector_v4.public_qualification.telemetry import read_clock_csv
 
 
 def sha(path):
@@ -72,30 +72,7 @@ def check_rows(rows, role):
     return grouped
 
 
-def telemetry(path):
-    active = []
-    with path.open() as stream:
-        for row in csv.DictReader(stream):
-            clock = next((v for k, v in row.items() if k and "clocks.sm" in k), None)
-            utilization = next((v for k, v in row.items() if k and "utilization.gpu" in k), None)
-            try:
-                if float(utilization.split()[0]) >= 90:
-                    active.append(float(clock.split()[0]))
-            except (ValueError, AttributeError, TypeError):
-                continue
-    if len(active) < 10:
-        return {
-            "stable": False,
-            "reason": "insufficient active samples",
-            "active_samples": len(active),
-        }
-    lo, hi = np.quantile(active, [0.05, 0.95])
-    return {
-        "stable": bool(lo > 0 and hi / lo <= 1.05),
-        "active_samples": len(active),
-        "p05_mhz": float(lo),
-        "p95_mhz": float(hi),
-    }
+telemetry = read_clock_csv
 
 
 def analyze(campaign, gpu, out):
@@ -243,7 +220,7 @@ def analyze(campaign, gpu, out):
         assert sass["pass"] and sass["binding_sha256"] == files["binding.json"]
         files[str(sass_path.relative_to(campaign))] = sha(sass_path)
         telemetry_path = campaign / f"logs/telemetry-{job}.csv"
-        health.append(telemetry(telemetry_path))
+        health.append(telemetry(telemetry_path, environments[0]["gpu_uuid"]))
         files[str(telemetry_path.relative_to(campaign))] = sha(telemetry_path)
     selected = [r for r in records if r["selected"]]
     joint = lambda array: (
