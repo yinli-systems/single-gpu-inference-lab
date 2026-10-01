@@ -1,0 +1,174 @@
+{
+  "pass_native_http_metadata_boundary": true,
+  "binding": {
+    "sglang_commit": "3825c5a4b5e8a1a73ae62f0c0ba6eb35beb1a2ca",
+    "sglang_source": "/ssd/scxi253/sgi-http-ownership-current-main-3825c5a-post1/candidate",
+    "sglang_backend_sha256": "5c8baba0d14eeca4c9d4bef8674318be1697b0160f105224282cd4aa27575810",
+    "sglang_source_ledger_sha256": "9321c51f0223eaba23fce6ac64ec4e5b6aecaa605371af0cb4a8fab55e42455a",
+    "flashinfer_commit": "75544a17ce0019ca877f50354d95451ee089f859",
+    "normal_wheel_sha256": "2044882df7413bff1946b5eb78d291c0f6fb715c55263d5e1dd5fa6b28dc94d1",
+    "flashinfer_overlay": "/ssd/scxi253/sgi-official-wheel-validation-75544a17-20261001/wheel-overlay",
+    "flashinfer_source_ledger_sha256": "27792f5b00b7f6eb54077c0f83d343f97c4407c7465ee866287177603375a965",
+    "vendor_git_pins": {
+      "cccl": "16bd510c9b712e82b0ab6cbb630d8e29ba1f7116",
+      "cutlass": "b46b16d003484063bca4ed365e44095c4c6ed633",
+      "spdlog": "c3aed4b68373955e1cc94307683d44dca1515d2b"
+    },
+    "observer_harness_commit": "8739e376f1a3bf7755e1f4568d34b995ce925338",
+    "observer_sha256": "471f7d2477374fdeb2407dd1e666f0b4955cb5126eebf887c3246d4b538a304b",
+    "source_files": {
+      "research/selector_v4/serving/metadata_adapter.py": "668579d51d94bf39aaec6b16a3c4b1fd1fcc69d8d180631da3d6bf50d0eb17fc",
+      "research/selector_v4/serving/metadata_boundary_server.py": "471f7d2477374fdeb2407dd1e666f0b4955cb5126eebf887c3246d4b538a304b",
+      "research/selector_v4/serving/epoch_registry.py": "50350cbda947df4aaf69c95539615a6ea3b6e54437769ac3f4fa5674eb17c4ee",
+      "research/selector_v4/serving/geometry_server.py": "a9cbed04dffefc50946fd313685f894d89d2c49397620536e0985cece41c983a",
+      "research/selector_v4/serving/test_metadata_adapter.py": "ab9d3bf224db199994cf0dcd32bbedacbf40bfefd9e3f44f0be6260190283f2b",
+      "research/selector_v4/serving/test_epoch_registry.py": "c713d5cf58666f68fcb44c5ff9dbcea3321ec849f12c7a3e60b1639ba5aae6ea"
+    },
+    "cpu_tests_passed": 32,
+    "full_model": "Qwen3-4B-Instruct-2507",
+    "layers": 36,
+    "resource_tactic_selected": false,
+    "registered_resource_geometries": 0,
+    "timing_valid": false,
+    "fresh_kernel_cases_consumed": 0,
+    "full_http_resource_qualified": false,
+    "historical_token_divergence_resolved": false,
+    "default_promotion": false,
+    "serving_promotion": false
+  },
+  "sacct": "1648281       COMPLETED      0:0   00:06:41 \n",
+  "job": "1648281",
+  "cpu_tests_passed": 32,
+  "http": {
+    "complete": true,
+    "pass_": true,
+    "requests": [
+      {
+        "name": "short-128",
+        "samples": 1,
+        "completion_tokens": 16,
+        "complete": true
+      },
+      {
+        "name": "prefill-1536",
+        "samples": 1,
+        "completion_tokens": 16,
+        "complete": true
+      },
+      {
+        "name": "prefix-hit-1536-plus128",
+        "samples": 1,
+        "completion_tokens": 16,
+        "complete": true
+      },
+      {
+        "name": "prefill-6500",
+        "samples": 1,
+        "completion_tokens": 16,
+        "complete": true
+      },
+      {
+        "name": "mixed-batch",
+        "samples": 3,
+        "completion_tokens": 16,
+        "complete": true
+      }
+    ],
+    "geometry_records": 54,
+    "geometry_files": {
+      "geometry/geometry-2467095.jsonl": "82c620c66230b8db397d0a2b87f748b620711e6b735eeedebccf4448b936e350"
+    },
+    "observed_layouts": [
+      "paged",
+      "ragged"
+    ],
+    "observed_page_sizes": [
+      1
+    ],
+    "observed_causal_modes": [
+      false,
+      true
+    ],
+    "observed_splits": [
+      "False",
+      "True"
+    ],
+    "untracked_metadata_records": 0,
+    "fresh_kernel_cases_consumed": 0,
+    "resource_tactic_selected": false,
+    "timing_valid": false,
+    "full_http_resource_qualified": false,
+    "historical_token_divergence_resolved": false
+  },
+  "boundary": {
+    "pass_": true,
+    "records": 94,
+    "last": {
+      "actual_prefill_updater_calls_inside_notified_boundary": 50,
+      "adapter_counters": {
+        "early_binds": 0,
+        "graph_updates": 89,
+        "updates": 139
+      },
+      "adapter_depth_after_model": 0,
+      "backend_source_sha256": "5c8baba0d14eeca4c9d4bef8674318be1697b0160f105224282cd4aa27575810",
+      "full_http_resource_qualified": false,
+      "registered_resource_geometries": 0,
+      "resource_tactic_selected": false,
+      "timing_valid": false
+    },
+    "files": {
+      "boundaries/boundaries-2467095.jsonl": "6a1f59fc31622d1d6e76d34e77566442418f304a12679a6496d6b090aa196060"
+    },
+    "resource_enabled": false,
+    "timing_valid": false
+  },
+  "files": {
+    "binding.json": "2466abc23d0e1803f44aed2aa26d48bde3846a9535cfc40e463182f1ec407485",
+    "http_metadata_boundary.sbatch": "ba0d965608fdcc9b3756cb34bb056ab4d3cb604795fa1ff33483f53a2222c70a",
+    "http_metadata_boundary_probe.py": "2c0ebe46eb7261f93d2b3f787ae8a43abe93da4dad869cc94fd8c1897c208218",
+    "prepare_http_metadata_boundary.py": "f816ad27dcc5733afb2cce304bfe4616c9ab1dedb03412c69f17fd511cce4c00",
+    "sglang-source.sha256": "9321c51f0223eaba23fce6ac64ec4e5b6aecaa605371af0cb4a8fab55e42455a",
+    "validation.sha256": "e1d86975362ecb7e1c9a388fb0867c82292b0f45b077eafe8c51ddfa6ba4b42a",
+    "logs/1648281.err": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "logs/1648281.out": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "logs/telemetry-1648281.csv": "0b56ba322cbc61174bd9395024ad6ae70a2c98564c5904a7cdf31738a8f1a037",
+    "receipts/cpu-tests.log": "f1cf11ab98b05772481597fea924a12e86c9bcb58ced6d16b376ee7d76feb095",
+    "receipts/cpu-tests.xml": "fde0b221e81f972460b04bc64595436694988ae73d2b07817c04e07967099b50",
+    "receipts/exit-1648281.txt": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "receipts/hardware-1648281.csv": "4836284b2bdcbebd91ddef0ef5f7978f7d7b1c80d04ab7186860a2a312ad8efc",
+    "receipts/jobs.json": "977b6284971d5dd40cd7463b53e9cab26a38341f6ed6e80b1f233ec7b5440147",
+    "receipts/sglang-source-verification-1648281.txt": "68fc41fbc236c2d1fe3fe648dcb2bf5a73346db2db26cd1bd70c45c36e1567e8",
+    "receipts/slurm-1648281.txt": "80b9d8eebee820a170660855e25bb97effb470983899923f37f1c5965141e0c9",
+    "receipts/source-verification-1648281.txt": "7674f64369d136ebcfd81a30ee1644ba6a1d0648c08eec535d3b57079705c0bb",
+    "receipts/validation-verification-1648281.txt": "feda9fee156830f5ec558ae3b8d10e7437f101ab0a0f903dcdd4a425441eb6ed",
+    "research/selector_v4/serving/epoch_registry.py": "50350cbda947df4aaf69c95539615a6ea3b6e54437769ac3f4fa5674eb17c4ee",
+    "research/selector_v4/serving/geometry_server.py": "a9cbed04dffefc50946fd313685f894d89d2c49397620536e0985cece41c983a",
+    "research/selector_v4/serving/metadata_adapter.py": "668579d51d94bf39aaec6b16a3c4b1fd1fcc69d8d180631da3d6bf50d0eb17fc",
+    "research/selector_v4/serving/metadata_boundary_server.py": "471f7d2477374fdeb2407dd1e666f0b4955cb5126eebf887c3246d4b538a304b",
+    "research/selector_v4/serving/test_epoch_registry.py": "c713d5cf58666f68fcb44c5ff9dbcea3321ec849f12c7a3e60b1639ba5aae6ea",
+    "research/selector_v4/serving/test_metadata_adapter.py": "ab9d3bf224db199994cf0dcd32bbedacbf40bfefd9e3f44f0be6260190283f2b",
+    "runs/full-http-1648281/complete.json": "c20f19f18984dacf9deddf92c1bb9b999090e9e262da0095ccd511d26fe5aab8",
+    "runs/full-http-1648281/environment.json": "f16f92e641ed277baaafc540bb8f59db14780092869f542820693c892aa5c592",
+    "runs/full-http-1648281/metadata-boundary-summary.json": "bef296126aa1352daf4f3ad10c7f0f0136b174793f9d90bb82f841668e70b5f8",
+    "runs/full-http-1648281/mixed-batch.json": "487f30f3bf4b9108b1e6ccbaabf7816daab4b85204fd54c568e9dcdee4c5b200",
+    "runs/full-http-1648281/prefill-1536.json": "77747bae4df7e5cc16c092407431275d1651245fb45714781510f7a134e2f443",
+    "runs/full-http-1648281/prefill-6500.json": "d04cc7526f7a65f0514c3f991b89cbc3f0286ef5ffc68d8861929f7b539741b7",
+    "runs/full-http-1648281/prefix-hit-1536-plus128.json": "b5237631471d3b55b5bcd116e19bd3ad93a4f72ef2f5866f9654a502072ecaa3",
+    "runs/full-http-1648281/server.log": "4c34030bc7b3aa0c30d7f1ee672891579362558f1be2d5f7cf3bb8e2ddb7a128",
+    "runs/full-http-1648281/short-128.json": "8d75baf50d89799e8da059cd36942cec06edac6a599d2e3d8ad8dd14b97df7dc",
+    "runs/full-http-1648281/boundaries/boundaries-2467095.jsonl": "6a1f59fc31622d1d6e76d34e77566442418f304a12679a6496d6b090aa196060",
+    "runs/full-http-1648281/geometry/geometry-2467095.jsonl": "82c620c66230b8db397d0a2b87f748b620711e6b735eeedebccf4448b936e350",
+    "archive_http_metadata_boundary.py": "80bc5682a354b8babc97911e4fa50b40de14c02e8620665c5eb8c39fa14aaaee"
+  },
+  "archive_sha256": "4931e526b5940d4496114073f82e5edaf1ef05ecc46dcd6091b60f7f1d56b90a",
+  "archive_bytes": 469597,
+  "resource_tactic_selected": false,
+  "full_http_resource_qualified": false,
+  "timing_valid": false,
+  "qualification_authority": false,
+  "fresh_cases_consumed": 0,
+  "default_promotion": false,
+  "serving_promotion": false,
+  "historical_token_divergence_resolved": false
+}
