@@ -1,0 +1,234 @@
+{
+  "binding": {
+    "harness_commit": "52d750872eda141a89dcb1fe66ae615f07f1881b",
+    "flashinfer_source_commit": "bab48695bbe72ba23c49bad69818b2975f3de6f7",
+    "normal_wheel_sha256": "f311c2f01a928de03cbe07df55f7afaab1df11fa34d421edf754ef8c86c0784b",
+    "source": "/ssd/scxi253/sgi-official-wheel-validation-bab48695-20261001/wheel-overlay",
+    "source_ledger_sha256": "cad5eb10b32b63cbe0d6596f4fa641047e0ff4bebc5ad97d98f8e4cd96d33af3",
+    "vendor_git_pins": {
+      "cccl": "16bd510c9b712e82b0ab6cbb630d8e29ba1f7116",
+      "cutlass": "b46b16d003484063bca4ed365e44095c4c6ed633",
+      "spdlog": "c3aed4b68373955e1cc94307683d44dca1515d2b"
+    },
+    "geometry": "Previously exposed dev-v4-v32-both BF16 ragged unsplit causal; native plan plus public per-plan construction and managed run",
+    "observations_per_gpu": 32,
+    "balanced_abba_blocks": 8,
+    "independent_processes": 1,
+    "includes_native_plan_and_public_runner_constructor_and_managed_run": true,
+    "confidence_may_be_inconclusive_and_remain_native": true,
+    "construction_cost_measured_including_cold_identity_checks": true,
+    "initial_jit_build_calibration_and_managed_training_not_scored": true,
+    "warm_kernel_modules_and_cached_confidence_used": true,
+    "fresh_cases_consumed": 0,
+    "all_started_observations_retained": true,
+    "default_promotion": false,
+    "source_observation": "Prepared kernel gains exclude per-plan source hashing, nvcc identity and confidence reload validation; this diagnosis measures those public construction costs.",
+    "causal_attribution_of_outlier_established": false,
+    "qualification_authority": false,
+    "full_http_qualified": false,
+    "historical_token_divergence_resolved": false
+  },
+  "gpus": {
+    "gpu_4090": {
+      "job": "1646009",
+      "environment": {
+        "source_commit": "bab48695bbe72ba23c49bad69818b2975f3de6f7",
+        "package_version": "0.7.1",
+        "gpu_uuid": "bdce2660-25eb-d632-5729-2b165e1573d4",
+        "gpu_name": "NVIDIA GeForce RTX 4090",
+        "source_sha256": "8060007d51ec3d61f39a40f6ab9b1a5dbc8d587d3ea4e4103e176d9299be5da2",
+        "confidence_identity": "886b684f356d1d7fd53b300455285295fc717e8c76edce521310327c7754d0ed",
+        "confidence_checksum": "0ac47f223f90e2ef78415b248f32f29eb88e7944c9692f8ca9549056531ba096",
+        "confidence_accepted": false,
+        "confidence_published": false,
+        "initial_managed_tactic": -1,
+        "previously_exposed_geometry": true,
+        "fresh_cases_consumed": 0,
+        "qualification_authority": false
+      },
+      "observations": 32,
+      "all_output_exact": true,
+      "by_arm": {
+        "native": {
+          "wall_ms": {
+            "mean": 2.4622299375,
+            "median": 2.456817,
+            "minimum": 2.338668,
+            "maximum": 2.620276
+          },
+          "plan_call_wall_ms": {
+            "mean": 0.2048414375,
+            "median": 0.1937885,
+            "minimum": 0.123538,
+            "maximum": 0.299897
+          },
+          "constructor_call_wall_ms": {
+            "mean": 0.005440625,
+            "median": 0.0064,
+            "minimum": 0.00025,
+            "maximum": 0.01173
+          },
+          "run_and_sync_ms": {
+            "mean": 2.251947875,
+            "median": 2.260852,
+            "minimum": 2.214669,
+            "maximum": 2.316104
+          }
+        },
+        "new_runner": {
+          "wall_ms": {
+            "mean": 5538.7371030625,
+            "median": 5413.419102,
+            "minimum": 5137.807984,
+            "maximum": 6699.477397
+          },
+          "plan_call_wall_ms": {
+            "mean": 0.152435125,
+            "median": 0.12828299999999998,
+            "minimum": 0.122729,
+            "maximum": 0.294367
+          },
+          "constructor_call_wall_ms": {
+            "mean": 5535.9911011875,
+            "median": 5410.883003,
+            "minimum": 5135.245528,
+            "maximum": 6694.060377
+          },
+          "run_and_sync_ms": {
+            "mean": 2.59356675,
+            "median": 2.4105925,
+            "minimum": 2.383813,
+            "maximum": 5.285571
+          }
+        }
+      },
+      "native_over_public_block_ratios": [
+        0.00042337877533725504,
+        0.00046670951294108305,
+        0.0004549522750102567,
+        0.0004569898383577915,
+        0.0004499891769265568,
+        0.00044627181178202955,
+        0.00046917776513229236,
+        0.00039859930853709347
+      ],
+      "native_over_public_block_geomean": 0.0004451849262628833,
+      "native_over_public_mean_wall": 0.00044454717595073694
+    },
+    "gpu_5090": {
+      "job": "1646010",
+      "environment": {
+        "source_commit": "bab48695bbe72ba23c49bad69818b2975f3de6f7",
+        "package_version": "0.7.1",
+        "gpu_uuid": "0efeab26-f092-497c-8b06-6753207e1130",
+        "gpu_name": "NVIDIA GeForce RTX 5090",
+        "source_sha256": "8060007d51ec3d61f39a40f6ab9b1a5dbc8d587d3ea4e4103e176d9299be5da2",
+        "confidence_identity": "09a20fdf9c1f1e63a631a66c7902f913a56866b4e18f59e2e09db6e79d764dad",
+        "confidence_checksum": "6a07883397121062b1560503e1741db43ef45d822785c23602f7162263a9161f",
+        "confidence_accepted": true,
+        "confidence_published": true,
+        "initial_managed_tactic": 1,
+        "previously_exposed_geometry": true,
+        "fresh_cases_consumed": 0,
+        "qualification_authority": false
+      },
+      "observations": 32,
+      "all_output_exact": true,
+      "by_arm": {
+        "native": {
+          "wall_ms": {
+            "mean": 2.0230244375,
+            "median": 2.0319884999999998,
+            "minimum": 1.957996,
+            "maximum": 2.090412
+          },
+          "plan_call_wall_ms": {
+            "mean": 0.20072575,
+            "median": 0.2023375,
+            "minimum": 0.152809,
+            "maximum": 0.267402
+          },
+          "constructor_call_wall_ms": {
+            "mean": 0.0067626875,
+            "median": 0.0093215,
+            "minimum": 0.000309,
+            "maximum": 0.011065
+          },
+          "run_and_sync_ms": {
+            "mean": 1.815536,
+            "median": 1.8169024999999999,
+            "minimum": 1.802402,
+            "maximum": 1.825879
+          }
+        },
+        "new_runner": {
+          "wall_ms": {
+            "mean": 9798.872406312501,
+            "median": 9717.038231499999,
+            "minimum": 9209.846194,
+            "maximum": 11230.974273
+          },
+          "plan_call_wall_ms": {
+            "mean": 0.171116375,
+            "median": 0.169429,
+            "minimum": 0.142659,
+            "maximum": 0.213071
+          },
+          "constructor_call_wall_ms": {
+            "mean": 9797.0460259375,
+            "median": 9715.1890475,
+            "minimum": 9208.063213,
+            "maximum": 11229.162375
+          },
+          "run_and_sync_ms": {
+            "mean": 1.655264,
+            "median": 1.6505465,
+            "minimum": 1.634176,
+            "maximum": 1.725785
+          }
+        }
+      },
+      "native_over_public_block_ratios": [
+        0.00021150794540637387,
+        0.00020615081812398758,
+        0.00020422487525978414,
+        0.00020467409478313787,
+        0.00019041174189474334,
+        0.00021606152979236325,
+        0.0002121700615685739,
+        0.00020889752163942468
+      ],
+      "native_over_public_block_geomean": 0.00020663147636373338,
+      "native_over_public_mean_wall": 0.0002064548198624113
+    }
+  },
+  "input_files_sha256": {
+    "binding.json": "420cd219b75c1428c803e8b3d66c04eb986d09573808cee34f753ccc6cc35c9c",
+    "runs/gpu_4090-1646009/calibration.json": "9a7aaa9e9ffd0013ad034fc47088f78b126d266a5c046c5e88519a570954c125",
+    "runs/gpu_4090-1646009/complete.json": "7f8ad19292d817f5ac67aa37bf3896a53d1595305a385b704b9d68526b5b27d4",
+    "runs/gpu_4090-1646009/environment.json": "10b62f28e9d80830e9399b7db1fe08496a62e764257e4a7997b5f1599701230a",
+    "runs/gpu_4090-1646009/measurements.json": "ca0d90704a851c1096fb3b10e9324c179181a59230e08bb5a918b578e3256973",
+    "runs/gpu_4090-1646009/managed-cache/v2/156f30c3888fa9d1/manifest.json": "7523cfa33220c4b5b72661be89cf159f4e4622f0bf8de76b89d922b619d28ada",
+    "runs/gpu_4090-1646009/managed-cache/v2/156f30c3888fa9d1/entries/930c9349f40b3b3a6833a39e.json": "ef5da861efe0b4f844c3d865ddb2d132331717256b8aa144416fb0a08757758e",
+    "runs/gpu_5090-1646010/calibration.json": "bd8c6f723f6ffde9e3fbbf14169e740ee31568150f6fd3435237acd189dadb03",
+    "runs/gpu_5090-1646010/complete.json": "26f6692155c839b964128775c65fca5784f23bb355a535ec438f740535fb26f7",
+    "runs/gpu_5090-1646010/environment.json": "a77ded1c07beac0bca1522864a485cd16944bcc6f3a23c9944819fe1bb417c33",
+    "runs/gpu_5090-1646010/measurements.json": "27fbbf863bbc06ecd4a10c61343ea80f8ed61f4ded14b560b2ccbff19a240f72",
+    "runs/gpu_5090-1646010/managed-cache/v2/a2f11eaa63cd5fea/manifest.json": "eb4a01cefb60fe7bc9012a07fabd060b3bf932a20b05738b7e6bb70577d3e280",
+    "runs/gpu_5090-1646010/managed-cache/v2/a2f11eaa63cd5fea/entries/4baf957465a76d03e2b8a9ac.json": "417cf40322aa9f1f2108b7700a95e4aaf278317245d7ff5a0e6d4fbb09138634"
+  },
+  "analyzer_sha256": "b79dc1c01377940eac5a04e4b56a1b1f5915cacbb389de4d70e3d3cb66399590",
+  "trimmed_observations": 0,
+  "all32_observations_per_gpu_retained": true,
+  "fresh_cases_consumed": 0,
+  "qualification_authority": false,
+  "full_http_qualified": false,
+  "default_promotion": false,
+  "historical_token_divergence_resolved": false,
+  "limitations": [
+    "One exposed geometry and one process per GPU; short calls do not satisfy release windows or independent-process controls.",
+    "Construction includes public source/compiler identity checks and cached confidence validation; initial compilation/calibration/training is excluded.",
+    "Component times are wall durations and can include synchronization; they are not pure CPU or kernel cycles.",
+    "Ratios are descriptive only; no confidence interval or formal qualification is inferred from these correlated samples."
+  ]
+}

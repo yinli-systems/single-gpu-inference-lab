@@ -122,3 +122,9 @@ SGLang3825c5a4 ownership fix remains separate,49 CPU and complete-model producti
 Dual69/managed persistence and reload jobs1645930/1645931 COMPLETED0:0; fresh dual SASS352pairs PASS. All compact build/functional/full raw SASS archives locally verified member-by-member and preserved in v42-normal-module-bound-wheel-{build,functional,sass}. Both graph modes select resource; eager staysnative on both.5090 reproduced a12.745ms resource profiling outlier after accepted confidence; cause remainsunknown. The earlier48fits did not establish its cause.
 
 Public fullplan setup jobs1646009/1646010 are active. Partial observations show new-constructor seconds vs native2ms, so prepared kernel gains cannot qualify this per-plan construction path. Keep all32 preregistered observations and analyze with analyze_plan_setup_cost.py before engineering a reuse boundary. No newcanary/release/stress dispatched; default/servingOFF, historical2/432unresolved.
+
+## 2026-10-01T11:34Z public construction cost diagnosis complete
+
+1646009/1646010 bothCOMPLETED0:0;32observations/GPU,alloutputexact. Native/full-public meanwall4090=2.462230/5538.737103ms,5090=2.023024/9798.872406ms. Publicconstruction alone5535.991101/9797.046026ms.4090confidenceinconclusive→native;5090accepted→resource1. Wholepublicconstruction pathcannotbeusedperplan.43members locallySHAverified, evidence/v42-public-plan-setup-complete/.
+
+NewlocalFlashInfer samegeometryeager rebind implementation is uncommitted and unqualified:13 CPU boundarycases and4GPU functionalcasesadded. PrivateCPU patchproof /ssd/scxi253/sgi-eager-rebind-cpu-20261001T1133Z dispatched after5file patch/helper upload completed;66CPU/20GPUskip expected. It uses copiednormalbabpackagewith explicitpatchedsourceledger, neverclaimsnewnormalwheel. NeedCPUPASSbeforecommitanddualGPUfunctional; thennormalnewwheel,completeplan-costdiagnosisandformalnewrevision. No fresh cases consumed.
