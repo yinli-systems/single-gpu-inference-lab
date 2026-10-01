@@ -41,6 +41,19 @@ def measured():
             }
         )
     elapsed = 0.7
+    for row in rows:
+        row["raw_events"] = []
+        for index, (token, stamp) in enumerate(zip(row["tokens"], row["token_times"])):
+            meta = {"completion_tokens": index + 1, "cached_tokens": 8192}
+            if index == len(row["tokens"]) - 1:
+                meta["finish_reason"] = {"type": "length"}
+            row["raw_events"].append(
+                {
+                    "client_arrival_seconds": stamp,
+                    "data": json.dumps({"output_ids": [token], "meta_info": meta}),
+                }
+            )
+        row["raw_events"].append({"client_arrival_seconds": 0.52, "data": "[DONE]"})
     block = {
         "complete": True,
         "errors": [],

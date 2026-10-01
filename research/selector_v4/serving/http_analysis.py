@@ -15,6 +15,7 @@ import numpy as np
 
 from research.release_qualification.serving.workloads import prefix_tokens, work_specs
 from research.selector_v4.public_qualification.gates import need, sha
+from research.selector_v4.serving.http_stream import TokenStream
 from research.selector_v4.serving.metric_gate import METRICS, WORKLOADS, evaluate_metrics
 from research.selector_v4.serving.parity_gate import compare_blocks
 
@@ -44,6 +45,19 @@ def derived_metrics(block, expected):
         need(
             len(row["tokens"]) == len(row["token_times"]) == cell["output_tokens"],
             "Every output token/timestamp required",
+        )
+        parsed = TokenStream(cell["output_tokens"])
+        for event in row["raw_events"]:
+            parsed.feed(
+                b"data: " + event["data"].encode() + b"\n\n", event["client_arrival_seconds"]
+            )
+        raw = parsed.complete(expected_cached_tokens=cell["expect_cached"])
+        need(
+            all(
+                row[k] == raw[k]
+                for k in ("tokens", "token_times", "ttft", "tpot", "cached_tokens", "finish_reason")
+            ),
+            "Derived request differs from actual raw SSE events",
         )
         times = row["token_times"]
         need(
