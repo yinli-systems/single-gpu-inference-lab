@@ -1,0 +1,3 @@
+# Current-main dual-GPU native/resource binary equality
+
+Exact FlashInfer commit d7683dd8e86af2f37e8d25162c45b01f80824378 against native base85744da1a397c0c4bea1a83b8345281750eb61a9. Each GPU has176 matched SASS functions (352 total) from the actual managed-v2 validation jobs1644585/1644586; missing/extra/mismatched functions are empty. All raw disassemblies are archived, and archive and member hashes were independently reverified locally. Pairing reverses only the resource symbol name; comparison normalizes instruction PC labels and whitespace and retains operands/encodings/resource metadata. This validates the compiled kernel body, not complete HTTP performance or the historical2/432 token differences. Defaults remain native.

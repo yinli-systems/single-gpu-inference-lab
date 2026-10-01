@@ -1,7 +1,7 @@
 {
   "schema": 6,
   "qualification_revision": "4.2.0",
-  "state": "V42_EXACT_DUAL_GPU_DEV_PASS_CANARY_RUNNING",
+  "state": "V42_CANARY_EXECUTION_HOLD_SLURM_RPC",
   "default_promotion": false,
   "serving_promotion": false,
   "historical_token_divergence_resolved": false,
@@ -184,7 +184,7 @@
     },
     "evidence": "evidence/v411-exact-dev/"
   },
-  "next_action": "Complete frozen dual-GPU canary; only dual PASS authorizes release48, then stress12, then full serving.",
+  "next_action": "Preserve infrastructure failure; complete consumed canary through preregistered technical recovery without modifying frozen source/analyzer/floors; release48 and stress12 remain untouched.",
   "stress_cases_consumed": 0,
   "v42": {
     "qualification_revision": "4.2.0",
@@ -220,7 +220,7 @@
     "dev_shards": 2,
     "dev_state": "PASS",
     "dev_evidence": "evidence/v42-exact-dev/",
-    "canary_state": "SUBMITTED",
+    "canary_state": "EXECUTION_HOLD",
     "dev_results": {
       "gpu_4090": {
         "pass": true,
@@ -426,6 +426,13 @@
         "8": "1644206",
         "9": "1644207"
       }
+    },
+    "canary_execution_failure": {
+      "job": "1644197",
+      "reason": "srun unable to confirm allocation: Socket timed out on send/recv before repeat2; original four completed runs retained",
+      "source_changed": false,
+      "thresholds_changed": false,
+      "recovery_pending": true
     }
   },
   "v41_source_isolation_history": {
@@ -506,6 +513,11 @@
     ],
     "evidence": "evidence/v42-current-main-managed-v2/",
     "full_serving_qualified": false,
-    "independent_process_release_qualified": false
+    "independent_process_release_qualified": false,
+    "sass_identity": {
+      "pass": true,
+      "paired_kernels_dual_gpu": 352,
+      "evidence": "evidence/v42-current-main-sass-dual/"
+    }
   }
 }
