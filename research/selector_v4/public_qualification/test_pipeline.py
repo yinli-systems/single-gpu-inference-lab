@@ -17,7 +17,7 @@ def test_exclusive_receipts_cannot_be_overwritten(tmp_path):
 
 
 @pytest.mark.parametrize(
-    "state", ["FAILED 1:0", "TIMEOUT 0:9", "CANCELLED 0:0", "OUT_OF_MEMORY 0:9"]
+    "state", ["FAILED 1:0", "TIMEOUT 0:9", "TIMEOUT 0:0", "CANCELLED 0:0", "OUT_OF_MEMORY 0:9"]
 )
 def test_failed_allocations_cannot_become_successful_from_exit_file(tmp_path, monkeypatch, state):
     pipeline.save_new(tmp_path / "receipts/unused.json", {})

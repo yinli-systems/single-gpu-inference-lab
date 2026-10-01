@@ -115,7 +115,7 @@ def test_actual_slurm_status_and_original_source_receipts_are_persisted(tmp_path
 
 def test_slurm_timeout_cannot_be_recorded_as_complete_from_local_exit_zero(tmp_path, monkeypatch):
     monkeypatch.setattr(p, "terminal", lambda *a: True)
-    monkeypatch.setattr(p.subprocess, "check_output", lambda *a, **k: "123|TIMEOUT|0:9|08:00:00")
+    monkeypatch.setattr(p.subprocess, "check_output", lambda *a, **k: "123|TIMEOUT|0:0|08:00:00")
     with pytest.raises(ValueError, match="Actual Slurm completion"):
         p.allocation_terminal(tmp_path, "123")
     assert not (tmp_path / "receipts/allocation-terminal-123.json").exists()

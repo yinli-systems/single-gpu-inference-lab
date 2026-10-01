@@ -9,7 +9,9 @@ import os
 from pathlib import Path
 
 import numpy as np
-from contract import CONTRACT, digest, full_call_choice
+
+from research.selector_v4.public_qualification.choice_integrity import verify_choice_record
+from research.selector_v4.public_qualification.contract import CONTRACT, digest, full_call_choice
 
 
 def sha(path):
@@ -167,7 +169,9 @@ def analyze(campaign, gpu, out):
                     )
                     assert not conditioning["includes_scored_windows"]
                 decision = json.loads((phase / "frozen-choice-before-scoring.json").read_text())
-                assert decision == full_call_choice(training, rep, key + ":" + policy["identity"])
+                verify_choice_record(
+                    decision, full_call_choice(training, rep, key + ":" + policy["identity"])
+                )
                 assert policy["choice"] == decision["choice"]
                 assert policy["input_hashes"] == pristine["input_hashes"]
                 assert policy["native_output_lse_sha256"] == pristine["native_output_lse_sha256"]
