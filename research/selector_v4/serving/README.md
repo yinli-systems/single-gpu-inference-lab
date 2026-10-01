@@ -99,3 +99,44 @@ block archive and a failed block has no success-only throughput summary.
 `metric_gate.py` still requires the complete40 metric matrix, joint0.99 floor,
 throughput gain and guarded-prefix confidence gain. These preparations do not
 close the historical2/432 token differences or grant serving/default promotion.
+
+## Complete HTTP pipeline preparation (not yet executed)
+
+`http_pipeline.py` requires the terminal formal kernel PASS and independently
+validates all eight kernel stage analyses before creating an HTTP campaign.
+It freezes committed helper blobs, every SGLang source byte, all model shards
+and tokenizer bytes, actual normal-package source, SDK and source ledgers.
+Four complete models × two GPU families × three stages × three independently
+paired allocations require72 allocations and24 stage verdicts, with at most
+four allocations in flight and a finite14-day controller deadline. Each HTTP
+allocation requests an initial8-hour limit. Existing public development jobs
+retain their original limits and are not repurposed as formal stage evidence.
+
+`http_pair.py` runs pristine/candidate, candidate/pristine, pristine/candidate
+arm orders for the three allocation indices on the same physical GPU and CPU
+affinity with separate JIT caches. Startup, explicit calibration, full frozen
+warmup, complete scored requests and independent profiling are separate phases.
+No failed request, allocation or calibration is automatically retried.
+
+`http_analysis.py` reconstructs full tokens and timing metrics from every
+original SSE event, exact Native/pristine SASS from the archived disassembly,
+and every opted-in paged-prefix Resource instruction. It checks full natural
+token parity, separately checks complete token/top5 logprobs in deterministic
+processes, requires actual Resource launches and65536-byte launch allocation
+in independent CUPTI traces, and records real idle metadata/Graph boundaries.
+Performance clocks must have at least10 actual scored samples at≥90%GPU
+utilization per arm, with p95/p05≤1.05. Warmup clocks cannot satisfy this gate.
+All40 workload/metric points and their joint95%LCB retain the0.99 floor.
+
+`http_archive.py` refuses live allocations and unresolved submission intents.
+After every known allocation stops it preserves all partial/failed HTTP arms,
+full model/source bindings, raw SASS/profile/telemetry, and managed decision
+caches. Only rebuildable top-level JIT/SDK data and Python bytecode are omitted.
+Every archived member is independently hashed after writing the archive.
+
+Exact d14c22b preparation passed180 Paracloud CPU tests with10 GPU skips.
+Its304 original source/log/XML members are archived in
+`evidence/v42-http-preparation-cpu-d14c22b/`. The later archive helper has3
+local CPU tests. None of these preparation tests is actual full-model Resource
+HTTP evidence. Historical2/432 token differences remain unresolved; even a
+later complete HTTP PASS will leave default activation disabled pending closure.
