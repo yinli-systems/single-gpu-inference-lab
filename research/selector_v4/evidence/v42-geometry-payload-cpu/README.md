@@ -1,0 +1,1 @@
+Twelve CPU tests passed on private Python3.12/Torch and normal wheel0.7.1. Native _unpack_paged_kv_cache handles tuple/packed, NHD/HND, implicit page1 and explicit page1/page16. Sources SHA-bound in receipt; corrected observer8f9ab99. No performance authority.

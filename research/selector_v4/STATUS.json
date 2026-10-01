@@ -184,7 +184,7 @@
     },
     "evidence": "evidence/v411-exact-dev/"
   },
-  "next_action": "Qualify eb4e3e60 normal pinned-vendor wheel and dual GPU Graph boundary diagnostics; then exposed durable native-context diagnostics. Frozen canary remains HOLD on both GPUs, original release48/stress12 untouched; no full-serving promotion. Historical2/432 remains unresolved.",
+  "next_action": "Finish corrected native HTTP geometry, pinned exposed native-context and fixed profiling-precision diagnoses; validate actual serving strides; build a qualified deployable candidate before a new frozen fresh campaign. Original dual v4.2 HOLD retained;48 release and12 stress untouched.",
   "stress_cases_consumed": 0,
   "v42": {
     "qualification_revision": "4.2.0",
@@ -735,7 +735,7 @@
     "local_cpu_tests_passed": 29,
     "local_skips": 2,
     "normal_pinned_vendor_wheel_build_pending": false,
-    "gpu_requalification_pending": true,
+    "gpu_requalification_pending": false,
     "old_d768_results_retained": true,
     "default_promotion": false,
     "normal_pinned_vendor_wheel_build_pass": true,
@@ -744,14 +744,69 @@
     "gpu_validation_jobs": {
       "gpu_4090": "1645384",
       "gpu_5090": "1645385"
-    }
+    },
+    "gpu_requalification_pass": true,
+    "functional_tests_per_gpu": 53,
+    "cpu_tests_per_gpu": 41,
+    "gpu_tests_per_gpu": 12,
+    "functional_evidence": "evidence/v42-normal-pinned-wheel-functional/",
+    "sass_identity_pass": true,
+    "sass_paired_kernels": 352,
+    "sass_evidence": "evidence/v42-normal-pinned-wheel-sass/",
+    "full_serving_qualified": false,
+    "independent_process_release_qualified": false,
+    "managed_5090_eager_winner": -1,
+    "managed_eager_outlier_cause_established": false
   },
   "graph_boundary_probe": {
     "harness_commit": "261123b",
-    "gpu_tests_pending": true,
+    "gpu_tests_pending": false,
     "raw_uncertified_resource_optin_required": true,
     "automatic_untracked_metadata_detection": false,
     "exclusive_owner_invalidation_required": true,
-    "serving_qualified": false
+    "serving_qualified": false,
+    "functional_pass": true,
+    "jobs": {
+      "gpu_4090": "1645466",
+      "gpu_5090": "1645467"
+    },
+    "gpu_tests_per_card": 10,
+    "evidence": "evidence/v42-pinned-wheel-graph-boundaries/",
+    "foreign_cuda_writes_require_explicit_invalidation": true
+  },
+  "http_geometry_observer": {
+    "original_job": "1645470",
+    "original_http_complete_samples": 7,
+    "original_paged_derived_geometry_valid": false,
+    "original_evidence": "evidence/v42-http-geometry-original-observer/",
+    "corrected_source": "8f9ab99",
+    "cpu_tests_passed": 12,
+    "cpu_evidence": "evidence/v42-geometry-payload-cpu/",
+    "corrected_live_job": "1645581",
+    "corrected_live_pending": true,
+    "resource_tactic_selected": false,
+    "timing_valid": false,
+    "fresh_cases_consumed": 0
+  },
+  "exposed_managed_resolution": {
+    "harness_commit": "e20b74a",
+    "jobs": {
+      "gpu_4090": "1645560",
+      "gpu_5090": "1645561"
+    },
+    "fit_repeat_sequence": [
+      10,
+      256,
+      256,
+      10,
+      256,
+      10,
+      10,
+      256
+    ],
+    "processes_per_gpu": 3,
+    "fresh_cases_consumed": 0,
+    "complete": false,
+    "qualification_authority": false
   }
 }

@@ -1,0 +1,1 @@
+Each GPU10 functional tests passed against exact pinned normal wheel. Includes raw uncertified Graph1/16 payload reuse and conservative invalidation for replacement inputs, metadata, plan epoch, options and stream. Foreign CUDA/Triton writes require explicit owner invalidation; no automatic counter detection. No deployment authority.

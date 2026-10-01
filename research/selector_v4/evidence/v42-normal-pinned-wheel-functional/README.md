@@ -1,0 +1,1 @@
+Normal upstream wheel 0.7.1 at eb4e3e60 with exact CCCL/CUTLASS/spdlog pins. Each GPU passed41 CPU+12 GPU tests and three prepared managed modes including persistence/reload. 5090 eager profiled native-1 as winner despite a passing resource confidence gate; retained, no cause established. No release/serving or independent fresh authority.

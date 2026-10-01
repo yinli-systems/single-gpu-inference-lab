@@ -1,0 +1,1 @@
+Each GPU176 native/resource SASS pairs,352 total. Original disassembly preserves encodings and operands. Package source eb4e3e60; prior older-CCCL receipts retained separately. No performance or HTTP qualification.
