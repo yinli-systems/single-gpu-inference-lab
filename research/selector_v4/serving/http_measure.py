@@ -318,6 +318,9 @@ async def run(arguments):
             await workloads(session, url, preparation, tag + "-calibration", logprobs=False)
             if arguments.role == "candidate":
                 await phase(session, url, training, 2)
+            frozen_warmup = arguments.out / "frozen-warmup"
+            frozen_warmup.mkdir()
+            await workloads(session, url, frozen_warmup, tag + "-frozen", logprobs=False)
             warm = {
                 "name": "conditioning",
                 "concurrency": 2,

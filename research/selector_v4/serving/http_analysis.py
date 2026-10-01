@@ -9,12 +9,14 @@ import gzip
 import hashlib
 import json
 import math
+import tarfile
 from pathlib import Path
 
 import numpy as np
 
 from research.release_qualification.serving.workloads import prefix_tokens, work_specs
 from research.selector_v4.public_qualification.gates import need, sha
+from research.selector_v4.public_qualification.runtime.audit_main_sass import parse
 from research.selector_v4.serving.http_stream import TokenStream
 from research.selector_v4.serving.metric_gate import METRICS, WORKLOADS, evaluate_metrics
 from research.selector_v4.serving.parity_gate import compare_blocks
@@ -179,6 +181,60 @@ def profile_evidence(root, role):
     }
 
 
+def sass_evidence(root, *, job, binding_sha):
+    """Reconstruct all three classes from original disassembly, never a PASS flag."""
+    receipt = json.loads((root / "receipt.json").read_text())
+    need(receipt["resource_scope"] == "ALL_PAGED_PREFIX_KERNELS", "Exact Resource HTTP scope")
+    need(
+        receipt["job"] == job and receipt["binding_sha256"] == binding_sha,
+        "Independent SASS identity",
+    )
+    archive = root / "raw-sass.tar.gz"
+    need(sha(archive) == receipt["raw_archive_sha256"], "Original SASS bytes changed")
+    artifacts = receipt["artifacts"]
+    names = {a["sass"] for a in artifacts}
+    need(len(names) == len(artifacts), "Unique original SASS artifacts")
+    tables = {kind: {} for kind in ("pristine", "native", "resource")}
+    with tarfile.open(archive) as stream:
+        members = stream.getmembers()
+        need(
+            len(members) == len(names) and {m.name for m in members} == names,
+            "Every original SASS member required, no extras",
+        )
+        need(all(m.isfile() for m in members), "Regular original disassembly only")
+        for artifact in artifacts:
+            kind = artifact["kind"]
+            need(kind in tables, "Known SASS class")
+            raw = stream.extractfile(artifact["sass"]).read()
+            need(
+                hashlib.sha256(raw).hexdigest() == artifact["sass_sha256"],
+                "Original disassembly changed",
+            )
+            records = parse(raw.decode())
+            need(bool(records) and len(records) == artifact["symbols"], "Full SASS symbols")
+            for key, value in records.items():
+                need(
+                    key not in tables[kind] or tables[kind][key] == value,
+                    "Conflicting original SASS module",
+                )
+                tables[kind][key] = value
+    expected = {
+        k: v for k, v in tables["pristine"].items() if "BatchPrefillWithPagedKVCacheKernel" in k
+    }
+    need(
+        bool(expected)
+        and tables["pristine"] == tables["native"]
+        and tables["resource"] == expected,
+        "Exact full Native/pristine/Resource disassembly identity",
+    )
+    need(
+        tables == receipt["tables"]
+        and {k: len(v) for k, v in tables.items()} == receipt["kernels_per_class"],
+        "Producer SASS tables differ from original instructions",
+    )
+    return {"kernels_per_class": {k: len(v) for k, v in tables.items()}}
+
+
 def analyze(root, output, *, jobs, gpu, model_id, stage):
     need(
         not output.exists() and len(jobs) == 3 and len(set(jobs)) == 3,
@@ -217,15 +273,7 @@ def analyze(root, output, *, jobs, gpu, model_id, stage):
             and environments[0]["cpu_affinity"] == environments[1]["cpu_affinity"],
             "Paired actual GPU and CPU affinity",
         )
-        sass = json.loads((path / "independent-sass/receipt.json").read_text())
-        need(
-            sass["pass"] and sass["job"] == job and sass["binding_sha256"] == binding_sha,
-            "Complete independent Native/pristine/Resource SASS proof",
-        )
-        need(
-            sha(path / "independent-sass/raw-sass.tar.gz") == sass["raw_archive_sha256"],
-            "Raw independent SASS archive changed",
-        )
+        sass_evidence(path / "independent-sass", job=job, binding_sha=binding_sha)
         for key in blocks["pristine"]:
             parity.append(
                 compare_blocks(
