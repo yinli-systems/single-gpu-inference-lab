@@ -15,7 +15,7 @@ model steps. Source inspection establishes these calls; actual workload geometry
 split decisions and metadata tracking still require execution evidence.
 
 Frozen v4.2 identity supports causal attention and paged page16. Current-main
-experimental functional tests cover both mask modes at page16, while its runner
+experimental functional tests cover both mask modes at page1 and page16, while its runner
 requires a prepared immutable plan and metadata with observable version counters.
 Inference tensors without version tracking fall back to native. These scopes must
 be independently extended and tested before claiming a production speedup.
@@ -63,3 +63,7 @@ The historical2/432 mismatches remain unreplicated and unattributed. Later equal
 forced-history replays do not reconstruct missing original pre-divergence state.
 Report new replay results separately and retain the historical blocker. Defaults
 and serving promotion stay OFF until their own independently bound gates pass.
+
+## Owned metadata snapshot functional evidence
+
+The explicit eager-only `ServingPlanLease` bridge snapshots inference-mode metadata into owned version-tracked tensors, binds the current plan epoch and CUDA stream, and requires notification before untracked writes. Its two exposed BF16 ragged-causal/paged1-noncausal GPU checks passed on RTX4090/RTX5090 in jobs1644779/1644780. Corrupt snapshots, same-valued new plans and explicit invalidation route to the original owner. These functional checks do not authorize full HTTP, replay or performance; the frozen v4.2 canary5090 verdict is HOLD.

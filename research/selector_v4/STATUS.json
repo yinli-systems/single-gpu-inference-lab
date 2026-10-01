@@ -1,7 +1,7 @@
 {
   "schema": 6,
   "qualification_revision": "4.2.0",
-  "state": "V42_CANARY_EXECUTION_HOLD_SLURM_RPC",
+  "state": "V42_CANARY_5090_QUALIFICATION_HOLD_4090_COMPLETENESS_RECOVERY",
   "default_promotion": false,
   "serving_promotion": false,
   "historical_token_divergence_resolved": false,
@@ -184,7 +184,7 @@
     },
     "evidence": "evidence/v411-exact-dev/"
   },
-  "next_action": "Preserve infrastructure failure; complete consumed canary through preregistered technical recovery without modifying frozen source/analyzer/floors; release48 and stress12 remain untouched.",
+  "next_action": "Complete preserved 4090 canary through exact GPU/CPU technical continuation. Investigate exposed 5090 native/pristine regressions and coverage/regret; no release48/stress12/full-serving qualification authorized while canary HOLD. Historical2/432 remains unresolved.",
   "stress_cases_consumed": 0,
   "v42": {
     "qualification_revision": "4.2.0",
@@ -220,7 +220,7 @@
     "dev_shards": 2,
     "dev_state": "PASS",
     "dev_evidence": "evidence/v42-exact-dev/",
-    "canary_state": "EXECUTION_HOLD",
+    "canary_state": "QUALIFICATION_HOLD",
     "dev_results": {
       "gpu_4090": {
         "pass": true,
@@ -433,6 +433,78 @@
       "source_changed": false,
       "thresholds_changed": false,
       "recovery_pending": true
+    },
+    "canary_5090": {
+      "pass": false,
+      "failed_requirements": [
+        "actual_policy_vs_pristine_worst_at_least_0_99",
+        "native_overlay_worst_at_least_0_99",
+        "native_overlay_joint_min_lcb_at_least_0_99",
+        "native_overlay_controls_resolve_one_percent",
+        "held_out_controls_resolve"
+      ],
+      "metrics": {
+        "fold_records": 720,
+        "selected_records": 255,
+        "coverage": 0.3541666666666667,
+        "selected_geomean": 1.30456953860456,
+        "selected_worst": 1.051294733406868,
+        "selected_block_worst": 1.0430883224902041,
+        "selected_joint_min_lcb95": 1.0490582045521695,
+        "policy_geomean": 1.0987392658192532,
+        "policy_worst": 1.0,
+        "by_execution_mode": {
+          "eager_full_call": {
+            "count": 73,
+            "geomean": 1.3433652643009872,
+            "worst": 1.0754486751919732
+          },
+          "graph1_replay": {
+            "count": 95,
+            "geomean": 1.286624439824573,
+            "worst": 1.0579163995376755
+          },
+          "graph16_replay": {
+            "count": 87,
+            "geomean": 1.2922809348119684,
+            "worst": 1.051294733406868
+          }
+        },
+        "selected_layouts": [
+          "paged",
+          "ragged"
+        ],
+        "selected_dtypes": [
+          "bfloat16",
+          "float16"
+        ],
+        "native_overlay_geomean": 0.9974447917732578,
+        "native_overlay_worst": 0.9318039985603792,
+        "native_overlay_block_worst": 0.9093853905647803,
+        "native_overlay_joint_min_lcb95": 0.9267431346715315,
+        "regret": {
+          "definition": "held-out oracle latency / chosen latency - 1; native=1 in same-module tactic comparison",
+          "p50": 0.0,
+          "p90": 0.06802448931464028,
+          "p99": 0.5012060481005771,
+          "worst": 0.529489136697521,
+          "above_one_percent_count": 99,
+          "records": 720
+        },
+        "actual_policy_vs_pristine_geomean": 1.0959317582081871,
+        "actual_policy_vs_pristine_worst": 0.926764218098475
+      },
+      "evidence": "evidence/v42-canary-5090-hold/"
+    },
+    "rpc_recovery": {
+      "campaign": "/ssd/scxi253/sgi-v42-canary-rpc-recovery-20261001T0430Z-allocation-v3",
+      "original_to_resume_jobs": {
+        "1644194": "1644802",
+        "1644196": "1644803",
+        "1644197": "1644804"
+      },
+      "fresh_cases_consumed": 0,
+      "same_gpu_and_cpu_required": true
     }
   },
   "v41_source_isolation_history": {
@@ -518,6 +590,17 @@
       "pass": true,
       "paired_kernels_dual_gpu": 352,
       "evidence": "evidence/v42-current-main-sass-dual/"
+    },
+    "inference_metadata_bridge": {
+      "bridge_source_commit": "70de511ae90d0baa8cc43ff28f26b2eba6ac5b89",
+      "jobs": {
+        "gpu_4090": "1644779",
+        "gpu_5090": "1644780"
+      },
+      "gpu_tests_per_card": 2,
+      "pass": true,
+      "evidence": "evidence/v42-serving-lease-functional-pass/",
+      "full_http_qualified": false
     }
   }
 }
