@@ -1,0 +1,5 @@
+# Managed validation prequalification failures
+
+Job1644343 rejected an unprofiled fallback after the timer helper could not find cublasLt.h. Jobs1644447/1644448 used a broader cu13 SDK include path that shadowed the CUDA13.0 compiler's runtime headers and caused the original native module to fail compilation. 5090 had37 CPU PASS and8 GPU FAIL before attention launch;4090 was cancelled after this shared cause was identified. These are development/exposed-geometry attempts, not fresh cases. Every completed log/receipt/launcher is archived with individual SHA256 hashes and reverified locally.
+
+Subsequent isolated library-header validation passed45 functional tests on4090 and successfully profiled/persisted a native default winner(-1). Its example then incorrectly rejected that valid v2 winner; this is a separate assertion error, not another SDK or kernel failure. Corrected source d7683dd requires a successfully profiled winner, zero failed offered tactics, exact source/certificate-bound persistence and disk reload. It also adds page1 coverage; independent jobs follow. Defaults and serving remainOFF.
