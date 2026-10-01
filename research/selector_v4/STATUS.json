@@ -1044,7 +1044,7 @@
   "self_review_tensor_control_hardening": {
     "source_commit_pending_cpu_proof": false,
     "scope": "Bind control Tensor address/version, reject untracked controls before cold source scan, preserve output/LSE scratch writes, reject changed control during rebind.",
-    "normal_new_source_qualified": false,
+    "normal_new_source_qualified": true,
     "private_cpu_expected_passes": 70,
     "private_gpu_skips_expected": 20,
     "private_cpu_root": "/ssd/scxi253/sgi-tensor-control-cpu-20261001T1315Z",
@@ -1056,7 +1056,7 @@
     "gpu_skipped": 20,
     "evidence": "evidence/v42-tensor-control-cpu/",
     "normal_build_root": "/ssd/scxi253/sgi-flashinfer-official-build-75544a17-20261001",
-    "normal_dual90_pending": true,
+    "normal_dual90_pending": false,
     "build_pid": 858462,
     "wheel_gate_pid": 858475,
     "normal_build_pass": true,
@@ -1067,7 +1067,13 @@
       "gpu_4090": "1646876",
       "gpu_5090": "1646877"
     },
-    "source_gate_pid": 910001
+    "source_gate_pid": 910001,
+    "normal_gpu_functional_pass": true,
+    "normal_native_resource_sass_pass": true,
+    "sass_pairs_total": 352,
+    "normal_build_evidence": "evidence/v42-normal-tensor-control-wheel-build/",
+    "normal_functional_evidence": "evidence/v42-normal-tensor-control-wheel-functional/",
+    "normal_sass_evidence": "evidence/v42-normal-tensor-control-wheel-sass/"
   },
   "independent_pristine_normal_package": {
     "source_commit": "85744da1a397c0c4bea1a83b8345281750eb61a9",
@@ -1077,7 +1083,8 @@
     "wheel_bytes": 65818279,
     "package_files_verified": 10121,
     "gpu_qualified": false,
-    "builder_pid": 909999
+    "builder_pid": 909999,
+    "evidence": "evidence/v42-normal-independent-pristine-wheel-build/"
   },
   "cross_process_prepared_handoff": {
     "harness_commit": "6aaa0b9f99d846380344b93df80a79ea919a7223",
@@ -1091,7 +1098,7 @@
     "old_gate_reason": "Static cache-miss counter did not prove actual cache hit; strict replacement asserts search_cache hit and preserved actual winner."
   },
   "public_path_prequalification": {
-    "harness_commit": "bb9d764a8db56621f2ff51468b2d23e985c1f25b",
+    "harness_commit": "c6879fbd578a165327c0e9a59f883be671ce0e6f",
     "cpu_contract_tests_passed": 7,
     "cases": "Only two exposed dev descriptors; no new holdouts generated",
     "processes_per_gpu_case": {
@@ -1110,8 +1117,14 @@
     "minimum_window_us": 120000,
     "held_out_oracle_never_trains": true,
     "all_started_rows_retained": true,
-    "state": "PREPARED_NOT_DISPATCHED",
+    "state": "WAIT_CROSS_PROCESS_HANDOFF",
     "qualification_authority": false,
-    "fresh_cases_consumed": 0
+    "fresh_cases_consumed": 0,
+    "scope": "EXPOSED_PUBLIC_PATH_PREQUAL_2",
+    "native_conditioning_seconds": 30,
+    "unconditioned_gate_cancelled_before_dispatch": 1943718,
+    "gate_pid": 2437314,
+    "helper_root": "/ssd/scxi253/public-path-helpers-c6879fb",
+    "helper_archive_sha256": "c8cc4ecb295a78767a5a8313061bc69122e2a17e73b1acb4229376d0bcc75c93"
   }
 }
