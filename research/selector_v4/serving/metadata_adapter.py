@@ -45,12 +45,23 @@ class MetadataEpochAdapter:
     def attach(self, registry, key, signature_inputs, *, qo_lengths, kv_lengths, forward_options):
         if self.frozen:
             raise RuntimeError("Attach prepared registries before installation")
-        if registry.owner not in self.backend.prefill_wrappers_paged:
+        if not any(registry.owner is owner for owner in self.backend.prefill_wrappers_paged):
             raise ValueError("Registry must belong to this backend's original paged wrapper")
         if not registry.frozen:
             raise ValueError("Freeze real trained decisions before serving attachment")
         if any(b.registry is registry and b.key == key for b in self.bindings):
             raise ValueError("Duplicate prepared binding")
+        # SGLang's allocator page size differs from the native FlashInfer view:
+        # its flat token KV cache becomes NHD [tokens,1,heads,dim] here. Bind the
+        # actual tensor geometry; never infer it from backend.page_size.
+        if (
+            getattr(registry.owner, "_kv_layout", None) != "NHD"
+            or len(signature_inputs) != 3
+            or len(signature_inputs[1].shape) != 4
+            or signature_inputs[1].shape[1] != 1
+            or signature_inputs[1].shape != signature_inputs[2].shape
+        ):
+            raise ValueError("Actual NHD native page1 signature tensors required")
         self.bindings.append(
             Binding(
                 registry,
@@ -73,7 +84,7 @@ class MetadataEpochAdapter:
                 seen.add(id(registry))
 
     def after_update(self, forward_batch, graph):
-        if graph or self.backend.page_size != 1:
+        if graph:
             return
         mode = forward_batch.forward_mode
         if not mode.is_extend_without_speculative():
@@ -90,7 +101,7 @@ class MetadataEpochAdapter:
         owners = metadata.prefill_wrappers
         for binding in self.bindings:
             if (
-                binding.registry.owner not in owners
+                not any(binding.registry.owner is owner for owner in owners)
                 or binding.qo_lengths != qo
                 or binding.kv_lengths != kv
             ):

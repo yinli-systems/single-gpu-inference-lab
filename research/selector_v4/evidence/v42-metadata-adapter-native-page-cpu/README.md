@@ -1,0 +1,1 @@
+Supersedes the31-test draft before any GPU dispatch. Native FlashInfer page1 must come from actual NHD K/V tensor shape, not SGLang allocator page size. Original paged owner identity is checked with is.32 CPU tests passed; old source/evidence preserved. Full-model metadata diagnostic not yet dispatched.

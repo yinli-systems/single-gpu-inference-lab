@@ -10,7 +10,7 @@ from research.selector_v4.serving.test_epoch_registry import Lease
 
 
 def fixture():
-    owner = object()
+    owner = SimpleNamespace(_kv_layout="NHD")
     registry = ServingEpochRegistry(owner)
     lease = Lease(owner)
     registry.register("prefix", lease, actual_managed_tactic=1)
@@ -43,7 +43,7 @@ def fixture():
     adapter.attach(
         registry,
         "prefix",
-        [],
+        [object(), SimpleNamespace(shape=(64, 1, 8, 128)), SimpleNamespace(shape=(64, 1, 8, 128))],
         qo_lengths=(3, 5),
         kv_lengths=(10, 20),
         forward_options=lease.options,
@@ -75,15 +75,11 @@ def test_graph_state_initialization_releases_without_binding():
     assert registry.epoch == 1 and lease.state == "RELEASED" and lease.bind_calls == 0
 
 
-@pytest.mark.parametrize(
-    "boundary", ["unknown_lengths", "page16", "no_prefix", "paged_only", "decode"]
-)
+@pytest.mark.parametrize("boundary", ["unknown_lengths", "no_prefix", "paged_only", "decode"])
 def test_unqualified_metadata_keeps_released_native_state(boundary):
     backend, adapter, _, lease, batch, _ = fixture()
     if boundary == "unknown_lengths":
         batch.extend_seq_lens_cpu = [4, 4]
-    elif boundary == "page16":
-        backend.page_size = 16
     elif boundary == "no_prefix":
         backend.forward_metadata.extend_no_prefix = True
     elif boundary == "paged_only":
@@ -148,3 +144,31 @@ def test_untrained_foreign_duplicate_and_post_install_attachment_are_rejected():
 @pytest.mark.parametrize("value", [None, [True], [-1], [1.0], SimpleNamespace(is_cuda=True)])
 def test_device_or_unknown_lengths_never_trigger_metadata_readback(value):
     assert host_lengths(value) is None
+
+
+def test_allocator_page16_does_not_override_actual_native_page1_signature():
+    backend, adapter, _, lease, batch, _ = fixture()
+    backend.page_size = 16
+    adapter.install()
+    backend.init_forward_metadata(batch)
+    assert lease.bind_calls == 1 and lease.state == "BOUND"
+
+
+def test_actual_native_page16_signature_is_rejected_before_installation():
+    backend, _, registry, lease, _, _ = fixture()
+    adapter = MetadataEpochAdapter(backend)
+    inputs = [
+        object(),
+        SimpleNamespace(shape=(64, 16, 8, 128)),
+        SimpleNamespace(shape=(64, 16, 8, 128)),
+    ]
+    with pytest.raises(ValueError, match="Actual NHD native page1"):
+        adapter.attach(
+            registry,
+            "prefix",
+            inputs,
+            qo_lengths=(3, 5),
+            kv_lengths=(10, 20),
+            forward_options=lease.options,
+        )
+    assert not adapter.bindings
