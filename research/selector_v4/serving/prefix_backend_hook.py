@@ -5,6 +5,8 @@ remain unmodified, so public lease fallback cannot recurse through this router.
 No resource training, automatic selection or serving qualification happens here.
 """
 
+import __future__
+
 import ast
 import functools
 import hashlib
@@ -62,7 +64,12 @@ def install(backend, router, *, source_path):
 
     namespace["_sgi_route_cached_prefix"] = route
     # The exact reviewed source SHA is checked before this single-call AST rewrite.
-    exec(compile(tree, str(source_path), "exec"), namespace)  # noqa: S102
+    future_mask = sum(
+        getattr(__future__, name).compiler_flag for name in __future__.all_feature_names
+    )
+    flags = method.__code__.co_flags & future_mask
+    code = compile(tree, str(source_path), "exec", flags=flags, dont_inherit=True)
+    exec(code, namespace)  # noqa: S102
     changed = namespace["forward_extend"]
 
     @functools.wraps(original)

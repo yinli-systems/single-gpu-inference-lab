@@ -1,5 +1,7 @@
 """Reviewed local source AST identity; no SGLang/Torch GPU dependency."""
 
+import __future__
+
 import ast
 import hashlib
 import os
@@ -93,7 +95,10 @@ def test_install_requires_actual_reviewed_source_without_mutating_instance(tmp_p
     assert backend.forward_extend is original
 
 
-def test_instance_hook_routes_one_call_and_leaves_native_owner_unmodified(tmp_path, monkeypatch):
+@pytest.mark.parametrize("deferred_annotations", [False, True])
+def test_instance_hook_routes_one_call_and_leaves_native_owner_unmodified(
+    tmp_path, monkeypatch, deferred_annotations
+):
     from research.selector_v4.serving import prefix_backend_hook
 
     class Backend:
@@ -112,11 +117,17 @@ def test_instance_hook_routes_one_call_and_leaves_native_owner_unmodified(tmp_pa
         run=lambda o, q, kv, **kw: ("routed", o.forward_return_lse(q, kv, **kw))
     )
     path = tmp_path / "synthetic-reviewed.py"
-    path.write_text(SOURCE)
+    source = SOURCE
+    if deferred_annotations:
+        source = SOURCE.replace("self, q, kv", "self, q: MissingType, kv")
+        Backend.forward_extend.__code__ = Backend.forward_extend.__code__.replace(
+            co_flags=Backend.forward_extend.__code__.co_flags | __future__.annotations.compiler_flag
+        )
+    path.write_text(source)
     monkeypatch.setattr(
         prefix_backend_hook,
         "transform",
-        lambda source: transform(source, hashlib.sha256(SOURCE.encode()).hexdigest()),
+        lambda source: transform(source, hashlib.sha256(source.encode()).hexdigest()),
     )
     original = install(backend, router, source_path=path)
     result = backend.forward_extend("q", "kv")
