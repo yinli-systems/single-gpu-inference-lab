@@ -1156,7 +1156,7 @@
     "qualification_authority": false
   },
   "reusable_serving_eager_lease": {
-    "state": "CPU_BOUNDARIES_PASS_GPU_PENDING",
+    "state": "DUAL_FUNCTIONAL_EPOCH_AND_ACTUAL_DISPATCH_PASS_REGISTRY_DRAFT",
     "evidence": "evidence/v42-reusable-lease-cpu/",
     "cpu_pass": 6,
     "gpu_skipped": 2,
@@ -1164,10 +1164,30 @@
     "explicit_release_before_native_plan_or_foreign_metadata_write": true,
     "uses_actual_public_eager_rebind": true,
     "per_transition_source_audit_compile_or_calibration": false,
-    "actual_resource_coverage_gpu_unverified": true,
+    "actual_resource_coverage_gpu_unverified": false,
     "resource_graph_metadata_updates_supported": false,
     "full_http_qualified": false,
     "qualification_authority": false,
-    "fresh_cases_consumed": 0
+    "fresh_cases_consumed": 0,
+    "initial_smoke_evidence": "evidence/v42-reusable-serving-epochs-smoke/",
+    "actual_dispatch_evidence": "evidence/v42-reusable-serving-epochs-managed/",
+    "actual_dispatch_jobs": {
+      "gpu_4090": "1647598",
+      "gpu_5090": "1647599"
+    },
+    "initial_smoke_jobs": {
+      "gpu_4090": "1647490",
+      "gpu_5090": "1647491"
+    },
+    "tests_passed_per_gpu": 8,
+    "actual_post_rebind_resource_calls": 9,
+    "all_actual_resource_calls_cache_hit": true,
+    "full_output_lse_exact": true,
+    "managed_raw_cache_artifacts_persisted": true,
+    "scope": "Exposed BF16 ragged projection-stride6144 and paged1 noncausal; numerical owned eager epochs and real dispatch only.4090ragged confidence rejected and keptnative in both diagnostics.",
+    "epoch_registry_state_tests_passed": 12,
+    "epoch_registry_gpu_or_real_server_qualified": false,
+    "registry_freezes_choices_before_scoring": true,
+    "registry_metadata_rebind_once_per_key_per_epoch": true
   }
 }

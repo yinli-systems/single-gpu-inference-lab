@@ -1,0 +1,3 @@
+Explicit eager serving epoch numerical smoke
+
+Dual8 tests PASS, jobs1647490/1647491. All complete records include real initial certificate and v2 choice; rejected4090 ragged evidence remains native. Three accepted geometries executed three explicit metadata epochs with exact output/LSE and owner fallback. This smoke alone does not independently witness post-rebind actual resource dispatch, and its managed cache used node-local pytest temporary paths. Supplemental aa8371f checks persist real cache artifacts and count post-training actual hits/dispatches. No fullHTTP, resource Graph metadata, performance, release or promotion authority. All archive/raw-member SHA256 independently verified locally.
