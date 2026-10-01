@@ -17,7 +17,10 @@ def setup(*, native_entry=False, return_lse=True):
     inputs = [tensor(), tensor(), tensor()]
     native_calls = []
     owner = NS(
-        forward_return_lse=lambda *a, **k: native_calls.append((a, k)) or ("native-o", "native-lse")
+        _kv_layout="NHD",
+        forward_return_lse=lambda *a, **k: (
+            native_calls.append((a, k)) or ("native-o", "native-lse")
+        ),
     )
     calls = []
     lease = NS(return_lse=return_lse, state="BOUND")
@@ -43,7 +46,9 @@ def setup(*, native_entry=False, return_lse=True):
     )
     adapter = NS(frozen=True, bindings=[binding], depth=0, current_prefix_lengths=((2,), (5,)))
     graph = [False]
-    router = PagedPrefixRouter(adapter, graph_or_tracing=lambda: graph[0])
+    router = PagedPrefixRouter(
+        adapter, graph_or_tracing=lambda: graph[0], unpack_paged_cache=lambda value, layout: value
+    )
     return router, adapter, registry, owner, inputs, graph, calls, native_calls
 
 
@@ -115,3 +120,31 @@ def test_missing_lse_duplicate_geometry_or_unfrozen_adapter_rejected():
     adapter.frozen = False
     with pytest.raises(ValueError, match="frozen"):
         PagedPrefixRouter(adapter, graph_or_tracing=lambda: False)
+
+
+def test_packed_payload_must_go_through_native_unpacker_without_iteration():
+    router, _, _, owner, inputs, _, calls, _ = setup()
+
+    class Packed:
+        def __iter__(self):
+            raise AssertionError("Do not iterate token-major packed KV")
+
+    packed = Packed()
+    unpacked = []
+
+    def native_unpack(value, layout):
+        assert value is packed and layout == "NHD"
+        unpacked.append(True)
+        return inputs[1], inputs[2]
+
+    router.unpack_paged_cache = native_unpack
+    assert router.run(owner, inputs[0], packed, causal=False) == ("managed-o", "managed-lse")
+    assert unpacked == [True] and calls[0][0][1] == inputs
+
+
+def test_unknown_owner_uses_native_without_touching_payload_or_unpacking():
+    router, _, _, _, inputs, _, calls, _ = setup()
+    owner = NS(forward_return_lse=lambda *a, **k: "native-other-owner")
+    router.unpack_paged_cache = lambda *a: pytest.fail("No unpack on unknown owner")
+    assert router.run(owner, inputs[0], object(), causal=False) == "native-other-owner"
+    assert not calls

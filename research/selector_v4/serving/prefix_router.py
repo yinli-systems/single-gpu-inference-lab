@@ -13,13 +13,14 @@ def signature(inputs):
 
 
 class PagedPrefixRouter:
-    def __init__(self, adapter, *, graph_or_tracing):
+    def __init__(self, adapter, *, graph_or_tracing, unpack_paged_cache=None):
         if not adapter.frozen:
             raise ValueError("Install the frozen metadata adapter before routing")
         self.adapter = adapter
         self.graph_or_tracing = graph_or_tracing
         self.bindings = {}
         self.counters = {"native_calls": 0, "prepared_attempts": 0}
+        self.owners = set()
         for binding in adapter.bindings:
             entry = binding.registry.entries.get(binding.key)
             if entry is None:
@@ -35,9 +36,15 @@ class PagedPrefixRouter:
             if key in self.bindings:
                 raise ValueError("Keep one frozen decision for each actual input geometry")
             self.bindings[key] = binding
+            self.owners.add(id(binding.registry.owner))
+        self.unpack_paged_cache = unpack_paged_cache
+        if self.bindings and self.unpack_paged_cache is None:
+            from flashinfer.utils import _unpack_paged_kv_cache
+
+            self.unpack_paged_cache = _unpack_paged_kv_cache
 
     def run(self, owner, q, kv_cache, **forward_options):
-        if not self.bindings:
+        if not self.bindings or id(owner) not in self.owners:
             self.counters["native_calls"] += 1
             return owner.forward_return_lse(q, kv_cache, **forward_options)
         native = functools.partial(owner.forward_return_lse, q, kv_cache, **forward_options)
@@ -45,7 +52,11 @@ class PagedPrefixRouter:
         if geometry is None or self.adapter.depth or self.graph_or_tracing():
             self.counters["native_calls"] += 1
             return native()
-        inputs = [q, *kv_cache]
+        # Native supports tuple and packed Tensor payloads, including an implicit
+        # page-size-one dimension. Use its real view transformation, never
+        # iterate a packed token-major Tensor as if it contained only K and V.
+        k, v = self.unpack_paged_cache(kv_cache, owner._kv_layout)
+        inputs = [q, k, v]
         key = (id(owner), *geometry, signature(inputs))
         binding = self.bindings.get(key)
         if binding is None or dict(forward_options) != binding.forward_options:
