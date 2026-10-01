@@ -90,3 +90,7 @@ Frozen measured source `b769e7c18e93c9d6cfdcd79b58edf76955313859`, archive `60ff
 ## Current-main HTTP ownership PASS (independent lifecycle fix)
 
 SGLang ea34a9d: all 49 registered CPU tests passed with full imports. ParaCloud current-main Qwen3-4B full-model job1644085 COMPLETED0:0. Original8/10 expected-complete requests vs candidate10/10; one additional intentional n=2 disconnect per arm. Both original reused-RID replacement requests were aborted by stale cleanup; candidate had zero stale aborts and no owned state left at cleanup. Raw source/SSE/log/metadata archive and SHA manifest: `evidence/v42-http-ownership-main/`. Resource cap disabled; original2/432 token-value divergence remains unresolved.
+
+## V4.2 dual dev PASS; canary consumed and active
+
+Exact sourceb769e7c dual dev passed every requirement after all four jobs1644068–1644071 COMPLETED0:0. Proof: `evidence/v42-exact-dev/`,225 raw files SHA-bound; actual policy/pristine means4090=1.383822,5090=1.285451. Frozen thresholds unchanged. Ten fresh canary shapes consumed at2026-10-01T01:43UTC, jobs1644188–1644207. Release48/stress12 untouched at this checkpoint. Follow finite controller `/ssd/scxi253/single-gpu-inference-selector-v42-20260930T230508Z/logs/kernel-pipeline.log`; no resubmission of consumed stage. On dual canaryPASS it submits release, then only releasePASS opens stress. HTTP serving/performance and historical token attribution remain independent gates and default/serving stayOFF.

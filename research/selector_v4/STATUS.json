@@ -1,7 +1,7 @@
 {
   "schema": 6,
   "qualification_revision": "4.2.0",
-  "state": "V42_EXACT_DUAL_GPU_SMOKE_PASS_DEV_RUNNING",
+  "state": "V42_EXACT_DUAL_GPU_DEV_PASS_CANARY_RUNNING",
   "default_promotion": false,
   "serving_promotion": false,
   "historical_token_divergence_resolved": false,
@@ -9,9 +9,10 @@
   "manifest_case_hash": "d54cc31596183165d9f2d18b3a8804d894c5de9d0a7ad4af038079ef316819b8",
   "fresh_counts": {
     "dev_exposed": 2,
-    "canary_untouched": 10,
+    "canary_untouched": 0,
     "release_untouched": 48,
-    "stress_untouched": 12
+    "stress_untouched": 12,
+    "canary_consumed": 10
   },
   "cpu_tests_last_complete": 51,
   "new_v41_gpu_jobs": {
@@ -56,21 +57,21 @@
       "receipts/binary-audit-1644062.json": "a9025c669ac7370b61ae2ab21558313ca876940a7465015c8324851d968c53c8"
     },
     "authorized_stage": "dev",
-    "canary_cases_consumed": 0,
+    "canary_cases_consumed": 10,
     "release_cases_consumed": 0,
     "stress_cases_consumed": 0,
     "default_promotion": false,
     "serving_promotion": false,
     "campaign": "/ssd/scxi253/single-gpu-inference-selector-v42-20260930T230508Z",
     "evidence": "evidence/v42-exact-smoke/",
-    "canary_authorized": false,
+    "canary_authorized": true,
     "dev_authorized": true
   },
   "launcher_fix": "persistent per-mode/per-repeat XDG JIT roots under campaign cache for post-run binary audit",
   "dev_submitted": true,
   "dev_campaign": "/ssd/scxi253/single-gpu-inference-selector-v42-20260930T230508Z",
   "dev_source_commit": "b769e7c18e93c9d6cfdcd79b58edf76955313859",
-  "canary_cases_consumed": 0,
+  "canary_cases_consumed": 10,
   "release_cases_consumed": 0,
   "v411_contract_evidence": "evidence/v411-contract-validation/",
   "v411_clean_archive_sha256": "054401c074135ad4a65e98180db44be6481ff5d5698a4150d7b3e8dd8654ba04",
@@ -183,7 +184,7 @@
     },
     "evidence": "evidence/v411-exact-dev/"
   },
-  "next_action": "Finish source-bound precision dev; analyze both GPUs; only dual PASS authorizes untouched canary.",
+  "next_action": "Complete frozen dual-GPU canary; only dual PASS authorizes release48, then stress12, then full serving.",
   "stress_cases_consumed": 0,
   "v42": {
     "qualification_revision": "4.2.0",
@@ -191,7 +192,7 @@
     "native_plan_vector_size": 15,
     "native_source_identity": true,
     "native_sass_identity": true,
-    "canary_cases_consumed": 0,
+    "canary_cases_consumed": 10,
     "release_cases_consumed": 0,
     "stress_cases_consumed": 0,
     "target_window_ms": 384,
@@ -217,7 +218,215 @@
       }
     },
     "dev_shards": 2,
-    "dev_state": "RUNNING"
+    "dev_state": "PASS",
+    "dev_evidence": "evidence/v42-exact-dev/",
+    "canary_state": "SUBMITTED",
+    "dev_results": {
+      "gpu_4090": {
+        "pass": true,
+        "requirements": {
+          "numerical_exact": true,
+          "native_after_cap_exact": true,
+          "compiled_kernel_symbol_isolation": true,
+          "native_sass_identity": true,
+          "native_source_identity": true,
+          "telemetry_stable": true,
+          "cache_roundtrip": true,
+          "selected_nonempty": true,
+          "selected_geomean_at_least_1_05": true,
+          "selected_worst_at_least_0_99": true,
+          "selected_block_worst_at_least_0_99": true,
+          "selected_joint_min_lcb_at_least_0_99": true,
+          "policy_worst_at_least_0_99": true,
+          "actual_policy_vs_pristine_worst_at_least_0_99": true,
+          "native_overlay_worst_at_least_0_99": true,
+          "native_overlay_joint_min_lcb_at_least_0_99": true,
+          "native_overlay_controls_resolve_one_percent": true,
+          "held_out_controls_resolve": true,
+          "all_execution_modes_selected": true,
+          "both_layouts_selected": true,
+          "both_dtypes_selected": true
+        },
+        "metrics": {
+          "fold_records": 144,
+          "selected_records": 144,
+          "coverage": 1.0,
+          "selected_geomean": 1.385991064404118,
+          "selected_worst": 1.317029539137776,
+          "selected_block_worst": 1.3115942262543119,
+          "selected_joint_min_lcb95": 1.3164143030120217,
+          "policy_geomean": 1.385991064404118,
+          "policy_worst": 1.317029539137776,
+          "by_execution_mode": {
+            "eager_full_call": {
+              "count": 48,
+              "geomean": 1.3544577322248725,
+              "worst": 1.317029539137776
+            },
+            "graph1_replay": {
+              "count": 48,
+              "geomean": 1.4019979529113935,
+              "worst": 1.3723765116348396
+            },
+            "graph16_replay": {
+              "count": 48,
+              "geomean": 1.4020659900610772,
+              "worst": 1.3724088080261883
+            }
+          },
+          "selected_layouts": [
+            "paged",
+            "ragged"
+          ],
+          "selected_dtypes": [
+            "bfloat16",
+            "float16"
+          ],
+          "native_overlay_geomean": 0.9984351064377128,
+          "native_overlay_worst": 0.9955161842404787,
+          "native_overlay_block_worst": 0.9786249536827967,
+          "native_overlay_joint_min_lcb95": 0.9936616110497288,
+          "regret": {
+            "definition": "held-out oracle latency / chosen latency - 1; native=1 in same-module tactic comparison",
+            "p50": 0.0,
+            "p90": 0.0,
+            "p99": 0.0,
+            "worst": 0.0,
+            "above_one_percent_count": 0,
+            "records": 144
+          },
+          "actual_policy_vs_pristine_geomean": 1.3838221359100444,
+          "actual_policy_vs_pristine_worst": 1.3116215213276
+        },
+        "hardware": {
+          "0": {
+            "uuid": "GPU-8259bf3f-435d-17b5-ef86-7ac16135de44",
+            "driver": "580.105.08",
+            "gpu_name": "NVIDIA GeForce RTX 4090"
+          },
+          "1": {
+            "uuid": "GPU-bdce2660-25eb-d632-5729-2b165e1573d4",
+            "driver": "580.105.08",
+            "gpu_name": "NVIDIA GeForce RTX 4090"
+          }
+        }
+      },
+      "gpu_5090": {
+        "pass": true,
+        "requirements": {
+          "numerical_exact": true,
+          "native_after_cap_exact": true,
+          "compiled_kernel_symbol_isolation": true,
+          "native_sass_identity": true,
+          "native_source_identity": true,
+          "telemetry_stable": true,
+          "cache_roundtrip": true,
+          "selected_nonempty": true,
+          "selected_geomean_at_least_1_05": true,
+          "selected_worst_at_least_0_99": true,
+          "selected_block_worst_at_least_0_99": true,
+          "selected_joint_min_lcb_at_least_0_99": true,
+          "policy_worst_at_least_0_99": true,
+          "actual_policy_vs_pristine_worst_at_least_0_99": true,
+          "native_overlay_worst_at_least_0_99": true,
+          "native_overlay_joint_min_lcb_at_least_0_99": true,
+          "native_overlay_controls_resolve_one_percent": true,
+          "held_out_controls_resolve": true,
+          "all_execution_modes_selected": true,
+          "both_layouts_selected": true,
+          "both_dtypes_selected": true
+        },
+        "metrics": {
+          "fold_records": 144,
+          "selected_records": 108,
+          "coverage": 0.75,
+          "selected_geomean": 1.3985678293538328,
+          "selected_worst": 1.3051706391786877,
+          "selected_block_worst": 1.3006777853162328,
+          "selected_joint_min_lcb95": 1.30480276790437,
+          "policy_geomean": 1.2860642047355375,
+          "policy_worst": 1.0,
+          "by_execution_mode": {
+            "eager_full_call": {
+              "count": 36,
+              "geomean": 1.3753972531328702,
+              "worst": 1.3051706391786877
+            },
+            "graph1_replay": {
+              "count": 36,
+              "geomean": 1.410091611915134,
+              "worst": 1.344115336110882
+            },
+            "graph16_replay": {
+              "count": 36,
+              "geomean": 1.4105065933615015,
+              "worst": 1.344557576572778
+            }
+          },
+          "selected_layouts": [
+            "paged",
+            "ragged"
+          ],
+          "selected_dtypes": [
+            "bfloat16",
+            "float16"
+          ],
+          "native_overlay_geomean": 0.9995229994043195,
+          "native_overlay_worst": 0.9953248633415966,
+          "native_overlay_block_worst": 0.9521659165461163,
+          "native_overlay_joint_min_lcb95": 0.992892450467237,
+          "regret": {
+            "definition": "held-out oracle latency / chosen latency - 1; native=1 in same-module tactic comparison",
+            "p50": 0.0,
+            "p90": 0.0,
+            "p99": 0.0,
+            "worst": 0.0,
+            "above_one_percent_count": 0,
+            "records": 144
+          },
+          "actual_policy_vs_pristine_geomean": 1.2854507513437954,
+          "actual_policy_vs_pristine_worst": 0.9928625405336201
+        },
+        "hardware": {
+          "0": {
+            "uuid": "GPU-2972bc5e-923b-124f-95e7-cc6653616016",
+            "driver": "580.82.07",
+            "gpu_name": "NVIDIA GeForce RTX 5090"
+          },
+          "1": {
+            "uuid": "GPU-20b462ec-0729-3cf8-acac-b41308e38bf6",
+            "driver": "580.82.07",
+            "gpu_name": "NVIDIA GeForce RTX 5090"
+          }
+        }
+      }
+    },
+    "canary_jobs": {
+      "gpu_4090": {
+        "0": "1644188",
+        "1": "1644189",
+        "2": "1644190",
+        "3": "1644191",
+        "4": "1644192",
+        "5": "1644193",
+        "6": "1644194",
+        "7": "1644195",
+        "8": "1644196",
+        "9": "1644197"
+      },
+      "gpu_5090": {
+        "0": "1644198",
+        "1": "1644199",
+        "2": "1644200",
+        "3": "1644201",
+        "4": "1644202",
+        "5": "1644203",
+        "6": "1644204",
+        "7": "1644205",
+        "8": "1644206",
+        "9": "1644207"
+      }
+    }
   },
   "v41_source_isolation_history": {
     "native_kernel_byte_identical": true,
