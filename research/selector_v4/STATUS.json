@@ -1145,7 +1145,22 @@
       }
     },
     "completion_pid": 3033512,
-    "campaign": "/ssd/scxi253/sgi-public-path-prequal-c6879fb-75544a17-20261001"
+    "campaign": "/ssd/scxi253/sgi-public-path-prequal-c6879fb-75544a17-20261001",
+    "runtime_budget": {
+      "observed_pristine0_minutes_range": [
+        35.37,
+        39.91
+      ],
+      "observed_train0_minutes_range": [
+        58.39,
+        70.11
+      ],
+      "requested_time_limit_hours": 10,
+      "all_four_requests_denied_by_slurm": true,
+      "actual_time_limit_hours": 8,
+      "evidence": "evidence/v42-public-path-runtime-budget/",
+      "no_new_or_resampled_windows": true
+    }
   },
   "predispatch_control_provenance": {
     "evidence": "evidence/v42-predispatch-controls/",
@@ -1189,5 +1204,29 @@
     "epoch_registry_gpu_or_real_server_qualified": false,
     "registry_freezes_choices_before_scoring": true,
     "registry_metadata_rebind_once_per_key_per_epoch": true
+  },
+  "actual_serving_operator_kernel_profile": {
+    "state": "DUAL_DIAGNOSTIC_PASS",
+    "evidence": "evidence/v42-serving-kernel-profile/",
+    "jobs": {
+      "gpu_4090": "1647801",
+      "gpu_5090": "1647802"
+    },
+    "actual_dynamic_shared_memory_bytes": {
+      "native": 49152,
+      "resource": 65536
+    },
+    "full_output_lse_exact": true,
+    "exposed_single_process_per_gpu": true,
+    "ragged_suffix_has_no_kernel_gain": true,
+    "paged1_cached_prefix_event_gain_range": [
+      1.3685758411867597,
+      1.3973809768918377
+    ],
+    "profile_timing_excluded_from_qualification": true,
+    "hardware_residency_counters_collected": false,
+    "kineto_zero_resource_occupancy_estimate_is_not_a_measurement": true,
+    "qualification_authority": false,
+    "fresh_cases_consumed": 0
   }
 }
