@@ -17,6 +17,15 @@ import runpy
 from pathlib import Path
 
 
+def unpack_paged_payload(cache, layout):
+    # The native helper also handles the implicit page-size-one dimension and
+    # packed tensors whose K/V axis is dim=1, not dim=0. These are views only.
+    from flashinfer.utils import _unpack_paged_kv_cache
+
+    k, v = _unpack_paged_kv_cache(cache, layout)
+    return k, v, k.shape[1 if layout == "NHD" else 2]
+
+
 def install():
     destination = os.environ.get("SGI_PREFILL_GEOMETRY_DIR")
     if not destination:
@@ -57,10 +66,11 @@ def install():
         qs = [b - a for a, b in zip(qi, qi[1:])]
         if paged:
             kv = bound["paged_kv_cache"]
-            k, v = (kv[0], kv[1]) if isinstance(kv, tuple) else kv.unbind(0)
-            page_size = k.shape[1 if wrapper._kv_layout == "NHD" else 2]
+            k, v, page_size = unpack_paged_payload(kv, wrapper._kv_layout)
             ki = wrapper._paged_kv_indptr_buf.detach().cpu().tolist()[: batch + 1]
             last = wrapper._paged_kv_last_page_len_buf.detach().cpu().tolist()[:batch]
+            if any(n < 0 or n > page_size for n in last):
+                raise RuntimeError("Page-tail length exceeds the actual native page size")
             lengths = [(b - a - 1) * page_size + n for a, b, n in zip(ki, ki[1:], last)]
         else:
             k, v = bound["k"], bound["v"]
@@ -104,6 +114,11 @@ def install():
                     wrapper._paged_kv_indptr_buf if paged else wrapper._kv_indptr_buf
                 ),
             },
+            "native_kv_unpacking_applied": paged,
+            "q_indptr": qi,
+            "kv_indptr": ki,
+            "last_page_lengths": last if paged else None,
+            "metadata_version_counters_detect_foreign_cuda_writes": False,
             "diagnostic_only": True,
             "timing_valid": False,
             "resource_tactic_selected": False,
