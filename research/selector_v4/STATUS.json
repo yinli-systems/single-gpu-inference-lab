@@ -854,7 +854,7 @@
     "source_commit": "13ae45c2283f54fc2cf2461b7ed7a0d4c5e84305",
     "change": "Accept positive noncausal prefix KV shorter than Q; keep causal KV>=Q and positive lengths guard",
     "normal_wheel_build_pending": false,
-    "gpu_requalification_pending": true,
+    "gpu_requalification_pending": false,
     "tests_expected": 61,
     "gpu_tests_expected": 16,
     "cpu_tests_expected": 45,
@@ -869,7 +869,11 @@
       "gpu_4090": "1645718",
       "gpu_5090": "1645719"
     },
-    "source_superseding_cache_fix_pending": true
+    "source_superseding_cache_fix_pending": true,
+    "gpu_tests_pass": true,
+    "functional_evidence": "evidence/v42-normal-prefix-wheel-functional/",
+    "tests_per_gpu": 61,
+    "prepared_managed_modes_pass": true
   },
   "current_main_module_identity_revision": {
     "source_commit": "bab48695bbe72ba23c49bad69818b2975f3de6f7",
