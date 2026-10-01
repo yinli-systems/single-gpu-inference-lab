@@ -42,8 +42,9 @@ def save(p, x):
     p.write_text(json.dumps(x, indent=2, allow_nan=False) + "\n")
 
 
-def run(out, rep):
+def run(out, rep, expected_source, expected_version):
     import torch
+    from flashinfer._build_meta import __git_commit__, __version__
     from flashinfer.prefill import (
         BatchPrefillWithRaggedKVCacheWrapper,
         BatchPrefillWithPagedKVCacheWrapper,
@@ -51,6 +52,8 @@ def run(out, rep):
     )
     from flashinfer.jit import env
 
+    if (__git_commit__, __version__) != (expected_source, expected_version):
+        raise RuntimeError("loaded package does not match the preregistered source/version")
     if out.exists():
         raise FileExistsError("preserve all previous evidence")
     out.mkdir(parents=True)
@@ -69,7 +72,8 @@ def run(out, rep):
             "cuda": torch.version.cuda,
             "affinity": sorted(os.sched_getaffinity(0)),
             "script_sha256": sha(__file__),
-            "source": "d7683dd8e86af2f37e8d25162c45b01f80824378",
+            "source": __git_commit__,
+            "package_version": __version__,
             "rep": rep,
             "fresh_cases_consumed": 0,
             "prepared_run_only": True,
@@ -329,5 +333,7 @@ if __name__ == "__main__":
     p = argparse.ArgumentParser()
     p.add_argument("--out", type=Path, required=True)
     p.add_argument("--rep", type=int, required=True)
+    p.add_argument("--source-commit", required=True)
+    p.add_argument("--package-version", required=True)
     a = p.parse_args()
-    run(a.out, a.rep)
+    run(a.out, a.rep, a.source_commit, a.package_version)

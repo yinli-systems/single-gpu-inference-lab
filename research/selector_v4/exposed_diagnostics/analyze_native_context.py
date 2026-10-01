@@ -82,6 +82,9 @@ def analyze(campaign, out, allow_incomplete_diagnostic=False):
         assert all(
             e["script_sha256"] == digest(campaign / "native_context.py") for e in environments
         )
+        assert all(e["source"] == binding["flashinfer_source"] for e in environments)
+        if "package_version" in binding:
+            assert all(e["package_version"] == binding["package_version"] for e in environments)
         # Compare common binary paths across all independent processes and cells.
         libraries = {}
         for numeric in numerics:
@@ -210,7 +213,11 @@ def analyze(campaign, out, allow_incomplete_diagnostic=False):
             "An incomplete diagnostic campaign is summarized only with explicit opt-in; unpersisted timing tails cannot be reconstructed",
             "Prepared calls and pure fixed replay; no replanning or Graph input updates",
             "Resource is deliberately uncertified; native fallback uses runner.forward, not AutoTuner.choose_one",
-            "Vendor payload is the recorded older CCCL overlay; official pinned-vendor wheel is qualified separately",
+            (
+                "Vendor payload is the recorded normal pinned-vendor wheel; this exposed diagnostic does not grant release authority"
+                if binding.get("official_pinned_vendor_wheel")
+                else "Vendor payload is the recorded older CCCL overlay; official pinned-vendor wheel is qualified separately"
+            ),
             "Observed associations do not attribute the cause of frozen v4.2 native regressions",
         ],
     }
