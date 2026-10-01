@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "/ssd/scxi253/validate_eager_rebind_cpu.py", line 38, in <module>
+    cases = ET.parse(out / 'tests.xml').findall('.//testcase')
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/ssd/scxi253/q7b-engines-20260925T1247Z/tools/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/xml/etree/ElementTree.py", line 1204, in parse
+    tree.parse(source, parser)
+  File "/ssd/scxi253/q7b-engines-20260925T1247Z/tools/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/xml/etree/ElementTree.py", line 558, in parse
+    source = open(source, "rb")
+             ^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/ssd/scxi253/sgi-eager-rebind-cpu-20261001T1133Z/tests.xml'
