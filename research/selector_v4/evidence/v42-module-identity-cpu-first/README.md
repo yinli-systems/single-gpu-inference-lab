@@ -1,0 +1,1 @@
+Initial module-identity patch on private13ae45c2 normal-wheel CPU overlay:51 CPU pass,16 GPU skipped. No GPU or new normal-package qualification. Final revision additionally guards changed envelopes across different dtype templates; its53 CPU proof is separate.
