@@ -143,6 +143,9 @@ class ServingPlanLease:
     def run(self, inputs, *, forward_options):
         if dict(forward_options) != self.options or not self.current(inputs):
             return self.native(inputs, forward_options)
+        if not self.runner._current(inputs):
+            self.invalidate()
+            return self.native(inputs, forward_options)
         # The runner independently revalidates the snapshot, certificate and
         # run options. Missing/inconclusive certificates remain native.
         return self.runner.run(inputs, **self.run_options)

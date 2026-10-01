@@ -86,6 +86,24 @@ def test_inference_metadata_snapshot_and_epoch_fallback(paged):
             torch.testing.assert_close(a, c, rtol=0, atol=0)
         assert w._plan_info is original_plan and w._cached_module is original_module
         assert lease.runner._current(inputs)
+        damaged = ServingPlanLease(
+            w,
+            inputs,
+            qo_lengths=Q,
+            kv_lengths=KV,
+            forward_options=options,
+            return_lse=True,
+        )
+        damaged.prepared._qo_indptr_buf.zero_()
+
+        def no_snapshot_run(*args, **kwargs):
+            raise AssertionError("Changed snapshot used a prepared runner")
+
+        damaged.runner.run = no_snapshot_run
+        owner_fallback = damaged.run(inputs, forward_options=options)
+        assert damaged.invalidated
+        for actual, expected in zip(owner_fallback, native):
+            torch.testing.assert_close(actual, expected, rtol=0, atol=0)
         # The owner changes the CPU planning epoch even when all15 plan values
         # remain equal. No expired resource path may be invoked.
         w._plan_info = list(original_plan)
