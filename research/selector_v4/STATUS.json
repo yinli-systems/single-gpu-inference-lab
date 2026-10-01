@@ -783,10 +783,18 @@
     "cpu_tests_passed": 12,
     "cpu_evidence": "evidence/v42-geometry-payload-cpu/",
     "corrected_live_job": "1645581",
-    "corrected_live_pending": true,
+    "corrected_live_pending": false,
     "resource_tactic_selected": false,
     "timing_valid": false,
-    "fresh_cases_consumed": 0
+    "fresh_cases_consumed": 0,
+    "corrected_live_complete": true,
+    "corrected_evidence": "evidence/v42-http-geometry-native-unpack/",
+    "native_page_sizes": [
+      1
+    ],
+    "native_control_tokens": 112,
+    "native_control_exact": true,
+    "resource_token_parity_qualified": false
   },
   "exposed_managed_resolution": {
     "harness_commit": "e20b74a",
@@ -806,7 +814,53 @@
     ],
     "processes_per_gpu": 3,
     "fresh_cases_consumed": 0,
-    "complete": false,
-    "qualification_authority": false
+    "complete": true,
+    "qualification_authority": false,
+    "all_started_fits_retained": true,
+    "trimmed_fits": 0,
+    "evidence": "evidence/v42-managed-resolution-complete/",
+    "original_outlier_explained": false,
+    "results": {
+      "gpu_4090": {
+        "resource_wins": 8,
+        "resource_offered": 8,
+        "fits": 24,
+        "confidence_certificates_accepted": 1,
+        "confidence_certificates_attempted": 3
+      },
+      "gpu_5090": {
+        "resource_wins": 24,
+        "resource_offered": 24,
+        "fits": 24,
+        "confidence_certificates_accepted": 3,
+        "confidence_certificates_attempted": 3
+      }
+    }
+  },
+  "serving_layout_functional": {
+    "harness_commit": "73fa382",
+    "flashinfer_commit": "eb4e3e60",
+    "jobs": {
+      "gpu_4090": "1645591",
+      "gpu_5090": "1645592"
+    },
+    "tests_per_gpu": 6,
+    "pass": true,
+    "evidence": "evidence/v42-serving-layouts-functional/",
+    "full_serving_qualified": false,
+    "metadata_update_supported": false
+  },
+  "current_main_prefix_geometry_revision": {
+    "source_commit": "13ae45c2283f54fc2cf2461b7ed7a0d4c5e84305",
+    "change": "Accept positive noncausal prefix KV shorter than Q; keep causal KV>=Q and positive lengths guard",
+    "normal_wheel_build_pending": true,
+    "gpu_requalification_pending": true,
+    "tests_expected": 61,
+    "gpu_tests_expected": 16,
+    "cpu_tests_expected": 45,
+    "prior_eb4_results_retained": true,
+    "release_qualified": false,
+    "full_http_qualified": false,
+    "default_promotion": false
   }
 }
