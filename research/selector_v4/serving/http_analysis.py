@@ -102,6 +102,12 @@ def derived_metrics(block, expected):
 def load_arm(root, *, role, stage, allocation, model_id, binding_sha, model_sha):
     need(not (root / "failure.json").exists(), "Failed HTTP arm")
     complete = json.loads((root / "complete.json").read_text())
+    actual_files = {
+        str(p.relative_to(root))
+        for p in root.rglob("*")
+        if p.is_file() and p.name not in ("complete.json", "server.log")
+    }
+    need(actual_files == set(complete["files"]), "Every original HTTP artifact must be bound")
     need(
         complete["complete"]
         and all(
@@ -235,6 +241,25 @@ def sass_evidence(root, *, job, binding_sha):
     return {"kernels_per_class": {k: len(v) for k, v in tables.items()}}
 
 
+def clock_evidence(path, blocks, uuid):
+    """Use only actual samples fully inside scored blocks, never compile/warmup."""
+    intervals = [(b["unix_started"], b["unix_started"] + b["elapsed"]) for b in blocks.values()]
+    clocks = []
+    for line in path.read_text().splitlines():
+        row = json.loads(line)
+        if not any(lo <= row["unix_started"] <= row["unix_finished"] <= hi for lo, hi in intervals):
+            continue
+        need("error" not in row and row["exit_code"] == 0, "Actual scored telemetry failed")
+        need(row["uuid"] == uuid, "Actual measured GPU UUID")
+        if row["utilization"] >= 90:
+            need(math.isfinite(row["sm_mhz"]) and row["sm_mhz"] > 0, "Actual positive clock")
+            clocks.append(row["sm_mhz"])
+    need(len(clocks) >= 10, "At least ten active scored clock samples per actual HTTP arm")
+    lo, hi = np.quantile(clocks, [0.05, 0.95])
+    need(hi / lo <= 1.05, "Actual scored GPU clocks unstable")
+    return {"active_samples": len(clocks), "p05_mhz": float(lo), "p95_mhz": float(hi)}
+
+
 def analyze(root, output, *, jobs, gpu, model_id, stage):
     need(
         not output.exists() and len(jobs) == 3 and len(set(jobs)) == 3,
@@ -243,10 +268,21 @@ def analyze(root, output, *, jobs, gpu, model_id, stage):
     binding = json.loads((root / "binding.json").read_text())
     binding_sha = sha(root / "binding.json")
     model_sha = binding["models"][model_id]["binding_sha256"]
-    allocations, parity, profiles, source = [], [], [], []
+    allocations, parity, profiles, source, clocks = [], [], [], [], []
     for allocation, job in enumerate(jobs):
         path = root / "paired" / job
         need((path / "exit.txt").read_text().strip() == "0", "Complete paired HTTP allocation")
+        terminal_path = root / f"receipts/allocation-terminal-{job}.json"
+        terminal_record = json.loads(terminal_path.read_text())
+        need(
+            terminal_record["job"] == job
+            and terminal_record["sacct"].split("|")[:3] == [job, "COMPLETED", "0:0"],
+            "Actual completed Slurm allocation required",
+        )
+        for name, digest in terminal_record["files"].items():
+            relative = Path(name)
+            need(not relative.is_absolute() and ".." not in relative.parts, "Safe Slurm evidence")
+            need(sha(root / relative) == digest, "Original allocation receipt changed")
         arms = {}
         environments = []
         blocks = {}
@@ -261,13 +297,19 @@ def analyze(root, output, *, jobs, gpu, model_id, stage):
                 model_sha=model_sha,
             )
             need(
-                env["gpu"] == gpu and env["actual_flashinfer_commit"] == binding[role + "_commit"],
+                env["gpu"] == gpu
+                and env["slurm_job_id"] == job
+                and env["actual_flashinfer_commit"] == binding[role + "_commit"],
                 "Actual GPU family/package source",
             )
             environments.append(env)
             blocks[role] = data
             arms[role] = metrics
             profiles.append(profile_evidence(path / role, role))
+            if stage == "performance":
+                clocks.append(
+                    clock_evidence(root / f"logs/telemetry-{job}.jsonl", data, env["gpu_uuid"])
+                )
         need(
             environments[0]["gpu_uuid"] == environments[1]["gpu_uuid"]
             and environments[0]["cpu_affinity"] == environments[1]["cpu_affinity"],
@@ -291,6 +333,13 @@ def analyze(root, output, *, jobs, gpu, model_id, stage):
             and snapshot["metadata_boundaries"]["early_binds"] > 0,
             "Actual early-bound serving metadata required",
         )
+        need(
+            snapshot["router"]["frozen_input_geometries"] > 0
+            and snapshot["router"]["counters"]["prepared_attempts"] > 0
+            and snapshot["request_time_training"] is False
+            and snapshot["router"]["request_time_metadata_readback"] is False,
+            "Actual frozen router, no request-time calibration or metadata readback",
+        )
         if stage != "parity":
             need(
                 snapshot["metadata_boundaries"]["graph_updates"] > 0,
@@ -302,6 +351,8 @@ def analyze(root, output, *, jobs, gpu, model_id, stage):
                 "job": job,
                 "sass_receipt_sha256": sha(path / "independent-sass/receipt.json"),
                 "metadata_snapshot_sha256": sha(snapshots[-1]),
+                "slurm_terminal_sha256": sha(terminal_path),
+                "scored_telemetry_sha256": sha(root / f"logs/telemetry-{job}.jsonl"),
             }
         )
     metric = evaluate_metrics(allocations) if stage == "performance" else None
@@ -316,6 +367,7 @@ def analyze(root, output, *, jobs, gpu, model_id, stage):
         "binding_sha256": binding_sha,
         "source": source,
         "profiles": profiles,
+        "scored_clocks": clocks,
         "parity": parity,
         "metrics": metric,
         "full_http_qualified": False,

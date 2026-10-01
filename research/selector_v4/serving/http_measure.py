@@ -274,6 +274,7 @@ async def run(arguments):
             "actual_flashinfer_version": __version__,
             "cpu_affinity": sorted(os.sched_getaffinity(0)),
             "gpu": gpu,
+            "slurm_job_id": os.environ["SLURM_JOB_ID"],
             "gpu_uuid": gpu_uuid,
             "gpu_name": properties.name,
             "compute_capability": [properties.major, properties.minor],
