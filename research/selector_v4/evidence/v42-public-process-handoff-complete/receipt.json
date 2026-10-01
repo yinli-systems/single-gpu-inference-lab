@@ -1,0 +1,1251 @@
+{
+  "pass": true,
+  "binding": {
+    "harness_commit": "6aaa0b9f99d846380344b93df80a79ea919a7223",
+    "flashinfer_source_commit": "75544a17ce0019ca877f50354d95451ee089f859",
+    "normal_wheel_sha256": "2044882df7413bff1946b5eb78d291c0f6fb715c55263d5e1dd5fa6b28dc94d1",
+    "source": "/ssd/scxi253/sgi-official-wheel-validation-75544a17-20261001/wheel-overlay",
+    "source_ledger_sha256": "27792f5b00b7f6eb54077c0f83d343f97c4407c7465ee866287177603375a965",
+    "vendor_git_pins": {
+      "cccl": "16bd510c9b712e82b0ab6cbb630d8e29ba1f7116",
+      "cutlass": "b46b16d003484063bca4ed365e44095c4c6ed633",
+      "spdlog": "c3aed4b68373955e1cc94307683d44dca1515d2b"
+    },
+    "geometry": "Previously exposed BF16 ragged unsplit causal, Q[3,39,107,175,243,311,411] cached[22528,16512,11840,8256,2624,672,80]",
+    "producer_processes_per_gpu": 1,
+    "fresh_consumer_processes_per_gpu": 2,
+    "modes": [
+      "eager_run-1",
+      "graph_replay-1",
+      "graph_replay-16"
+    ],
+    "consumers_never_calibrate_or_tune": true,
+    "private_jit_root_per_process": true,
+    "actual_public_confidence_load_and_managed_v2_replay": true,
+    "eager_same_geometry_rebind": true,
+    "fixed_graph_same_pointer_input_updates": true,
+    "metadata_updates_or_full_serving_qualified": false,
+    "independent_performance_qualified": false,
+    "fresh_cases_consumed": 0,
+    "all_started_results_retained": true,
+    "qualification_authority": false,
+    "full_http_qualified": false,
+    "default_promotion": false,
+    "serving_promotion": false,
+    "historical_token_divergence_resolved": false
+  },
+  "results": {
+    "gpu_4090": {
+      "sacct": "1647026       COMPLETED      0:0   00:17:51 \n",
+      "environments": [
+        {
+          "source_commit": "75544a17ce0019ca877f50354d95451ee089f859",
+          "gpu_uuid": "3e0f4908-d2a5-ea4f-2627-630b5082aff4",
+          "gpu_name": "NVIDIA GeForce RTX 4090",
+          "pid": 2438978,
+          "source_sha256": "eadd61cc4e870087c1d7514a6a82af06e187a9c08b5b798286f0510141635829",
+          "affinity": [
+            36,
+            37
+          ],
+          "inputs_sha256": [
+            "098ad374b7759fafd7c70e86324f78b588f324029ebfeafa50fa7b34ca43b6b2",
+            "75a44b64f548e8f3b93c6b342bf5567331a8bdc184da83ba3fa3c30b2060ca9c",
+            "469e34bcd0f60d483b0e3fca6a414ab27e53453b869e11b61aca70dfbb132c4e"
+          ],
+          "producer": null,
+          "native_output_lse_sha256": [
+            "f7d35d027eb59b83c126c5f014884c58c9e7633c732d17199103aed2780a8191",
+            "4aea5d0f8a37a19499dbf475ffbbc33bb166a4c17e407ee93bb931c15e637cfe"
+          ],
+          "calibrates_and_tunes": true,
+          "fresh_cases_consumed": 0,
+          "performance_qualification": false,
+          "full_http_qualified": false
+        },
+        {
+          "source_commit": "75544a17ce0019ca877f50354d95451ee089f859",
+          "gpu_uuid": "3e0f4908-d2a5-ea4f-2627-630b5082aff4",
+          "gpu_name": "NVIDIA GeForce RTX 4090",
+          "pid": 2440286,
+          "source_sha256": "eadd61cc4e870087c1d7514a6a82af06e187a9c08b5b798286f0510141635829",
+          "affinity": [
+            36,
+            37
+          ],
+          "inputs_sha256": [
+            "098ad374b7759fafd7c70e86324f78b588f324029ebfeafa50fa7b34ca43b6b2",
+            "75a44b64f548e8f3b93c6b342bf5567331a8bdc184da83ba3fa3c30b2060ca9c",
+            "469e34bcd0f60d483b0e3fca6a414ab27e53453b869e11b61aca70dfbb132c4e"
+          ],
+          "producer": "/ssd/scxi253/sgi-public-process-handoff-6aaa0b9-75544a17-20261001/runs/gpu_4090-1647026/producer",
+          "native_output_lse_sha256": [
+            "f7d35d027eb59b83c126c5f014884c58c9e7633c732d17199103aed2780a8191",
+            "4aea5d0f8a37a19499dbf475ffbbc33bb166a4c17e407ee93bb931c15e637cfe"
+          ],
+          "calibrates_and_tunes": false,
+          "fresh_cases_consumed": 0,
+          "performance_qualification": false,
+          "full_http_qualified": false
+        },
+        {
+          "source_commit": "75544a17ce0019ca877f50354d95451ee089f859",
+          "gpu_uuid": "3e0f4908-d2a5-ea4f-2627-630b5082aff4",
+          "gpu_name": "NVIDIA GeForce RTX 4090",
+          "pid": 2441239,
+          "source_sha256": "eadd61cc4e870087c1d7514a6a82af06e187a9c08b5b798286f0510141635829",
+          "affinity": [
+            36,
+            37
+          ],
+          "inputs_sha256": [
+            "098ad374b7759fafd7c70e86324f78b588f324029ebfeafa50fa7b34ca43b6b2",
+            "75a44b64f548e8f3b93c6b342bf5567331a8bdc184da83ba3fa3c30b2060ca9c",
+            "469e34bcd0f60d483b0e3fca6a414ab27e53453b869e11b61aca70dfbb132c4e"
+          ],
+          "producer": "/ssd/scxi253/sgi-public-process-handoff-6aaa0b9-75544a17-20261001/runs/gpu_4090-1647026/producer",
+          "native_output_lse_sha256": [
+            "f7d35d027eb59b83c126c5f014884c58c9e7633c732d17199103aed2780a8191",
+            "4aea5d0f8a37a19499dbf475ffbbc33bb166a4c17e407ee93bb931c15e637cfe"
+          ],
+          "calibrates_and_tunes": false,
+          "fresh_cases_consumed": 0,
+          "performance_qualification": false,
+          "full_http_qualified": false
+        }
+      ],
+      "modes": {
+        "producer": {
+          "eager_run-1": {
+            "identity": "eb67e29e260a7e892dcd8f6ccc20a4a55ea5343d2567d199fa810e920875d525",
+            "certificate_checksum": "c297f3efd19a16846fa178176d2f9a978d0fe6863507bc0c55aede5f81202f7e",
+            "certificate_accepted": false,
+            "managed_tactic": 0,
+            "initial_output_lse_exact": true,
+            "stored_winner": {
+              "key": "('experimental_prefill_resource', 'ResourceCapRunner', ((1289, 32, 128), (63801, 8, 128), (63801, 8, 128)), ('eb67e29e260a7e892dcd8f6ccc20a4a55ea5343d2567d199fa810e920875d525', 'c297f3efd19a16846fa178176d2f9a978d0fe6863507bc0c55aede5f81202f7e'))",
+              "key_fields": {
+                "__tuple__": [
+                  "experimental_prefill_resource",
+                  "ResourceCapRunner",
+                  {
+                    "__tuple__": [
+                      {
+                        "__tuple__": [
+                          1289,
+                          32,
+                          128
+                        ]
+                      },
+                      {
+                        "__tuple__": [
+                          63801,
+                          8,
+                          128
+                        ]
+                      },
+                      {
+                        "__tuple__": [
+                          63801,
+                          8,
+                          128
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "__tuple__": [
+                      "eb67e29e260a7e892dcd8f6ccc20a4a55ea5343d2567d199fa810e920875d525",
+                      "c297f3efd19a16846fa178176d2f9a978d0fe6863507bc0c55aede5f81202f7e"
+                    ]
+                  }
+                ]
+              },
+              "runner": "ResourceCapRunner",
+              "tactic": 0
+            },
+            "producer_pid": 2438978,
+            "consumer_pid": null,
+            "replanned_output_lse_exact": true,
+            "resource_rebound": false
+          },
+          "graph_replay-1": {
+            "identity": "8170658d1019c4bf955494413fcfc0b0e8a6110de3a56cfe6bb75bcfc4855c9c",
+            "certificate_checksum": "d98c71720fc00c0f51ee877571af0e6412f11b1217442badb75c68d4562bd608",
+            "certificate_accepted": true,
+            "managed_tactic": 1,
+            "initial_output_lse_exact": true,
+            "stored_winner": {
+              "key": "('experimental_prefill_resource', 'ResourceCapRunner', ((1289, 32, 128), (63801, 8, 128), (63801, 8, 128)), ('8170658d1019c4bf955494413fcfc0b0e8a6110de3a56cfe6bb75bcfc4855c9c', 'd98c71720fc00c0f51ee877571af0e6412f11b1217442badb75c68d4562bd608'))",
+              "key_fields": {
+                "__tuple__": [
+                  "experimental_prefill_resource",
+                  "ResourceCapRunner",
+                  {
+                    "__tuple__": [
+                      {
+                        "__tuple__": [
+                          1289,
+                          32,
+                          128
+                        ]
+                      },
+                      {
+                        "__tuple__": [
+                          63801,
+                          8,
+                          128
+                        ]
+                      },
+                      {
+                        "__tuple__": [
+                          63801,
+                          8,
+                          128
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "__tuple__": [
+                      "8170658d1019c4bf955494413fcfc0b0e8a6110de3a56cfe6bb75bcfc4855c9c",
+                      "d98c71720fc00c0f51ee877571af0e6412f11b1217442badb75c68d4562bd608"
+                    ]
+                  }
+                ]
+              },
+              "runner": "ResourceCapRunner",
+              "tactic": 1
+            },
+            "producer_pid": 2438978,
+            "consumer_pid": null,
+            "captured_output_lse_exact": true,
+            "same_pointer_input_update_output_lse_exact": true
+          },
+          "graph_replay-16": {
+            "identity": "43601724939e7f1be216938e837fd429b5349bdab4d619167a35bbfee59b62fe",
+            "certificate_checksum": "4d4f290fc58a7681be14c9b6eb038081d4af11213d6efc995d06c66cc04b98e0",
+            "certificate_accepted": true,
+            "managed_tactic": 1,
+            "initial_output_lse_exact": true,
+            "stored_winner": {
+              "key": "('experimental_prefill_resource', 'ResourceCapRunner', ((1289, 32, 128), (63801, 8, 128), (63801, 8, 128)), ('43601724939e7f1be216938e837fd429b5349bdab4d619167a35bbfee59b62fe', '4d4f290fc58a7681be14c9b6eb038081d4af11213d6efc995d06c66cc04b98e0'))",
+              "key_fields": {
+                "__tuple__": [
+                  "experimental_prefill_resource",
+                  "ResourceCapRunner",
+                  {
+                    "__tuple__": [
+                      {
+                        "__tuple__": [
+                          1289,
+                          32,
+                          128
+                        ]
+                      },
+                      {
+                        "__tuple__": [
+                          63801,
+                          8,
+                          128
+                        ]
+                      },
+                      {
+                        "__tuple__": [
+                          63801,
+                          8,
+                          128
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "__tuple__": [
+                      "43601724939e7f1be216938e837fd429b5349bdab4d619167a35bbfee59b62fe",
+                      "4d4f290fc58a7681be14c9b6eb038081d4af11213d6efc995d06c66cc04b98e0"
+                    ]
+                  }
+                ]
+              },
+              "runner": "ResourceCapRunner",
+              "tactic": 1
+            },
+            "producer_pid": 2438978,
+            "consumer_pid": null,
+            "captured_output_lse_exact": true,
+            "same_pointer_input_update_output_lse_exact": true
+          }
+        },
+        "consumer1": {
+          "eager_run-1": {
+            "identity": "eb67e29e260a7e892dcd8f6ccc20a4a55ea5343d2567d199fa810e920875d525",
+            "certificate_checksum": "c297f3efd19a16846fa178176d2f9a978d0fe6863507bc0c55aede5f81202f7e",
+            "certificate_accepted": false,
+            "managed_tactic": 0,
+            "initial_output_lse_exact": true,
+            "stored_winner": {
+              "key": "('experimental_prefill_resource', 'ResourceCapRunner', ((1289, 32, 128), (63801, 8, 128), (63801, 8, 128)), ('eb67e29e260a7e892dcd8f6ccc20a4a55ea5343d2567d199fa810e920875d525', 'c297f3efd19a16846fa178176d2f9a978d0fe6863507bc0c55aede5f81202f7e'))",
+              "key_fields": {
+                "__tuple__": [
+                  "experimental_prefill_resource",
+                  "ResourceCapRunner",
+                  {
+                    "__tuple__": [
+                      {
+                        "__tuple__": [
+                          1289,
+                          32,
+                          128
+                        ]
+                      },
+                      {
+                        "__tuple__": [
+                          63801,
+                          8,
+                          128
+                        ]
+                      },
+                      {
+                        "__tuple__": [
+                          63801,
+                          8,
+                          128
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "__tuple__": [
+                      "eb67e29e260a7e892dcd8f6ccc20a4a55ea5343d2567d199fa810e920875d525",
+                      "c297f3efd19a16846fa178176d2f9a978d0fe6863507bc0c55aede5f81202f7e"
+                    ]
+                  }
+                ]
+              },
+              "runner": "ResourceCapRunner",
+              "tactic": 0
+            },
+            "producer_pid": 2438978,
+            "consumer_pid": 2440286,
+            "replanned_output_lse_exact": true,
+            "resource_rebound": false
+          },
+          "graph_replay-1": {
+            "identity": "8170658d1019c4bf955494413fcfc0b0e8a6110de3a56cfe6bb75bcfc4855c9c",
+            "certificate_checksum": "d98c71720fc00c0f51ee877571af0e6412f11b1217442badb75c68d4562bd608",
+            "certificate_accepted": true,
+            "managed_tactic": 1,
+            "initial_output_lse_exact": true,
+            "stored_winner": {
+              "key": "('experimental_prefill_resource', 'ResourceCapRunner', ((1289, 32, 128), (63801, 8, 128), (63801, 8, 128)), ('8170658d1019c4bf955494413fcfc0b0e8a6110de3a56cfe6bb75bcfc4855c9c', 'd98c71720fc00c0f51ee877571af0e6412f11b1217442badb75c68d4562bd608'))",
+              "key_fields": {
+                "__tuple__": [
+                  "experimental_prefill_resource",
+                  "ResourceCapRunner",
+                  {
+                    "__tuple__": [
+                      {
+                        "__tuple__": [
+                          1289,
+                          32,
+                          128
+                        ]
+                      },
+                      {
+                        "__tuple__": [
+                          63801,
+                          8,
+                          128
+                        ]
+                      },
+                      {
+                        "__tuple__": [
+                          63801,
+                          8,
+                          128
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "__tuple__": [
+                      "8170658d1019c4bf955494413fcfc0b0e8a6110de3a56cfe6bb75bcfc4855c9c",
+                      "d98c71720fc00c0f51ee877571af0e6412f11b1217442badb75c68d4562bd608"
+                    ]
+                  }
+                ]
+              },
+              "runner": "ResourceCapRunner",
+              "tactic": 1
+            },
+            "producer_pid": 2438978,
+            "consumer_pid": 2440286,
+            "captured_output_lse_exact": true,
+            "same_pointer_input_update_output_lse_exact": true
+          },
+          "graph_replay-16": {
+            "identity": "43601724939e7f1be216938e837fd429b5349bdab4d619167a35bbfee59b62fe",
+            "certificate_checksum": "4d4f290fc58a7681be14c9b6eb038081d4af11213d6efc995d06c66cc04b98e0",
+            "certificate_accepted": true,
+            "managed_tactic": 1,
+            "initial_output_lse_exact": true,
+            "stored_winner": {
+              "key": "('experimental_prefill_resource', 'ResourceCapRunner', ((1289, 32, 128), (63801, 8, 128), (63801, 8, 128)), ('43601724939e7f1be216938e837fd429b5349bdab4d619167a35bbfee59b62fe', '4d4f290fc58a7681be14c9b6eb038081d4af11213d6efc995d06c66cc04b98e0'))",
+              "key_fields": {
+                "__tuple__": [
+                  "experimental_prefill_resource",
+                  "ResourceCapRunner",
+                  {
+                    "__tuple__": [
+                      {
+                        "__tuple__": [
+                          1289,
+                          32,
+                          128
+                        ]
+                      },
+                      {
+                        "__tuple__": [
+                          63801,
+                          8,
+                          128
+                        ]
+                      },
+                      {
+                        "__tuple__": [
+                          63801,
+                          8,
+                          128
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "__tuple__": [
+                      "43601724939e7f1be216938e837fd429b5349bdab4d619167a35bbfee59b62fe",
+                      "4d4f290fc58a7681be14c9b6eb038081d4af11213d6efc995d06c66cc04b98e0"
+                    ]
+                  }
+                ]
+              },
+              "runner": "ResourceCapRunner",
+              "tactic": 1
+            },
+            "producer_pid": 2438978,
+            "consumer_pid": 2440286,
+            "captured_output_lse_exact": true,
+            "same_pointer_input_update_output_lse_exact": true
+          }
+        },
+        "consumer2": {
+          "eager_run-1": {
+            "identity": "eb67e29e260a7e892dcd8f6ccc20a4a55ea5343d2567d199fa810e920875d525",
+            "certificate_checksum": "c297f3efd19a16846fa178176d2f9a978d0fe6863507bc0c55aede5f81202f7e",
+            "certificate_accepted": false,
+            "managed_tactic": 0,
+            "initial_output_lse_exact": true,
+            "stored_winner": {
+              "key": "('experimental_prefill_resource', 'ResourceCapRunner', ((1289, 32, 128), (63801, 8, 128), (63801, 8, 128)), ('eb67e29e260a7e892dcd8f6ccc20a4a55ea5343d2567d199fa810e920875d525', 'c297f3efd19a16846fa178176d2f9a978d0fe6863507bc0c55aede5f81202f7e'))",
+              "key_fields": {
+                "__tuple__": [
+                  "experimental_prefill_resource",
+                  "ResourceCapRunner",
+                  {
+                    "__tuple__": [
+                      {
+                        "__tuple__": [
+                          1289,
+                          32,
+                          128
+                        ]
+                      },
+                      {
+                        "__tuple__": [
+                          63801,
+                          8,
+                          128
+                        ]
+                      },
+                      {
+                        "__tuple__": [
+                          63801,
+                          8,
+                          128
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "__tuple__": [
+                      "eb67e29e260a7e892dcd8f6ccc20a4a55ea5343d2567d199fa810e920875d525",
+                      "c297f3efd19a16846fa178176d2f9a978d0fe6863507bc0c55aede5f81202f7e"
+                    ]
+                  }
+                ]
+              },
+              "runner": "ResourceCapRunner",
+              "tactic": 0
+            },
+            "producer_pid": 2438978,
+            "consumer_pid": 2441239,
+            "replanned_output_lse_exact": true,
+            "resource_rebound": false
+          },
+          "graph_replay-1": {
+            "identity": "8170658d1019c4bf955494413fcfc0b0e8a6110de3a56cfe6bb75bcfc4855c9c",
+            "certificate_checksum": "d98c71720fc00c0f51ee877571af0e6412f11b1217442badb75c68d4562bd608",
+            "certificate_accepted": true,
+            "managed_tactic": 1,
+            "initial_output_lse_exact": true,
+            "stored_winner": {
+              "key": "('experimental_prefill_resource', 'ResourceCapRunner', ((1289, 32, 128), (63801, 8, 128), (63801, 8, 128)), ('8170658d1019c4bf955494413fcfc0b0e8a6110de3a56cfe6bb75bcfc4855c9c', 'd98c71720fc00c0f51ee877571af0e6412f11b1217442badb75c68d4562bd608'))",
+              "key_fields": {
+                "__tuple__": [
+                  "experimental_prefill_resource",
+                  "ResourceCapRunner",
+                  {
+                    "__tuple__": [
+                      {
+                        "__tuple__": [
+                          1289,
+                          32,
+                          128
+                        ]
+                      },
+                      {
+                        "__tuple__": [
+                          63801,
+                          8,
+                          128
+                        ]
+                      },
+                      {
+                        "__tuple__": [
+                          63801,
+                          8,
+                          128
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "__tuple__": [
+                      "8170658d1019c4bf955494413fcfc0b0e8a6110de3a56cfe6bb75bcfc4855c9c",
+                      "d98c71720fc00c0f51ee877571af0e6412f11b1217442badb75c68d4562bd608"
+                    ]
+                  }
+                ]
+              },
+              "runner": "ResourceCapRunner",
+              "tactic": 1
+            },
+            "producer_pid": 2438978,
+            "consumer_pid": 2441239,
+            "captured_output_lse_exact": true,
+            "same_pointer_input_update_output_lse_exact": true
+          },
+          "graph_replay-16": {
+            "identity": "43601724939e7f1be216938e837fd429b5349bdab4d619167a35bbfee59b62fe",
+            "certificate_checksum": "4d4f290fc58a7681be14c9b6eb038081d4af11213d6efc995d06c66cc04b98e0",
+            "certificate_accepted": true,
+            "managed_tactic": 1,
+            "initial_output_lse_exact": true,
+            "stored_winner": {
+              "key": "('experimental_prefill_resource', 'ResourceCapRunner', ((1289, 32, 128), (63801, 8, 128), (63801, 8, 128)), ('43601724939e7f1be216938e837fd429b5349bdab4d619167a35bbfee59b62fe', '4d4f290fc58a7681be14c9b6eb038081d4af11213d6efc995d06c66cc04b98e0'))",
+              "key_fields": {
+                "__tuple__": [
+                  "experimental_prefill_resource",
+                  "ResourceCapRunner",
+                  {
+                    "__tuple__": [
+                      {
+                        "__tuple__": [
+                          1289,
+                          32,
+                          128
+                        ]
+                      },
+                      {
+                        "__tuple__": [
+                          63801,
+                          8,
+                          128
+                        ]
+                      },
+                      {
+                        "__tuple__": [
+                          63801,
+                          8,
+                          128
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "__tuple__": [
+                      "43601724939e7f1be216938e837fd429b5349bdab4d619167a35bbfee59b62fe",
+                      "4d4f290fc58a7681be14c9b6eb038081d4af11213d6efc995d06c66cc04b98e0"
+                    ]
+                  }
+                ]
+              },
+              "runner": "ResourceCapRunner",
+              "tactic": 1
+            },
+            "producer_pid": 2438978,
+            "consumer_pid": 2441239,
+            "captured_output_lse_exact": true,
+            "same_pointer_input_update_output_lse_exact": true
+          }
+        }
+      }
+    },
+    "gpu_5090": {
+      "sacct": "1647027       COMPLETED      0:0   00:15:50 \n",
+      "environments": [
+        {
+          "source_commit": "75544a17ce0019ca877f50354d95451ee089f859",
+          "gpu_uuid": "13704586-0768-4e92-b9fb-0a29d0c72db5",
+          "gpu_name": "NVIDIA GeForce RTX 5090",
+          "pid": 3595282,
+          "source_sha256": "eadd61cc4e870087c1d7514a6a82af06e187a9c08b5b798286f0510141635829",
+          "affinity": [
+            32,
+            33
+          ],
+          "inputs_sha256": [
+            "40ca3de57e545a8ef24dbad858b8f9d8c43a5f584b39a47d1d6ab4d8ff19ac17",
+            "7ed928b559ea0660c7906a41f463924ec51c9daaa4db0a0cc7dc44e67afd848c",
+            "9aecd967bf9597ac1c67aa94f66d759735e7ae71cf9f6d7e44b49aacb18278b1"
+          ],
+          "producer": null,
+          "native_output_lse_sha256": [
+            "107fd5888b1b3ceb998534196693667557dba37dc508ac07d7346ee2d5cace24",
+            "6fcd1fbb69588a1e0348e956928bef5ba2c683464978a74e840048245ccadbc5"
+          ],
+          "calibrates_and_tunes": true,
+          "fresh_cases_consumed": 0,
+          "performance_qualification": false,
+          "full_http_qualified": false
+        },
+        {
+          "source_commit": "75544a17ce0019ca877f50354d95451ee089f859",
+          "gpu_uuid": "13704586-0768-4e92-b9fb-0a29d0c72db5",
+          "gpu_name": "NVIDIA GeForce RTX 5090",
+          "pid": 3596768,
+          "source_sha256": "eadd61cc4e870087c1d7514a6a82af06e187a9c08b5b798286f0510141635829",
+          "affinity": [
+            32,
+            33
+          ],
+          "inputs_sha256": [
+            "40ca3de57e545a8ef24dbad858b8f9d8c43a5f584b39a47d1d6ab4d8ff19ac17",
+            "7ed928b559ea0660c7906a41f463924ec51c9daaa4db0a0cc7dc44e67afd848c",
+            "9aecd967bf9597ac1c67aa94f66d759735e7ae71cf9f6d7e44b49aacb18278b1"
+          ],
+          "producer": "/ssd/scxi253/sgi-public-process-handoff-6aaa0b9-75544a17-20261001/runs/gpu_5090-1647027/producer",
+          "native_output_lse_sha256": [
+            "107fd5888b1b3ceb998534196693667557dba37dc508ac07d7346ee2d5cace24",
+            "6fcd1fbb69588a1e0348e956928bef5ba2c683464978a74e840048245ccadbc5"
+          ],
+          "calibrates_and_tunes": false,
+          "fresh_cases_consumed": 0,
+          "performance_qualification": false,
+          "full_http_qualified": false
+        },
+        {
+          "source_commit": "75544a17ce0019ca877f50354d95451ee089f859",
+          "gpu_uuid": "13704586-0768-4e92-b9fb-0a29d0c72db5",
+          "gpu_name": "NVIDIA GeForce RTX 5090",
+          "pid": 3597762,
+          "source_sha256": "eadd61cc4e870087c1d7514a6a82af06e187a9c08b5b798286f0510141635829",
+          "affinity": [
+            32,
+            33
+          ],
+          "inputs_sha256": [
+            "40ca3de57e545a8ef24dbad858b8f9d8c43a5f584b39a47d1d6ab4d8ff19ac17",
+            "7ed928b559ea0660c7906a41f463924ec51c9daaa4db0a0cc7dc44e67afd848c",
+            "9aecd967bf9597ac1c67aa94f66d759735e7ae71cf9f6d7e44b49aacb18278b1"
+          ],
+          "producer": "/ssd/scxi253/sgi-public-process-handoff-6aaa0b9-75544a17-20261001/runs/gpu_5090-1647027/producer",
+          "native_output_lse_sha256": [
+            "107fd5888b1b3ceb998534196693667557dba37dc508ac07d7346ee2d5cace24",
+            "6fcd1fbb69588a1e0348e956928bef5ba2c683464978a74e840048245ccadbc5"
+          ],
+          "calibrates_and_tunes": false,
+          "fresh_cases_consumed": 0,
+          "performance_qualification": false,
+          "full_http_qualified": false
+        }
+      ],
+      "modes": {
+        "producer": {
+          "eager_run-1": {
+            "identity": "ecb974e7a59f014c98a79612ac42574e4a91935d24443c7147e22812ac95bf8f",
+            "certificate_checksum": "121c3190a7964af6873a35ee09e1f5edf45a65662851b1b1527741418f4d6bf9",
+            "certificate_accepted": true,
+            "managed_tactic": 1,
+            "initial_output_lse_exact": true,
+            "stored_winner": {
+              "key": "('experimental_prefill_resource', 'ResourceCapRunner', ((1289, 32, 128), (63801, 8, 128), (63801, 8, 128)), ('ecb974e7a59f014c98a79612ac42574e4a91935d24443c7147e22812ac95bf8f', '121c3190a7964af6873a35ee09e1f5edf45a65662851b1b1527741418f4d6bf9'))",
+              "key_fields": {
+                "__tuple__": [
+                  "experimental_prefill_resource",
+                  "ResourceCapRunner",
+                  {
+                    "__tuple__": [
+                      {
+                        "__tuple__": [
+                          1289,
+                          32,
+                          128
+                        ]
+                      },
+                      {
+                        "__tuple__": [
+                          63801,
+                          8,
+                          128
+                        ]
+                      },
+                      {
+                        "__tuple__": [
+                          63801,
+                          8,
+                          128
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "__tuple__": [
+                      "ecb974e7a59f014c98a79612ac42574e4a91935d24443c7147e22812ac95bf8f",
+                      "121c3190a7964af6873a35ee09e1f5edf45a65662851b1b1527741418f4d6bf9"
+                    ]
+                  }
+                ]
+              },
+              "runner": "ResourceCapRunner",
+              "tactic": 1
+            },
+            "producer_pid": 3595282,
+            "consumer_pid": null,
+            "replanned_output_lse_exact": true,
+            "resource_rebound": true
+          },
+          "graph_replay-1": {
+            "identity": "56fcc7a10bb10a8b19e2d2f4b4cb9d6bc7b21a2f769f2f4344dc911d04773516",
+            "certificate_checksum": "73f492738a368e6abacae5a601bbaca57ac6b4f29de87fc1ff2858680401375f",
+            "certificate_accepted": true,
+            "managed_tactic": 1,
+            "initial_output_lse_exact": true,
+            "stored_winner": {
+              "key": "('experimental_prefill_resource', 'ResourceCapRunner', ((1289, 32, 128), (63801, 8, 128), (63801, 8, 128)), ('56fcc7a10bb10a8b19e2d2f4b4cb9d6bc7b21a2f769f2f4344dc911d04773516', '73f492738a368e6abacae5a601bbaca57ac6b4f29de87fc1ff2858680401375f'))",
+              "key_fields": {
+                "__tuple__": [
+                  "experimental_prefill_resource",
+                  "ResourceCapRunner",
+                  {
+                    "__tuple__": [
+                      {
+                        "__tuple__": [
+                          1289,
+                          32,
+                          128
+                        ]
+                      },
+                      {
+                        "__tuple__": [
+                          63801,
+                          8,
+                          128
+                        ]
+                      },
+                      {
+                        "__tuple__": [
+                          63801,
+                          8,
+                          128
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "__tuple__": [
+                      "56fcc7a10bb10a8b19e2d2f4b4cb9d6bc7b21a2f769f2f4344dc911d04773516",
+                      "73f492738a368e6abacae5a601bbaca57ac6b4f29de87fc1ff2858680401375f"
+                    ]
+                  }
+                ]
+              },
+              "runner": "ResourceCapRunner",
+              "tactic": 1
+            },
+            "producer_pid": 3595282,
+            "consumer_pid": null,
+            "captured_output_lse_exact": true,
+            "same_pointer_input_update_output_lse_exact": true
+          },
+          "graph_replay-16": {
+            "identity": "f06a74fb3517705a827e571390d1f2c0c19849d584166131f5f81bab84af8255",
+            "certificate_checksum": "bd5c5fe68441948d9d54f8b249fe8a17618d4292d306d45d5cca3d5d6231aeba",
+            "certificate_accepted": true,
+            "managed_tactic": 1,
+            "initial_output_lse_exact": true,
+            "stored_winner": {
+              "key": "('experimental_prefill_resource', 'ResourceCapRunner', ((1289, 32, 128), (63801, 8, 128), (63801, 8, 128)), ('f06a74fb3517705a827e571390d1f2c0c19849d584166131f5f81bab84af8255', 'bd5c5fe68441948d9d54f8b249fe8a17618d4292d306d45d5cca3d5d6231aeba'))",
+              "key_fields": {
+                "__tuple__": [
+                  "experimental_prefill_resource",
+                  "ResourceCapRunner",
+                  {
+                    "__tuple__": [
+                      {
+                        "__tuple__": [
+                          1289,
+                          32,
+                          128
+                        ]
+                      },
+                      {
+                        "__tuple__": [
+                          63801,
+                          8,
+                          128
+                        ]
+                      },
+                      {
+                        "__tuple__": [
+                          63801,
+                          8,
+                          128
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "__tuple__": [
+                      "f06a74fb3517705a827e571390d1f2c0c19849d584166131f5f81bab84af8255",
+                      "bd5c5fe68441948d9d54f8b249fe8a17618d4292d306d45d5cca3d5d6231aeba"
+                    ]
+                  }
+                ]
+              },
+              "runner": "ResourceCapRunner",
+              "tactic": 1
+            },
+            "producer_pid": 3595282,
+            "consumer_pid": null,
+            "captured_output_lse_exact": true,
+            "same_pointer_input_update_output_lse_exact": true
+          }
+        },
+        "consumer1": {
+          "eager_run-1": {
+            "identity": "ecb974e7a59f014c98a79612ac42574e4a91935d24443c7147e22812ac95bf8f",
+            "certificate_checksum": "121c3190a7964af6873a35ee09e1f5edf45a65662851b1b1527741418f4d6bf9",
+            "certificate_accepted": true,
+            "managed_tactic": 1,
+            "initial_output_lse_exact": true,
+            "stored_winner": {
+              "key": "('experimental_prefill_resource', 'ResourceCapRunner', ((1289, 32, 128), (63801, 8, 128), (63801, 8, 128)), ('ecb974e7a59f014c98a79612ac42574e4a91935d24443c7147e22812ac95bf8f', '121c3190a7964af6873a35ee09e1f5edf45a65662851b1b1527741418f4d6bf9'))",
+              "key_fields": {
+                "__tuple__": [
+                  "experimental_prefill_resource",
+                  "ResourceCapRunner",
+                  {
+                    "__tuple__": [
+                      {
+                        "__tuple__": [
+                          1289,
+                          32,
+                          128
+                        ]
+                      },
+                      {
+                        "__tuple__": [
+                          63801,
+                          8,
+                          128
+                        ]
+                      },
+                      {
+                        "__tuple__": [
+                          63801,
+                          8,
+                          128
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "__tuple__": [
+                      "ecb974e7a59f014c98a79612ac42574e4a91935d24443c7147e22812ac95bf8f",
+                      "121c3190a7964af6873a35ee09e1f5edf45a65662851b1b1527741418f4d6bf9"
+                    ]
+                  }
+                ]
+              },
+              "runner": "ResourceCapRunner",
+              "tactic": 1
+            },
+            "producer_pid": 3595282,
+            "consumer_pid": 3596768,
+            "replanned_output_lse_exact": true,
+            "resource_rebound": true
+          },
+          "graph_replay-1": {
+            "identity": "56fcc7a10bb10a8b19e2d2f4b4cb9d6bc7b21a2f769f2f4344dc911d04773516",
+            "certificate_checksum": "73f492738a368e6abacae5a601bbaca57ac6b4f29de87fc1ff2858680401375f",
+            "certificate_accepted": true,
+            "managed_tactic": 1,
+            "initial_output_lse_exact": true,
+            "stored_winner": {
+              "key": "('experimental_prefill_resource', 'ResourceCapRunner', ((1289, 32, 128), (63801, 8, 128), (63801, 8, 128)), ('56fcc7a10bb10a8b19e2d2f4b4cb9d6bc7b21a2f769f2f4344dc911d04773516', '73f492738a368e6abacae5a601bbaca57ac6b4f29de87fc1ff2858680401375f'))",
+              "key_fields": {
+                "__tuple__": [
+                  "experimental_prefill_resource",
+                  "ResourceCapRunner",
+                  {
+                    "__tuple__": [
+                      {
+                        "__tuple__": [
+                          1289,
+                          32,
+                          128
+                        ]
+                      },
+                      {
+                        "__tuple__": [
+                          63801,
+                          8,
+                          128
+                        ]
+                      },
+                      {
+                        "__tuple__": [
+                          63801,
+                          8,
+                          128
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "__tuple__": [
+                      "56fcc7a10bb10a8b19e2d2f4b4cb9d6bc7b21a2f769f2f4344dc911d04773516",
+                      "73f492738a368e6abacae5a601bbaca57ac6b4f29de87fc1ff2858680401375f"
+                    ]
+                  }
+                ]
+              },
+              "runner": "ResourceCapRunner",
+              "tactic": 1
+            },
+            "producer_pid": 3595282,
+            "consumer_pid": 3596768,
+            "captured_output_lse_exact": true,
+            "same_pointer_input_update_output_lse_exact": true
+          },
+          "graph_replay-16": {
+            "identity": "f06a74fb3517705a827e571390d1f2c0c19849d584166131f5f81bab84af8255",
+            "certificate_checksum": "bd5c5fe68441948d9d54f8b249fe8a17618d4292d306d45d5cca3d5d6231aeba",
+            "certificate_accepted": true,
+            "managed_tactic": 1,
+            "initial_output_lse_exact": true,
+            "stored_winner": {
+              "key": "('experimental_prefill_resource', 'ResourceCapRunner', ((1289, 32, 128), (63801, 8, 128), (63801, 8, 128)), ('f06a74fb3517705a827e571390d1f2c0c19849d584166131f5f81bab84af8255', 'bd5c5fe68441948d9d54f8b249fe8a17618d4292d306d45d5cca3d5d6231aeba'))",
+              "key_fields": {
+                "__tuple__": [
+                  "experimental_prefill_resource",
+                  "ResourceCapRunner",
+                  {
+                    "__tuple__": [
+                      {
+                        "__tuple__": [
+                          1289,
+                          32,
+                          128
+                        ]
+                      },
+                      {
+                        "__tuple__": [
+                          63801,
+                          8,
+                          128
+                        ]
+                      },
+                      {
+                        "__tuple__": [
+                          63801,
+                          8,
+                          128
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "__tuple__": [
+                      "f06a74fb3517705a827e571390d1f2c0c19849d584166131f5f81bab84af8255",
+                      "bd5c5fe68441948d9d54f8b249fe8a17618d4292d306d45d5cca3d5d6231aeba"
+                    ]
+                  }
+                ]
+              },
+              "runner": "ResourceCapRunner",
+              "tactic": 1
+            },
+            "producer_pid": 3595282,
+            "consumer_pid": 3596768,
+            "captured_output_lse_exact": true,
+            "same_pointer_input_update_output_lse_exact": true
+          }
+        },
+        "consumer2": {
+          "eager_run-1": {
+            "identity": "ecb974e7a59f014c98a79612ac42574e4a91935d24443c7147e22812ac95bf8f",
+            "certificate_checksum": "121c3190a7964af6873a35ee09e1f5edf45a65662851b1b1527741418f4d6bf9",
+            "certificate_accepted": true,
+            "managed_tactic": 1,
+            "initial_output_lse_exact": true,
+            "stored_winner": {
+              "key": "('experimental_prefill_resource', 'ResourceCapRunner', ((1289, 32, 128), (63801, 8, 128), (63801, 8, 128)), ('ecb974e7a59f014c98a79612ac42574e4a91935d24443c7147e22812ac95bf8f', '121c3190a7964af6873a35ee09e1f5edf45a65662851b1b1527741418f4d6bf9'))",
+              "key_fields": {
+                "__tuple__": [
+                  "experimental_prefill_resource",
+                  "ResourceCapRunner",
+                  {
+                    "__tuple__": [
+                      {
+                        "__tuple__": [
+                          1289,
+                          32,
+                          128
+                        ]
+                      },
+                      {
+                        "__tuple__": [
+                          63801,
+                          8,
+                          128
+                        ]
+                      },
+                      {
+                        "__tuple__": [
+                          63801,
+                          8,
+                          128
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "__tuple__": [
+                      "ecb974e7a59f014c98a79612ac42574e4a91935d24443c7147e22812ac95bf8f",
+                      "121c3190a7964af6873a35ee09e1f5edf45a65662851b1b1527741418f4d6bf9"
+                    ]
+                  }
+                ]
+              },
+              "runner": "ResourceCapRunner",
+              "tactic": 1
+            },
+            "producer_pid": 3595282,
+            "consumer_pid": 3597762,
+            "replanned_output_lse_exact": true,
+            "resource_rebound": true
+          },
+          "graph_replay-1": {
+            "identity": "56fcc7a10bb10a8b19e2d2f4b4cb9d6bc7b21a2f769f2f4344dc911d04773516",
+            "certificate_checksum": "73f492738a368e6abacae5a601bbaca57ac6b4f29de87fc1ff2858680401375f",
+            "certificate_accepted": true,
+            "managed_tactic": 1,
+            "initial_output_lse_exact": true,
+            "stored_winner": {
+              "key": "('experimental_prefill_resource', 'ResourceCapRunner', ((1289, 32, 128), (63801, 8, 128), (63801, 8, 128)), ('56fcc7a10bb10a8b19e2d2f4b4cb9d6bc7b21a2f769f2f4344dc911d04773516', '73f492738a368e6abacae5a601bbaca57ac6b4f29de87fc1ff2858680401375f'))",
+              "key_fields": {
+                "__tuple__": [
+                  "experimental_prefill_resource",
+                  "ResourceCapRunner",
+                  {
+                    "__tuple__": [
+                      {
+                        "__tuple__": [
+                          1289,
+                          32,
+                          128
+                        ]
+                      },
+                      {
+                        "__tuple__": [
+                          63801,
+                          8,
+                          128
+                        ]
+                      },
+                      {
+                        "__tuple__": [
+                          63801,
+                          8,
+                          128
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "__tuple__": [
+                      "56fcc7a10bb10a8b19e2d2f4b4cb9d6bc7b21a2f769f2f4344dc911d04773516",
+                      "73f492738a368e6abacae5a601bbaca57ac6b4f29de87fc1ff2858680401375f"
+                    ]
+                  }
+                ]
+              },
+              "runner": "ResourceCapRunner",
+              "tactic": 1
+            },
+            "producer_pid": 3595282,
+            "consumer_pid": 3597762,
+            "captured_output_lse_exact": true,
+            "same_pointer_input_update_output_lse_exact": true
+          },
+          "graph_replay-16": {
+            "identity": "f06a74fb3517705a827e571390d1f2c0c19849d584166131f5f81bab84af8255",
+            "certificate_checksum": "bd5c5fe68441948d9d54f8b249fe8a17618d4292d306d45d5cca3d5d6231aeba",
+            "certificate_accepted": true,
+            "managed_tactic": 1,
+            "initial_output_lse_exact": true,
+            "stored_winner": {
+              "key": "('experimental_prefill_resource', 'ResourceCapRunner', ((1289, 32, 128), (63801, 8, 128), (63801, 8, 128)), ('f06a74fb3517705a827e571390d1f2c0c19849d584166131f5f81bab84af8255', 'bd5c5fe68441948d9d54f8b249fe8a17618d4292d306d45d5cca3d5d6231aeba'))",
+              "key_fields": {
+                "__tuple__": [
+                  "experimental_prefill_resource",
+                  "ResourceCapRunner",
+                  {
+                    "__tuple__": [
+                      {
+                        "__tuple__": [
+                          1289,
+                          32,
+                          128
+                        ]
+                      },
+                      {
+                        "__tuple__": [
+                          63801,
+                          8,
+                          128
+                        ]
+                      },
+                      {
+                        "__tuple__": [
+                          63801,
+                          8,
+                          128
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "__tuple__": [
+                      "f06a74fb3517705a827e571390d1f2c0c19849d584166131f5f81bab84af8255",
+                      "bd5c5fe68441948d9d54f8b249fe8a17618d4292d306d45d5cca3d5d6231aeba"
+                    ]
+                  }
+                ]
+              },
+              "runner": "ResourceCapRunner",
+              "tactic": 1
+            },
+            "producer_pid": 3595282,
+            "consumer_pid": 3597762,
+            "captured_output_lse_exact": true,
+            "same_pointer_input_update_output_lse_exact": true
+          }
+        }
+      }
+    }
+  },
+  "files": {
+    "binding.json": "0eb0c7637be170e0a63cd5d8f2c7cbbe4aecd1d0229573e3f0c061498e3bc762",
+    "logs/1647026-consumer1.log": "9d6f0b5fdb2b9082ebed347ee9af641ef780272e41c8e5e311772d573e916249",
+    "logs/1647026-consumer2.log": "941e130f3b446f66354c6230d3380fd3b30a3261add1db578a7d9531badeafd5",
+    "logs/1647026-producer.log": "6157957cc6b0757bad45e14b6870456567832969fa91ddfbb41d5943713cb116",
+    "logs/1647026.err": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "logs/1647026.out": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "logs/1647027-consumer1.log": "09f92d5e16fcec0f907e52447620c64d235243f8bbb1e42f07ae2ad32911d4d6",
+    "logs/1647027-consumer2.log": "d5fd96e28f0beb3ab8709f50967371a6ff0ac0750d4618db720cc91ccf14e1d9",
+    "logs/1647027-producer.log": "195373bbac06dca81b9ff7159ae580b8b266242aba376c2658d63c5834d91b7c",
+    "logs/1647027.err": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "logs/1647027.out": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "logs/telemetry-1647026.csv": "d4379289dc85ecf5a13ee63e3fa071e94647382538d7ce1c7b414ef8bf4609fa",
+    "logs/telemetry-1647027.csv": "16a463297d32f3e7158e77441ccd7441705bf6af1cd88247fd970e9615fc8dd9",
+    "process_handoff_strict.py": "eadd61cc4e870087c1d7514a6a82af06e187a9c08b5b798286f0510141635829",
+    "process_handoff_strict.sbatch": "ca94d8503c10d2b524c280a27ee09b0ad554a4c1e6a8194e900c90fcdf70190f",
+    "receipts/exit-1647026.txt": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "receipts/exit-1647027.txt": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "receipts/jobs.json": "97d6c9ac734626f3295eee8021ce8d03b513c764e0401b9cbc2119f76d99dbb4",
+    "receipts/source-post-verification-1647026.txt": "7674f64369d136ebcfd81a30ee1644ba6a1d0648c08eec535d3b57079705c0bb",
+    "receipts/source-post-verification-1647027.txt": "7674f64369d136ebcfd81a30ee1644ba6a1d0648c08eec535d3b57079705c0bb",
+    "receipts/source-verification-1647026.txt": "7674f64369d136ebcfd81a30ee1644ba6a1d0648c08eec535d3b57079705c0bb",
+    "receipts/source-verification-1647027.txt": "7674f64369d136ebcfd81a30ee1644ba6a1d0648c08eec535d3b57079705c0bb",
+    "receipts/validation-verification-1647026.txt": "5e88cd405f1d78eb136b56f011c4f55afc9cb3eec9baccb2274641d355f45ff2",
+    "receipts/validation-verification-1647027.txt": "5e88cd405f1d78eb136b56f011c4f55afc9cb3eec9baccb2274641d355f45ff2",
+    "runs/gpu_4090-1647026/consumer1/complete.json": "3926c361487fad2784308e5524b3cd3f49b07b19713b7e1c32a71a61222bac38",
+    "runs/gpu_4090-1647026/consumer1/eager_run-1/result.json": "ae17240733e35df72f89819dfa3ec4bcbe60c13594efea451c2545c0fe8521d8",
+    "runs/gpu_4090-1647026/consumer1/environment.json": "8a142d60a54c6991c009f64e41ef14970643861720aaec4e8ca050b4454895d0",
+    "runs/gpu_4090-1647026/consumer1/graph_replay-1/result.json": "efd0652435c0ff212832912effab44dbaa78bdceae62f31b7ea51332ef6705f4",
+    "runs/gpu_4090-1647026/consumer1/graph_replay-16/result.json": "402c504f681ac53ccfee21428610b5df875d6164464e3635378898ffd2a13b8b",
+    "runs/gpu_4090-1647026/consumer2/complete.json": "50b632053fdf42eff53e06187e5958ddabf07502410ab49c368a8e09d3c51d96",
+    "runs/gpu_4090-1647026/consumer2/eager_run-1/result.json": "0c03cfb7f33b365d130f44042d47e205cd55efd608d5b5ae26099929ea9cad6d",
+    "runs/gpu_4090-1647026/consumer2/environment.json": "1481c94e58bc154d02a508de37ab36cf4bf482714260358f76a15fbe9bc4defe",
+    "runs/gpu_4090-1647026/consumer2/graph_replay-1/result.json": "d0e05f84c5c33a10699fb5a1a0d3d7bd7c9dbdef609addbd2077a685cada2adc",
+    "runs/gpu_4090-1647026/consumer2/graph_replay-16/result.json": "c62ae8c51c2a166d0a9320eecc7890844a7b8da68abc0e41836e160216d0b98b",
+    "runs/gpu_4090-1647026/producer/complete.json": "74ab7cecad954a2e0d14e2f4a7691558b21054570bc8677dd4eefc76db934ea4",
+    "runs/gpu_4090-1647026/producer/eager_run-1/certificates/eb67e29e260a7e892dcd8f6ccc20a4a55ea5343d2567d199fa810e920875d525.json": "46e00373b20d4e7091addcb3e3a3a3d4470969127aa9b68cbcdd45bad0527023",
+    "runs/gpu_4090-1647026/producer/eager_run-1/managed-cache/v2/156f30c3888fa9d1/entries/08f6c30dd62c5c5e2596a674.json": "d939ac386e2890ac142dd5b3dcfe9362e4e650f72dba7118cd90447ebeb73916",
+    "runs/gpu_4090-1647026/producer/eager_run-1/managed-cache/v2/156f30c3888fa9d1/manifest.json": "7523cfa33220c4b5b72661be89cf159f4e4622f0bf8de76b89d922b619d28ada",
+    "runs/gpu_4090-1647026/producer/eager_run-1/result.json": "61ac40b82e80f5a5ccfe306712cb0ec32e248665020fe39d4890195a75f58d7f",
+    "runs/gpu_4090-1647026/producer/environment.json": "974031aac94af31efe1672cbf5e4b7a9e129982b8c9a077f0f6ebb63b4f9602b",
+    "runs/gpu_4090-1647026/producer/graph_replay-1/certificates/8170658d1019c4bf955494413fcfc0b0e8a6110de3a56cfe6bb75bcfc4855c9c.json": "677780e66822690ee61772a9a7e0e0a71e2db09a8d7493abbcc70ef9258f1cd1",
+    "runs/gpu_4090-1647026/producer/graph_replay-1/managed-cache/v2/d662d9ed0207adcf/entries/7ad9599f3725914a6ec67622.json": "53d412861e8e249dc11e7eca79c7dbcfb5f6b5cb1b7539122adff0decb277008",
+    "runs/gpu_4090-1647026/producer/graph_replay-1/managed-cache/v2/d662d9ed0207adcf/manifest.json": "85714ea3aa6a05798e969fedcda03b07f6d6528e467b6a27d15ac26c945dd56e",
+    "runs/gpu_4090-1647026/producer/graph_replay-1/result.json": "1dc0287e78878d62254ae6a2f1813bd771b0beba0a7b106d3fc58d295ee63ea9",
+    "runs/gpu_4090-1647026/producer/graph_replay-16/certificates/43601724939e7f1be216938e837fd429b5349bdab4d619167a35bbfee59b62fe.json": "51c92bd6327578f02d73d920dcca9256fea322bb424c77f8854e533faaf745c0",
+    "runs/gpu_4090-1647026/producer/graph_replay-16/managed-cache/v2/d662d9ed0207adcf/entries/8eef923fc869c555ab856b38.json": "d90040b17745cd62ab45d6d1521cf8d2ba20713e57890ec911b2c56fb4131c3b",
+    "runs/gpu_4090-1647026/producer/graph_replay-16/managed-cache/v2/d662d9ed0207adcf/manifest.json": "85714ea3aa6a05798e969fedcda03b07f6d6528e467b6a27d15ac26c945dd56e",
+    "runs/gpu_4090-1647026/producer/graph_replay-16/result.json": "7d637bcfccca47f08b32eb5c808f9b7a14dce755de649054f6810a1d7d352664",
+    "runs/gpu_5090-1647027/consumer1/complete.json": "45e47fe9bce39f6ccebd59af6eb7546b21b7b4eb10a03f36b2001ee62f13027b",
+    "runs/gpu_5090-1647027/consumer1/eager_run-1/result.json": "279d88be97d5b62c265753d4b27467dcb7c53ae018c4d9cf8170908d417294c9",
+    "runs/gpu_5090-1647027/consumer1/environment.json": "ea49f7eab577ad52ce7cd32f300d86b4670ca93ffc24ae756df3950023f3afe8",
+    "runs/gpu_5090-1647027/consumer1/graph_replay-1/result.json": "2b489b8c479691d206a16363f86682d0e0e5ae740b094345d30afd47f85060a0",
+    "runs/gpu_5090-1647027/consumer1/graph_replay-16/result.json": "b593d3be1963041402e5dfcc14f8e99692384357461812274b896b5ab01f50b1",
+    "runs/gpu_5090-1647027/consumer2/complete.json": "e46d7cc8db43d8d50bff86ca528f1bf05ffc24561418aa26220ca67b570470f4",
+    "runs/gpu_5090-1647027/consumer2/eager_run-1/result.json": "9a3e37991d23811ff8f259142247a8c4561ad2c8c0ea935d2d3f2cfc5ee648dd",
+    "runs/gpu_5090-1647027/consumer2/environment.json": "13aec5e1f5fc9732605fe53d1ade5241096272d5480dbc252bb1250c6d2c29b9",
+    "runs/gpu_5090-1647027/consumer2/graph_replay-1/result.json": "9d0103de6577ceb277a04bb7f6fd3139969a6ab0248cf464572016a7acefa0fd",
+    "runs/gpu_5090-1647027/consumer2/graph_replay-16/result.json": "acb83ef1860403bc0a4e426a4e7fb468377a0eea734a9a9c33e37a51519f905e",
+    "runs/gpu_5090-1647027/producer/complete.json": "bd535def23e55626c8d25e724ec48f16027d74a1f9db36e0008092fa53c4282d",
+    "runs/gpu_5090-1647027/producer/eager_run-1/certificates/ecb974e7a59f014c98a79612ac42574e4a91935d24443c7147e22812ac95bf8f.json": "9412a72ab6e8540c90351f4252d258081809ea2e41807e6e890e57fd25a89f1d",
+    "runs/gpu_5090-1647027/producer/eager_run-1/managed-cache/v2/a2f11eaa63cd5fea/entries/7572aa59b816c3920c9cb252.json": "007b7622033a9c6aa292122eaec1f2af892a0734992d794b20df7baf5a76d5ca",
+    "runs/gpu_5090-1647027/producer/eager_run-1/managed-cache/v2/a2f11eaa63cd5fea/manifest.json": "eb4a01cefb60fe7bc9012a07fabd060b3bf932a20b05738b7e6bb70577d3e280",
+    "runs/gpu_5090-1647027/producer/eager_run-1/result.json": "f17117e429f01cc54211c5e7e8849b7a7d32991826c9e018fba992e20b638a36",
+    "runs/gpu_5090-1647027/producer/environment.json": "cc2dbe8953d797b0ce53d69a1603eac41ef8162a3c2b9446d3109544e0a03d47",
+    "runs/gpu_5090-1647027/producer/graph_replay-1/certificates/56fcc7a10bb10a8b19e2d2f4b4cb9d6bc7b21a2f769f2f4344dc911d04773516.json": "8a01af9f0569808e777e574a986c41077c2b92e480e550f4ec605cdc8eb639c1",
+    "runs/gpu_5090-1647027/producer/graph_replay-1/managed-cache/v2/7b1b10109fa04cfd/entries/13c09570bdccdf019bcb718e.json": "6a359e5b5a4f0f941a5def1e127efc744c6f583d06414cd6ed4585d88c762344",
+    "runs/gpu_5090-1647027/producer/graph_replay-1/managed-cache/v2/7b1b10109fa04cfd/manifest.json": "065ac4b6c9524c5384c634897b3099fe0c305e487c639ab84d026daab173bb3a",
+    "runs/gpu_5090-1647027/producer/graph_replay-1/result.json": "3442d85cfa42ebe4d4084a47d531be0a94fd560e96dc591e04d968d8df6a26d1",
+    "runs/gpu_5090-1647027/producer/graph_replay-16/certificates/f06a74fb3517705a827e571390d1f2c0c19849d584166131f5f81bab84af8255.json": "30a4484e8ee8884e3b349743f2777b76bc2a4d22013dd740ded49fc8268f086d",
+    "runs/gpu_5090-1647027/producer/graph_replay-16/managed-cache/v2/7b1b10109fa04cfd/entries/b3b727925d6c1370bada3f6f.json": "564599b8251b647099c7bb721b222df118ec29b5b58b737265694c5f9fd83935",
+    "runs/gpu_5090-1647027/producer/graph_replay-16/managed-cache/v2/7b1b10109fa04cfd/manifest.json": "065ac4b6c9524c5384c634897b3099fe0c305e487c639ab84d026daab173bb3a",
+    "runs/gpu_5090-1647027/producer/graph_replay-16/result.json": "a9bbbf0d391e098577494c3dc260558e86de9e4d792f45d452d3d03808a68aed",
+    "validation.sha256": "a1d92fdd54f7d37a6667fa2191b37300cbcb78bc21790f43e23e3213e9194481"
+  },
+  "archive_sha256": "c6770242d020a3c1cef746a40479c5870b169bc45aee9250bc6f3c8ac74c0e17",
+  "archive_bytes": 358985,
+  "scope": "Prepared actual confidence/v2 winner transferred to two fresh processes per GPU; eager rebind and fixed-pointer Graph input updates exact. No Graph metadata updates/full HTTP/performance qualification.",
+  "fresh_cases_consumed": 0,
+  "default_promotion": false,
+  "serving_promotion": false,
+  "historical_token_divergence_resolved": false
+}
