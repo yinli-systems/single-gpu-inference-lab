@@ -12,7 +12,7 @@ SGLang's ordinary radix-prefix path merges causal ragged current-token attention
 with **noncausal paged cached-prefix attention**. Its FlashInfer backend supplies
 **page size 1**. Dynamic batching updates the plan and metadata buffers between
 model steps. Source inspection establishes these calls; actual workload geometry,
-split decisions and metadata tracking still require execution evidence.
+split decisions and metadata tracking are recorded by the Native-only full-model diagnostics. Their timings are invalid and their Resource registries are empty.
 
 Frozen v4.2 identity supports causal attention and paged page16. Current-main
 experimental functional tests cover both mask modes at page1 and page16, while its runner
@@ -72,4 +72,30 @@ The explicit eager-only `ServingPlanLease` bridge snapshots inference-mode metad
 
 `ReusableServingPlanLease` requires scheduler release before any native planning or foreign metadata write. It recopies metadata into tracked ownership, verifies actualGPUmetadata through the public same-geometry eager rebind and reuses only a previously prepared module/acceptedcertificate. Rejection isterminal; retiredleases cannot resume. Dual numerical smoke and supplemental real cache-hit/tactic/count witnesses passed on exposed BF16ragged projectionstride6144 and page1noncausal inputs; all9 actualresource calls wereexact. Both4090ragged calibrations wereinconclusive and keptnative. All rawcache/certificate/call records arearchived in evidence/v42-reusable-serving-epochs-managed/. These tests do not qualify Graphmetadata updates, fullHTTP orperformance.
 
-`ServingEpochRegistry` is a research component with12 CPUstate tests. Register only explicit pre-trained results, thenfreeze. Unknown/inconclusive geometries use theoriginalowner. The scheduler must call before_metadata_update before thefirstmetadata write, includingTriton/fast planningpaths. One publicrebind perkey/epoch isshared acrossmodel layers. Graph/tracing staysnative. Registering a managedtactic cannot force the publicrunner to bypass its independentcertificate/cache checks. Its attemptcounter isnot anactualkernel launchcounter; anindependentHTTPprofile isstillmandatory. No SGLanghook isinstalled yet, and no fullHTTP score hasrun throughthisregistry.
+`ServingEpochRegistry` has CPU state and exact-source dual-GPU tests. Register only explicit pre-trained results, thenfreeze. Unknown/inconclusive geometries use theoriginalowner. The scheduler must call before_metadata_update before thefirstmetadata write, includingTriton/fast planningpaths. One publicrebind perkey/epoch isshared acrossmodel layers. Graph/tracing staysnative. Registering a managedtactic cannot force the publicrunner to bypass its independentcertificate/cache checks. Its attemptcounter isnot anactualkernel launchcounter; anindependentHTTPprofile isstillmandatory. The reviewed single-call SGLang prefix hook has passed Native-only full-model checks (112 exact output tokens). Actual packed/tuple KV routing through the adapter and frozen registry passes dual47 functional tests with432 independently witnessed Resource calls and real cache hits. These are minimal-driver composition checks, not Resource-enabled fullHTTP scores.
+
+
+## Current exact-source prefix boundary and HTTP prerequisites
+
+`prefix_backend_hook.py` checks the complete backend source hash and replaces
+exactly one cached-prefix call in `forward_extend`; it preserves the original
+future compiler flags. Native owner methods and every other call stay intact.
+`prefix_router.py` uses Native's actual packed/tuple KV unpacker, dispatches only
+already-bound frozen eager leases, and keeps Graph/tracing/unknown geometry Native.
+Independent actual kernel-launch evidence is required in the later HTTP profile.
+
+`training_session.py` permits an explicit premeasurement session only after all
+four formal stages on both GPUs and their raw source/evidence ledgers pass.
+The first certificate and actual winner are saved before registration. Partial
+sessions preserve failure evidence and cannot resume or authorize serving.
+No actual HTTP training campaign or server bootstrap is installed by this module.
+
+`http_stream.py` and `http_client.py` collect full SSE token streams and every
+failed response. Client receive times include server queues and co-delivered
+tokens share a timestamp. A missing terminal DONE, conflicting cumulative prefix,
+incomplete output, missing cache hit or nonpositive metric blocks completion.
+Raw writes occur outside the measured block. All failed requests remain in the
+block archive and a failed block has no success-only throughput summary.
+`metric_gate.py` still requires the complete40 metric matrix, joint0.99 floor,
+throughput gain and guarded-prefix confidence gain. These preparations do not
+close the historical2/432 token differences or grant serving/default promotion.
