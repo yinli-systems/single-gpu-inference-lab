@@ -94,3 +94,7 @@ SGLang ea34a9d: all 49 registered CPU tests passed with full imports. ParaCloud 
 ## V4.2 dual dev PASS; canary consumed and active
 
 Exact sourceb769e7c dual dev passed every requirement after all four jobs1644068–1644071 COMPLETED0:0. Proof: `evidence/v42-exact-dev/`,225 raw files SHA-bound; actual policy/pristine means4090=1.383822,5090=1.285451. Frozen thresholds unchanged. Ten fresh canary shapes consumed at2026-10-01T01:43UTC, jobs1644188–1644207. Release48/stress12 untouched at this checkpoint. Follow finite controller `/ssd/scxi253/single-gpu-inference-selector-v42-20260930T230508Z/logs/kernel-pipeline.log`; no resubmission of consumed stage. On dual canaryPASS it submits release, then only releasePASS opens stress. HTTP serving/performance and historical token attribution remain independent gates and default/serving stayOFF.
+
+## Latest pinned SGLang request-lifetime PASS
+
+Rebased independent patch3825c5a4 on upstreambaae019:49 full-import registered CPU tests PASS. Full Qwen3-4B BF16 real-HTTP job1644258 COMPLETED0:0 in12m56s with isolated official FlashInfer0.7.0.post1; original8/10 and candidate10/10 expected completions, plus one intentional n=2 disconnect per arm. Candidate zero stale-owner aborts and zero remaining owned states. Source/SSE/events/logs archive locally verified: `evidence/v42-http-ownership-current-main/`. This supersedes the earlier dependency startup failure as the ownership verdict; all failure receipts are preserved. Resource tuning/performance and original2/432 attribution are independent and still unqualified.
