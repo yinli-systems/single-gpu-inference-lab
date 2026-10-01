@@ -1,0 +1,200 @@
+{
+  "original_campaign": "/ssd/scxi253/single-gpu-inference-selector-v42-20260930T230508Z",
+  "recovery_campaign": "/ssd/scxi253/sgi-v42-canary-rpc-recovery-20261001T0430Z-allocation-v3",
+  "preregistered_utc": "2026-10-01T04:33:37.874725+00:00",
+  "original_terminal_receipt_sha256": "8b7f879a1e25ae85574203bb44ec03162c66e9e2a8294af7aba209cc0aac6da8",
+  "source_commit": "b769e7c18e93c9d6cfdcd79b58edf76955313859",
+  "source_archive_sha256": "60ffb32e73e8e9b2ce0e84f2ca20ad3c4559ecbc651cd86c5e168c03074f3d7e",
+  "reason": "Slurm control-plane RPC failed before Python startup; resume only absent repeat2 processes, with identical allocated GPU UUID and CPU affinity. All earlier measurements remain in qualification.",
+  "failures": {
+    "1644194": {
+      "shard": 6,
+      "node": "wqd10nae09g3",
+      "gpu_uuid": "GPU-bdce2660-25eb-d632-5729-2b165e1573d4",
+      "cpu_affinity": [
+        18,
+        19
+      ],
+      "missing_processes": [
+        [
+          2,
+          "pristine"
+        ],
+        [
+          2,
+          "paired"
+        ]
+      ],
+      "retained_files": {
+        "runs/canary-gpu_4090-s6-r0-paired-1644194/complete.json": "48b233c701540599aef1cc89dcb23d75f3ae36695c2234668d6bee9338559051",
+        "runs/canary-gpu_4090-s6-r0-paired-1644194/environment.json": "4c6a6ef310da87b12bf62867deb0497dbff35c87c3fa083bfa801e1e2178905a",
+        "runs/canary-gpu_4090-s6-r0-paired-1644194/launcher-complete.txt": "6ebfbbf22512385fef8e3c6f67013805f47770ca2f7d8af7f5a192202c8a644a",
+        "runs/canary-gpu_4090-s6-r0-paired-1644194/measurements.json": "d81a25c34a049c3526ff5b13d6e83e6065740532f251e9375ad24f7218e3442e",
+        "runs/canary-gpu_4090-s6-r0-paired-1644194/memory.json": "d2eccdca04c3ca41db0b8248edc1ff505c394afd78d2c9bbd8c741c9746d8fc1",
+        "runs/canary-gpu_4090-s6-r0-paired-1644194/progress.json": "9e76e116a4f06c2d6c4d49e1e54b73541fc5be8421bc2ebbbcb3176ee16e6b96",
+        "runs/canary-gpu_4090-s6-r0-paired-1644194/qualification.json": "72a39c35f815f01ac19a404290eadf5b04c14ca9316f3074827e40f00eff8ee8",
+        "runs/canary-gpu_4090-s6-r0-paired-1644194/source_commit.txt": "94a32029d1c1404aab8a129ea99821c803182ace076a6bc3bfcf547c872d785a",
+        "runs/canary-gpu_4090-s6-r0-pristine-1644194/complete.json": "75afbd6290d437a2cce878699c4cbcadcbbe853dc50f8da082738ac0f43c1f51",
+        "runs/canary-gpu_4090-s6-r0-pristine-1644194/environment.json": "40a3f85d5e59e8266b45ad428b908f940b615c18fea02afd7cde0915e8b65cb2",
+        "runs/canary-gpu_4090-s6-r0-pristine-1644194/launcher-complete.txt": "ee87cf96d9d869837fb0e34e241519c2f9b7daff9c1766688c91dcba22330afe",
+        "runs/canary-gpu_4090-s6-r0-pristine-1644194/measurements.json": "24e3573e63639e812b31b4cc8dd86153561c45e4c5ab1aaf89506d11e8c645bc",
+        "runs/canary-gpu_4090-s6-r0-pristine-1644194/memory.json": "6586a11cdfc9f1639ed502d268ac06ada0335c6792b91be5b3047b20cba40e45",
+        "runs/canary-gpu_4090-s6-r0-pristine-1644194/progress.json": "906969b553242664caab125dbf577b799fa0f6824d4977a848f5d56efd2e95b8",
+        "runs/canary-gpu_4090-s6-r0-pristine-1644194/qualification.json": "d729811f2bd8028d1dcf2fef70efe4c1644f028fcff9c1d9719d1e21ff5c8987",
+        "runs/canary-gpu_4090-s6-r0-pristine-1644194/source_commit.txt": "94a32029d1c1404aab8a129ea99821c803182ace076a6bc3bfcf547c872d785a",
+        "runs/canary-gpu_4090-s6-r1-paired-1644194/complete.json": "331f4166c2d697fe39bf6b63c5e4c95b2377484691db373c20c4f51f61856482",
+        "runs/canary-gpu_4090-s6-r1-paired-1644194/environment.json": "519f42164c19fa924a4823d366d66c6d0e1334ae26cdb619709c7aaab986488d",
+        "runs/canary-gpu_4090-s6-r1-paired-1644194/launcher-complete.txt": "0f7efdda709f0c69a4784bb8becd18a8560c7760ad9b9c11c2d22cf117f6290a",
+        "runs/canary-gpu_4090-s6-r1-paired-1644194/measurements.json": "2da287525a05021a92e5ee5a23930348891b9168b8203c7a772f66a84c424c1a",
+        "runs/canary-gpu_4090-s6-r1-paired-1644194/memory.json": "d2eccdca04c3ca41db0b8248edc1ff505c394afd78d2c9bbd8c741c9746d8fc1",
+        "runs/canary-gpu_4090-s6-r1-paired-1644194/progress.json": "00f83e7bd46348e395c7cb1e672ae88574683f740f1d97698240472afa5431a3",
+        "runs/canary-gpu_4090-s6-r1-paired-1644194/qualification.json": "72a39c35f815f01ac19a404290eadf5b04c14ca9316f3074827e40f00eff8ee8",
+        "runs/canary-gpu_4090-s6-r1-paired-1644194/source_commit.txt": "94a32029d1c1404aab8a129ea99821c803182ace076a6bc3bfcf547c872d785a",
+        "runs/canary-gpu_4090-s6-r1-pristine-1644194/complete.json": "f8154f6ff7cf75040b9cf379a3ff7bc79e723339cd62828d435ab0a9adaaac80",
+        "runs/canary-gpu_4090-s6-r1-pristine-1644194/environment.json": "7f405b36eda8f7b4223f61442292c67c64bf98f0ebb5515fdab6ed2fffcf6861",
+        "runs/canary-gpu_4090-s6-r1-pristine-1644194/launcher-complete.txt": "26d9a96881e5449f5c542467a565372cef2a29d6f7b80503b0013bc8a9be3325",
+        "runs/canary-gpu_4090-s6-r1-pristine-1644194/measurements.json": "4468814bb88308779845ccb0fb89ab7895e4361121b09e1b7797d5df38b1db6f",
+        "runs/canary-gpu_4090-s6-r1-pristine-1644194/memory.json": "6586a11cdfc9f1639ed502d268ac06ada0335c6792b91be5b3047b20cba40e45",
+        "runs/canary-gpu_4090-s6-r1-pristine-1644194/progress.json": "32e28e5e2f61c6429c90e6fb3d83fb0dbda744056a85540d77494c78ac9244a6",
+        "runs/canary-gpu_4090-s6-r1-pristine-1644194/qualification.json": "d729811f2bd8028d1dcf2fef70efe4c1644f028fcff9c1d9719d1e21ff5c8987",
+        "runs/canary-gpu_4090-s6-r1-pristine-1644194/source_commit.txt": "94a32029d1c1404aab8a129ea99821c803182ace076a6bc3bfcf547c872d785a"
+      },
+      "failure_log_sha256": "b7e12ba5568dd2332648915d37cb69d7076bc4761c3fc5fdd49b507d9967d90b",
+      "metrics_inspected_for_recovery_decision": false
+    },
+    "1644196": {
+      "shard": 8,
+      "node": "wqd10naf13g1",
+      "gpu_uuid": "GPU-f3251911-f059-9cb7-6871-02fe3c1e28da",
+      "cpu_affinity": [
+        36,
+        37
+      ],
+      "missing_processes": [
+        [
+          2,
+          "paired"
+        ]
+      ],
+      "retained_files": {
+        "runs/canary-gpu_4090-s8-r0-paired-1644196/complete.json": "20986573721d67c284fa03c22eb7b551a61b473db58f5ad6f928ddd1a49cfa6e",
+        "runs/canary-gpu_4090-s8-r0-paired-1644196/environment.json": "82ded385b1b073d5fc463961c3698dba046a4ddee54b995a4b4a41eb83914a8a",
+        "runs/canary-gpu_4090-s8-r0-paired-1644196/launcher-complete.txt": "e26bb62b611b57ee46c6f98a50c4e1dd2839f581f29a0cdda8b1b4050a43758f",
+        "runs/canary-gpu_4090-s8-r0-paired-1644196/measurements.json": "2fd210f8643e62480def6dd655f53a03abfaa2e6eb98293323d89ef17c064b30",
+        "runs/canary-gpu_4090-s8-r0-paired-1644196/memory.json": "a51864dacc072c7fa9627efb0bce08b9fc9b2a2db0947959b8d98660348b96c3",
+        "runs/canary-gpu_4090-s8-r0-paired-1644196/progress.json": "159f03207b576895cd59afb0c62042b97e6dc0f0a15d52e68e000a284c8c6903",
+        "runs/canary-gpu_4090-s8-r0-paired-1644196/qualification.json": "4fbf3fae4dabe2691d4498fa335bebdaf72c92f49f8326e5b811ce3ff17a1e03",
+        "runs/canary-gpu_4090-s8-r0-paired-1644196/source_commit.txt": "94a32029d1c1404aab8a129ea99821c803182ace076a6bc3bfcf547c872d785a",
+        "runs/canary-gpu_4090-s8-r0-pristine-1644196/complete.json": "5c3690692ac27397b02af33c5c9b3562d945790c00a547d4049077feec828480",
+        "runs/canary-gpu_4090-s8-r0-pristine-1644196/environment.json": "e1fe62484e394eecc897a713494fc13b3154d8a0213d54d14dc004bcf4b5ec51",
+        "runs/canary-gpu_4090-s8-r0-pristine-1644196/launcher-complete.txt": "970e005f9647f10572c41164c30857e19c037d57970f2ee623cb6b8a16e74067",
+        "runs/canary-gpu_4090-s8-r0-pristine-1644196/measurements.json": "a2fc6a126788f1bbb575591fc33db0031dfaae548e1f227a828de204e4917524",
+        "runs/canary-gpu_4090-s8-r0-pristine-1644196/memory.json": "6fbaf872f4e905f3c2829fa32bfb3d446973744e50be1581b613d6fb751a971a",
+        "runs/canary-gpu_4090-s8-r0-pristine-1644196/progress.json": "aa48f3b55a3319e605bc617babd94d468b16940e69d7617fb3f873aeea1d11af",
+        "runs/canary-gpu_4090-s8-r0-pristine-1644196/qualification.json": "cf703eac972e8eeb5fe00fe25182f49f7a2d9d96910b3ae2d55582937984e6dc",
+        "runs/canary-gpu_4090-s8-r0-pristine-1644196/source_commit.txt": "94a32029d1c1404aab8a129ea99821c803182ace076a6bc3bfcf547c872d785a",
+        "runs/canary-gpu_4090-s8-r1-paired-1644196/complete.json": "b54316bfde8b7a6f91bab946ea0fe98b79f1a9800142bf6d133eb7156830c2e1",
+        "runs/canary-gpu_4090-s8-r1-paired-1644196/environment.json": "fdd38e444ab0101a70c42d69b8828c58b9c41f7dc4285a3697958bf1e7962ad1",
+        "runs/canary-gpu_4090-s8-r1-paired-1644196/launcher-complete.txt": "a69593352b6dc2c10b85e8b8bceb4d2b31b54f9312ec0448b4544706f53fecc3",
+        "runs/canary-gpu_4090-s8-r1-paired-1644196/measurements.json": "7647fd53f2a2aaf03e1cbd3f09027179d587353f374c13a57f3f04ae2be38157",
+        "runs/canary-gpu_4090-s8-r1-paired-1644196/memory.json": "a51864dacc072c7fa9627efb0bce08b9fc9b2a2db0947959b8d98660348b96c3",
+        "runs/canary-gpu_4090-s8-r1-paired-1644196/progress.json": "34da3749069d72a23fb26a9d6874c80707d0933b8fcb20ca684d483f681254bf",
+        "runs/canary-gpu_4090-s8-r1-paired-1644196/qualification.json": "4fbf3fae4dabe2691d4498fa335bebdaf72c92f49f8326e5b811ce3ff17a1e03",
+        "runs/canary-gpu_4090-s8-r1-paired-1644196/source_commit.txt": "94a32029d1c1404aab8a129ea99821c803182ace076a6bc3bfcf547c872d785a",
+        "runs/canary-gpu_4090-s8-r1-pristine-1644196/complete.json": "71f09b3c2ac5d8b49c2d230e072d887caadfe4522b936a6ff846c5ce01ddc4bf",
+        "runs/canary-gpu_4090-s8-r1-pristine-1644196/environment.json": "fd6de39eeace13f915c6302581349e48875b56acbc6b54a7b5eb00c2cd84f889",
+        "runs/canary-gpu_4090-s8-r1-pristine-1644196/launcher-complete.txt": "d98aa8cac44d1d2587007e8244c2538808eea86e780c9aa6782421b32b125630",
+        "runs/canary-gpu_4090-s8-r1-pristine-1644196/measurements.json": "12a910f6853bd53b649d10308672e976b1ffdd94ffaea7fb4bb6cc5850c02d4a",
+        "runs/canary-gpu_4090-s8-r1-pristine-1644196/memory.json": "6fbaf872f4e905f3c2829fa32bfb3d446973744e50be1581b613d6fb751a971a",
+        "runs/canary-gpu_4090-s8-r1-pristine-1644196/progress.json": "c0ed8f95606796a4ce0772b7c2feb4b001ad4289b430ec310fcef349f024c1af",
+        "runs/canary-gpu_4090-s8-r1-pristine-1644196/qualification.json": "cf703eac972e8eeb5fe00fe25182f49f7a2d9d96910b3ae2d55582937984e6dc",
+        "runs/canary-gpu_4090-s8-r1-pristine-1644196/source_commit.txt": "94a32029d1c1404aab8a129ea99821c803182ace076a6bc3bfcf547c872d785a",
+        "runs/canary-gpu_4090-s8-r2-pristine-1644196/complete.json": "c46c9f6227ff3d5f90822a1ee1503e2cc4101bf9e2f6512b618f7f1e06670a75",
+        "runs/canary-gpu_4090-s8-r2-pristine-1644196/environment.json": "ff18ad37208b651f15c53661aa4a7ee7ba58dccb4a97992495300d567cbc308b",
+        "runs/canary-gpu_4090-s8-r2-pristine-1644196/launcher-complete.txt": "2ab23adb851ecb0e3fe0255fa4a731086fe76f673e8fcfcdbe236a6b18e602ab",
+        "runs/canary-gpu_4090-s8-r2-pristine-1644196/measurements.json": "8681158d70332fb1099af2df3277f33c3abc3d303f7e907fe50311c907bcb45f",
+        "runs/canary-gpu_4090-s8-r2-pristine-1644196/memory.json": "6fbaf872f4e905f3c2829fa32bfb3d446973744e50be1581b613d6fb751a971a",
+        "runs/canary-gpu_4090-s8-r2-pristine-1644196/progress.json": "5de015abe57695ce3a587751f02ee7ad40e9221ae8c34c8894d835287f2b81b9",
+        "runs/canary-gpu_4090-s8-r2-pristine-1644196/qualification.json": "cf703eac972e8eeb5fe00fe25182f49f7a2d9d96910b3ae2d55582937984e6dc",
+        "runs/canary-gpu_4090-s8-r2-pristine-1644196/source_commit.txt": "94a32029d1c1404aab8a129ea99821c803182ace076a6bc3bfcf547c872d785a"
+      },
+      "failure_log_sha256": "b2a5569c2b026c2383a5295afab562b841809ef1ce0f284d08c9d5a789c43a99",
+      "metrics_inspected_for_recovery_decision": false
+    },
+    "1644197": {
+      "shard": 9,
+      "node": "wqd10nba07g3",
+      "gpu_uuid": "GPU-701cb4ff-2d5b-d356-5575-eb48ff168f9b",
+      "cpu_affinity": [
+        36,
+        37
+      ],
+      "missing_processes": [
+        [
+          2,
+          "pristine"
+        ],
+        [
+          2,
+          "paired"
+        ]
+      ],
+      "retained_files": {
+        "runs/canary-gpu_4090-s9-r0-paired-1644197/complete.json": "e0915ac1ee02c5e17418484b7cf9d9eb1366a4804bc3187785acc38e4bf5ecfe",
+        "runs/canary-gpu_4090-s9-r0-paired-1644197/environment.json": "40aadeffcf3ce1da45e288f6149f8bde9d8c36347d9dc41f2b49282968f148f3",
+        "runs/canary-gpu_4090-s9-r0-paired-1644197/launcher-complete.txt": "c1390ef7c4c95cc1b6473f0d90dd709998f9638a103e7c8fb4f29ad512a2a38e",
+        "runs/canary-gpu_4090-s9-r0-paired-1644197/measurements.json": "04010c0b2c6e08deadd349907048af1bcd44db0d787407344a3f3f577df9252c",
+        "runs/canary-gpu_4090-s9-r0-paired-1644197/memory.json": "a7f4e9fa975ac4ec1588aa1e49eb190bbb35830f44098198cdcf8deb00cc3788",
+        "runs/canary-gpu_4090-s9-r0-paired-1644197/progress.json": "4329c6444138ba5b94486f3c34ac2ad2cf3565e45dbdea48b4d9fc16b6fb51a4",
+        "runs/canary-gpu_4090-s9-r0-paired-1644197/qualification.json": "3242b7806e2aeccad20b48ecef39095aa13fe2113c3c9adc084913afffa1edc2",
+        "runs/canary-gpu_4090-s9-r0-paired-1644197/source_commit.txt": "94a32029d1c1404aab8a129ea99821c803182ace076a6bc3bfcf547c872d785a",
+        "runs/canary-gpu_4090-s9-r0-pristine-1644197/complete.json": "db691f7b3127a3a34f5e7a2d1cf77a8520928b9bb9579a777cd443a14e0014d4",
+        "runs/canary-gpu_4090-s9-r0-pristine-1644197/environment.json": "2bfd1c7629b94c3ccd132889cb97a3a3bc045e2ec8e9f011ac53ff237ebd25ca",
+        "runs/canary-gpu_4090-s9-r0-pristine-1644197/launcher-complete.txt": "2848dd928bc485dbb08a4169cbb85dbf32f60bf44587083d89951b44c6ade920",
+        "runs/canary-gpu_4090-s9-r0-pristine-1644197/measurements.json": "81ad56ad264097de1a3253af4f307f043d75ae2abc06997187f796586df63716",
+        "runs/canary-gpu_4090-s9-r0-pristine-1644197/memory.json": "c4c32af83e2b53a1feebc54beda9750a030bb5a651b76d715051a44ea6d00106",
+        "runs/canary-gpu_4090-s9-r0-pristine-1644197/progress.json": "2d96bea09fd5f3f38e3459c46bee7b4423685a1468f31b6b787925e59d98a38c",
+        "runs/canary-gpu_4090-s9-r0-pristine-1644197/qualification.json": "4fe08d3535e4255b07147da346c7855afe1b215a8c189be9d6e7429f7323da28",
+        "runs/canary-gpu_4090-s9-r0-pristine-1644197/source_commit.txt": "94a32029d1c1404aab8a129ea99821c803182ace076a6bc3bfcf547c872d785a",
+        "runs/canary-gpu_4090-s9-r1-paired-1644197/complete.json": "90a57b4d2ffdeb4c83fc674d7e3f6480ce0f316dccfbca018a258e139824b971",
+        "runs/canary-gpu_4090-s9-r1-paired-1644197/environment.json": "02f1428f466a54e76140a2794b90ac10daba096aa95f457f1ee0a7e00039b75a",
+        "runs/canary-gpu_4090-s9-r1-paired-1644197/launcher-complete.txt": "b76bfbdf9ef16158be82b4f53d83823de4479247c52f404998748f1abdc69d8e",
+        "runs/canary-gpu_4090-s9-r1-paired-1644197/measurements.json": "08de2960f93244180b3e0b55c1fd5f1d6fe2db15cc61e56a134babe03ffa00b7",
+        "runs/canary-gpu_4090-s9-r1-paired-1644197/memory.json": "a7f4e9fa975ac4ec1588aa1e49eb190bbb35830f44098198cdcf8deb00cc3788",
+        "runs/canary-gpu_4090-s9-r1-paired-1644197/progress.json": "2d62b281a640b4111ac71ef10d6b37666fc17a5b5a86c8f16746302c84e1b6e0",
+        "runs/canary-gpu_4090-s9-r1-paired-1644197/qualification.json": "3242b7806e2aeccad20b48ecef39095aa13fe2113c3c9adc084913afffa1edc2",
+        "runs/canary-gpu_4090-s9-r1-paired-1644197/source_commit.txt": "94a32029d1c1404aab8a129ea99821c803182ace076a6bc3bfcf547c872d785a",
+        "runs/canary-gpu_4090-s9-r1-pristine-1644197/complete.json": "f2c823e69a4caac1a725054eb163d4d9a3920c20e6cd40ebeef2495221868a7b",
+        "runs/canary-gpu_4090-s9-r1-pristine-1644197/environment.json": "3253f9469ca7d30010213fe4bc1c95286eeb2da1290992caea2407d2cd559bd1",
+        "runs/canary-gpu_4090-s9-r1-pristine-1644197/launcher-complete.txt": "d261202fb8f3e26648fd4345844c0c8649b779ca01448b66dccdad3128344ab8",
+        "runs/canary-gpu_4090-s9-r1-pristine-1644197/measurements.json": "1fbfa3b7eb2d74a6f93aeabdb9d81e365e42549ca5f51e125dde8175f9b3ccff",
+        "runs/canary-gpu_4090-s9-r1-pristine-1644197/memory.json": "c4c32af83e2b53a1feebc54beda9750a030bb5a651b76d715051a44ea6d00106",
+        "runs/canary-gpu_4090-s9-r1-pristine-1644197/progress.json": "de3c40c876c85f430a78d3abf4c46843890945da8099a9c4083d415a34aa742a",
+        "runs/canary-gpu_4090-s9-r1-pristine-1644197/qualification.json": "4fe08d3535e4255b07147da346c7855afe1b215a8c189be9d6e7429f7323da28",
+        "runs/canary-gpu_4090-s9-r1-pristine-1644197/source_commit.txt": "94a32029d1c1404aab8a129ea99821c803182ace076a6bc3bfcf547c872d785a"
+      },
+      "failure_log_sha256": "fc1c743f0ff00e986a08da4ae70f14ec735210fb710f2867fa0b9fed4d81840d",
+      "metrics_inspected_for_recovery_decision": false
+    }
+  },
+  "fresh_cases_consumed": 0,
+  "source_changed": false,
+  "analyzer_changed": false,
+  "floors_changed": false,
+  "second_preparation_failure": {
+    "campaign": "/ssd/scxi253/sgi-v42-canary-rpc-recovery-20261001T0430Z-allocation-v2",
+    "reason": "Explicit memory flag prohibited; queue assigns 60GB per GPU; no jobs submitted"
+  },
+  "initial_preparation_failure": {
+    "campaign": "/ssd/scxi253/sgi-v42-canary-rpc-recovery-20261001T0430Z",
+    "reason": "Requested 96 CPUs violated six CPUs per GPU submission policy; no jobs submitted and no measurements started"
+  },
+  "subsequent_stages_authorized": false,
+  "default_promotion": false,
+  "serving_promotion": false,
+  "resource_request_reason": "Request all 8 GPUs, 48 physical cores (within six cores per GPU policy), and exclusive allocation on each original node to select the original UUID/cores legally; other allocated GPUs remain unused; never overlap another allocation.",
+  "scripts_sha256": {
+    "resume_measure.py": "7234445db1606dad18743117504d1f5ae54174d0082622412fe7b0485eead978",
+    "canary_resume.sbatch": "8c77430e196afa6a8f623f2142e9d2af575a6d5bb18ad5ac688810992e29bd77"
+  }
+}
