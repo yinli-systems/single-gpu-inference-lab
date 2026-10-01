@@ -83,7 +83,7 @@ smoke authorizes exposed dev only. Both dev passes authorize canary; both canary
 passes authorize release; both release passes authorize stress. All original 0.99
 floors remain, including candidate-native/pristine simultaneous LCB. Actual chosen
 policy/pristine point worst is additionally required >=0.99. Held-out oracle regret
-is reported as `oracle latency / chosen latency - 1`, including P50/P90/P99, worst
+is reported as `chosen latency / oracle latency - 1`, including P50/P90/P99, worst
 and >1% counts. Oracle evidence never trains the tactic.
 
 The original case hash and every stage hash are unchanged. Canary/release/stress
@@ -96,3 +96,10 @@ core set and records affinity. NVML hardware queries and telemetry target the UU
 reported by Torch for the actual CUDA device. Missing UUID or cross-repeat affinity
 drift is a blocking failure. Resource FFI absence leaves the official native module
 available; cached resource choices are rejected if the actual 15-field plan differs.
+
+The frozen `b769e7c` analyzer computes regret correctly as
+`max(1, held_out_speedup) / chosen_speedup - 1`, but its output description inverted
+the latency numerator and denominator. This is a reporting-label correction only;
+the frozen campaign's original source and numerical receipts stay immutable.
+Archived reports must annotate the correct latency definition separately without
+rewriting source-bound summary hashes or using held-out oracle evidence for training.

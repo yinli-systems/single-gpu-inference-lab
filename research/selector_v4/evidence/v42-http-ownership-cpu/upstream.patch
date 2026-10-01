@@ -1,0 +1,444 @@
+diff --git a/python/sglang/srt/managers/tokenizer_manager.py b/python/sglang/srt/managers/tokenizer_manager.py
+index 989b7a2..50498f8 100644
+--- a/python/sglang/srt/managers/tokenizer_manager.py
++++ b/python/sglang/srt/managers/tokenizer_manager.py
+@@ -54,7 +54,6 @@ import uvloop
+ import zmq
+ import zmq.asyncio
+ from fastapi import BackgroundTasks
+-
+ from sglang.srt.beam_search.output import (
+     build_beam_search_out,
+     try_build_beam_search_out_dict,
+@@ -247,6 +246,7 @@ class ReqState:
+ 
+     dispatched: bool = False
+     abort_sent: bool = False
++    abort_generation: object = dataclasses.field(default_factory=object, repr=False)
+ 
+     # For streaming output
+     last_output_offset: int = 0
+@@ -2028,7 +2028,7 @@ class TokenizerManager(TokenizerControlMixin, TokenizerManagerScoreMixin):
+                 tokenized_obj.sampling_params = copy.copy(tokenized_obj.sampling_params)
+                 tokenized_obj.sampling_params.max_new_tokens = 0
+                 tokenized_obj.stream = False
+-                self._init_req_state(tmp_obj)
++                self._init_req_state(tmp_obj, abort_owner=obj)
+                 request_rids.add(tmp_obj.rid)
+                 await self._send_one_request(tokenized_obj)
+                 await self._wait_one_response(tmp_obj, request).__anext__()
+@@ -2045,7 +2045,7 @@ class TokenizerManager(TokenizerControlMixin, TokenizerManagerScoreMixin):
+                             copy.copy(item) for item in tokenized_obj.mm_inputs.mm_items
+                         ]
+                     tokenized_obj.rid = tmp_obj.regenerate_rid()
+-                    self._init_req_state(tmp_obj)
++                    self._init_req_state(tmp_obj, abort_owner=obj)
+                     request_rids.add(tmp_obj.rid)
+                     state = self.rid_to_state[tmp_obj.rid]
+                     tokenized_obj.time_stats = state.time_stats
+@@ -2290,13 +2290,41 @@ class TokenizerManager(TokenizerControlMixin, TokenizerManagerScoreMixin):
+         return None
+ 
+     def create_abort_task(self, obj: GenerateReqInput):
+-        # Abort the request if the client is disconnected.
++        # A request ID can be reused after the response finishes. Bind delayed
++        # disconnect cleanup to the exact request/state generation that created
++        # this response, rather than aborting whichever request currently owns
++        # the same textual ID two seconds later.
+         async def abort_request():
++            owned_generations = obj.__dict__.get("_http_abort_states")
++            if owned_generations is not None:
++                # Parallel samples have regenerated RIDs, so the response owns
++                # the states registered below, including its expanded children.
++                owned_generations = list(owned_generations.items())
++            else:
++                request_objs = (
++                    [obj] if obj.is_single else [obj[i] for i in range(len(obj.rid))]
++                )
++                owned_generations = []
++                for request_obj in request_objs:
++                    state = self.rid_to_state.get(request_obj.rid)
++                    if state is not None and state.obj is request_obj:
++                        owned_generations.append(
++                            (request_obj.rid, state.abort_generation)
++                        )
++                state = None
++
+             await asyncio.sleep(2)
+-            rids = [obj.rid] if obj.is_single else obj.rid
+-            for rid in rids:
+-                if rid in self.rid_to_state:
+-                    self.abort_request(rid)
++            for rid, generation in owned_generations:
++                state = self.rid_to_state.get(rid)
++                if (
++                    state is not None
++                    and state.abort_generation is generation
++                    and not state.finished
++                ):
++                    if state.dispatched:
++                        self.abort_request(rid)
++                    else:
++                        self._release_req_states_on_failure([rid])
+ 
+         background_tasks = BackgroundTasks()
+         background_tasks.add_task(abort_request)
+@@ -3624,6 +3652,8 @@ class TokenizerManager(TokenizerControlMixin, TokenizerManagerScoreMixin):
+         self,
+         obj: Union[GenerateReqInput, EmbeddingReqInput],
+         request: Optional[fastapi.Request] = None,
++        *,
++        abort_owner: Optional[GenerateReqInput] = None,
+     ):
+         created_time = obj.received_time
+ 
+@@ -3661,6 +3691,12 @@ class TokenizerManager(TokenizerControlMixin, TokenizerManagerScoreMixin):
+             time_stats = APIServerReqTimeStats(disagg_mode=self.disaggregation_mode)
+             state = ReqState([], False, asyncio.Event(), sub_obj, time_stats)
+             self.rid_to_state[rid] = state
++            # Markers retain no result buffers and can be pickled with requests
++            # for request/crash dumps. Identity distinguishes reused RID epochs.
++            owner = obj if abort_owner is None else abort_owner
++            owner.__dict__.setdefault("_http_abort_states", {})[rid] = (
++                state.abort_generation
++            )
+             if self.enable_trace:
+                 time_stats.init_trace_ctx(rid, bootstrap_room, external_trace_header)
+             time_stats.set_created_time(created_time)
+diff --git a/test/registered/unit/managers/test_tokenizer_manager_rid_cleanup.py b/test/registered/unit/managers/test_tokenizer_manager_rid_cleanup.py
+index 0b1e2eb..592e5b7 100644
+--- a/test/registered/unit/managers/test_tokenizer_manager_rid_cleanup.py
++++ b/test/registered/unit/managers/test_tokenizer_manager_rid_cleanup.py
+@@ -15,12 +15,15 @@ Covers:
+ """
+ 
+ import asyncio
++import gc
++import pickle
+ import time
+ import unittest
++import weakref
++from types import SimpleNamespace
+ from unittest.mock import AsyncMock, MagicMock, Mock, patch
+ 
+ import msgspec
+-
+ from sglang.test.ci.ci_register import register_cpu_ci
+ from sglang.test.test_utils import CustomTestCase, maybe_stub_sgl_kernel
+ 
+@@ -998,5 +1001,315 @@ class TestDisconnectAfterDispatchAbortsRequest(CustomTestCase):
+         self.assertIn(rid, tm.rid_to_state)
+ 
+ 
++class TestDelayedAbortOwnership(CustomTestCase):
++    """Delayed HTTP cleanup must never abort a newer request reusing the RID."""
++
++    async def _run_cleanup(self, tm, obj, during_sleep=None):
++        entered = asyncio.Event()
++        release = asyncio.Event()
++
++        async def controlled_sleep(_seconds):
++            entered.set()
++            await release.wait()
++
++        with patch(
++            "sglang.srt.managers.tokenizer_manager.asyncio.sleep",
++            side_effect=controlled_sleep,
++        ):
++            task = asyncio.create_task(tm.create_abort_task(obj)())
++            await entered.wait()
++            if during_sleep is not None:
++                during_sleep()
++            release.set()
++            await task
++
++    def test_reused_rid_does_not_abort_replacement(self):
++        tm = _make_tokenizer_manager(self)
++        tm.abort_request = Mock()
++        rid = "reused-rid"
++        obj = Mock(spec=GenerateReqInput)
++        obj.is_single = True
++        obj.rid = rid
++        original = _make_req_state(rid)
++        original.obj = obj
++        replacement = _make_req_state(rid)
++        tm.rid_to_state[rid] = original
++
++        asyncio.run(
++            self._run_cleanup(
++                tm,
++                obj,
++                during_sleep=lambda: tm.rid_to_state.__setitem__(rid, replacement),
++            )
++        )
++        tm.abort_request.assert_not_called()
++        self.assertIs(tm.rid_to_state[rid], replacement)
++
++    def test_replacement_present_before_cleanup_starts_is_not_aborted(self):
++        tm = _make_tokenizer_manager(self)
++        tm.abort_request = Mock()
++        rid = "replacement-before-start"
++        obj = Mock(spec=GenerateReqInput)
++        obj.is_single = True
++        obj.rid = rid
++        replacement = _make_req_state(rid)
++        tm.rid_to_state[rid] = replacement
++
++        asyncio.run(self._run_cleanup(tm, obj))
++        tm.abort_request.assert_not_called()
++        self.assertIs(tm.rid_to_state[rid], replacement)
++
++    def test_same_request_object_new_state_generation_is_not_aborted(self):
++        tm = _make_tokenizer_manager(self)
++        tm.abort_request = Mock()
++        rid = "same-object-new-state"
++        obj = Mock(spec=GenerateReqInput)
++        obj.is_single = True
++        obj.rid = rid
++        original = _make_req_state(rid)
++        original.obj = obj
++        replacement = _make_req_state(rid)
++        replacement.obj = obj
++        tm.rid_to_state[rid] = original
++
++        asyncio.run(
++            self._run_cleanup(
++                tm,
++                obj,
++                during_sleep=lambda: tm.rid_to_state.__setitem__(rid, replacement),
++            )
++        )
++        tm.abort_request.assert_not_called()
++        self.assertIs(tm.rid_to_state[rid], replacement)
++
++    def test_absent_at_start_then_replacement_appears_is_not_aborted(self):
++        tm = _make_tokenizer_manager(self)
++        tm.abort_request = Mock()
++        rid = "late-replacement"
++        obj = Mock(spec=GenerateReqInput)
++        obj.is_single = True
++        obj.rid = rid
++        replacement = _make_req_state(rid)
++
++        asyncio.run(
++            self._run_cleanup(
++                tm,
++                obj,
++                during_sleep=lambda: tm.rid_to_state.__setitem__(rid, replacement),
++            )
++        )
++        tm.abort_request.assert_not_called()
++        self.assertIs(tm.rid_to_state[rid], replacement)
++
++    def test_batch_aborts_only_members_still_owned_by_original_generation(self):
++        tm = _make_tokenizer_manager(self)
++        tm.abort_request = Mock()
++        rids = ["batch-live", "batch-replaced"]
++        children = []
++        for rid in rids:
++            child = Mock(spec=GenerateReqInput)
++            child.rid = rid
++            children.append(child)
++        obj = MagicMock(spec=GenerateReqInput)
++        obj.is_single = False
++        obj.rid = rids
++        obj.__getitem__.side_effect = children
++        original = []
++        for rid, child in zip(rids, children):
++            state = _make_req_state(rid)
++            state.obj = child
++            state.dispatched = True
++            tm.rid_to_state[rid] = state
++            original.append(state)
++        replacement = _make_req_state(rids[1])
++
++        asyncio.run(
++            self._run_cleanup(
++                tm,
++                obj,
++                during_sleep=lambda: tm.rid_to_state.__setitem__(rids[1], replacement),
++            )
++        )
++        tm.abort_request.assert_called_once_with(rids[0])
++        self.assertIs(tm.rid_to_state[rids[0]], original[0])
++        self.assertIs(tm.rid_to_state[rids[1]], replacement)
++
++    def test_original_live_request_is_still_aborted(self):
++        tm = _make_tokenizer_manager(self)
++        tm.abort_request = Mock()
++        rid = "live-rid"
++        obj = Mock(spec=GenerateReqInput)
++        obj.is_single = True
++        obj.rid = rid
++        state = _make_req_state(rid)
++        state.obj = obj
++        state.dispatched = True
++        tm.rid_to_state[rid] = state
++
++        asyncio.run(self._run_cleanup(tm, obj))
++        tm.abort_request.assert_called_once_with(rid)
++
++    def test_parallel_samples_are_owned_after_parent_state_is_removed(self):
++        tm = _make_tokenizer_manager(self)
++        tm.abort_request = Mock()
++        obj = _make_generate_obj("parallel-parent", is_single=True)
++        tm._init_req_state(obj)
++        for rid in ("parallel-child-0", "parallel-child-1"):
++            child = _make_generate_obj(rid, is_single=True)
++            tm._init_req_state(child, abort_owner=obj)
++            tm.rid_to_state[rid].dispatched = True
++        del tm.rid_to_state[obj.rid]
++
++        asyncio.run(self._run_cleanup(tm, obj))
++
++        self.assertEqual(
++            [call.args[0] for call in tm.abort_request.call_args_list],
++            ["parallel-child-0", "parallel-child-1"],
++        )
++
++    def test_parallel_sampling_handler_registers_expanded_requests(self):
++        tm = _make_tokenizer_manager(self)
++        tm.abort_request = Mock()
++        obj = GenerateReqInput(
++            input_ids=[1], rid="parallel-parent", sampling_params={"n": 2}
++        )
++        obj.normalize_batch_and_arguments()
++        obj.received_time = 0.0
++        tm._tokenize_one_request = AsyncMock(
++            return_value=SimpleNamespace(
++                rid=obj.rid[0],
++                mm_inputs=None,
++                sampling_params=SimpleNamespace(max_new_tokens=128),
++            )
++        )
++
++        async def send_one(tokenized_obj):
++            tm.rid_to_state[tokenized_obj.rid].dispatched = True
++
++        tm._send_one_request = AsyncMock(side_effect=send_one)
++        tm._collect_batch_responses = AsyncMock(return_value=[])
++
++        async def finish_prefix(request_obj, request):
++            tm.rid_to_state.pop(request_obj.rid)
++            yield {}
++
++        tm._wait_one_response = finish_prefix
++
++        async def drive():
++            tm._init_req_state(obj)
++            handler = tm._handle_batch_request(obj)
++            await handler.__anext__()
++            sample_rids = {
++                rid for rid, state in tm.rid_to_state.items() if state.dispatched
++            }
++            self.assertEqual(len(sample_rids), 2)
++            self.assertTrue(set(obj.rid).isdisjoint(sample_rids))
++            await self._run_cleanup(tm, obj)
++            self.assertEqual(
++                {call.args[0] for call in tm.abort_request.call_args_list},
++                sample_rids,
++            )
++            self.assertEqual(set(tm.rid_to_state), sample_rids)
++            await handler.aclose()
++
++        asyncio.run(drive())
++
++    def test_undispatched_owned_request_is_released_locally(self):
++        tm = _make_tokenizer_manager(self)
++        tm.abort_request = Mock()
++        obj = _make_generate_obj("never-dispatched", is_single=True)
++        tm._init_req_state(obj)
++        event = asyncio.Event()
++        tm.encoder_dispatch_ready[obj.rid] = event
++
++        asyncio.run(self._run_cleanup(tm, obj))
++
++        tm.abort_request.assert_not_called()
++        self.assertNotIn(obj.rid, tm.rid_to_state)
++        self.assertNotIn(obj.rid, tm.encoder_dispatch_ready)
++        self.assertTrue(event.is_set())
++
++    def test_parallel_sample_replacement_is_not_aborted(self):
++        tm = _make_tokenizer_manager(self)
++        tm.abort_request = Mock()
++        obj = _make_generate_obj("parallel-parent", is_single=True)
++        child = _make_generate_obj("parallel-child", is_single=True)
++        tm._init_req_state(child, abort_owner=obj)
++        replacement = _make_req_state(child.rid)
++
++        asyncio.run(
++            self._run_cleanup(
++                tm,
++                obj,
++                during_sleep=lambda: tm.rid_to_state.__setitem__(
++                    child.rid, replacement
++                ),
++            )
++        )
++
++        tm.abort_request.assert_not_called()
++        self.assertIs(tm.rid_to_state[child.rid], replacement)
++
++    def test_delayed_cleanup_does_not_retain_completed_state(self):
++        tm = _make_tokenizer_manager(self)
++        tm.abort_request = Mock()
++        obj = _make_generate_obj("weak-state", is_single=True)
++        tm._init_req_state(obj)
++        state_ref = weakref.ref(tm.rid_to_state[obj.rid])
++
++        def complete():
++            del tm.rid_to_state[obj.rid]
++            gc.collect()
++            self.assertIsNone(state_ref())
++
++        asyncio.run(self._run_cleanup(tm, obj, during_sleep=complete))
++        tm.abort_request.assert_not_called()
++
++    def test_removed_parallel_sample_is_ignored(self):
++        tm = _make_tokenizer_manager(self)
++        tm.abort_request = Mock()
++        obj = _make_generate_obj("parallel-parent", is_single=True)
++        child = _make_generate_obj("expired-child", is_single=True)
++        tm._init_req_state(child, abort_owner=obj)
++        del tm.rid_to_state[child.rid]
++        gc.collect()
++
++        asyncio.run(self._run_cleanup(tm, obj))
++        tm.abort_request.assert_not_called()
++
++    def test_request_cleanup_metadata_preserves_request_pickling(self):
++        tm = _make_tokenizer_manager(self)
++        obj = GenerateReqInput(input_ids=[1, 2], rid="pickle-request")
++        obj.received_time = 0.0
++        tm._init_req_state(obj)
++
++        restored = pickle.loads(pickle.dumps(obj))
++
++        self.assertEqual(restored.rid, obj.rid)
++        self.assertEqual(restored.input_ids, obj.input_ids)
++
++    def test_finished_or_removed_original_is_not_aborted(self):
++        for removed in (False, True):
++            with self.subTest(removed=removed):
++                tm = _make_tokenizer_manager(self)
++                tm.abort_request = Mock()
++                rid = f"done-{removed}"
++                obj = Mock(spec=GenerateReqInput)
++                obj.is_single = True
++                obj.rid = rid
++                state = _make_req_state(rid)
++                state.obj = obj
++                tm.rid_to_state[rid] = state
++
++                def finish_or_remove():
++                    if removed:
++                        del tm.rid_to_state[rid]
++                    else:
++                        state.finished = True
++
++                asyncio.run(self._run_cleanup(tm, obj, finish_or_remove))
++                tm.abort_request.assert_not_called()
++
++
+ if __name__ == "__main__":
+     unittest.main(verbosity=2)

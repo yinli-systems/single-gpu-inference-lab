@@ -217,7 +217,7 @@ def run(args):
         "native_overlay_worst":min(x["ratio"] for x in native_overlay_records),
         "native_overlay_block_worst":min(x["block_worst"] for x in native_overlay_records),
         "native_overlay_joint_min_lcb95":native_overlay_joint}
-    metrics['regret']={'definition':'held-out oracle latency / chosen latency - 1; native=1 in same-module tactic comparison',
+    metrics['regret']={'definition':'chosen latency / held-out oracle latency - 1 = oracle speedup / chosen speedup - 1; native speedup=1 in same-module tactic comparison',
         'p50':float(np.quantile(regrets,.5)),'p90':float(np.quantile(regrets,.9)),
         'p99':float(np.quantile(regrets,.99)),'worst':max(regrets),
         'above_one_percent_count':sum(x>.01 for x in regrets),'records':len(regrets)}
