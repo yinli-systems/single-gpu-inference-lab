@@ -1,7 +1,7 @@
 {
   "schema": 6,
   "qualification_revision": "4.2.0",
-  "state": "V42_CANARY_5090_QUALIFICATION_HOLD_4090_COMPLETENESS_RECOVERY",
+  "state": "V42_DUAL_CANARY_QUALIFICATION_HOLD_COMPLETENESS_RECOVERED",
   "default_promotion": false,
   "serving_promotion": false,
   "historical_token_divergence_resolved": false,
@@ -14,7 +14,7 @@
     "stress_untouched": 12,
     "canary_consumed": 10
   },
-  "cpu_tests_last_complete": 51,
+  "cpu_tests_last_complete": 53,
   "new_v41_gpu_jobs": {
     "smoke_gpu_4090": "1643827",
     "smoke_gpu_5090": "1643828"
@@ -184,7 +184,7 @@
     },
     "evidence": "evidence/v411-exact-dev/"
   },
-  "next_action": "Complete preserved 4090 canary through exact GPU/CPU technical continuation. Investigate exposed 5090 native/pristine regressions and coverage/regret; no release48/stress12/full-serving qualification authorized while canary HOLD. Historical2/432 remains unresolved.",
+  "next_action": "Qualify eb4e3e60 normal pinned-vendor wheel and dual GPU Graph boundary diagnostics; then exposed durable native-context diagnostics. Frozen canary remains HOLD on both GPUs, original release48/stress12 untouched; no full-serving promotion. Historical2/432 remains unresolved.",
   "stress_cases_consumed": 0,
   "v42": {
     "qualification_revision": "4.2.0",
@@ -432,7 +432,7 @@
       "reason": "srun unable to confirm allocation: Socket timed out on send/recv before repeat2; original four completed runs retained",
       "source_changed": false,
       "thresholds_changed": false,
-      "recovery_pending": true
+      "recovery_pending": false
     },
     "canary_5090": {
       "pass": false,
@@ -512,8 +512,74 @@
       ],
       "confirmed_original_gpu_and_cpu": [
         "1644913",
-        "1644914"
-      ]
+        "1644914",
+        "1644929"
+      ],
+      "complete_4090_processes": 60,
+      "missing_processes_resumed": 5,
+      "evidence": "evidence/v42-canary-4090-complete-hold/",
+      "cpu_audit_discovery_repaired": true,
+      "original_terminal_receipts_preserved": true
+    },
+    "canary_4090": {
+      "pass": false,
+      "failed_requirements": [
+        "held_out_controls_resolve"
+      ],
+      "metrics": {
+        "fold_records": 720,
+        "selected_records": 476,
+        "coverage": 0.6611111111111111,
+        "selected_geomean": 1.5379335365817948,
+        "selected_worst": 1.0715474111810368,
+        "selected_block_worst": 1.0028470516537515,
+        "selected_joint_min_lcb95": 1.0650180671025005,
+        "policy_geomean": 1.3291882787966691,
+        "policy_worst": 1.0,
+        "by_execution_mode": {
+          "eager_full_call": {
+            "count": 148,
+            "geomean": 1.5091992338867721,
+            "worst": 1.0715474111810368
+          },
+          "graph1_replay": {
+            "count": 160,
+            "geomean": 1.550499558419068,
+            "worst": 1.088181869348399
+          },
+          "graph16_replay": {
+            "count": 168,
+            "geomean": 1.5516281521183344,
+            "worst": 1.0875978630122516
+          }
+        },
+        "selected_layouts": [
+          "paged",
+          "ragged"
+        ],
+        "selected_dtypes": [
+          "bfloat16",
+          "float16"
+        ],
+        "native_overlay_geomean": 0.9991791247724433,
+        "native_overlay_worst": 0.993900961398416,
+        "native_overlay_block_worst": 0.9133838452133353,
+        "native_overlay_joint_min_lcb95": 0.9927017774909123,
+        "regret": {
+          "definition": "held-out oracle latency / chosen latency - 1; native=1 in same-module tactic comparison",
+          "p50": 0.0,
+          "p90": 0.0,
+          "p99": 0.7544275665123181,
+          "worst": 0.77816989742353,
+          "above_one_percent_count": 28,
+          "records": 720
+        },
+        "actual_policy_vs_pristine_geomean": 1.3280971810658462,
+        "actual_policy_vs_pristine_worst": 0.9961852635977275
+      },
+      "evidence": "evidence/v42-canary-4090-complete-hold/",
+      "complete_processes": 60,
+      "recovery_fresh_cases_consumed": 0
     }
   },
   "v41_source_isolation_history": {
@@ -663,5 +729,22 @@
     },
     "analysis_scope": "prepared wrapper/fallback and pure fixed replay only; raw uncertified resource; three exposed cells; older CCCL overlay; not full-plan, outer AutoTuner dispatch, release or HTTP",
     "future_diagnostic_durability": "Source updated to append each complete paired block with fsync outside scored windows; new jobs require a new harness binding and longer allocation"
+  },
+  "current_main_header_identity_revision": {
+    "source_commit": "eb4e3e60a6de71f00c0fb558da6f21e4b45d8b55",
+    "local_cpu_tests_passed": 29,
+    "local_skips": 2,
+    "normal_pinned_vendor_wheel_build_pending": true,
+    "gpu_requalification_pending": true,
+    "old_d768_results_retained": true,
+    "default_promotion": false
+  },
+  "graph_boundary_probe": {
+    "harness_commit": "261123b",
+    "gpu_tests_pending": true,
+    "raw_uncertified_resource_optin_required": true,
+    "automatic_untracked_metadata_detection": false,
+    "exclusive_owner_invalidation_required": true,
+    "serving_qualified": false
   }
 }
