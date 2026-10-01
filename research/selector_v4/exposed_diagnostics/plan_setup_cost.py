@@ -111,12 +111,7 @@ def run(out):
                     result = w.run(*inputs)
                 torch.cuda.synchronize()
                 finished = time.perf_counter_ns()
-                if current:
-                    assert current.identity == runner.identity
-                    if published:
-                        assert current.receipt["checksum"] == cert["checksum"]
-                    else:
-                        assert current.receipt is None and not current._receipt_valid
+                loaded = current.receipt if current else None
                 rows.append(
                     dict(
                         block=block,
@@ -130,9 +125,16 @@ def run(out):
                         confidence_identity_stable=current.identity == runner.identity
                         if current
                         else None,
+                        loaded_confidence_checksum=loaded["checksum"] if loaded else None,
                     )
                 )
                 save(out / "measurements.json", rows)
+                if current:
+                    assert current.identity == runner.identity
+                    if published:
+                        assert loaded["checksum"] == cert["checksum"]
+                    else:
+                        assert loaded is None and not current._receipt_valid
                 if not rows[-1]["exact"]:
                     torch.save(
                         {"actual": result, "native_reference": reference},
