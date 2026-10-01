@@ -14,6 +14,7 @@ from research.selector_v4.public_qualification.gates import (
     predecessor_stages,
     sha,
     verify_case_ticket,
+    verify_manifest,
 )
 
 
@@ -26,7 +27,18 @@ def campaign(tmp_path):
     root = tmp_path / "synthetic-no-gpu"
     root.mkdir()
     cases = [{"id": stage + "-synthetic", "family": stage} for stage in STAGES]
-    save(root / "manifest.json", {"cases": cases})
+    import hashlib
+
+    digest = lambda value: hashlib.sha256(
+        json.dumps(value, sort_keys=True, separators=(",", ":")).encode()
+    ).hexdigest()
+    manifest = {
+        "cases": cases,
+        "case_hash": digest(cases),
+        "stage_hashes": {s: digest([c for c in cases if c["family"] == s]) for s in STAGES},
+        "families": {s: 1 for s in STAGES},
+    }
+    save(root / "manifest.json", manifest)
     (root / "harness.tar.gz").write_bytes(b"synthetic-test-source-not-an-engine")
     expected = {
         "scope": SCOPE,
@@ -36,7 +48,7 @@ def campaign(tmp_path):
         "candidate_commit": "synthetic-candidate",
         "pristine_commit": "synthetic-pristine",
         "analyzer_sha256": "synthetic-analyzer",
-        "stage_hashes": {s: s + "-hash" for s in STAGES},
+        "stage_hashes": manifest["stage_hashes"],
     }
     save(root / "frozen-binding.json", expected)
     (root / "smoke-proof.txt").write_text("synthetic raw evidence")
@@ -133,7 +145,9 @@ def test_missing_gate_or_changed_raw_evidence_blocks_dispatch(tmp_path):
 def test_case_measurement_requires_ticket_geometry_and_consumption_ledger(tmp_path):
     root, expected, cases = campaign(tmp_path)
     stage = root / "stages/canary"
-    binding = dict(expected, stage="canary", stage_hash="canary-hash", cases=[cases[1]])
+    binding = dict(
+        expected, stage="canary", stage_hash=expected["stage_hashes"]["canary"], cases=[cases[1]]
+    )
     save(stage / "binding.json", binding)
     save(stage / "authorization.json", build_stage_ticket(root, "canary"))
     save(stage / "receipts/consumption.json", {"consumed_case_ids": []})
@@ -157,3 +171,14 @@ def test_changed_smoke_or_manifest_cannot_authorize_even_dev(tmp_path):
     (root / "manifest.json").write_text("changed")
     with pytest.raises(ValueError, match="Manifest"):
         build_stage_ticket(root, "dev")
+
+
+@pytest.mark.parametrize("field", ["case_hash", "stage_hashes", "families"])
+def test_declared_file_hash_cannot_hide_wrong_derived_geometry(tmp_path, field):
+    root, expected, _ = campaign(tmp_path)
+    manifest = json.loads((root / "manifest.json").read_text())
+    manifest[field] = "wrong" if field == "case_hash" else {}
+    save(root / "manifest.json", manifest)
+    expected["manifest_sha256"] = sha(root / "manifest.json")
+    with pytest.raises(ValueError, match="Derived"):
+        verify_manifest(root, expected)

@@ -5,6 +5,7 @@ import csv
 import hashlib
 import json
 import math
+import os
 from pathlib import Path
 
 import numpy as np
@@ -305,6 +306,17 @@ def analyze(campaign, gpu, out):
         "both_dtypes_selected": {r["dtype"] for r in selected} == {"float16", "bfloat16"},
         "active_clocks_stable": all(x["stable"] for x in health),
     }
+    # Stage tickets bind all raw observations, native reference tensors, source
+    # checks, traces and full disassembly, rather than only analyzed JSON rows.
+    for name in ("runs", "receipts", "logs"):
+        for current, folders, names in os.walk(campaign / name):
+            folders[:] = [n for n in folders if n not in ("__pycache__", ".pytest_cache")]
+            for filename in names:
+                if filename.startswith("analysis-"):
+                    continue  # The current analyzer log is still being written.
+                path = Path(current) / filename
+                if path.is_file():
+                    files[str(path.relative_to(campaign))] = sha(path)
     result = {
         "pass": all(checks.values()),
         "qualification_revision": "4.3.0",

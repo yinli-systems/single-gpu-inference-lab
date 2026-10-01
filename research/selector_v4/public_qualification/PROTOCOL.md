@@ -77,8 +77,8 @@ Generate only10 replacements for consumed canaries. Preserve original exposed
 dev, release and stress cases verbatim, including their stage hashes. Deduplicate
 q/cached pairs and each component against all recorded historical manifests,
 including renamed sibling/old-manifest files and their original hash ledger.
-Record each fresh case as consumed at the first acknowledged GPU dispatch,
-including executions that later fail. A manifest freeze alone consumes no case.
+Record each fresh case as consumed at dispatch intent before the first GPU
+submission, including uncertain/failed submissions and executions that later fail. A manifest freeze alone consumes no case.
 
 The dispatcher publishes a ticket after verifying both predecessor verdicts and
 their complete raw ledgers. Each process verifies immutable ticket/source/manifest
@@ -107,3 +107,23 @@ full token/logprob parity separately. The historical2/432 token differences rema
 unreplicated and unattributed; later112 exact Native tokens and432 exact isolated
 Resource calls do not close that failure. The two upstream PRs remain the final
 step after qualification; no PR is created by this draft.
+
+## Finite execution draft
+
+`pack_harness.py` archives committed research blobs, rejects uncommitted or
+untracked research source, and adds a file-by-file commit provenance ledger.
+`pipeline.py --initialize` validates the complete archived prerequisite and normal
+packages before formal jobs; no invocation or manifest freeze has occurred yet.
+It freezes source and new10 once, retaining original48/12. Initialization requires
+current consumption state to match the committed source bundle.
+
+The sole exclusive controller performs fresh dual ninety-test smoke, example,
+all three managed modes and SASS checks. It publishes dev authorization, then
+advances only through complete dual stage verdicts. At most eight case allocations
+are in flight. Each case receives twelve hours at initial sbatch submission;
+the controller has a finite fourteen-day deadline. There is no automatic retry
+or resampling. On failure it retains the controller traceback, submitted jobs,
+conservative dispatch-intent consumption, and all partial measurements. Remaining
+allocations can finish under their original limits; successors are blocked.
+Successful kernel completion still requires separate full HTTP qualification
+and historical token-divergence closure before any default promotion.

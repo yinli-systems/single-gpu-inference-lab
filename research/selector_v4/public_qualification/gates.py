@@ -46,6 +46,27 @@ def need(condition, message):
         raise ValueError(message)
 
 
+def verify_manifest(campaign, expected):
+    """Verify derived identities, not merely the bytes declared by a producer."""
+    path = Path(campaign) / "manifest.json"
+    need(sha(path) == expected["manifest_sha256"], "Manifest changed")
+    manifest = json.loads(path.read_text())
+    canonical = lambda value: hashlib.sha256(
+        json.dumps(value, sort_keys=True, separators=(",", ":")).encode()
+    ).hexdigest()
+    cases = manifest["cases"]
+    need(len({c["id"] for c in cases}) == len(cases), "Duplicate case identity")
+    need(all(c["family"] in STAGES for c in cases), "Unknown case stage")
+    need(canonical(cases) == manifest["case_hash"], "Derived case hash")
+    hashes = {s: canonical([c for c in cases if c["family"] == s]) for s in STAGES}
+    need(hashes == manifest["stage_hashes"] == expected["stage_hashes"], "Derived stage hashes")
+    need(
+        {s: sum(c["family"] == s for c in cases) for s in STAGES} == manifest["families"],
+        "Derived stage counts",
+    )
+    return manifest
+
+
 def verify_summary(campaign, stage, gpu, expected):
     campaign = Path(campaign)
     path = campaign / "stages" / stage / "analysis" / gpu / "summary.json"
@@ -89,7 +110,7 @@ def build_stage_ticket(campaign, stage):
         expected.get("scope") == SCOPE and expected.get("qualification_revision") == REVISION,
         "A new frozen formal campaign is required",
     )
-    need(sha(campaign / "manifest.json") == expected["manifest_sha256"], "Manifest changed")
+    verify_manifest(campaign, expected)
     need(
         sha(campaign / "harness.tar.gz") == expected["harness_archive_sha256"],
         "Source bundle changed",
@@ -154,7 +175,7 @@ def verify_case_ticket(stage_root, index):
         ticket.get("frozen_binding_sha256") == sha(campaign / "frozen-binding.json"),
         "Frozen binding changed",
     )
-    need(sha(campaign / "manifest.json") == expected["manifest_sha256"], "Manifest changed")
+    verify_manifest(campaign, expected)
     need(
         sha(campaign / "harness.tar.gz") == expected["harness_archive_sha256"],
         "Source bundle changed",
