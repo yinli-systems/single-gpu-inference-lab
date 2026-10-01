@@ -182,6 +182,7 @@ def run(out, rep):
                 ],
             }
         )
+        save(out / "numerics.json", numerics)
         calls = {
             "native": native,
             "native_after_resource": native,
@@ -262,6 +263,13 @@ def run(out, rep):
                                 "device_us": device * 1000 / (count * n),
                             }
                         )
+                    # Persist each complete paired block outside every scored window.
+                    with (out / "raw-windows.jsonl").open("a") as stream:
+                        for row in rows[-4:]:
+                            stream.write(json.dumps(row, allow_nan=False) + "\n")
+                        stream.flush()
+                        os.fsync(stream.fileno())
+                save(out / "measurements.json", rows)
                 save(
                     out / "progress.json",
                     {
@@ -309,7 +317,7 @@ def run(out, rep):
             "complete": True,
             "rows": len(rows),
             "rep": rep,
-            "files": {f.name: sha(f) for f in out.glob("*.json")},
+            "files": {f.name: sha(f) for f in out.glob("*.json*")},
             "fresh_cases_consumed": 0,
             "qualified_release": False,
             "qualified_http": False,

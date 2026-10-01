@@ -641,6 +641,27 @@
     },
     "fresh_cases_consumed": 0,
     "qualified_release": false,
-    "qualified_http": false
+    "qualified_http": false,
+    "campaign_complete": false,
+    "evidence": "evidence/v42-exposed-native-context-persisted/",
+    "all_persisted_rows_retained": true,
+    "rows": {
+      "gpu_4090": 6912,
+      "gpu_5090": 7776
+    },
+    "complete_processes": {
+      "gpu_4090": 2,
+      "gpu_5090": 3
+    },
+    "incomplete_process": {
+      "job": "1644872",
+      "rep": 2,
+      "persisted_rows": 1728,
+      "last_reported_rows": 1920,
+      "at_least192_rows_unpersisted": true,
+      "reason": "Slurm90minuteTIMEOUT; extension denied; no complete data reconstructed"
+    },
+    "analysis_scope": "prepared wrapper/fallback and pure fixed replay only; raw uncertified resource; three exposed cells; older CCCL overlay; not full-plan, outer AutoTuner dispatch, release or HTTP",
+    "future_diagnostic_durability": "Source updated to append each complete paired block with fsync outside scored windows; new jobs require a new harness binding and longer allocation"
   }
 }
