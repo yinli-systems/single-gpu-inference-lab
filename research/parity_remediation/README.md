@@ -163,3 +163,9 @@ packet. See `evidence/DELIVERY.json` and `evidence/MANIFEST.json` for exact acco
 
 The standalone reviewed cleanup patch and source binding are under `upstream/`.
 The review is in this research repository; it is not official SGLang acceptance.
+
+## Later forced-history replay: both historical target positions
+
+A separate source-bound campaign `/ssd/scxi253/single-gpu-inference-forced-history-v3-20260930T050818Z`, source6416791790e0ee30bdad80428da5d436ec1396f9, completed job1640986. It covers two frozen historical target conditions: decode11/output74 and decode13/output114. In each condition the four ABBA arms (pristine0, cap0, cap1, pristine1) match full-batch signature, physical page table, all72 logical K/V tensors, shadow activations and logits exactly. All16 capture JSON/PT files were SHA256 reverified on2026-10-01. Metadata, source and raw responses are archived in `evidence/forced-history-v3/`; the eight large PT binaries remain on ParaCloud at receipt-bound paths.
+
+These are eight dependent pairwise comparisons across two target conditions. Both original divergences remain unreproduced and unattributed: the forced-natural decode11 token is304 for every arm (historical pristine315/cap304), and decode13 token is785 for every arm (historical pristine30280/cap785). The original run did not retain all pre-divergence scheduler/KV/activation state, so these equal replays cannot establish its cause. The original2/432 failure remains blocking; default and serving promotion remain OFF. This later evidence extends, rather than relabels, the earlier one-condition observer result.
