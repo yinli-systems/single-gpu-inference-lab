@@ -1,0 +1,5025 @@
+{
+  "binding": {
+    "flashinfer_source": "eb4e3e60a6de71f00c0fb558da6f21e4b45d8b55",
+    "native_base": "85744da1a397c0c4bea1a83b8345281750eb61a9",
+    "package_version": "0.7.1",
+    "official_pinned_vendor_wheel": true,
+    "normal_wheel_sha256": "0337548c78844c10bb5dad6276f76a5c50b45cb753636a6438e03621d26b260d",
+    "vendor_git_pins": {
+      "cccl": "16bd510c9b712e82b0ab6cbb630d8e29ba1f7116",
+      "cutlass": "b46b16d003484063bca4ed365e44095c4c6ed633",
+      "spdlog": "c3aed4b68373955e1cc94307683d44dca1515d2b"
+    },
+    "diagnostic_commit": "7eafb66",
+    "source": "/ssd/scxi253/sgi-official-wheel-validation-eb4e3e60-20261001/wheel-overlay",
+    "source_ledger_sha256": "ad8b08e92e33bf63d9859ffe4e25d48e5deeaeeca03ddbb11851db7038bdba9a",
+    "cells": "Three previously exposed canary03/07 configurations; BF16 paged, FP16 ragged, FP16 paged; all unsplit",
+    "comparisons": [
+      "native/native after explicit resource conditioning",
+      "uncertified native fallback/direct native",
+      "native/resource shared buffers"
+    ],
+    "window_target_ms": 384,
+    "minimum_window_ms": 120,
+    "blocks": 24,
+    "independent_processes": 3,
+    "allocation_hours": 3,
+    "durability": "Each complete four-window block fsynced outside scored windows",
+    "fresh_cases_consumed": 0,
+    "serving_qualified": false,
+    "release_qualified": false,
+    "historical_divergence_resolved": false,
+    "known_frozen_v42_canary_dual": "HOLD; remains unchanged",
+    "prior_partial_old_vendor_diagnostic_retained": true
+  },
+  "input_files_sha256": {
+    "binding.json": "bb0480e86a9ca34435abbbb0ad7d47bc12841fa2c9b303f2337a7ed64894f4d0",
+    "runs/gpu_4090-r0-1645468/complete.json": "4220fdf96a926505d6681408bba111328bc3e796d326130525c728334e0c8585",
+    "runs/gpu_4090-r0-1645468/environment.json": "2fd7e883c0f04857129140e7617f3420a588b62a0ac582a78ca73bd93e3f1859",
+    "runs/gpu_4090-r0-1645468/measurements.json": "f0df2ba159c688db255dbec2d82c8db49b9cd79aad3a5e18286f9552786c04c8",
+    "runs/gpu_4090-r0-1645468/numerics.json": "7de72f87bd6e6e197e75ea4ddfeb28da161e4cd76e500e0d7ab3d519e464329d",
+    "runs/gpu_4090-r0-1645468/progress.json": "a338251c71d912707330dbb905e0a9ccc0af721cc1459f827d81f4faa45e42a1",
+    "runs/gpu_4090-r0-1645468/raw-windows.jsonl": "6a896d1cd908c67d97df213e00f39b458358e28dc0bf0383734856762f50168c",
+    "runs/gpu_4090-r1-1645468/complete.json": "fcdb2c20d87390db9a6a51fbedfcb79ce27ace29db5ca8f39ed70e2885c65d1b",
+    "runs/gpu_4090-r1-1645468/environment.json": "89761a15cc1a304ab5e66db3a1455018716d926dae186d6912bf73c9bb2ebd31",
+    "runs/gpu_4090-r1-1645468/measurements.json": "533fee67bb91ef989ef2d133e8968e3a9c50f0b7af82fa00ffb53087359314cd",
+    "runs/gpu_4090-r1-1645468/numerics.json": "6652948468e5571dd1243bb121a5b18f9192df719110168363dc7687323b7771",
+    "runs/gpu_4090-r1-1645468/progress.json": "a338251c71d912707330dbb905e0a9ccc0af721cc1459f827d81f4faa45e42a1",
+    "runs/gpu_4090-r1-1645468/raw-windows.jsonl": "daf59aeb492b943dd0783f72b78f6f1123e4183786ac9becd6bfebe2dcce6d48",
+    "runs/gpu_4090-r2-1645468/complete.json": "937e2f3c08169b214d99e3e5b6d8da775260f9d05903622ad59c3bd8b2180d9c",
+    "runs/gpu_4090-r2-1645468/environment.json": "1056812ab7c4c3827b45d5f6e2c33a389e5f3134027380a9c871012b97c5e003",
+    "runs/gpu_4090-r2-1645468/measurements.json": "9aa908b5285856f982758bf7fb98a92b72cc3ba913e2fd926684d7fd4a7c853b",
+    "runs/gpu_4090-r2-1645468/numerics.json": "3b09fc86bf1332e8709ae42c1b8b98f5e2e57e4204e50788f3b5dfeb3229d0fc",
+    "runs/gpu_4090-r2-1645468/progress.json": "a338251c71d912707330dbb905e0a9ccc0af721cc1459f827d81f4faa45e42a1",
+    "runs/gpu_4090-r2-1645468/raw-windows.jsonl": "08f7b42c924839d68fe11b490d5ccd69ef3f3c709fd7e3ac967075189ba11345",
+    "runs/gpu_5090-r0-1645469/complete.json": "571fbdef84c737226b7fe22e18a3e10018a140f32c340b32a23efcf309ebaa3c",
+    "runs/gpu_5090-r0-1645469/environment.json": "dfafeee0b18ec0031bb5734be4ba75f176c6644a59455ed0349907e1e25e0b60",
+    "runs/gpu_5090-r0-1645469/measurements.json": "baba2bb4a31025435c2020380fb3d6e54d80f433cc266bd2f9b9141ed52c4276",
+    "runs/gpu_5090-r0-1645469/numerics.json": "53d9981ec1f668dfcedeb09920be5e7b1c3447b56d2546d917469e65041dd4ea",
+    "runs/gpu_5090-r0-1645469/progress.json": "a338251c71d912707330dbb905e0a9ccc0af721cc1459f827d81f4faa45e42a1",
+    "runs/gpu_5090-r0-1645469/raw-windows.jsonl": "b7b905730472c63a632e1a998f3da098411d1cec6310b4863aecf6cfbfc5a03d",
+    "runs/gpu_5090-r1-1645469/complete.json": "071505c8daceba643f5a2a9516b28bd7773bbeeb01fcc0bd81a965daf8cfc8f3",
+    "runs/gpu_5090-r1-1645469/environment.json": "d04e103ad2fce25a16e298c6e13bed23a6bbd1f30e5e260f2ca4d81932124c8e",
+    "runs/gpu_5090-r1-1645469/measurements.json": "f129f815f033057f97242337583530fefdbbc4ad5b58960d86300835318d1595",
+    "runs/gpu_5090-r1-1645469/numerics.json": "549234b9b17402222c9b111cd115698de0cf2891b836c6a54fde448255468f62",
+    "runs/gpu_5090-r1-1645469/progress.json": "a338251c71d912707330dbb905e0a9ccc0af721cc1459f827d81f4faa45e42a1",
+    "runs/gpu_5090-r1-1645469/raw-windows.jsonl": "1023ef7ae423a4d84109c4833266b1c6ace2174c0fc0888f07de50f2799aec32",
+    "runs/gpu_5090-r2-1645469/complete.json": "948ca0597ad85ab71e94d927306df421a649caed18b01f0ab65905d7da066761",
+    "runs/gpu_5090-r2-1645469/environment.json": "0f85ef65ad5312dac51ab063ad19dc53c19bbbb233d29ff77919af2d6e56cdb2",
+    "runs/gpu_5090-r2-1645469/measurements.json": "99582586b10db670c9c54d31b96f940c88e1872dd6ded4a102989e363bb03780",
+    "runs/gpu_5090-r2-1645469/numerics.json": "de8629c8cc30371af7d99db8a7ce66dd62ac182e6374f128aa6e8fc4d25616a1",
+    "runs/gpu_5090-r2-1645469/progress.json": "a338251c71d912707330dbb905e0a9ccc0af721cc1459f827d81f4faa45e42a1",
+    "runs/gpu_5090-r2-1645469/raw-windows.jsonl": "eca92be04f699cf91c6fd0adf8d8ef0ed5c70c4f131f0005e87d96e50d05b6b5"
+  },
+  "gpus": {
+    "gpu_4090": {
+      "job": "1645468",
+      "rows": 7776,
+      "environment": [
+        {
+          "gpu_name": "NVIDIA GeForce RTX 4090",
+          "gpu_uuid": "76aa3753-9445-dbc7-89e5-2329d3751b29",
+          "torch": "2.13.0+cu130",
+          "cuda": "13.0",
+          "affinity": [
+            36,
+            37
+          ],
+          "script_sha256": "79cf76bbd83321df9bafd34ca3fc6847355c014654293a6727fbf12719146bf7",
+          "source": "eb4e3e60a6de71f00c0fb558da6f21e4b45d8b55",
+          "package_version": "0.7.1",
+          "rep": 0,
+          "fresh_cases_consumed": 0,
+          "prepared_run_only": true,
+          "serving_qualified": false
+        },
+        {
+          "gpu_name": "NVIDIA GeForce RTX 4090",
+          "gpu_uuid": "76aa3753-9445-dbc7-89e5-2329d3751b29",
+          "torch": "2.13.0+cu130",
+          "cuda": "13.0",
+          "affinity": [
+            36,
+            37
+          ],
+          "script_sha256": "79cf76bbd83321df9bafd34ca3fc6847355c014654293a6727fbf12719146bf7",
+          "source": "eb4e3e60a6de71f00c0fb558da6f21e4b45d8b55",
+          "package_version": "0.7.1",
+          "rep": 1,
+          "fresh_cases_consumed": 0,
+          "prepared_run_only": true,
+          "serving_qualified": false
+        },
+        {
+          "gpu_name": "NVIDIA GeForce RTX 4090",
+          "gpu_uuid": "76aa3753-9445-dbc7-89e5-2329d3751b29",
+          "torch": "2.13.0+cu130",
+          "cuda": "13.0",
+          "affinity": [
+            36,
+            37
+          ],
+          "script_sha256": "79cf76bbd83321df9bafd34ca3fc6847355c014654293a6727fbf12719146bf7",
+          "source": "eb4e3e60a6de71f00c0fb558da6f21e4b45d8b55",
+          "package_version": "0.7.1",
+          "rep": 2,
+          "fresh_cases_consumed": 0,
+          "prepared_run_only": true,
+          "serving_qualified": false
+        }
+      ],
+      "process_completeness": [
+        {
+          "rep": 0,
+          "complete": true,
+          "persisted_rows": 2592,
+          "last_reported_rows": 2592,
+          "unpersisted_rows_at_least": 0,
+          "timed_unpersisted_tail_count_unknown": false
+        },
+        {
+          "rep": 1,
+          "complete": true,
+          "persisted_rows": 2592,
+          "last_reported_rows": 2592,
+          "unpersisted_rows_at_least": 0,
+          "timed_unpersisted_tail_count_unknown": false
+        },
+        {
+          "rep": 2,
+          "complete": true,
+          "persisted_rows": 2592,
+          "last_reported_rows": 2592,
+          "unpersisted_rows_at_least": 0,
+          "timed_unpersisted_tail_count_unknown": false
+        }
+      ],
+      "campaign_complete": true,
+      "native_libraries_unchanged": true,
+      "all_output_and_lse_exact": true,
+      "summaries": [
+        {
+          "cell_index": 0,
+          "execution_mode": "eager_prepared",
+          "comparison": "native_context",
+          "processes": 3,
+          "process_reps": [
+            0,
+            1,
+            2
+          ],
+          "blocks": 72,
+          "wall_us": {
+            "native_over_other_geomean": 1.0005024429950429,
+            "process_ratios": [
+              1.0005255166138285,
+              1.0008059425958948,
+              1.000175969342382
+            ],
+            "block_min_ratio": 0.9973452358772643,
+            "process_min_ratio": 1.000175969342382,
+            "cluster_bootstrap_95_ci": [
+              0.9999409892634205,
+              1.001366670300758
+            ],
+            "native_aa_90_ci": [
+              0.9997834595534147,
+              1.0021140177723276
+            ],
+            "other_aa_90_ci": [
+              0.9996099860294833,
+              1.000020573125187
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 2540.5982516422105,
+                "native_after_resource": 2539.2638263145877
+              },
+              {
+                "native": 2540.951699151969,
+                "native_after_resource": 2538.905487072984
+              },
+              {
+                "native": 2539.9508010397553,
+                "native_after_resource": 2539.5039262038813
+              }
+            ]
+          },
+          "device_us": {
+            "native_over_other_geomean": 1.0004981284523993,
+            "process_ratios": [
+              1.00052419930011,
+              1.0007985616668784,
+              1.000171723083733
+            ],
+            "block_min_ratio": 0.9972963825973928,
+            "process_min_ratio": 1.000171723083733,
+            "cluster_bootstrap_95_ci": [
+              0.9999389948071554,
+              1.0013561217682247
+            ],
+            "native_aa_90_ci": [
+              0.9997745181987366,
+              1.0021191685615107
+            ],
+            "other_aa_90_ci": [
+              0.999613043622145,
+              1.0000172733410264
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 2540.4302097542572,
+                "native_after_resource": 2539.0992157224646
+              },
+              {
+                "native": 2540.811487961535,
+                "native_after_resource": 2538.784112288982
+              },
+              {
+                "native": 2539.8155240481265,
+                "native_after_resource": 2539.379453977522
+              }
+            ]
+          }
+        },
+        {
+          "cell_index": 0,
+          "execution_mode": "eager_prepared",
+          "comparison": "fallback_overhead",
+          "processes": 3,
+          "process_reps": [
+            0,
+            1,
+            2
+          ],
+          "blocks": 72,
+          "wall_us": {
+            "native_over_other_geomean": 1.0000253514849002,
+            "process_ratios": [
+              1.0000449082470773,
+              0.9999617445685635,
+              1.0000694048235355
+            ],
+            "block_min_ratio": 0.9992088004973759,
+            "process_min_ratio": 0.9999617445685635,
+            "cluster_bootstrap_95_ci": [
+              0.9999158034841394,
+              1.0001438681913173
+            ],
+            "native_aa_90_ci": [
+              0.9997236406884175,
+              1.0001366789785453
+            ],
+            "other_aa_90_ci": [
+              0.9999759806276346,
+              1.0002488765592374
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 2548.2553701684083,
+                "uncertified_fallback": 2548.1409376255897
+              },
+              {
+                "native": 2548.2238429678187,
+                "uncertified_fallback": 2548.3213300997395
+              },
+              {
+                "native": 2548.443895493824,
+                "uncertified_fallback": 2548.267033470047
+              }
+            ]
+          },
+          "device_us": {
+            "native_over_other_geomean": 1.0000253748395826,
+            "process_ratios": [
+              1.0000460239469098,
+              0.9999605166428857,
+              1.0000695872227812
+            ],
+            "block_min_ratio": 0.9992121034130531,
+            "process_min_ratio": 0.9999605166428857,
+            "cluster_bootstrap_95_ci": [
+              0.9999154607676833,
+              1.000143110449195
+            ],
+            "native_aa_90_ci": [
+              0.9997201338432109,
+              1.000138482120583
+            ],
+            "other_aa_90_ci": [
+              0.9999738814367474,
+              1.0002455718160712
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 2548.0982319616605,
+                "uncertified_fallback": 2547.980963821059
+              },
+              {
+                "native": 2548.1052414169826,
+                "uncertified_fallback": 2548.205853138684
+              },
+              {
+                "native": 2548.3348948242665,
+                "uncertified_fallback": 2548.15757561537
+              }
+            ]
+          }
+        },
+        {
+          "cell_index": 0,
+          "execution_mode": "eager_prepared",
+          "comparison": "resource_gain",
+          "processes": 3,
+          "process_reps": [
+            0,
+            1,
+            2
+          ],
+          "blocks": 72,
+          "wall_us": {
+            "native_over_other_geomean": 1.630490531941838,
+            "process_ratios": [
+              1.630534018546728,
+              1.6305771821227928,
+              1.630360403231299
+            ],
+            "block_min_ratio": 1.6292591743978981,
+            "process_min_ratio": 1.630360403231299,
+            "cluster_bootstrap_95_ci": [
+              1.6303248332772196,
+              1.6306466940732134
+            ],
+            "native_aa_90_ci": [
+              0.9998397302348198,
+              1.0002671592286632
+            ],
+            "other_aa_90_ci": [
+              1.0000009293353904,
+              1.000032965308649
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 2548.671348150218,
+                "resource": 1563.0899565173197
+              },
+              {
+                "native": 2548.6679409392923,
+                "resource": 1563.0464898455596
+              },
+              {
+                "native": 2548.402673321111,
+                "resource": 1563.091613529311
+              }
+            ]
+          },
+          "device_us": {
+            "native_over_other_geomean": 1.6305339708743558,
+            "process_ratios": [
+              1.6306014618802227,
+              1.6306059262563766,
+              1.6303945334333054
+            ],
+            "block_min_ratio": 1.629302319269443,
+            "process_min_ratio": 1.6303945334333054,
+            "cluster_bootstrap_95_ci": [
+              1.6303626433777254,
+              1.6306936800724254
+            ],
+            "native_aa_90_ci": [
+              0.9998485874893628,
+              1.000272875176259
+            ],
+            "other_aa_90_ci": [
+              1.0000007054887559,
+              1.000028770691197
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 2548.518650897875,
+                "resource": 1562.9316607868213
+              },
+              {
+                "native": 2548.554602008234,
+                "resource": 1562.9494293936064
+              },
+              {
+                "native": 2548.283253238709,
+                "resource": 1562.9856461015602
+              }
+            ]
+          }
+        },
+        {
+          "cell_index": 0,
+          "execution_mode": "graph1_pure_replay",
+          "comparison": "native_context",
+          "processes": 3,
+          "process_reps": [
+            0,
+            1,
+            2
+          ],
+          "blocks": 72,
+          "wall_us": {
+            "native_over_other_geomean": 1.0000625668030585,
+            "process_ratios": [
+              1.0000610503608633,
+              1.0000292568045264,
+              1.0000973944061202
+            ],
+            "block_min_ratio": 0.9987816175096066,
+            "process_min_ratio": 1.0000292568045264,
+            "cluster_bootstrap_95_ci": [
+              0.9999383732468423,
+              1.00018129414059
+            ],
+            "native_aa_90_ci": [
+              1.0000496893863524,
+              1.0003277524324792
+            ],
+            "other_aa_90_ci": [
+              0.9998749547110761,
+              1.000304456714305
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 2547.8102337680252,
+                "native_after_resource": 2547.6546985293253
+              },
+              {
+                "native": 2547.911032733941,
+                "native_after_resource": 2547.8364911797535
+              },
+              {
+                "native": 2548.0075992463326,
+                "native_after_resource": 2547.7594617266245
+              }
+            ]
+          },
+          "device_us": {
+            "native_over_other_geomean": 1.0000624165987624,
+            "process_ratios": [
+              1.0000621035154416,
+              1.0000272657354323,
+              1.0000978817920658
+            ],
+            "block_min_ratio": 0.9987911867186099,
+            "process_min_ratio": 1.0000272657354323,
+            "cluster_bootstrap_95_ci": [
+              0.9999408733418329,
+              1.0001804704201942
+            ],
+            "native_aa_90_ci": [
+              1.0000418453953581,
+              1.0003234281100428
+            ],
+            "other_aa_90_ci": [
+              0.9998722966022109,
+              1.0003049512450812
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 2547.657345560681,
+                "native_after_resource": 2547.4991369086956
+              },
+              {
+                "native": 2547.7884254671653,
+                "native_after_resource": 2547.718960036044
+              },
+              {
+                "native": 2547.875364870485,
+                "native_after_resource": 2547.6259986722216
+              }
+            ]
+          }
+        },
+        {
+          "cell_index": 0,
+          "execution_mode": "graph1_pure_replay",
+          "comparison": "fallback_overhead",
+          "processes": 3,
+          "process_reps": [
+            0,
+            1,
+            2
+          ],
+          "blocks": 72,
+          "wall_us": {
+            "native_over_other_geomean": 1.0000446507608214,
+            "process_ratios": [
+              1.000011353513009,
+              1.0000267702775594,
+              1.0000958305156675
+            ],
+            "block_min_ratio": 0.9988294864255803,
+            "process_min_ratio": 1.000011353513009,
+            "cluster_bootstrap_95_ci": [
+              0.9999211264317661,
+              1.0001592444901837
+            ],
+            "native_aa_90_ci": [
+              0.9997959401740014,
+              1.0000792667206693
+            ],
+            "other_aa_90_ci": [
+              0.9998018092099256,
+              1.0001751924881834
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 2547.5706606884987,
+                "uncertified_fallback": 2547.5417371402436
+              },
+              {
+                "native": 2547.740031225659,
+                "uncertified_fallback": 2547.6718293436566
+              },
+              {
+                "native": 2547.8808715188898,
+                "uncertified_fallback": 2547.6367301773034
+              }
+            ]
+          },
+          "device_us": {
+            "native_over_other_geomean": 1.0000466676879027,
+            "process_ratios": [
+              1.0000128133786836,
+              1.0000329844099765,
+              1.0000942070716117
+            ],
+            "block_min_ratio": 0.9988274941931381,
+            "process_min_ratio": 1.0000128133786836,
+            "cluster_bootstrap_95_ci": [
+              0.9999272125712672,
+              1.000161159161021
+            ],
+            "native_aa_90_ci": [
+              0.999794870082921,
+              1.0000786722741892
+            ],
+            "other_aa_90_ci": [
+              0.9997942708829457,
+              1.0001801125048213
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 2547.4119939492853,
+                "uncertified_fallback": 2547.37935341298
+              },
+              {
+                "native": 2547.644646521932,
+                "uncertified_fallback": 2547.560616738107
+              },
+              {
+                "native": 2547.743411358558,
+                "uncertified_fallback": 2547.5034185215827
+              }
+            ]
+          }
+        },
+        {
+          "cell_index": 0,
+          "execution_mode": "graph1_pure_replay",
+          "comparison": "resource_gain",
+          "processes": 3,
+          "process_reps": [
+            0,
+            1,
+            2
+          ],
+          "blocks": 72,
+          "wall_us": {
+            "native_over_other_geomean": 1.6308644491578146,
+            "process_ratios": [
+              1.63059376863209,
+              1.6309068400697224,
+              1.631092777769999
+            ],
+            "block_min_ratio": 1.629754455226813,
+            "process_min_ratio": 1.63059376863209,
+            "cluster_bootstrap_95_ci": [
+              1.6305965219481462,
+              1.6311086392382321
+            ],
+            "native_aa_90_ci": [
+              0.9998539003655079,
+              1.0001575177344553
+            ],
+            "other_aa_90_ci": [
+              0.9999808769251854,
+              1.0000106856743558
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 2547.4267459972507,
+                "resource": 1562.2693984255163
+              },
+              {
+                "native": 2548.067239352332,
+                "resource": 1562.3622249590926
+              },
+              {
+                "native": 2548.278514381256,
+                "resource": 1562.3136519954542
+              }
+            ]
+          },
+          "device_us": {
+            "native_over_other_geomean": 1.6308995966142883,
+            "process_ratios": [
+              1.630630182217836,
+              1.6309374309944564,
+              1.631131215770285
+            ],
+            "block_min_ratio": 1.629783854658242,
+            "process_min_ratio": 1.630630182217836,
+            "cluster_bootstrap_95_ci": [
+              1.6306332874013796,
+              1.6311443454209902
+            ],
+            "native_aa_90_ci": [
+              0.9998541035263941,
+              1.000151913466931
+            ],
+            "other_aa_90_ci": [
+              0.9999812675704642,
+              1.000008424663047
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 2547.31808061138,
+                "resource": 1562.1678712868825
+              },
+              {
+                "native": 2547.9370918160016,
+                "resource": 1562.2531210546867
+              },
+              {
+                "native": 2548.1593223442533,
+                "resource": 1562.2037624612024
+              }
+            ]
+          }
+        },
+        {
+          "cell_index": 0,
+          "execution_mode": "graph16_pure_replay",
+          "comparison": "native_context",
+          "processes": 3,
+          "process_reps": [
+            0,
+            1,
+            2
+          ],
+          "blocks": 72,
+          "wall_us": {
+            "native_over_other_geomean": 1.0000153578895752,
+            "process_ratios": [
+              1.0000647708162678,
+              0.9999475620711777,
+              1.000033744469273
+            ],
+            "block_min_ratio": 0.9983296341344775,
+            "process_min_ratio": 0.9999475620711777,
+            "cluster_bootstrap_95_ci": [
+              0.9998738375141382,
+              1.0001486429886266
+            ],
+            "native_aa_90_ci": [
+              0.9997592499767327,
+              1.0001709655149462
+            ],
+            "other_aa_90_ci": [
+              0.9998250849840734,
+              1.0000923381782536
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 2547.583435601701,
+                "native_after_resource": 2547.4184372301443
+              },
+              {
+                "native": 2547.557476778486,
+                "native_after_resource": 2547.691072421605
+              },
+              {
+                "native": 2547.473819557197,
+                "native_after_resource": 2547.3878593058535
+              }
+            ]
+          },
+          "device_us": {
+            "native_over_other_geomean": 1.0000153026790353,
+            "process_ratios": [
+              1.0000629438949284,
+              0.9999475113029191,
+              1.0000354564750333
+            ],
+            "block_min_ratio": 0.9983393270492468,
+            "process_min_ratio": 0.9999475113029191,
+            "cluster_bootstrap_95_ci": [
+              0.9998714722409482,
+              1.0001492515047132
+            ],
+            "native_aa_90_ci": [
+              0.9997612439083812,
+              1.0001688545770175
+            ],
+            "other_aa_90_ci": [
+              0.9998240781277464,
+              1.0000919994733213
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 2547.477843582605,
+                "native_after_resource": 2547.317505497193
+              },
+              {
+                "native": 2547.4413157884646,
+                "native_after_resource": 2547.5750346827517
+              },
+              {
+                "native": 2547.3611551387557,
+                "native_after_resource": 2547.2708378938905
+              }
+            ]
+          }
+        },
+        {
+          "cell_index": 0,
+          "execution_mode": "graph16_pure_replay",
+          "comparison": "fallback_overhead",
+          "processes": 3,
+          "process_reps": [
+            0,
+            1,
+            2
+          ],
+          "blocks": 72,
+          "wall_us": {
+            "native_over_other_geomean": 0.9999595640582172,
+            "process_ratios": [
+              0.9998877144293745,
+              1.000012641544982,
+              0.9999783403666045
+            ],
+            "block_min_ratio": 0.9987590630343336,
+            "process_min_ratio": 0.9998877144293745,
+            "cluster_bootstrap_95_ci": [
+              0.9998368583935239,
+              1.0000758007053325
+            ],
+            "native_aa_90_ci": [
+              0.9997930879125518,
+              1.0001288257864012
+            ],
+            "other_aa_90_ci": [
+              0.9998928735907835,
+              1.0002850541087205
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 2547.2561398993166,
+                "uncertified_fallback": 2547.5421921280517
+              },
+              {
+                "native": 2547.492541504778,
+                "uncertified_fallback": 2547.4603376703317
+              },
+              {
+                "native": 2546.8416195759864,
+                "uncertified_fallback": 2546.896784426635
+              }
+            ]
+          },
+          "device_us": {
+            "native_over_other_geomean": 0.9999591850733325,
+            "process_ratios": [
+              0.9998878299817823,
+              1.0000123188759364,
+              0.999977410485974
+            ],
+            "block_min_ratio": 0.9987621662984749,
+            "process_min_ratio": 0.9998878299817823,
+            "cluster_bootstrap_95_ci": [
+              0.9998389805104255,
+              1.0000776448055446
+            ],
+            "native_aa_90_ci": [
+              0.9997875099480008,
+              1.0001238217498694
+            ],
+            "other_aa_90_ci": [
+              0.9998937084606507,
+              1.00028245063926
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 2547.1537759912026,
+                "uncertified_fallback": 2547.4395223288275
+              },
+              {
+                "native": 2547.367635380496,
+                "uncertified_fallback": 2547.336255061205
+              },
+              {
+                "native": 2546.7084416758375,
+                "uncertified_fallback": 2546.765971881482
+              }
+            ]
+          }
+        },
+        {
+          "cell_index": 0,
+          "execution_mode": "graph16_pure_replay",
+          "comparison": "resource_gain",
+          "processes": 3,
+          "process_reps": [
+            0,
+            1,
+            2
+          ],
+          "blocks": 72,
+          "wall_us": {
+            "native_over_other_geomean": 1.6309231280924619,
+            "process_ratios": [
+              1.631073190107533,
+              1.6308372749139461,
+              1.6308589296824547
+            ],
+            "block_min_ratio": 1.6294576334725335,
+            "process_min_ratio": 1.6308372749139461,
+            "cluster_bootstrap_95_ci": [
+              1.6307390341564911,
+              1.6310980022843953
+            ],
+            "native_aa_90_ci": [
+              0.9998765387776516,
+              1.0001600519995002
+            ],
+            "other_aa_90_ci": [
+              0.9999959337519212,
+              1.0000445355900964
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 2547.5423748381163,
+                "resource": 1561.8810917186133
+              },
+              {
+                "native": 2547.3139489735945,
+                "resource": 1561.9669651639563
+              },
+              {
+                "native": 2547.2802016370892,
+                "resource": 1561.9255321691571
+              }
+            ]
+          },
+          "device_us": {
+            "native_over_other_geomean": 1.6309594117726727,
+            "process_ratios": [
+              1.631110240763755,
+              1.6308729415109189,
+              1.6308950635789077
+            ],
+            "block_min_ratio": 1.6294840664120598,
+            "process_min_ratio": 1.6308729415109189,
+            "cluster_bootstrap_95_ci": [
+              1.6307787989058133,
+              1.6311349610769206
+            ],
+            "native_aa_90_ci": [
+              0.9998781238646942,
+              1.0001635069730292
+            ],
+            "other_aa_90_ci": [
+              0.9999893557661093,
+              1.0000348478659675
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 2547.4317282755783,
+                "resource": 1561.7777784797445
+              },
+              {
+                "native": 2547.1971199438417,
+                "resource": 1561.8611696285775
+              },
+              {
+                "native": 2547.1749547860454,
+                "resource": 1561.8263931686756
+              }
+            ]
+          }
+        },
+        {
+          "cell_index": 1,
+          "execution_mode": "eager_prepared",
+          "comparison": "native_context",
+          "processes": 3,
+          "process_reps": [
+            0,
+            1,
+            2
+          ],
+          "blocks": 72,
+          "wall_us": {
+            "native_over_other_geomean": 1.0005213715560515,
+            "process_ratios": [
+              1.0006569515891757,
+              1.000618910753155,
+              1.0002882934181083
+            ],
+            "block_min_ratio": 0.998826517192659,
+            "process_min_ratio": 1.0002882934181083,
+            "cluster_bootstrap_95_ci": [
+              0.9999685614453316,
+              1.0013656000968585
+            ],
+            "native_aa_90_ci": [
+              0.99996374724534,
+              1.00248016738036
+            ],
+            "other_aa_90_ci": [
+              0.999627481300054,
+              1.000018090450245
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 2483.769440123443,
+                "native_after_resource": 2482.13879509745
+              },
+              {
+                "native": 2485.1745808916125,
+                "native_after_resource": 2483.6374309786415
+              },
+              {
+                "native": 2483.554478576614,
+                "native_after_resource": 2482.8386925233376
+              }
+            ]
+          },
+          "device_us": {
+            "native_over_other_geomean": 1.0005226302131334,
+            "process_ratios": [
+              1.0006600039844211,
+              1.0006190470286707,
+              1.0002888810109956
+            ],
+            "block_min_ratio": 0.9988302341031381,
+            "process_min_ratio": 1.0002888810109956,
+            "cluster_bootstrap_95_ci": [
+              0.9999688071754628,
+              1.0013693390463758
+            ],
+            "native_aa_90_ci": [
+              0.9999610654328859,
+              1.0024782121671576
+            ],
+            "other_aa_90_ci": [
+              0.9996180810940494,
+              1.0000148134331244
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 2483.6552062545725,
+                "native_after_resource": 2482.017065102206
+              },
+              {
+                "native": 2485.0551184142405,
+                "native_after_resource": 2483.517704158827
+              },
+              {
+                "native": 2483.461278531296,
+                "native_after_resource": 2482.7440609169316
+              }
+            ]
+          }
+        },
+        {
+          "cell_index": 1,
+          "execution_mode": "eager_prepared",
+          "comparison": "fallback_overhead",
+          "processes": 3,
+          "process_reps": [
+            0,
+            1,
+            2
+          ],
+          "blocks": 72,
+          "wall_us": {
+            "native_over_other_geomean": 0.9999247772634847,
+            "process_ratios": [
+              0.9999288183028484,
+              0.9998843430605298,
+              0.9999611719151065
+            ],
+            "block_min_ratio": 0.9990798851930737,
+            "process_min_ratio": 0.9998843430605298,
+            "cluster_bootstrap_95_ci": [
+              0.9998349017947521,
+              1.0000158264040917
+            ],
+            "native_aa_90_ci": [
+              0.9998461663269982,
+              1.000030401669551
+            ],
+            "other_aa_90_ci": [
+              0.9999078800818914,
+              1.000113273887086
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 2490.392330306212,
+                "uncertified_fallback": 2490.569613278161
+              },
+              {
+                "native": 2491.026772465183,
+                "uncertified_fallback": 2491.3149103229684
+              },
+              {
+                "native": 2490.720312050966,
+                "uncertified_fallback": 2490.817025705894
+              }
+            ]
+          },
+          "device_us": {
+            "native_over_other_geomean": 0.9999239123095125,
+            "process_ratios": [
+              0.9999301646350812,
+              0.9998827740639542,
+              0.9999587997039117
+            ],
+            "block_min_ratio": 0.9990761225493555,
+            "process_min_ratio": 0.9998827740639542,
+            "cluster_bootstrap_95_ci": [
+              0.9998339901063682,
+              1.0000138616699832
+            ],
+            "native_aa_90_ci": [
+              0.9998445893835604,
+              1.0000287369247896
+            ],
+            "other_aa_90_ci": [
+              0.999906933210513,
+              1.0001162982056757
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 2490.2794147744116,
+                "uncertified_fallback": 2490.4533364919794
+              },
+              {
+                "native": 2490.89287601396,
+                "uncertified_fallback": 2491.184907496606
+              },
+              {
+                "native": 2490.606245318296,
+                "uncertified_fallback": 2490.708863260931
+              }
+            ]
+          }
+        },
+        {
+          "cell_index": 1,
+          "execution_mode": "eager_prepared",
+          "comparison": "resource_gain",
+          "processes": 3,
+          "process_reps": [
+            0,
+            1,
+            2
+          ],
+          "blocks": 72,
+          "wall_us": {
+            "native_over_other_geomean": 1.6287890051187681,
+            "process_ratios": [
+              1.628764417966008,
+              1.628866362932337,
+              1.6287362373352734
+            ],
+            "block_min_ratio": 1.6278231786014394,
+            "process_min_ratio": 1.6287362373352734,
+            "cluster_bootstrap_95_ci": [
+              1.6286765275635313,
+              1.6289051947361584
+            ],
+            "native_aa_90_ci": [
+              0.9999042526133155,
+              1.0001405359176532
+            ],
+            "other_aa_90_ci": [
+              0.9999916553154712,
+              1.0000723998343228
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 2491.3634230666794,
+                "resource": 1529.6032965761096
+              },
+              {
+                "native": 2491.5470448000897,
+                "resource": 1529.6202939047298
+              },
+              {
+                "native": 2491.393033679783,
+                "resource": 1529.6479421099389
+              }
+            ]
+          },
+          "device_us": {
+            "native_over_other_geomean": 1.6288267779683199,
+            "process_ratios": [
+              1.6288006668953503,
+              1.628904303391502,
+              1.6287753664836642
+            ],
+            "block_min_ratio": 1.6278503450833055,
+            "process_min_ratio": 1.6287753664836642,
+            "cluster_bootstrap_95_ci": [
+              1.6287132265516238,
+              1.6289439769733622
+            ],
+            "native_aa_90_ci": [
+              0.9999030356146728,
+              1.0001397527453255
+            ],
+            "other_aa_90_ci": [
+              0.9999849902301474,
+              1.000067257094388
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 2491.2486537662485,
+                "resource": 1529.4987928233143
+              },
+              {
+                "native": 2491.43242074466,
+                "resource": 1529.5142971611697
+              },
+              {
+                "native": 2491.2893618568123,
+                "resource": 1529.5475441989374
+              }
+            ]
+          }
+        },
+        {
+          "cell_index": 1,
+          "execution_mode": "graph1_pure_replay",
+          "comparison": "native_context",
+          "processes": 3,
+          "process_reps": [
+            0,
+            1,
+            2
+          ],
+          "blocks": 72,
+          "wall_us": {
+            "native_over_other_geomean": 1.0000560620191894,
+            "process_ratios": [
+              1.0000859338047257,
+              1.0000703701449263,
+              1.0000118836322378
+            ],
+            "block_min_ratio": 0.9991950731540851,
+            "process_min_ratio": 1.0000118836322378,
+            "cluster_bootstrap_95_ci": [
+              0.9999646561851343,
+              1.0001467143589908
+            ],
+            "native_aa_90_ci": [
+              0.999858716302457,
+              1.0000979809574317
+            ],
+            "other_aa_90_ci": [
+              0.9998953670846679,
+              1.0001672246495807
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 2490.8874995365322,
+                "native_after_resource": 2490.6734664892265
+              },
+              {
+                "native": 2490.814307777558,
+                "native_after_resource": 2490.639041147275
+              },
+              {
+                "native": 2490.9826424559487,
+                "native_after_resource": 2490.953040886087
+              }
+            ]
+          },
+          "device_us": {
+            "native_over_other_geomean": 1.000053805588535,
+            "process_ratios": [
+              1.0000851942863405,
+              1.0000668005163853,
+              1.0000094235247565
+            ],
+            "block_min_ratio": 0.9991959080176857,
+            "process_min_ratio": 1.0000094235247565,
+            "cluster_bootstrap_95_ci": [
+              0.9999634711473633,
+              1.0001448963946789
+            ],
+            "native_aa_90_ci": [
+              0.9998533609941784,
+              1.0000940603997142
+            ],
+            "other_aa_90_ci": [
+              0.9998908454133504,
+              1.0001641925802809
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 2490.779031845544,
+                "native_after_resource": 2490.566849780196
+              },
+              {
+                "native": 2490.688364872476,
+                "native_after_resource": 2490.5219967170233
+              },
+              {
+                "native": 2490.8672158000923,
+                "native_after_resource": 2490.8437432724113
+              }
+            ]
+          }
+        },
+        {
+          "cell_index": 1,
+          "execution_mode": "graph1_pure_replay",
+          "comparison": "fallback_overhead",
+          "processes": 3,
+          "process_reps": [
+            0,
+            1,
+            2
+          ],
+          "blocks": 72,
+          "wall_us": {
+            "native_over_other_geomean": 1.0000281161465236,
+            "process_ratios": [
+              1.000040126939011,
+              1.0000826602196264,
+              0.9999615650550524
+            ],
+            "block_min_ratio": 0.9992179987189733,
+            "process_min_ratio": 0.9999615650550524,
+            "cluster_bootstrap_95_ci": [
+              0.9999302884693038,
+              1.00013162836601
+            ],
+            "native_aa_90_ci": [
+              0.9998775726735438,
+              1.0000959772859255
+            ],
+            "other_aa_90_ci": [
+              0.9998811322304142,
+              1.0001258505077537
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 2490.8301232889144,
+                "uncertified_fallback": 2490.7301779109744
+              },
+              {
+                "native": 2490.7144125451514,
+                "uncertified_fallback": 2490.5085465617112
+              },
+              {
+                "native": 2490.537839288717,
+                "uncertified_fallback": 2490.6335666527348
+              }
+            ]
+          },
+          "device_us": {
+            "native_over_other_geomean": 1.0000277468703809,
+            "process_ratios": [
+              1.0000378918840986,
+              1.0000837389045698,
+              0.9999616136282238
+            ],
+            "block_min_ratio": 0.9992244965991625,
+            "process_min_ratio": 0.9999616136282238,
+            "cluster_bootstrap_95_ci": [
+              0.9999300387064252,
+              1.0001304216013807
+            ],
+            "native_aa_90_ci": [
+              0.9998798677008405,
+              1.0000952079276773
+            ],
+            "other_aa_90_ci": [
+              0.9998757334352073,
+              1.0001237117438224
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 2490.712178351813,
+                "uncertified_fallback": 2490.617804150645
+              },
+              {
+                "native": 2490.585732326282,
+                "uncertified_fallback": 2490.3771908683566
+              },
+              {
+                "native": 2490.4291091186396,
+                "uncertified_fallback": 2490.5247113261253
+              }
+            ]
+          }
+        },
+        {
+          "cell_index": 1,
+          "execution_mode": "graph1_pure_replay",
+          "comparison": "resource_gain",
+          "processes": 3,
+          "process_reps": [
+            0,
+            1,
+            2
+          ],
+          "blocks": 72,
+          "wall_us": {
+            "native_over_other_geomean": 1.6293793201704112,
+            "process_ratios": [
+              1.629471581137199,
+              1.6292687317912462,
+              1.6293976540509685
+            ],
+            "block_min_ratio": 1.6284522361812253,
+            "process_min_ratio": 1.6292687317912462,
+            "cluster_bootstrap_95_ci": [
+              1.6292544254033399,
+              1.6295097439281032
+            ],
+            "native_aa_90_ci": [
+              0.9999888421858327,
+              1.0001869238903724
+            ],
+            "other_aa_90_ci": [
+              0.9999625515035567,
+              1.0000356517525046
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 2490.86989148456,
+                "resource": 1528.636596255454
+              },
+              {
+                "native": 2490.638836638791,
+                "resource": 1528.6851015059624
+              },
+              {
+                "native": 2490.7233242074867,
+                "resource": 1528.615999915741
+              }
+            ]
+          },
+          "device_us": {
+            "native_over_other_geomean": 1.6294149816986903,
+            "process_ratios": [
+              1.629503481182886,
+              1.629307028793711,
+              1.6294344412151855
+            ],
+            "block_min_ratio": 1.628477886074347,
+            "process_min_ratio": 1.629307028793711,
+            "cluster_bootstrap_95_ci": [
+              1.6292929578198112,
+              1.629543879078803
+            ],
+            "native_aa_90_ci": [
+              0.9999869248963895,
+              1.000184902637546
+            ],
+            "other_aa_90_ci": [
+              0.9999639325330549,
+              1.0000319515303007
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 2490.7715373740025,
+                "resource": 1528.5463125036733
+              },
+              {
+                "native": 2490.5205313763163,
+                "resource": 1528.5765588455238
+              },
+              {
+                "native": 2490.616905551033,
+                "resource": 1528.516178713887
+              }
+            ]
+          }
+        },
+        {
+          "cell_index": 1,
+          "execution_mode": "graph16_pure_replay",
+          "comparison": "native_context",
+          "processes": 3,
+          "process_reps": [
+            0,
+            1,
+            2
+          ],
+          "blocks": 72,
+          "wall_us": {
+            "native_over_other_geomean": 0.9999753291560068,
+            "process_ratios": [
+              1.0000448465213896,
+              0.9998557112859568,
+              1.00002544048748
+            ],
+            "block_min_ratio": 0.9991379652102026,
+            "process_min_ratio": 0.9998557112859568,
+            "cluster_bootstrap_95_ci": [
+              0.9998495349050595,
+              1.0000969669979636
+            ],
+            "native_aa_90_ci": [
+              0.9999428708137141,
+              1.0001394061304871
+            ],
+            "other_aa_90_ci": [
+              0.9999328590154869,
+              1.0001471358733265
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 2490.2530290779687,
+                "native_after_resource": 2490.1413549004346
+              },
+              {
+                "native": 2490.236521579256,
+                "native_after_resource": 2490.5958864569106
+              },
+              {
+                "native": 2490.4352161729175,
+                "native_after_resource": 2490.371859898798
+              }
+            ]
+          },
+          "device_us": {
+            "native_over_other_geomean": 0.9999732189679639,
+            "process_ratios": [
+              1.0000434917407288,
+              0.9998527675201578,
+              1.000023408626632
+            ],
+            "block_min_ratio": 0.9991626291882822,
+            "process_min_ratio": 0.9998527675201578,
+            "cluster_bootstrap_95_ci": [
+              0.9998460388079631,
+              1.0000925412420598
+            ],
+            "native_aa_90_ci": [
+              0.9999420099419677,
+              1.0001374968651333
+            ],
+            "other_aa_90_ci": [
+              0.9999329932058534,
+              1.0001437088939635
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 2490.146848576852,
+                "native_after_resource": 2490.038552465724
+              },
+              {
+                "native": 2490.1256378793823,
+                "native_after_resource": 2490.492319239573
+              },
+              {
+                "native": 2490.318250414013,
+                "native_after_resource": 2490.2599568484684
+              }
+            ]
+          }
+        },
+        {
+          "cell_index": 1,
+          "execution_mode": "graph16_pure_replay",
+          "comparison": "fallback_overhead",
+          "processes": 3,
+          "process_reps": [
+            0,
+            1,
+            2
+          ],
+          "blocks": 72,
+          "wall_us": {
+            "native_over_other_geomean": 1.0000022594961444,
+            "process_ratios": [
+              1.000034820054376,
+              0.9999696595240831,
+              1.0000022999714464
+            ],
+            "block_min_ratio": 0.9992462342599532,
+            "process_min_ratio": 0.9999696595240831,
+            "cluster_bootstrap_95_ci": [
+              0.9999268802445757,
+              1.0000810776776814
+            ],
+            "native_aa_90_ci": [
+              0.9998533185595564,
+              1.0000474538754818
+            ],
+            "other_aa_90_ci": [
+              0.9998431439628596,
+              1.0001935322646496
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 2490.209702299368,
+                "uncertified_fallback": 2490.122996081242
+              },
+              {
+                "native": 2490.1989678985037,
+                "uncertified_fallback": 2490.2745240127274
+              },
+              {
+                "native": 2490.4082343607943,
+                "uncertified_fallback": 2490.40250650614
+              }
+            ]
+          },
+          "device_us": {
+            "native_over_other_geomean": 1.0000023772535815,
+            "process_ratios": [
+              1.0000351642575618,
+              0.9999691878574808,
+              1.000002780734043
+            ],
+            "block_min_ratio": 0.9992436758666519,
+            "process_min_ratio": 0.9999691878574808,
+            "cluster_bootstrap_95_ci": [
+              0.9999246351603314,
+              1.0000826741367983
+            ],
+            "native_aa_90_ci": [
+              0.9998496281452929,
+              1.0000430792084682
+            ],
+            "other_aa_90_ci": [
+              0.9998408092011397,
+              1.0001889027569648
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 2490.093130031864,
+                "uncertified_fallback": 2490.005570834638
+              },
+              {
+                "native": 2490.0982196337436,
+                "uncertified_fallback": 2490.174947259114
+              },
+              {
+                "native": 2490.2737437826445,
+                "uncertified_fallback": 2490.2668190129248
+              }
+            ]
+          }
+        },
+        {
+          "cell_index": 1,
+          "execution_mode": "graph16_pure_replay",
+          "comparison": "resource_gain",
+          "processes": 3,
+          "process_reps": [
+            0,
+            1,
+            2
+          ],
+          "blocks": 72,
+          "wall_us": {
+            "native_over_other_geomean": 1.6295448994392758,
+            "process_ratios": [
+              1.6294466055689671,
+              1.6295515750785532,
+              1.6296365232243863
+            ],
+            "block_min_ratio": 1.628732501318817,
+            "process_min_ratio": 1.6294466055689671,
+            "cluster_bootstrap_95_ci": [
+              1.6294243488404359,
+              1.6296660729383998
+            ],
+            "native_aa_90_ci": [
+              0.9998609962097661,
+              1.0000804725160162
+            ],
+            "other_aa_90_ci": [
+              0.999955612958997,
+              1.0000635528171125
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 2490.231942405646,
+                "resource": 1528.2685139204723
+              },
+              {
+                "native": 2490.335707072263,
+                "resource": 1528.2337455027864
+              },
+              {
+                "native": 2490.447491360606,
+                "resource": 1528.2226777987446
+              }
+            ]
+          },
+          "device_us": {
+            "native_over_other_geomean": 1.629572651360067,
+            "process_ratios": [
+              1.6294724986724713,
+              1.629579540302289,
+              1.6296659208668587
+            ],
+            "block_min_ratio": 1.6287469094024354,
+            "process_min_ratio": 1.6294724986724713,
+            "cluster_bootstrap_95_ci": [
+              1.629449986138644,
+              1.62969460354014
+            ],
+            "native_aa_90_ci": [
+              0.999862434392667,
+              1.0000800549041684
+            ],
+            "other_aa_90_ci": [
+              0.999954382855687,
+              1.0000584351502058
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 2490.122503829479,
+                "resource": 1528.1770670313097
+              },
+              {
+                "native": 2490.2186122195963,
+                "resource": 1528.1356636066132
+              },
+              {
+                "native": 2490.334100150081,
+                "resource": 1528.1255306765026
+              }
+            ]
+          }
+        },
+        {
+          "cell_index": 2,
+          "execution_mode": "eager_prepared",
+          "comparison": "native_context",
+          "processes": 3,
+          "process_reps": [
+            0,
+            1,
+            2
+          ],
+          "blocks": 72,
+          "wall_us": {
+            "native_over_other_geomean": 1.0003570600411553,
+            "process_ratios": [
+              1.0004122223298424,
+              1.0003004534811581,
+              1.0003585074359922
+            ],
+            "block_min_ratio": 0.9999030514828844,
+            "process_min_ratio": 1.0003004534811581,
+            "cluster_bootstrap_95_ci": [
+              0.9999989027539338,
+              1.0008134476252857
+            ],
+            "native_aa_90_ci": [
+              1.0001926555518807,
+              1.001465130989566
+            ],
+            "other_aa_90_ci": [
+              0.9999819092563125,
+              1.0000116978223705
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 2543.438354118227,
+                "native_after_resource": 2542.3903240554732
+              },
+              {
+                "native": 2543.3732802886266,
+                "native_after_resource": 2542.609344459857
+              },
+              {
+                "native": 2543.390549814824,
+                "native_after_resource": 2542.4790521687637
+              }
+            ]
+          },
+          "device_us": {
+            "native_over_other_geomean": 1.0003582292125976,
+            "process_ratios": [
+              1.000412628579275,
+              1.0003008338190422,
+              1.0003612283696226
+            ],
+            "block_min_ratio": 0.9999087186295474,
+            "process_min_ratio": 1.0003008338190422,
+            "cluster_bootstrap_95_ci": [
+              1.0000001672115353,
+              1.0008167259571012
+            ],
+            "native_aa_90_ci": [
+              1.0000244444871917,
+              1.001455925402006
+            ],
+            "other_aa_90_ci": [
+              0.9999813678498272,
+              1.000010054631151
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 2543.318211097134,
+                "native_after_resource": 2542.2691981697562
+              },
+              {
+                "native": 2543.2749032662005,
+                "native_after_resource": 2542.5100302638407
+              },
+              {
+                "native": 2543.2735036824165,
+                "native_after_resource": 2542.355132882766
+              }
+            ]
+          }
+        },
+        {
+          "cell_index": 2,
+          "execution_mode": "eager_prepared",
+          "comparison": "fallback_overhead",
+          "processes": 3,
+          "process_reps": [
+            0,
+            1,
+            2
+          ],
+          "blocks": 72,
+          "wall_us": {
+            "native_over_other_geomean": 0.9999707278878978,
+            "process_ratios": [
+              0.9999575337651178,
+              0.9999771909647829,
+              0.9999774590643794
+            ],
+            "block_min_ratio": 0.9997379488765679,
+            "process_min_ratio": 0.9999575337651178,
+            "cluster_bootstrap_95_ci": [
+              0.9999538992458178,
+              0.9999848818837155
+            ],
+            "native_aa_90_ci": [
+              0.9999934890335377,
+              1.0000221433735341
+            ],
+            "other_aa_90_ci": [
+              0.9999880452557081,
+              1.0000278870427082
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 2542.405377452426,
+                "uncertified_fallback": 2542.513348421476
+              },
+              {
+                "native": 2542.5066972976274,
+                "uncertified_fallback": 2542.564690745199
+              },
+              {
+                "native": 2542.4704351598602,
+                "uncertified_fallback": 2542.527746114099
+              }
+            ]
+          },
+          "device_us": {
+            "native_over_other_geomean": 0.9999704621818704,
+            "process_ratios": [
+              0.9999600831777595,
+              0.9999759939634237,
+              0.9999753094853406
+            ],
+            "block_min_ratio": 0.9998190965705271,
+            "process_min_ratio": 0.9999600831777595,
+            "cluster_bootstrap_95_ci": [
+              0.9999568721927544,
+              0.9999832008211914
+            ],
+            "native_aa_90_ci": [
+              0.9999916578753969,
+              1.0000226048616352
+            ],
+            "other_aa_90_ci": [
+              0.9999955181197838,
+              1.000028941997919
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 2542.283741477132,
+                "uncertified_fallback": 2542.3852254162425
+              },
+              {
+                "native": 2542.399245266346,
+                "uncertified_fallback": 2542.4602796608146
+              },
+              {
+                "native": 2542.337142050706,
+                "uncertified_fallback": 2542.399915213085
+              }
+            ]
+          }
+        },
+        {
+          "cell_index": 2,
+          "execution_mode": "eager_prepared",
+          "comparison": "resource_gain",
+          "processes": 3,
+          "process_reps": [
+            0,
+            1,
+            2
+          ],
+          "blocks": 72,
+          "wall_us": {
+            "native_over_other_geomean": 1.6455421135135515,
+            "process_ratios": [
+              1.6456980714907055,
+              1.645164943988854,
+              1.6457633905589895
+            ],
+            "block_min_ratio": 1.6447159791363326,
+            "process_min_ratio": 1.645164943988854,
+            "cluster_bootstrap_95_ci": [
+              1.64517109152486,
+              1.6457653292567336
+            ],
+            "native_aa_90_ci": [
+              0.999980685987669,
+              1.0000125280885022
+            ],
+            "other_aa_90_ci": [
+              0.9999751317455775,
+              1.0000348885198926
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 2542.5745896188128,
+                "resource": 1544.9824203267733
+              },
+              {
+                "native": 2542.5951583727797,
+                "resource": 1545.4955855113392
+              },
+              {
+                "native": 2542.647950909928,
+                "resource": 1544.965677020138
+              }
+            ]
+          },
+          "device_us": {
+            "native_over_other_geomean": 1.6455796392677005,
+            "process_ratios": [
+              1.6457356164529775,
+              1.645213261153448,
+              1.6457901018378476
+            ],
+            "block_min_ratio": 1.6450135280373175,
+            "process_min_ratio": 1.645213261153448,
+            "cluster_bootstrap_95_ci": [
+              1.6452210086300458,
+              1.645793928297889
+            ],
+            "native_aa_90_ci": [
+              0.999980045748743,
+              1.0000101675893294
+            ],
+            "other_aa_90_ci": [
+              0.9999892176073333,
+              1.0000357988013853
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 2542.4633489128123,
+                "resource": 1544.8795805929838
+              },
+              {
+                "native": 2542.479932539429,
+                "resource": 1545.3801598687057
+              },
+              {
+                "native": 2542.530891009747,
+                "resource": 1544.869475257213
+              }
+            ]
+          }
+        },
+        {
+          "cell_index": 2,
+          "execution_mode": "graph1_pure_replay",
+          "comparison": "native_context",
+          "processes": 3,
+          "process_reps": [
+            0,
+            1,
+            2
+          ],
+          "blocks": 72,
+          "wall_us": {
+            "native_over_other_geomean": 0.9999977203614084,
+            "process_ratios": [
+              0.9999940412547966,
+              0.9999996410945916,
+              0.9999994787449954
+            ],
+            "block_min_ratio": 0.9998823583405823,
+            "process_min_ratio": 0.9999940412547966,
+            "cluster_bootstrap_95_ci": [
+              0.9999879451999983,
+              1.0000081898607156
+            ],
+            "native_aa_90_ci": [
+              0.99999127991375,
+              1.0000157567059191
+            ],
+            "other_aa_90_ci": [
+              0.9999769563945976,
+              1.0000112702774127
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 2541.783229622773,
+                "native_after_resource": 2541.7983755516493
+              },
+              {
+                "native": 2541.826919349234,
+                "native_after_resource": 2541.827831624989
+              },
+              {
+                "native": 2541.8569695153114,
+                "native_after_resource": 2541.858294471668
+              }
+            ]
+          },
+          "device_us": {
+            "native_over_other_geomean": 0.9999962918699523,
+            "process_ratios": [
+              0.9999929728671937,
+              0.9999977375496681,
+              0.9999981652013026
+            ],
+            "block_min_ratio": 0.999878973710413,
+            "process_min_ratio": 0.9999929728671937,
+            "cluster_bootstrap_95_ci": [
+              0.9999868237283831,
+              1.0000059958970446
+            ],
+            "native_aa_90_ci": [
+              0.999988146833139,
+              1.0000112981636842
+            ],
+            "other_aa_90_ci": [
+              0.9999773293502723,
+              1.0000096386887665
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 2541.666555386286,
+                "native_after_resource": 2541.6844161402296
+              },
+              {
+                "native": 2541.725777325569,
+                "native_after_resource": 2541.731527866905
+              },
+              {
+                "native": 2541.7240835356342,
+                "native_after_resource": 2541.728747096229
+              }
+            ]
+          }
+        },
+        {
+          "cell_index": 2,
+          "execution_mode": "graph1_pure_replay",
+          "comparison": "fallback_overhead",
+          "processes": 3,
+          "process_reps": [
+            0,
+            1,
+            2
+          ],
+          "blocks": 72,
+          "wall_us": {
+            "native_over_other_geomean": 0.9999971653247669,
+            "process_ratios": [
+              0.9999899864794198,
+              1.0000082419438132,
+              0.9999932676457772
+            ],
+            "block_min_ratio": 0.9998551741217266,
+            "process_min_ratio": 0.9999899864794198,
+            "cluster_bootstrap_95_ci": [
+              0.9999829652159955,
+              1.000011204779893
+            ],
+            "native_aa_90_ci": [
+              0.9999971939293119,
+              1.0000220802873048
+            ],
+            "other_aa_90_ci": [
+              0.9999857878332349,
+              1.000013926884465
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 2541.5735587449517,
+                "uncertified_fallback": 2541.599009098933
+              },
+              {
+                "native": 2541.7223034221684,
+                "uncertified_fallback": 2541.7013548624136
+              },
+              {
+                "native": 2541.7998437821666,
+                "uncertified_fallback": 2541.816956194281
+              }
+            ]
+          },
+          "device_us": {
+            "native_over_other_geomean": 0.9999981893960385,
+            "process_ratios": [
+              0.9999882891794609,
+              1.0000092633236084,
+              0.9999970157960578
+            ],
+            "block_min_ratio": 0.9998844826730277,
+            "process_min_ratio": 0.9999882891794609,
+            "cluster_bootstrap_95_ci": [
+              0.9999840622591225,
+              1.0000117182618729
+            ],
+            "native_aa_90_ci": [
+              0.9999988250210211,
+              1.0000219747738202
+            ],
+            "other_aa_90_ci": [
+              0.9999834103150885,
+              1.0000109677534441
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 2541.454376467417,
+                "uncertified_fallback": 2541.4841393320776
+              },
+              {
+                "native": 2541.614261401357,
+                "uncertified_fallback": 2541.590717824055
+              },
+              {
+                "native": 2541.6874165231648,
+                "uncertified_fallback": 2541.6950014594063
+              }
+            ]
+          }
+        },
+        {
+          "cell_index": 2,
+          "execution_mode": "graph1_pure_replay",
+          "comparison": "resource_gain",
+          "processes": 3,
+          "process_reps": [
+            0,
+            1,
+            2
+          ],
+          "blocks": 72,
+          "wall_us": {
+            "native_over_other_geomean": 1.6456482655482143,
+            "process_ratios": [
+              1.6458511052128344,
+              1.6452220901820023,
+              1.645871684107333
+            ],
+            "block_min_ratio": 1.6446950562550975,
+            "process_min_ratio": 1.6452220901820023,
+            "cluster_bootstrap_95_ci": [
+              1.6452317469184365,
+              1.6458846072258015
+            ],
+            "native_aa_90_ci": [
+              0.9999934664978681,
+              1.0000215446078635
+            ],
+            "other_aa_90_ci": [
+              0.9999745063563449,
+              1.0000115533690126
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 2541.698651512407,
+                "resource": 1544.3065557158834
+              },
+              {
+                "native": 2541.773794209662,
+                "resource": 1544.942661162833
+              },
+              {
+                "native": 2541.7980590147185,
+                "resource": 1544.347644812486
+              }
+            ]
+          },
+          "device_us": {
+            "native_over_other_geomean": 1.6456780530205217,
+            "process_ratios": [
+              1.645881861581737,
+              1.6452519197605997,
+              1.6459004605471124
+            ],
+            "block_min_ratio": 1.6447898946355817,
+            "process_min_ratio": 1.6452519197605997,
+            "cluster_bootstrap_95_ci": [
+              1.645260359412365,
+              1.645914963092387
+            ],
+            "native_aa_90_ci": [
+              0.9999953530467018,
+              1.0000229298789727
+            ],
+            "other_aa_90_ci": [
+              0.9999697011796103,
+              1.0000069640888551
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 2541.596747784458,
+                "resource": 1544.2157831072484
+              },
+              {
+                "native": 2541.6701046142375,
+                "resource": 1544.851626724783
+              },
+              {
+                "native": 2541.719816141672,
+                "resource": 1544.273105857679
+              }
+            ]
+          }
+        },
+        {
+          "cell_index": 2,
+          "execution_mode": "graph16_pure_replay",
+          "comparison": "native_context",
+          "processes": 3,
+          "process_reps": [
+            0,
+            1,
+            2
+          ],
+          "blocks": 72,
+          "wall_us": {
+            "native_over_other_geomean": 1.0000038950036831,
+            "process_ratios": [
+              0.9999978067547604,
+              1.0000137105745834,
+              1.0000001677553572
+            ],
+            "block_min_ratio": 0.9998674965148464,
+            "process_min_ratio": 0.9999978067547604,
+            "cluster_bootstrap_95_ci": [
+              0.9999912293908949,
+              1.0000158752799568
+            ],
+            "native_aa_90_ci": [
+              0.9999923849827881,
+              1.0000309737444004
+            ],
+            "other_aa_90_ci": [
+              0.9999838058842562,
+              1.000010058816479
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 2541.314827243587,
+                "native_after_resource": 2541.3204009824613
+              },
+              {
+                "native": 2541.380943890673,
+                "native_after_resource": 2541.3461005754184
+              },
+              {
+                "native": 2541.497791512674,
+                "native_after_resource": 2541.497365162876
+              }
+            ]
+          },
+          "device_us": {
+            "native_over_other_geomean": 1.0000028065077358,
+            "process_ratios": [
+              0.9999976488231207,
+              1.0000118872073054,
+              0.9999988835550059
+            ],
+            "block_min_ratio": 0.9998717043789179,
+            "process_min_ratio": 0.9999976488231207,
+            "cluster_bootstrap_95_ci": [
+              0.9999908425925315,
+              1.0000143201169422
+            ],
+            "native_aa_90_ci": [
+              0.9999869423493937,
+              1.0000258819403012
+            ],
+            "other_aa_90_ci": [
+              0.9999817313001025,
+              1.0000078928246712
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 2541.2122831968954,
+                "native_after_resource": 2541.2182580505128
+              },
+              {
+                "native": 2541.278906336147,
+                "native_after_resource": 2541.2486979860605
+              },
+              {
+                "native": 2541.4059230530856,
+                "native_after_resource": 2541.408760396173
+              }
+            ]
+          }
+        },
+        {
+          "cell_index": 2,
+          "execution_mode": "graph16_pure_replay",
+          "comparison": "fallback_overhead",
+          "processes": 3,
+          "process_reps": [
+            0,
+            1,
+            2
+          ],
+          "blocks": 72,
+          "wall_us": {
+            "native_over_other_geomean": 0.9999909598002603,
+            "process_ratios": [
+              0.9999968159992448,
+              1.0000056238108899,
+              0.9999704399258478
+            ],
+            "block_min_ratio": 0.9998685309674976,
+            "process_min_ratio": 0.9999704399258478,
+            "cluster_bootstrap_95_ci": [
+              0.9999703979490184,
+              1.0000091734714283
+            ],
+            "native_aa_90_ci": [
+              1.0000025594295605,
+              1.0000295589568828
+            ],
+            "other_aa_90_ci": [
+              0.999994943040927,
+              1.0000195132865586
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 2540.5592941641294,
+                "uncertified_fallback": 2540.5673833325973
+              },
+              {
+                "native": 2541.281750236442,
+                "uncertified_fallback": 2541.2674586288326
+              },
+              {
+                "native": 2541.4537026107055,
+                "uncertified_fallback": 2541.528830391391
+              }
+            ]
+          },
+          "device_us": {
+            "native_over_other_geomean": 0.9999903684083747,
+            "process_ratios": [
+              0.9999946467291736,
+              1.0000044054911692,
+              0.999972053280179
+            ],
+            "block_min_ratio": 0.9998645846325903,
+            "process_min_ratio": 0.999972053280179,
+            "cluster_bootstrap_95_ci": [
+              0.9999716955994495,
+              1.0000079834248101
+            ],
+            "native_aa_90_ci": [
+              1.0000015108015188,
+              1.0000276407300368
+            ],
+            "other_aa_90_ci": [
+              0.999994618225557,
+              1.0000191805234373
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 2540.458801059148,
+                "uncertified_fallback": 2540.4724008959333
+              },
+              {
+                "native": 2541.169401393032,
+                "uncertified_fallback": 2541.1582063429946
+              },
+              {
+                "native": 2541.347143028384,
+                "uncertified_fallback": 2541.4181673298544
+              }
+            ]
+          }
+        },
+        {
+          "cell_index": 2,
+          "execution_mode": "graph16_pure_replay",
+          "comparison": "resource_gain",
+          "processes": 3,
+          "process_reps": [
+            0,
+            1,
+            2
+          ],
+          "blocks": 72,
+          "wall_us": {
+            "native_over_other_geomean": 1.645842879293511,
+            "process_ratios": [
+              1.6460429820656874,
+              1.6454463277510523,
+              1.6460393997393694
+            ],
+            "block_min_ratio": 1.6452157164360315,
+            "process_min_ratio": 1.6454463277510523,
+            "cluster_bootstrap_95_ci": [
+              1.6454505469003704,
+              1.6460616600985072
+            ],
+            "native_aa_90_ci": [
+              0.9999725138118882,
+              1.0000089623843784
+            ],
+            "other_aa_90_ci": [
+              0.999972074906814,
+              1.0000331219807275
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 2541.349792552698,
+                "resource": 1543.9146001907286
+              },
+              {
+                "native": 2541.511180365425,
+                "resource": 1544.5725196269943
+              },
+              {
+                "native": 2541.5016636293444,
+                "resource": 1544.0102248049225
+              }
+            ]
+          },
+          "device_us": {
+            "native_over_other_geomean": 1.6458759568009649,
+            "process_ratios": [
+              1.6460776760939422,
+              1.6454772946245542,
+              1.6460729721250003
+            ],
+            "block_min_ratio": 1.6452365735396366,
+            "process_min_ratio": 1.6454772946245542,
+            "cluster_bootstrap_95_ci": [
+              1.6454832287694463,
+              1.6460956531690594
+            ],
+            "native_aa_90_ci": [
+              0.9999733232832323,
+              1.0000085853753404
+            ],
+            "other_aa_90_ci": [
+              0.999969556336118,
+              1.000027273738987
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 2541.2473229213133,
+                "resource": 1543.8198086444884
+              },
+              {
+                "native": 2541.4149988053914,
+                "resource": 1544.4849996458088
+              },
+              {
+                "native": 2541.3941667184527,
+                "resource": 1543.9134289639887
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "gpu_5090": {
+      "job": "1645469",
+      "rows": 7776,
+      "environment": [
+        {
+          "gpu_name": "NVIDIA GeForce RTX 5090",
+          "gpu_uuid": "d5611dcb-2010-c7a0-50f0-d2296645e9cc",
+          "torch": "2.13.0+cu130",
+          "cuda": "13.0",
+          "affinity": [
+            35,
+            36
+          ],
+          "script_sha256": "79cf76bbd83321df9bafd34ca3fc6847355c014654293a6727fbf12719146bf7",
+          "source": "eb4e3e60a6de71f00c0fb558da6f21e4b45d8b55",
+          "package_version": "0.7.1",
+          "rep": 0,
+          "fresh_cases_consumed": 0,
+          "prepared_run_only": true,
+          "serving_qualified": false
+        },
+        {
+          "gpu_name": "NVIDIA GeForce RTX 5090",
+          "gpu_uuid": "d5611dcb-2010-c7a0-50f0-d2296645e9cc",
+          "torch": "2.13.0+cu130",
+          "cuda": "13.0",
+          "affinity": [
+            35,
+            36
+          ],
+          "script_sha256": "79cf76bbd83321df9bafd34ca3fc6847355c014654293a6727fbf12719146bf7",
+          "source": "eb4e3e60a6de71f00c0fb558da6f21e4b45d8b55",
+          "package_version": "0.7.1",
+          "rep": 1,
+          "fresh_cases_consumed": 0,
+          "prepared_run_only": true,
+          "serving_qualified": false
+        },
+        {
+          "gpu_name": "NVIDIA GeForce RTX 5090",
+          "gpu_uuid": "d5611dcb-2010-c7a0-50f0-d2296645e9cc",
+          "torch": "2.13.0+cu130",
+          "cuda": "13.0",
+          "affinity": [
+            35,
+            36
+          ],
+          "script_sha256": "79cf76bbd83321df9bafd34ca3fc6847355c014654293a6727fbf12719146bf7",
+          "source": "eb4e3e60a6de71f00c0fb558da6f21e4b45d8b55",
+          "package_version": "0.7.1",
+          "rep": 2,
+          "fresh_cases_consumed": 0,
+          "prepared_run_only": true,
+          "serving_qualified": false
+        }
+      ],
+      "process_completeness": [
+        {
+          "rep": 0,
+          "complete": true,
+          "persisted_rows": 2592,
+          "last_reported_rows": 2592,
+          "unpersisted_rows_at_least": 0,
+          "timed_unpersisted_tail_count_unknown": false
+        },
+        {
+          "rep": 1,
+          "complete": true,
+          "persisted_rows": 2592,
+          "last_reported_rows": 2592,
+          "unpersisted_rows_at_least": 0,
+          "timed_unpersisted_tail_count_unknown": false
+        },
+        {
+          "rep": 2,
+          "complete": true,
+          "persisted_rows": 2592,
+          "last_reported_rows": 2592,
+          "unpersisted_rows_at_least": 0,
+          "timed_unpersisted_tail_count_unknown": false
+        }
+      ],
+      "campaign_complete": true,
+      "native_libraries_unchanged": true,
+      "all_output_and_lse_exact": true,
+      "summaries": [
+        {
+          "cell_index": 0,
+          "execution_mode": "eager_prepared",
+          "comparison": "native_context",
+          "processes": 3,
+          "process_reps": [
+            0,
+            1,
+            2
+          ],
+          "blocks": 72,
+          "wall_us": {
+            "native_over_other_geomean": 0.9980838869731012,
+            "process_ratios": [
+              0.9997041798896613,
+              0.9949687168247947,
+              0.9995860788981107
+            ],
+            "block_min_ratio": 0.9787719775677475,
+            "process_min_ratio": 0.9949687168247947,
+            "cluster_bootstrap_95_ci": [
+              0.9949485815237485,
+              1.0008267051735773
+            ],
+            "native_aa_90_ci": [
+              0.9981658876847732,
+              1.0025123167267578
+            ],
+            "other_aa_90_ci": [
+              0.9971658391309965,
+              1.0010951961234276
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 1852.6341791481889,
+                "native_after_resource": 1853.182387766612
+              },
+              {
+                "native": 1827.591544851833,
+                "native_after_resource": 1836.833172689245
+              },
+              {
+                "native": 1784.1542342960672,
+                "native_after_resource": 1784.8930391896056
+              }
+            ]
+          },
+          "device_us": {
+            "native_over_other_geomean": 0.9980801386268898,
+            "process_ratios": [
+              0.9997034162877346,
+              0.9949698267600515,
+              0.9995744654076442
+            ],
+            "block_min_ratio": 0.978781268984984,
+            "process_min_ratio": 0.9949698267600515,
+            "cluster_bootstrap_95_ci": [
+              0.9949780035835908,
+              1.0008205284742555
+            ],
+            "native_aa_90_ci": [
+              0.9981676713817949,
+              1.0024926072879887
+            ],
+            "other_aa_90_ci": [
+              0.9971507839258943,
+              1.0011114351083705
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 1852.5480184959786,
+                "native_after_resource": 1853.0976170664362
+              },
+              {
+                "native": 1827.5182626256321,
+                "native_after_resource": 1836.7574709040482
+              },
+              {
+                "native": 1784.0570742459058,
+                "native_after_resource": 1784.8165754397676
+              }
+            ]
+          }
+        },
+        {
+          "cell_index": 0,
+          "execution_mode": "eager_prepared",
+          "comparison": "fallback_overhead",
+          "processes": 3,
+          "process_reps": [
+            0,
+            1,
+            2
+          ],
+          "blocks": 72,
+          "wall_us": {
+            "native_over_other_geomean": 0.9996079929499083,
+            "process_ratios": [
+              0.9998589367824535,
+              1.0000874611636823,
+              0.9988779940338178
+            ],
+            "block_min_ratio": 0.9870546257390072,
+            "process_min_ratio": 0.9988779940338178,
+            "cluster_bootstrap_95_ci": [
+              0.9978596092805719,
+              1.0013476900249252
+            ],
+            "native_aa_90_ci": [
+              0.9986281949906669,
+              1.0023867626267595
+            ],
+            "other_aa_90_ci": [
+              0.9979783466258089,
+              1.0036691938623357
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 1857.9767298872728,
+                "uncertified_fallback": 1858.2388590397
+              },
+              {
+                "native": 1835.6921189208572,
+                "uncertified_fallback": 1835.5315811927903
+              },
+              {
+                "native": 1782.0262770328618,
+                "uncertified_fallback": 1784.0279670557366
+              }
+            ]
+          },
+          "device_us": {
+            "native_over_other_geomean": 0.9996082985672128,
+            "process_ratios": [
+              0.9998578223806548,
+              1.0000885613749955,
+              0.998878924645406
+            ],
+            "block_min_ratio": 0.9870664880091892,
+            "process_min_ratio": 0.998878924645406,
+            "cluster_bootstrap_95_ci": [
+              0.9978624961940786,
+              1.0013525631277111
+            ],
+            "native_aa_90_ci": [
+              0.9985944566653254,
+              1.0023887976179655
+            ],
+            "other_aa_90_ci": [
+              0.9980090335742606,
+              1.0036936366017208
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 1857.9011023194244,
+                "uncertified_fallback": 1858.1652918369698
+              },
+              {
+                "native": 1835.6229895796748,
+                "uncertified_fallback": 1835.4604386794747
+              },
+              {
+                "native": 1781.9627469076265,
+                "uncertified_fallback": 1783.962703528064
+              }
+            ]
+          }
+        },
+        {
+          "cell_index": 0,
+          "execution_mode": "eager_prepared",
+          "comparison": "resource_gain",
+          "processes": 3,
+          "process_reps": [
+            0,
+            1,
+            2
+          ],
+          "blocks": 72,
+          "wall_us": {
+            "native_over_other_geomean": 1.2437403086179142,
+            "process_ratios": [
+              1.2658203588374517,
+              1.2505759602254807,
+              1.2153657032200342
+            ],
+            "block_min_ratio": 1.2048485706663805,
+            "process_min_ratio": 1.2153657032200342,
+            "cluster_bootstrap_95_ci": [
+              1.2156903255980631,
+              1.2654526359386649
+            ],
+            "native_aa_90_ci": [
+              0.998424301659116,
+              1.0034747142349623
+            ],
+            "other_aa_90_ci": [
+              0.9993521772918033,
+              1.0000633058213073
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 1855.6229589442148,
+                "resource": 1465.9449470764146
+              },
+              {
+                "native": 1833.2171501689909,
+                "resource": 1465.8982808516948
+              },
+              {
+                "native": 1782.934213400409,
+                "resource": 1466.9940156091618
+              }
+            ]
+          },
+          "device_us": {
+            "native_over_other_geomean": 1.243750570696287,
+            "process_ratios": [
+              1.2658312583085725,
+              1.2505862980228395,
+              1.2153752753396785
+            ],
+            "block_min_ratio": 1.2048753238238865,
+            "process_min_ratio": 1.2153752753396785,
+            "cluster_bootstrap_95_ci": [
+              1.2156899479771752,
+              1.2655749572114372
+            ],
+            "native_aa_90_ci": [
+              0.9984083710266077,
+              1.0033943374141707
+            ],
+            "other_aa_90_ci": [
+              0.9993343438145207,
+              1.000045614386007
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 1855.5592429120193,
+                "resource": 1465.8819891929786
+              },
+              {
+                "native": 1833.1522851518623,
+                "resource": 1465.8342955220699
+              },
+              {
+                "native": 1782.8709873125713,
+                "resource": 1466.9304399123025
+              }
+            ]
+          }
+        },
+        {
+          "cell_index": 0,
+          "execution_mode": "graph1_pure_replay",
+          "comparison": "native_context",
+          "processes": 3,
+          "process_reps": [
+            0,
+            1,
+            2
+          ],
+          "blocks": 72,
+          "wall_us": {
+            "native_over_other_geomean": 1.0008980776157883,
+            "process_ratios": [
+              1.0003761261524189,
+              1.0027542399058038,
+              0.9995666083255904
+            ],
+            "block_min_ratio": 0.9849883677195357,
+            "process_min_ratio": 0.9995666083255904,
+            "cluster_bootstrap_95_ci": [
+              0.9985855876804574,
+              1.0034114328034593
+            ],
+            "native_aa_90_ci": [
+              0.9974328023296797,
+              1.0021562592023223
+            ],
+            "other_aa_90_ci": [
+              0.9947468074252278,
+              1.0047837196097444
+            ],
+            "controls_resolve_half_percent": false,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 1857.5479377444622,
+                "native_after_resource": 1856.8495280758448
+              },
+              {
+                "native": 1838.2264171188394,
+                "native_after_resource": 1833.177406750749
+              },
+              {
+                "native": 1776.6496399688178,
+                "native_after_resource": 1777.4199589809714
+              }
+            ]
+          },
+          "device_us": {
+            "native_over_other_geomean": 1.0008968883925013,
+            "process_ratios": [
+              1.0003759537551937,
+              1.0027525547488751,
+              0.9995648974602265
+            ],
+            "block_min_ratio": 0.9849752306828538,
+            "process_min_ratio": 0.9995648974602265,
+            "cluster_bootstrap_95_ci": [
+              0.9985728570078071,
+              1.0033995075025313
+            ],
+            "native_aa_90_ci": [
+              0.9974023381487208,
+              1.0021460868664558
+            ],
+            "other_aa_90_ci": [
+              0.9947489644799485,
+              1.004765327469208
+            ],
+            "controls_resolve_half_percent": false,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 1857.480776227282,
+                "native_after_resource": 1856.7827117942027
+              },
+              {
+                "native": 1838.139498928146,
+                "native_after_resource": 1833.09380786218
+              },
+              {
+                "native": 1776.5826611490577,
+                "native_after_resource": 1777.355993255806
+              }
+            ]
+          }
+        },
+        {
+          "cell_index": 0,
+          "execution_mode": "graph1_pure_replay",
+          "comparison": "fallback_overhead",
+          "processes": 3,
+          "process_reps": [
+            0,
+            1,
+            2
+          ],
+          "blocks": 72,
+          "wall_us": {
+            "native_over_other_geomean": 1.0005985022494188,
+            "process_ratios": [
+              1.0013879357002844,
+              1.0003958818714556,
+              1.0000121927907344
+            ],
+            "block_min_ratio": 0.9823918661842219,
+            "process_min_ratio": 1.0000121927907344,
+            "cluster_bootstrap_95_ci": [
+              0.9986704567629735,
+              1.0025023353226454
+            ],
+            "native_aa_90_ci": [
+              0.9971199499153479,
+              1.0024637823418407
+            ],
+            "other_aa_90_ci": [
+              0.9966383187349142,
+              1.0016775284324253
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 1861.052021126162,
+                "uncertified_fallback": 1858.4725806834335
+              },
+              {
+                "native": 1840.3372701188673,
+                "uncertified_fallback": 1839.6090022643045
+              },
+              {
+                "native": 1782.0946671904949,
+                "uncertified_fallback": 1782.072938748081
+              }
+            ]
+          },
+          "device_us": {
+            "native_over_other_geomean": 1.0005984137036923,
+            "process_ratios": [
+              1.0013875247522663,
+              1.0003952358903863,
+              1.0000129834265552
+            ],
+            "block_min_ratio": 0.9823813387935421,
+            "process_min_ratio": 1.0000129834265552,
+            "cluster_bootstrap_95_ci": [
+              0.9986474083204028,
+              1.0025134255892822
+            ],
+            "native_aa_90_ci": [
+              0.9971094206139494,
+              1.0023613908188296
+            ],
+            "other_aa_90_ci": [
+              0.9966157485443939,
+              1.001705578180776
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 1860.985183404014,
+                "uncertified_fallback": 1858.4065982491647
+              },
+              {
+                "native": 1840.2570032611552,
+                "uncertified_fallback": 1839.529955001499
+              },
+              {
+                "native": 1782.0313939000246,
+                "uncertified_fallback": 1782.008257326696
+              }
+            ]
+          }
+        },
+        {
+          "cell_index": 0,
+          "execution_mode": "graph1_pure_replay",
+          "comparison": "resource_gain",
+          "processes": 3,
+          "process_reps": [
+            0,
+            1,
+            2
+          ],
+          "blocks": 72,
+          "wall_us": {
+            "native_over_other_geomean": 1.245808313032625,
+            "process_ratios": [
+              1.2672701178605774,
+              1.256395822612654,
+              1.214389477370463
+            ],
+            "block_min_ratio": 1.1994940007802442,
+            "process_min_ratio": 1.214389477370463,
+            "cluster_bootstrap_95_ci": [
+              1.214911548229467,
+              1.2668298908139066
+            ],
+            "native_aa_90_ci": [
+              0.9980540537549354,
+              1.0036940221492556
+            ],
+            "other_aa_90_ci": [
+              0.9991102559975492,
+              0.9999861029842115
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 1859.2922434568234,
+                "resource": 1467.1633278907468
+              },
+              {
+                "native": 1846.8330215361034,
+                "resource": 1469.9452101771924
+              },
+              {
+                "native": 1789.8271616672216,
+                "resource": 1473.8493663027805
+              }
+            ]
+          },
+          "device_us": {
+            "native_over_other_geomean": 1.2458189195660574,
+            "process_ratios": [
+              1.2672808045805921,
+              1.2564060551097826,
+              1.2144003633237637
+            ],
+            "block_min_ratio": 1.1995141441537218,
+            "process_min_ratio": 1.2144003633237637,
+            "cluster_bootstrap_95_ci": [
+              1.215022953926495,
+              1.2667864119595402
+            ],
+            "native_aa_90_ci": [
+              0.9979981593820897,
+              1.0036635864802834
+            ],
+            "other_aa_90_ci": [
+              0.9990875461688153,
+              0.9999712212242386
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 1859.2279406916177,
+                "resource": 1467.1002148627451
+              },
+              {
+                "native": 1846.7600717752307,
+                "resource": 1469.8751763130142
+              },
+              {
+                "native": 1789.7632207432603,
+                "resource": 1473.78350237376
+              }
+            ]
+          }
+        },
+        {
+          "cell_index": 0,
+          "execution_mode": "graph16_pure_replay",
+          "comparison": "native_context",
+          "processes": 3,
+          "process_reps": [
+            0,
+            1,
+            2
+          ],
+          "blocks": 72,
+          "wall_us": {
+            "native_over_other_geomean": 0.9974403597161406,
+            "process_ratios": [
+              1.0002686027909546,
+              0.9970275993070097,
+              0.9950318771840113
+            ],
+            "block_min_ratio": 0.97767133840006,
+            "process_min_ratio": 0.9950318771840113,
+            "cluster_bootstrap_95_ci": [
+              0.9944255716589953,
+              1.000663656275693
+            ],
+            "native_aa_90_ci": [
+              0.9996168322888971,
+              1.0053425410625914
+            ],
+            "other_aa_90_ci": [
+              0.9966237779697461,
+              1.0008617018409713
+            ],
+            "controls_resolve_half_percent": false,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 1855.9444818955428,
+                "native_after_resource": 1855.4461038935713
+              },
+              {
+                "native": 1830.7410217695258,
+                "native_after_resource": 1836.1989407735505
+              },
+              {
+                "native": 1779.58291915465,
+                "native_after_resource": 1788.468249068519
+              }
+            ]
+          },
+          "device_us": {
+            "native_over_other_geomean": 0.9974385717253462,
+            "process_ratios": [
+              1.000266572533966,
+              0.9970252949094476,
+              0.9950308455771201
+            ],
+            "block_min_ratio": 0.9776839273254591,
+            "process_min_ratio": 0.9950308455771201,
+            "cluster_bootstrap_95_ci": [
+              0.994484967406475,
+              1.0006115830769537
+            ],
+            "native_aa_90_ci": [
+              0.9995941548451167,
+              1.0053777214450055
+            ],
+            "other_aa_90_ci": [
+              0.9966359491298422,
+              1.0008721286402167
+            ],
+            "controls_resolve_half_percent": false,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 1855.8781506952353,
+                "native_after_resource": 1855.38355639913
+              },
+              {
+                "native": 1830.663728680145,
+                "native_after_resource": 1836.1256610309085
+              },
+              {
+                "native": 1779.513936082403,
+                "native_after_resource": 1788.400775706888
+              }
+            ]
+          }
+        },
+        {
+          "cell_index": 0,
+          "execution_mode": "graph16_pure_replay",
+          "comparison": "fallback_overhead",
+          "processes": 3,
+          "process_reps": [
+            0,
+            1,
+            2
+          ],
+          "blocks": 72,
+          "wall_us": {
+            "native_over_other_geomean": 0.9988107823072626,
+            "process_ratios": [
+              1.0016212485422376,
+              0.996821953552527,
+              0.9979954071901603
+            ],
+            "block_min_ratio": 0.9783213463066838,
+            "process_min_ratio": 0.996821953552527,
+            "cluster_bootstrap_95_ci": [
+              0.9960324356744561,
+              1.0017742873911926
+            ],
+            "native_aa_90_ci": [
+              0.9965295253572908,
+              1.003297410417623
+            ],
+            "other_aa_90_ci": [
+              0.998418956432465,
+              1.0041044051417964
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 1859.9440589258265,
+                "uncertified_fallback": 1856.9335081826557
+              },
+              {
+                "native": 1834.5381372187574,
+                "uncertified_fallback": 1840.386972498684
+              },
+              {
+                "native": 1784.713058573747,
+                "uncertified_fallback": 1788.2978676210307
+              }
+            ]
+          },
+          "device_us": {
+            "native_over_other_geomean": 0.9988111585144392,
+            "process_ratios": [
+              1.0016221433732233,
+              0.9968217512536999,
+              0.9979958458358976
+            ],
+            "block_min_ratio": 0.9783126624443433,
+            "process_min_ratio": 0.9968217512536999,
+            "cluster_bootstrap_95_ci": [
+              0.9960250407424498,
+              1.0017530968569925
+            ],
+            "native_aa_90_ci": [
+              0.9964789743835145,
+              1.003260752763669
+            ],
+            "other_aa_90_ci": [
+              0.9984381696384019,
+              1.0041182604962513
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 1859.8808891941474,
+                "uncertified_fallback": 1856.8687818047954
+              },
+              {
+                "native": 1834.4622069636976,
+                "uncertified_fallback": 1840.3111736441347
+              },
+              {
+                "native": 1784.6458376378853,
+                "uncertified_fallback": 1788.2297256889976
+              }
+            ]
+          }
+        },
+        {
+          "cell_index": 0,
+          "execution_mode": "graph16_pure_replay",
+          "comparison": "resource_gain",
+          "processes": 3,
+          "process_reps": [
+            0,
+            1,
+            2
+          ],
+          "blocks": 72,
+          "wall_us": {
+            "native_over_other_geomean": 1.243404024948531,
+            "process_ratios": [
+              1.2678101125457486,
+              1.2528377743797396,
+              1.2102852923800296
+            ],
+            "block_min_ratio": 1.1945272202715964,
+            "process_min_ratio": 1.2102852923800296,
+            "cluster_bootstrap_95_ci": [
+              1.210660976159416,
+              1.2675838997472122
+            ],
+            "native_aa_90_ci": [
+              0.9959493603213766,
+              1.0019806206119477
+            ],
+            "other_aa_90_ci": [
+              0.9990922369943771,
+              0.9999021291130342
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 1858.6316105108403,
+                "resource": 1466.017341334129
+              },
+              {
+                "native": 1843.1480042933304,
+                "resource": 1471.1785052983773
+              },
+              {
+                "native": 1781.9865643868372,
+                "resource": 1472.3690154761377
+              }
+            ]
+          },
+          "device_us": {
+            "native_over_other_geomean": 1.2434137374834697,
+            "process_ratios": [
+              1.2678202228626598,
+              1.252848618236061,
+              1.210293526766384
+            ],
+            "block_min_ratio": 1.1945181334729142,
+            "process_min_ratio": 1.210293526766384,
+            "cluster_bootstrap_95_ci": [
+              1.2106268774419338,
+              1.2674788311051122
+            ],
+            "native_aa_90_ci": [
+              0.9959625321813482,
+              1.0020311949270462
+            ],
+            "other_aa_90_ci": [
+              0.9990644525061331,
+              0.9998795089804354
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 1858.5693050260254,
+                "resource": 1465.9565066957923
+              },
+              {
+                "native": 1843.0762721813594,
+                "resource": 1471.1085165072109
+              },
+              {
+                "native": 1781.9150632206106,
+                "resource": 1472.299920484138
+              }
+            ]
+          }
+        },
+        {
+          "cell_index": 1,
+          "execution_mode": "eager_prepared",
+          "comparison": "native_context",
+          "processes": 3,
+          "process_reps": [
+            0,
+            1,
+            2
+          ],
+          "blocks": 72,
+          "wall_us": {
+            "native_over_other_geomean": 1.0000681290082503,
+            "process_ratios": [
+              0.9999045021163231,
+              1.000526670772019,
+              0.9997733760600547
+            ],
+            "block_min_ratio": 0.9913422154638514,
+            "process_min_ratio": 0.9997733760600547,
+            "cluster_bootstrap_95_ci": [
+              0.9990671938652095,
+              1.0010293351279294
+            ],
+            "native_aa_90_ci": [
+              0.9990632197551104,
+              1.0010713266467435
+            ],
+            "other_aa_90_ci": [
+              0.9988104365613528,
+              1.0012763284322332
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 1875.7777390014596,
+                "native_after_resource": 1875.9568889142163
+              },
+              {
+                "native": 1877.139039279051,
+                "native_after_resource": 1876.1509254227362
+              },
+              {
+                "native": 1881.4938574841917,
+                "native_after_resource": 1881.9203456875925
+              }
+            ]
+          },
+          "device_us": {
+            "native_over_other_geomean": 1.0000674958951292,
+            "process_ratios": [
+              0.9999044762865402,
+              1.0005275349771123,
+              0.9997706395559677
+            ],
+            "block_min_ratio": 0.9913329408873656,
+            "process_min_ratio": 0.9997706395559677,
+            "cluster_bootstrap_95_ci": [
+              0.9990494981888788,
+              1.0010444134443504
+            ],
+            "native_aa_90_ci": [
+              0.9990459286483971,
+              1.0010619406356258
+            ],
+            "other_aa_90_ci": [
+              0.9987965024007818,
+              1.0012528298386563
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 1875.7181995407227,
+                "native_after_resource": 1875.897392225699
+              },
+              {
+                "native": 1877.0738061575007,
+                "native_after_resource": 1876.0841061714905
+              },
+              {
+                "native": 1881.4265092016021,
+                "native_after_resource": 1881.8581330185957
+              }
+            ]
+          }
+        },
+        {
+          "cell_index": 1,
+          "execution_mode": "eager_prepared",
+          "comparison": "fallback_overhead",
+          "processes": 3,
+          "process_reps": [
+            0,
+            1,
+            2
+          ],
+          "blocks": 72,
+          "wall_us": {
+            "native_over_other_geomean": 1.0000429888763724,
+            "process_ratios": [
+              1.0006643655767946,
+              0.9993785127337752,
+              1.000086503084114
+            ],
+            "block_min_ratio": 0.9923255031927943,
+            "process_min_ratio": 0.9993785127337752,
+            "cluster_bootstrap_95_ci": [
+              0.9989871976907643,
+              1.0011667281749272
+            ],
+            "native_aa_90_ci": [
+              0.9980107217344786,
+              1.000351583845145
+            ],
+            "other_aa_90_ci": [
+              0.9996200150182255,
+              1.0018636910330987
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 1879.050240708929,
+                "uncertified_fallback": 1877.8026932395267
+              },
+              {
+                "native": 1876.4550269793936,
+                "uncertified_fallback": 1877.6219451090606
+              },
+              {
+                "native": 1881.3087527254438,
+                "uncertified_fallback": 1881.1460277923738
+              }
+            ]
+          },
+          "device_us": {
+            "native_over_other_geomean": 1.0000426264469022,
+            "process_ratios": [
+              1.0006631974106557,
+              0.9993767974925326,
+              1.000088299699884
+            ],
+            "block_min_ratio": 0.9923090590316128,
+            "process_min_ratio": 0.9993767974925326,
+            "cluster_bootstrap_95_ci": [
+              0.9989902838642348,
+              1.0011537506380965
+            ],
+            "native_aa_90_ci": [
+              0.9979789311359106,
+              1.0003506654683256
+            ],
+            "other_aa_90_ci": [
+              0.9995946771722706,
+              1.0018552629125783
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 1878.985056912679,
+                "uncertified_fallback": 1877.7397447760593
+              },
+              {
+                "native": 1876.3866695629106,
+                "uncertified_fallback": 1877.5567676484227
+              },
+              {
+                "native": 1881.2373504138354,
+                "uncertified_fallback": 1881.0712523867892
+              }
+            ]
+          }
+        },
+        {
+          "cell_index": 1,
+          "execution_mode": "eager_prepared",
+          "comparison": "resource_gain",
+          "processes": 3,
+          "process_reps": [
+            0,
+            1,
+            2
+          ],
+          "blocks": 72,
+          "wall_us": {
+            "native_over_other_geomean": 1.3355284978698254,
+            "process_ratios": [
+              1.3366026718522788,
+              1.335879081959596,
+              1.334104976750838
+            ],
+            "block_min_ratio": 1.323888868381683,
+            "process_min_ratio": 1.334104976750838,
+            "cluster_bootstrap_95_ci": [
+              1.3340240020171787,
+              1.3370372815328395
+            ],
+            "native_aa_90_ci": [
+              0.9988562760742614,
+              1.0013719212299705
+            ],
+            "other_aa_90_ci": [
+              0.9992358131135286,
+              1.0001351104460972
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 1878.0959643060219,
+                "resource": 1405.1265973479879
+              },
+              {
+                "native": 1877.1735929209456,
+                "resource": 1405.1972354917973
+              },
+              {
+                "native": 1880.1030934431806,
+                "resource": 1409.2617344267014
+              }
+            ]
+          },
+          "device_us": {
+            "native_over_other_geomean": 1.3355426976473823,
+            "process_ratios": [
+              1.3366181141689537,
+              1.335893465623088,
+              1.3341177526576504
+            ],
+            "block_min_ratio": 1.3238856262966168,
+            "process_min_ratio": 1.3341177526576504,
+            "cluster_bootstrap_95_ci": [
+              1.3340217854841863,
+              1.337077506623708
+            ],
+            "native_aa_90_ci": [
+              0.9988645693508599,
+              1.0013859233266864
+            ],
+            "other_aa_90_ci": [
+              0.9992270992476624,
+              1.0001183362688373
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 1878.0318639654963,
+                "resource": 1405.0624064250158
+              },
+              {
+                "native": 1877.1071023730963,
+                "resource": 1405.1323332864536
+              },
+              {
+                "native": 1880.0334263387015,
+                "resource": 1409.1960193120517
+              }
+            ]
+          }
+        },
+        {
+          "cell_index": 1,
+          "execution_mode": "graph1_pure_replay",
+          "comparison": "native_context",
+          "processes": 3,
+          "process_reps": [
+            0,
+            1,
+            2
+          ],
+          "blocks": 72,
+          "wall_us": {
+            "native_over_other_geomean": 1.000299195172677,
+            "process_ratios": [
+              1.0005850769987807,
+              1.0016634996332436,
+              0.9986513380729841
+            ],
+            "block_min_ratio": 0.9791905626040235,
+            "process_min_ratio": 0.9986513380729841,
+            "cluster_bootstrap_95_ci": [
+              0.9977958049671641,
+              1.0029683035871673
+            ],
+            "native_aa_90_ci": [
+              0.9929200293235351,
+              0.9986828747033839
+            ],
+            "other_aa_90_ci": [
+              0.9930214270165794,
+              0.9984517187813482
+            ],
+            "controls_resolve_half_percent": false,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 1834.211084060904,
+                "native_after_resource": 1833.1385568557112
+              },
+              {
+                "native": 1844.4318688985493,
+                "native_after_resource": 1841.3687526538426
+              },
+              {
+                "native": 1846.4604166961853,
+                "native_after_resource": 1848.9540306020617
+              }
+            ]
+          },
+          "device_us": {
+            "native_over_other_geomean": 1.0002983178135882,
+            "process_ratios": [
+              1.00058484437257,
+              1.0016626848599008,
+              0.9986497548319928
+            ],
+            "block_min_ratio": 0.9791983131364125,
+            "process_min_ratio": 0.9986497548319928,
+            "cluster_bootstrap_95_ci": [
+              0.9977641437950615,
+              1.0030190714321385
+            ],
+            "native_aa_90_ci": [
+              0.9928387663086026,
+              0.9986779556375781
+            ],
+            "other_aa_90_ci": [
+              0.992976915704877,
+              0.9984870687017505
+            ],
+            "controls_resolve_half_percent": false,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 1834.1467962868503,
+                "native_after_resource": 1833.0747328448467
+              },
+              {
+                "native": 1844.3650503096976,
+                "native_after_resource": 1841.3035427866275
+              },
+              {
+                "native": 1846.3888447050726,
+                "native_after_resource": 1848.8852931383337
+              }
+            ]
+          }
+        },
+        {
+          "cell_index": 1,
+          "execution_mode": "graph1_pure_replay",
+          "comparison": "fallback_overhead",
+          "processes": 3,
+          "process_reps": [
+            0,
+            1,
+            2
+          ],
+          "blocks": 72,
+          "wall_us": {
+            "native_over_other_geomean": 0.9997158231927651,
+            "process_ratios": [
+              0.999926611654912,
+              1.0008900912303043,
+              0.9983324360571797
+            ],
+            "block_min_ratio": 0.9859445713175101,
+            "process_min_ratio": 0.9983324360571797,
+            "cluster_bootstrap_95_ci": [
+              0.9976673902634947,
+              1.0015353187113167
+            ],
+            "native_aa_90_ci": [
+              0.9955305768595258,
+              1.0033384300770978
+            ],
+            "other_aa_90_ci": [
+              0.9967855123983984,
+              1.0046585960929424
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 1841.8637071251042,
+                "uncertified_fallback": 1841.9988883751746
+              },
+              {
+                "native": 1855.4797541248784,
+                "uncertified_fallback": 1853.829676587266
+              },
+              {
+                "native": 1851.2112019589483,
+                "uncertified_fallback": 1854.3033714001438
+              }
+            ]
+          },
+          "device_us": {
+            "native_over_other_geomean": 0.9997155464296494,
+            "process_ratios": [
+              0.9999261456063121,
+              1.0008886096365135,
+              0.9983335500318166
+            ],
+            "block_min_ratio": 0.9859531250005152,
+            "process_min_ratio": 0.9983335500318166,
+            "cluster_bootstrap_95_ci": [
+              0.9976614918905474,
+              1.001543693902903
+            ],
+            "native_aa_90_ci": [
+              0.9955015058790312,
+              1.0033073511000026
+            ],
+            "other_aa_90_ci": [
+              0.9968025001297753,
+              1.0046476900592698
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 1841.793898230111,
+                "uncertified_fallback": 1841.9299328485174
+              },
+              {
+                "native": 1855.4041776322806,
+                "uncertified_fallback": 1853.756911377076
+              },
+              {
+                "native": 1851.1395891402356,
+                "uncertified_fallback": 1854.2295699480787
+              }
+            ]
+          }
+        },
+        {
+          "cell_index": 1,
+          "execution_mode": "graph1_pure_replay",
+          "comparison": "resource_gain",
+          "processes": 3,
+          "process_reps": [
+            0,
+            1,
+            2
+          ],
+          "blocks": 72,
+          "wall_us": {
+            "native_over_other_geomean": 1.3083959191591241,
+            "process_ratios": [
+              1.3046474644790298,
+              1.3136966328346003,
+              1.30686064990313
+            ],
+            "block_min_ratio": 1.2822024012748472,
+            "process_min_ratio": 1.3046474644790298,
+            "cluster_bootstrap_95_ci": [
+              1.30367187689381,
+              1.31346812607596
+            ],
+            "native_aa_90_ci": [
+              0.996566029120108,
+              1.0019820433134634
+            ],
+            "other_aa_90_ci": [
+              0.9998018298942098,
+              1.000041867712564
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 1834.9058785647787,
+                "resource": 1406.438082717993
+              },
+              {
+                "native": 1848.509821105407,
+                "resource": 1407.1055484985334
+              },
+              {
+                "native": 1846.589646268568,
+                "resource": 1412.9965933287845
+              }
+            ]
+          },
+          "device_us": {
+            "native_over_other_geomean": 1.3084087328093024,
+            "process_ratios": [
+              1.304659889650393,
+              1.3137093974053984,
+              1.3068739013492348
+            ],
+            "block_min_ratio": 1.2822252221936927,
+            "process_min_ratio": 1.304659889650393,
+            "cluster_bootstrap_95_ci": [
+              1.303606545413397,
+              1.3135076751580068
+            ],
+            "native_aa_90_ci": [
+              0.9965131935591908,
+              1.0020339727366239
+            ],
+            "other_aa_90_ci": [
+              0.9997790045451125,
+              1.000021992191805
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 1834.823297114242,
+                "resource": 1406.3613909414469
+              },
+              {
+                "native": 1848.442276982185,
+                "resource": 1407.0404616370222
+              },
+              {
+                "native": 1846.5185038406246,
+                "resource": 1412.9278287172565
+              }
+            ]
+          }
+        },
+        {
+          "cell_index": 1,
+          "execution_mode": "graph16_pure_replay",
+          "comparison": "native_context",
+          "processes": 3,
+          "process_reps": [
+            0,
+            1,
+            2
+          ],
+          "blocks": 72,
+          "wall_us": {
+            "native_over_other_geomean": 1.0016453456870464,
+            "process_ratios": [
+              0.9981330002792301,
+              0.9993048282364081,
+              1.0075243053965601
+            ],
+            "block_min_ratio": 0.9820726461406926,
+            "process_min_ratio": 0.9981330002792301,
+            "cluster_bootstrap_95_ci": [
+              0.997092991111351,
+              1.0073845960260885
+            ],
+            "native_aa_90_ci": [
+              0.9975604099434581,
+              1.0029094009036021
+            ],
+            "other_aa_90_ci": [
+              0.99679498008804,
+              1.0029728665016684
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 1838.2695366678531,
+                "native_after_resource": 1841.7080049989252
+              },
+              {
+                "native": 1858.9756085306683,
+                "native_after_resource": 1860.2688148834675
+              },
+              {
+                "native": 1842.866382410298,
+                "native_after_resource": 1829.1036479610777
+              }
+            ]
+          },
+          "device_us": {
+            "native_over_other_geomean": 1.0016447506999295,
+            "process_ratios": [
+              0.9981331970827727,
+              0.9993025749039531,
+              1.0075245831721293
+            ],
+            "block_min_ratio": 0.982064994301315,
+            "process_min_ratio": 0.9981331970827727,
+            "cluster_bootstrap_95_ci": [
+              0.9971015831976842,
+              1.007248098823567
+            ],
+            "native_aa_90_ci": [
+              0.9975780124026894,
+              1.0028710819909366
+            ],
+            "other_aa_90_ci": [
+              0.9967829997507787,
+              1.0029580725428477
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 1838.2012493659852,
+                "native_after_resource": 1841.6392268471432
+              },
+              {
+                "native": 1858.906421755429,
+                "native_after_resource": 1860.2037745515627
+              },
+              {
+                "native": 1842.797356509014,
+                "native_after_resource": 1829.0346332861468
+              }
+            ]
+          }
+        },
+        {
+          "cell_index": 1,
+          "execution_mode": "graph16_pure_replay",
+          "comparison": "fallback_overhead",
+          "processes": 3,
+          "process_reps": [
+            0,
+            1,
+            2
+          ],
+          "blocks": 72,
+          "wall_us": {
+            "native_over_other_geomean": 0.9989080367825142,
+            "process_ratios": [
+              0.9991068724964628,
+              0.9986392765034616,
+              0.9989780197478033
+            ],
+            "block_min_ratio": 0.9801441799714292,
+            "process_min_ratio": 0.9986392765034616,
+            "cluster_bootstrap_95_ci": [
+              0.9967831712042385,
+              1.0010744150127198
+            ],
+            "native_aa_90_ci": [
+              0.9959053710872167,
+              1.001736449627216
+            ],
+            "other_aa_90_ci": [
+              0.9960548936029527,
+              1.0014394434022555
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 1844.3658858124313,
+                "uncertified_fallback": 1846.0146122345473
+              },
+              {
+                "native": 1853.818793938945,
+                "uncertified_fallback": 1856.344765879555
+              },
+              {
+                "native": 1841.1764405902782,
+                "uncertified_fallback": 1843.0600115256705
+              }
+            ]
+          },
+          "device_us": {
+            "native_over_other_geomean": 0.9989083268044525,
+            "process_ratios": [
+              0.9991057395917836,
+              0.9986395777417714,
+              0.9989797212946646
+            ],
+            "block_min_ratio": 0.9801526917852416,
+            "process_min_ratio": 0.9986395777417714,
+            "cluster_bootstrap_95_ci": [
+              0.9968055104216815,
+              1.0011286546901603
+            ],
+            "native_aa_90_ci": [
+              0.995837367648519,
+              1.0017277564325984
+            ],
+            "other_aa_90_ci": [
+              0.9960643391752417,
+              1.0013881405191418
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 1844.2940954818728,
+                "uncertified_fallback": 1845.9448508777605
+              },
+              {
+                "native": 1853.751325857305,
+                "uncertified_fallback": 1856.2766459238503
+              },
+              {
+                "native": 1841.1109253045302,
+                "uncertified_fallback": 1842.9912900719105
+              }
+            ]
+          }
+        },
+        {
+          "cell_index": 1,
+          "execution_mode": "graph16_pure_replay",
+          "comparison": "resource_gain",
+          "processes": 3,
+          "process_reps": [
+            0,
+            1,
+            2
+          ],
+          "blocks": 72,
+          "wall_us": {
+            "native_over_other_geomean": 1.3094788784139382,
+            "process_ratios": [
+              1.30540463506393,
+              1.3141929134215151,
+              1.308854052037963
+            ],
+            "block_min_ratio": 1.2874507709141512,
+            "process_min_ratio": 1.30540463506393,
+            "cluster_bootstrap_95_ci": [
+              1.3049414413068396,
+              1.314157691072761
+            ],
+            "native_aa_90_ci": [
+              0.9961272084878346,
+              1.0041236088557026
+            ],
+            "other_aa_90_ci": [
+              0.999103508930102,
+              0.9999929185529053
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 1834.5355755558708,
+                "resource": 1405.33864081617
+              },
+              {
+                "native": 1850.3372659802317,
+                "resource": 1407.9647265505796
+              },
+              {
+                "native": 1847.2684162738433,
+                "resource": 1411.3631794144947
+              }
+            ]
+          },
+          "device_us": {
+            "native_over_other_geomean": 1.3094913508327044,
+            "process_ratios": [
+              1.3054159665325809,
+              1.3142058878588927,
+              1.3088671683008277
+            ],
+            "block_min_ratio": 1.287466114413346,
+            "process_min_ratio": 1.3054159665325809,
+            "cluster_bootstrap_95_ci": [
+              1.3050267495119339,
+              1.3141122218009869
+            ],
+            "native_aa_90_ci": [
+              0.9960891161573431,
+              1.0040609339680362
+            ],
+            "other_aa_90_ci": [
+              0.9990997289735675,
+              0.9999675101559955
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 1834.4657793148979,
+                "resource": 1405.2729753164963
+              },
+              {
+                "native": 1850.2706050470092,
+                "resource": 1407.9001031272758
+              },
+              {
+                "native": 1847.2085308678131,
+                "resource": 1411.3032824147176
+              }
+            ]
+          }
+        },
+        {
+          "cell_index": 2,
+          "execution_mode": "eager_prepared",
+          "comparison": "native_context",
+          "processes": 3,
+          "process_reps": [
+            0,
+            1,
+            2
+          ],
+          "blocks": 72,
+          "wall_us": {
+            "native_over_other_geomean": 1.0001491339187445,
+            "process_ratios": [
+              0.9999210929215356,
+              1.000633513357975,
+              0.9998929715448084
+            ],
+            "block_min_ratio": 0.9947286378607403,
+            "process_min_ratio": 0.9998929715448084,
+            "cluster_bootstrap_95_ci": [
+              0.999538453051084,
+              1.0009389406833435
+            ],
+            "native_aa_90_ci": [
+              0.9983314642897848,
+              0.9999466548372652
+            ],
+            "other_aa_90_ci": [
+              0.9981825935635117,
+              1.0005703664679615
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 1459.9637268788217,
+                "native_after_resource": 1460.0789374421013
+              },
+              {
+                "native": 1474.8983502920432,
+                "native_after_resource": 1473.9645740452022
+              },
+              {
+                "native": 1480.2780512090176,
+                "native_after_resource": 1480.4365000406256
+              }
+            ]
+          },
+          "device_us": {
+            "native_over_other_geomean": 1.0001469721168077,
+            "process_ratios": [
+              0.9999198884128357,
+              1.0006293153943682,
+              0.9998918871348046
+            ],
+            "block_min_ratio": 0.9947380835369077,
+            "process_min_ratio": 0.9998918871348046,
+            "cluster_bootstrap_95_ci": [
+              0.9995308565439338,
+              1.0009029352129992
+            ],
+            "native_aa_90_ci": [
+              0.9983064113939679,
+              0.9999429325704075
+            ],
+            "other_aa_90_ci": [
+              0.9981538031329179,
+              1.0005687304915583
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 1459.9243536644929,
+                "native_after_resource": 1460.041319891955
+              },
+              {
+                "native": 1474.8319593400201,
+                "native_after_resource": 1473.904408605857
+              },
+              {
+                "native": 1480.2363437645117,
+                "native_after_resource": 1480.3963936602568
+              }
+            ]
+          }
+        },
+        {
+          "cell_index": 2,
+          "execution_mode": "eager_prepared",
+          "comparison": "fallback_overhead",
+          "processes": 3,
+          "process_reps": [
+            0,
+            1,
+            2
+          ],
+          "blocks": 72,
+          "wall_us": {
+            "native_over_other_geomean": 1.0003742906418254,
+            "process_ratios": [
+              1.0002322176686864,
+              1.0004282822271946,
+              1.0004623874549312
+            ],
+            "block_min_ratio": 0.9930420845318415,
+            "process_min_ratio": 1.0002322176686864,
+            "cluster_bootstrap_95_ci": [
+              0.9998788688104546,
+              1.0008415969388993
+            ],
+            "native_aa_90_ci": [
+              0.9990462635450312,
+              1.000529057720235
+            ],
+            "other_aa_90_ci": [
+              0.9994070793666926,
+              1.0013088768253458
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 1459.036697952817,
+                "uncertified_fallback": 1458.6979625126448
+              },
+              {
+                "native": 1474.0658494255508,
+                "uncertified_fallback": 1473.434803486289
+              },
+              {
+                "native": 1482.9942961607421,
+                "uncertified_fallback": 1482.308895123303
+              }
+            ]
+          },
+          "device_us": {
+            "native_over_other_geomean": 1.0003737748513537,
+            "process_ratios": [
+              1.0002288799136714,
+              1.0004271356975787,
+              1.000465325049179
+            ],
+            "block_min_ratio": 0.9930301698999292,
+            "process_min_ratio": 1.0002288799136714,
+            "cluster_bootstrap_95_ci": [
+              0.9998773590339548,
+              1.0008403458369697
+            ],
+            "native_aa_90_ci": [
+              0.9990431489236006,
+              1.0005118479805788
+            ],
+            "other_aa_90_ci": [
+              0.9993895689242783,
+              1.0013023041198101
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 1458.997062368241,
+                "uncertified_fallback": 1458.663203660112
+              },
+              {
+                "native": 1473.9998250122796,
+                "uncertified_fallback": 1473.3704958777312
+              },
+              {
+                "native": 1482.9559329722208,
+                "uncertified_fallback": 1482.2661973810282
+              }
+            ]
+          }
+        },
+        {
+          "cell_index": 2,
+          "execution_mode": "eager_prepared",
+          "comparison": "resource_gain",
+          "processes": 3,
+          "process_reps": [
+            0,
+            1,
+            2
+          ],
+          "blocks": 72,
+          "wall_us": {
+            "native_over_other_geomean": 1.0492536931369063,
+            "process_ratios": [
+              1.041222233872741,
+              1.052978431267069,
+              1.0536069114086681
+            ],
+            "block_min_ratio": 1.0377218957289223,
+            "process_min_ratio": 1.041222233872741,
+            "cluster_bootstrap_95_ci": [
+              1.041301882945154,
+              1.0536544167729103
+            ],
+            "native_aa_90_ci": [
+              0.9995855060546301,
+              1.0010903828466853
+            ],
+            "other_aa_90_ci": [
+              0.9996575596687312,
+              1.0000040394366598
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 1465.139820078415,
+                "resource": 1407.1345889618087
+              },
+              {
+                "native": 1475.0049051127503,
+                "resource": 1400.7930849427255
+              },
+              {
+                "native": 1482.7426965530126,
+                "resource": 1407.3016041348758
+              }
+            ]
+          },
+          "device_us": {
+            "native_over_other_geomean": 1.049255476363895,
+            "process_ratios": [
+              1.041221374247526,
+              1.0529778821825233,
+              1.053613702564778
+            ],
+            "block_min_ratio": 1.0377165833862214,
+            "process_min_ratio": 1.041221374247526,
+            "cluster_bootstrap_95_ci": [
+              1.0412977416311209,
+              1.0536574831836056
+            ],
+            "native_aa_90_ci": [
+              0.9995717935420422,
+              1.0010803492823397
+            ],
+            "other_aa_90_ci": [
+              0.9996387608044683,
+              0.9999933775935085
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 1465.0980400601554,
+                "resource": 1407.0956247118522
+              },
+              {
+                "native": 1474.9400784319885,
+                "resource": 1400.7322503060163
+              },
+              {
+                "native": 1482.7018987382894,
+                "resource": 1407.253811457647
+              }
+            ]
+          }
+        },
+        {
+          "cell_index": 2,
+          "execution_mode": "graph1_pure_replay",
+          "comparison": "native_context",
+          "processes": 3,
+          "process_reps": [
+            0,
+            1,
+            2
+          ],
+          "blocks": 72,
+          "wall_us": {
+            "native_over_other_geomean": 1.0006802478894437,
+            "process_ratios": [
+              1.001559263101454,
+              1.000850286370976,
+              0.9996321437576121
+            ],
+            "block_min_ratio": 0.9889350656117525,
+            "process_min_ratio": 0.9996321437576121,
+            "cluster_bootstrap_95_ci": [
+              0.9991031931944329,
+              1.0021081239729845
+            ],
+            "native_aa_90_ci": [
+              0.9998184046231288,
+              1.0029363742981439
+            ],
+            "other_aa_90_ci": [
+              0.9975030044463933,
+              1.002722945156757
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 1465.3608690316323,
+                "native_after_resource": 1463.0795430856083
+              },
+              {
+                "native": 1474.7517657289545,
+                "native_after_resource": 1473.4988697223805
+              },
+              {
+                "native": 1482.785124889811,
+                "native_after_resource": 1483.3307773757926
+              }
+            ]
+          },
+          "device_us": {
+            "native_over_other_geomean": 1.0006797686613704,
+            "process_ratios": [
+              1.0015589755853391,
+              1.0008502844874003,
+              0.9996309964237496
+            ],
+            "block_min_ratio": 0.9889225180496943,
+            "process_min_ratio": 0.9996309964237496,
+            "cluster_bootstrap_95_ci": [
+              0.999094879421319,
+              1.0021025722677577
+            ],
+            "native_aa_90_ci": [
+              0.999840847973429,
+              1.0029208165984942
+            ],
+            "other_aa_90_ci": [
+              0.9974879596843953,
+              1.0026625273331584
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 1465.313363214215,
+                "native_after_resource": 1463.0325312174912
+              },
+              {
+                "native": 1474.7140727528576,
+                "native_after_resource": 1473.4612115418959
+              },
+              {
+                "native": 1482.716217014884,
+                "native_after_resource": 1483.2635465680887
+              }
+            ]
+          }
+        },
+        {
+          "cell_index": 2,
+          "execution_mode": "graph1_pure_replay",
+          "comparison": "fallback_overhead",
+          "processes": 3,
+          "process_reps": [
+            0,
+            1,
+            2
+          ],
+          "blocks": 72,
+          "wall_us": {
+            "native_over_other_geomean": 1.0026069290221769,
+            "process_ratios": [
+              1.002828073565398,
+              1.002008503377534,
+              1.0029844842418416
+            ],
+            "block_min_ratio": 0.990952672199382,
+            "process_min_ratio": 1.002008503377534,
+            "cluster_bootstrap_95_ci": [
+              1.00145105139587,
+              1.0037049503820867
+            ],
+            "native_aa_90_ci": [
+              0.9977528609059122,
+              1.0030629423807957
+            ],
+            "other_aa_90_ci": [
+              0.9997836342118839,
+              1.0031758763643577
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 1467.1686483808317,
+                "uncertified_fallback": 1463.0310888331483
+              },
+              {
+                "native": 1474.9166551124679,
+                "uncertified_fallback": 1471.9602180429329
+              },
+              {
+                "native": 1484.4953571433407,
+                "uncertified_fallback": 1480.078087414755
+              }
+            ]
+          },
+          "device_us": {
+            "native_over_other_geomean": 1.0026064257479126,
+            "process_ratios": [
+              1.002827664102125,
+              1.0020042451690008,
+              1.0029876457475033
+            ],
+            "block_min_ratio": 0.9909577198712302,
+            "process_min_ratio": 1.0020042451690008,
+            "cluster_bootstrap_95_ci": [
+              1.001442199007246,
+              1.0037125053965226
+            ],
+            "native_aa_90_ci": [
+              0.9977603391386247,
+              1.0030977304651019
+            ],
+            "other_aa_90_ci": [
+              0.9997596290876394,
+              1.0031456922242135
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 1467.1213948321717,
+                "uncertified_fallback": 1462.984565893232
+              },
+              {
+                "native": 1474.873269506185,
+                "uncertified_fallback": 1471.9231745943657
+              },
+              {
+                "native": 1484.4287978882667,
+                "uncertified_fallback": 1480.0070610859382
+              }
+            ]
+          }
+        },
+        {
+          "cell_index": 2,
+          "execution_mode": "graph1_pure_replay",
+          "comparison": "resource_gain",
+          "processes": 3,
+          "process_reps": [
+            0,
+            1,
+            2
+          ],
+          "blocks": 72,
+          "wall_us": {
+            "native_over_other_geomean": 1.0481578954235398,
+            "process_ratios": [
+              1.040655156864409,
+              1.0507480310458688,
+              1.0531123472285953
+            ],
+            "block_min_ratio": 1.0315816476718553,
+            "process_min_ratio": 1.040655156864409,
+            "cluster_bootstrap_95_ci": [
+              1.0408185459312858,
+              1.0530423611787976
+            ],
+            "native_aa_90_ci": [
+              0.9983317051073659,
+              1.0025764911532236
+            ],
+            "other_aa_90_ci": [
+              0.9995385051477752,
+              1.0000360526898704
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 1465.8478765894074,
+                "resource": 1408.5817640169507
+              },
+              {
+                "native": 1476.8040769240404,
+                "resource": 1405.4787953817004
+              },
+              {
+                "native": 1483.6630395433406,
+                "resource": 1408.8364298906915
+              }
+            ]
+          },
+          "device_us": {
+            "native_over_other_geomean": 1.0481603607612846,
+            "process_ratios": [
+              1.0406559048513988,
+              1.0507471768083176,
+              1.0531198774391484
+            ],
+            "block_min_ratio": 1.0315770081876823,
+            "process_min_ratio": 1.0406559048513988,
+            "cluster_bootstrap_95_ci": [
+              1.0408538820325393,
+              1.053043394834944
+            ],
+            "native_aa_90_ci": [
+              0.9983368772707253,
+              1.0025929668320728
+            ],
+            "other_aa_90_ci": [
+              0.9995313135478131,
+              1.0000235571343317
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 1465.8054316817756,
+                "resource": 1408.5399648898228
+              },
+              {
+                "native": 1476.7588751119004,
+                "resource": 1405.4369192764398
+              },
+              {
+                "native": 1483.601306230576,
+                "resource": 1408.7677367159965
+              }
+            ]
+          }
+        },
+        {
+          "cell_index": 2,
+          "execution_mode": "graph16_pure_replay",
+          "comparison": "native_context",
+          "processes": 3,
+          "process_reps": [
+            0,
+            1,
+            2
+          ],
+          "blocks": 72,
+          "wall_us": {
+            "native_over_other_geomean": 1.0044570159928539,
+            "process_ratios": [
+              1.0048923506273144,
+              1.002832775199099,
+              1.0056480366662313
+            ],
+            "block_min_ratio": 0.9941342305241025,
+            "process_min_ratio": 1.002832775199099,
+            "cluster_bootstrap_95_ci": [
+              1.0027542072936286,
+              1.0061608718667758
+            ],
+            "native_aa_90_ci": [
+              0.9980812939590551,
+              1.0008664856338443
+            ],
+            "other_aa_90_ci": [
+              0.9980884683196699,
+              1.0029018588510081
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 1473.5565493881436,
+                "native_after_resource": 1466.3824920831187
+              },
+              {
+                "native": 1477.459209993273,
+                "native_after_resource": 1473.2857227367163
+              },
+              {
+                "native": 1486.752068882037,
+                "native_after_resource": 1478.402000177607
+              }
+            ]
+          },
+          "device_us": {
+            "native_over_other_geomean": 1.0044564021238835,
+            "process_ratios": [
+              1.0048931385575948,
+              1.0028301888074813,
+              1.005647998008361
+            ],
+            "block_min_ratio": 0.9941266674829524,
+            "process_min_ratio": 1.0028301888074813,
+            "cluster_bootstrap_95_ci": [
+              1.002719000893468,
+              1.0061381295550886
+            ],
+            "native_aa_90_ci": [
+              0.9980531544018341,
+              1.0008674854742907
+            ],
+            "other_aa_90_ci": [
+              0.9980873064404187,
+              1.002920708084417
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 1473.5159096418827,
+                "native_after_resource": 1466.340900443342
+              },
+              {
+                "native": 1477.416722093067,
+                "native_after_resource": 1473.247154485787
+              },
+              {
+                "native": 1486.703888813711,
+                "native_after_resource": 1478.354147532794
+              }
+            ]
+          }
+        },
+        {
+          "cell_index": 2,
+          "execution_mode": "graph16_pure_replay",
+          "comparison": "fallback_overhead",
+          "processes": 3,
+          "process_reps": [
+            0,
+            1,
+            2
+          ],
+          "blocks": 72,
+          "wall_us": {
+            "native_over_other_geomean": 1.0038516340027865,
+            "process_ratios": [
+              1.004262173424564,
+              1.0024684503010255,
+              1.0048257883746163
+            ],
+            "block_min_ratio": 0.9907006508278325,
+            "process_min_ratio": 1.0024684503010255,
+            "cluster_bootstrap_95_ci": [
+              1.0022459479019625,
+              1.005308331640467
+            ],
+            "native_aa_90_ci": [
+              0.9987230274810961,
+              1.002506762615827
+            ],
+            "other_aa_90_ci": [
+              0.9981134902771739,
+              1.0011295306428847
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 1470.6512053531376,
+                "uncertified_fallback": 1464.4096375134513
+              },
+              {
+                "native": 1475.755680663951,
+                "uncertified_fallback": 1472.1218211114833
+              },
+              {
+                "native": 1486.1311723596175,
+                "uncertified_fallback": 1478.9938609791764
+              }
+            ]
+          },
+          "device_us": {
+            "native_over_other_geomean": 1.0038512643380229,
+            "process_ratios": [
+              1.0042634556305197,
+              1.0024671355948094,
+              1.0048247131784251
+            ],
+            "block_min_ratio": 0.9906956602477539,
+            "process_min_ratio": 1.0024671355948094,
+            "cluster_bootstrap_95_ci": [
+              1.002246711263259,
+              1.005301064429498
+            ],
+            "native_aa_90_ci": [
+              0.9987328738054411,
+              1.0025681371527055
+            ],
+            "other_aa_90_ci": [
+              0.9981364447274468,
+              1.0011218604175633
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 1470.6104954397344,
+                "uncertified_fallback": 1464.3672307247532
+              },
+              {
+                "native": 1475.7161996394957,
+                "uncertified_fallback": 1472.0843678968968
+              },
+              {
+                "native": 1486.0865904266293,
+                "uncertified_fallback": 1478.9510756815391
+              }
+            ]
+          }
+        },
+        {
+          "cell_index": 2,
+          "execution_mode": "graph16_pure_replay",
+          "comparison": "resource_gain",
+          "processes": 3,
+          "process_reps": [
+            0,
+            1,
+            2
+          ],
+          "blocks": 72,
+          "wall_us": {
+            "native_over_other_geomean": 1.0494046625849334,
+            "process_ratios": [
+              1.0418394762249565,
+              1.0519302079730681,
+              1.0544870058060336
+            ],
+            "block_min_ratio": 1.037409421050516,
+            "process_min_ratio": 1.0418394762249565,
+            "cluster_bootstrap_95_ci": [
+              1.0419745721029896,
+              1.054379626318489
+            ],
+            "native_aa_90_ci": [
+              0.9987072725136722,
+              1.0018459511903155
+            ],
+            "other_aa_90_ci": [
+              0.9998451640860324,
+              1.0000285255930315
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 1466.0361596338287,
+                "resource": 1407.1612691678022
+              },
+              {
+                "native": 1480.0311825377175,
+                "resource": 1406.9670889949477
+              },
+              {
+                "native": 1483.8748240415835,
+                "resource": 1407.2006728118315
+              }
+            ]
+          },
+          "device_us": {
+            "native_over_other_geomean": 1.049404950833494,
+            "process_ratios": [
+              1.041840745576628,
+              1.05192851429219,
+              1.0544882877789405
+            ],
+            "block_min_ratio": 1.037414525361825,
+            "process_min_ratio": 1.041840745576628,
+            "cluster_bootstrap_95_ci": [
+              1.0419929542706123,
+              1.0543840626368042
+            ],
+            "native_aa_90_ci": [
+              0.99871848617494,
+              1.0018125620543947
+            ],
+            "other_aa_90_ci": [
+              0.9998351802612794,
+              1.0000219712095948
+            ],
+            "controls_resolve_half_percent": true,
+            "descriptive_point_and_lcb_above_099": true,
+            "process_latency_geomeans_us": [
+              {
+                "native": 1465.9973672745864,
+                "resource": 1407.1223202766957
+              },
+              {
+                "native": 1479.9956807743697,
+                "resource": 1406.9356050969052
+              },
+              {
+                "native": 1483.8231702997095,
+                "resource": 1407.1499773838862
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "bootstrap_resamples": 20000,
+  "bootstrap_unit": "independent process, then paired block",
+  "all_persisted_rows_retained": true,
+  "allow_incomplete_diagnostic": false,
+  "campaign_complete": true,
+  "analyzer_sha256": "0fe7a08f74279faf7ad30af999150508b027f5e4cd8b231b7778b882380bd0aa",
+  "trimmed_rows": 0,
+  "fresh_cases_consumed": 0,
+  "qualification_authority": false,
+  "full_plan_measured": false,
+  "outer_managed_dispatch_measured": false,
+  "full_http_qualified": false,
+  "historical_token_divergence_resolved": false,
+  "limitations": [
+    "Three exposed cells; independent process counts reported per cell. Development diagnosis only",
+    "An incomplete diagnostic campaign is summarized only with explicit opt-in; unpersisted timing tails cannot be reconstructed",
+    "Prepared calls and pure fixed replay; no replanning or Graph input updates",
+    "Resource is deliberately uncertified; native fallback uses runner.forward, not AutoTuner.choose_one",
+    "Vendor payload is the recorded normal pinned-vendor wheel; this exposed diagnostic does not grant release authority",
+    "Observed associations do not attribute the cause of frozen v4.2 native regressions"
+  ]
+}
