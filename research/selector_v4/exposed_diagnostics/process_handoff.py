@@ -164,13 +164,21 @@ def run(out, producer, expected_commit):
                     "Fresh consumer must load its own real resource module"
                 )
             with autotune_v2(mode="replay", measurement_policy=policy, cache_root=cache):
-                misses = AutoTuner.get().stats.cache_misses
+                tuner = AutoTuner.get()
+                config = tuner._apply_measure_policy(runner.tuning_config, policy)
+                hit, runner_id, disk_tactic, _ = tuner.search_cache(
+                    "experimental_prefill_resource",
+                    [runner],
+                    tuple(tuner._get_input_sizes(inputs)),
+                    config,
+                    inputs=inputs,
+                )
+                assert hit and runner_id == 0 and disk_tactic == previous["managed_tactic"], (
+                    "A native -1 cache miss must not imitate a reloaded winner"
+                )
                 initial = clone_pair(runner.run(inputs))
                 chosen, tactic = AutoTuner.get().choose_one(
                     "experimental_prefill_resource", [runner], runner.tuning_config, inputs
-                )
-                assert AutoTuner.get().stats.cache_misses == misses, (
-                    "A native -1 cache miss must not imitate a reloaded winner"
                 )
             assert tactic == previous["managed_tactic"]
         entries = [json.loads(f.read_text()) for f in cache.glob("v2/*/entries/*.json")]
