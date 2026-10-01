@@ -73,6 +73,44 @@ class ServingEpochRegistry:
                 entry.lease.release_before_update()
         self.bound_keys.clear()
 
+    def bind_after_metadata_update(
+        self, key, signature_inputs, *, qo_lengths, kv_lengths, forward_options
+    ):
+        """Bind before model computation using real tensors of the saved geometry.
+
+        The public eager contract binds tensor geometry, not payload or storage
+        address. It reads actual owner metadata and never invokes attention here.
+        The subsequent public run independently checks the actual layer inputs.
+        This avoids a late metadata readback after first-layer QKV computation.
+        No synthetic identity, certificate or managed cache entry is created.
+        """
+        entry = self.entries.get(key)
+        if not self.frozen or entry is None or entry.lease.state == "RETIRED":
+            return False
+        lease = entry.lease
+        if (
+            tuple(qo_lengths) != lease.runner.qo_lengths
+            or tuple(kv_lengths) != lease.runner.kv_lengths
+            or dict(forward_options) != lease.options
+        ):
+            lease.invalidate()
+            return False
+        if entry.bound_epoch == self.epoch:
+            return lease.current(signature_inputs)
+        rebound = lease.bind_current_plan(
+            signature_inputs,
+            qo_lengths=qo_lengths,
+            kv_lengths=kv_lengths,
+            forward_options=forward_options,
+        )
+        self.counters["public_rebinds"] += 1
+        if not rebound:
+            self.counters["failed_rebinds"] += 1
+            return False
+        entry.bound_epoch = self.epoch
+        self.bound_keys.add(key)
+        return True
+
     def run(
         self,
         key,
@@ -109,19 +147,16 @@ class ServingEpochRegistry:
             self.counters["native_calls"] += 1
             return native_call()
         if entry.bound_epoch != self.epoch:
-            rebound = lease.bind_current_plan(
+            rebound = self.bind_after_metadata_update(
+                key,
                 inputs,
                 qo_lengths=qo_lengths,
                 kv_lengths=kv_lengths,
                 forward_options=forward_options,
             )
-            self.counters["public_rebinds"] += 1
             if not rebound:
-                self.counters["failed_rebinds"] += 1
                 self.counters["native_calls"] += 1
                 return native_call()
-            entry.bound_epoch = self.epoch
-            self.bound_keys.add(key)
         if not lease.current(inputs):
             self.counters["native_calls"] += 1
             return native_call()

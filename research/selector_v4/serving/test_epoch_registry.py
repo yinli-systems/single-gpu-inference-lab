@@ -151,3 +151,24 @@ def test_registry_capacity_is_bounded_before_any_serving_freeze():
         registry.register("unseen", None, actual_managed_tactic=-1)
     registry.freeze()
     assert invoke(registry, "unseen") == "owner_native"
+
+
+def test_metadata_can_bind_before_first_layer_without_executing_attention():
+    registry, lease = prepared()
+    registry.before_metadata_update()
+    assert registry.bind_after_metadata_update(
+        "geometry", [], qo_lengths=(3, 5), kv_lengths=(10, 20), forward_options=lease.options
+    )
+    assert lease.bind_calls == 1 and lease.run_calls == 0
+    for _ in range(36):
+        assert invoke(registry) == "prepared_eager"
+    assert lease.bind_calls == 1 and lease.run_calls == 36
+
+
+def test_early_bind_cache_miss_remains_native_without_preparation():
+    registry, lease = prepared()
+    registry.before_metadata_update()
+    assert not registry.bind_after_metadata_update(
+        "unseen", [], qo_lengths=(3, 5), kv_lengths=(10, 20), forward_options=lease.options
+    )
+    assert lease.bind_calls == lease.run_calls == 0

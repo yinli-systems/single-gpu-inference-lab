@@ -1,0 +1,1 @@
+Early binding after metadata planning, before model computation. 14 CPU contract tests pass. A new real-GPU test verifies distinct real Tensor storage, one public bind per epoch, 36 actual layer calls, real v2 hits and Resource invocation counts. GPU test not yet dispatched at this commit. No HTTP, Graph-metadata, release or promotion authority.
