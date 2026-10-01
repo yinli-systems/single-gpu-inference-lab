@@ -497,14 +497,23 @@
       "evidence": "evidence/v42-canary-5090-hold/"
     },
     "rpc_recovery": {
-      "campaign": "/ssd/scxi253/sgi-v42-canary-rpc-recovery-20261001T0430Z-allocation-v3",
+      "campaign": "/ssd/scxi253/sgi-v42-canary-rpc-recovery-20261001T0505Z-single-gpu",
       "original_to_resume_jobs": {
-        "1644194": "1644802",
-        "1644196": "1644803",
-        "1644197": "1644804"
+        "1644194": "1644929",
+        "1644196": "1644913",
+        "1644197": "1644914"
       },
       "fresh_cases_consumed": 0,
-      "same_gpu_and_cpu_required": true
+      "same_gpu_and_cpu_required": true,
+      "superseded_pending_full_node_jobs": [
+        "1644802",
+        "1644803",
+        "1644804"
+      ],
+      "confirmed_original_gpu_and_cpu": [
+        "1644913",
+        "1644914"
+      ]
     }
   },
   "v41_source_isolation_history": {
@@ -601,6 +610,25 @@
       "pass": true,
       "evidence": "evidence/v42-serving-lease-functional-pass/",
       "full_http_qualified": false
+    },
+    "shared_native_workspace_adapter": {
+      "harness_commit": "43114db",
+      "jobs": {
+        "gpu_4090": "1644920",
+        "gpu_5090": "1644921"
+      },
+      "gpu_tests_per_card": 4,
+      "functional_pass": true,
+      "evidence": "evidence/v42-shared-runtime-functional-pass/",
+      "qualified_serving": false,
+      "prepared_certificates_reused_after_replan": false
+    },
+    "vendor_provenance_note": {
+      "prior_main_tests_cccl_source": "Existing Python environment payload; cub/cub/version.cuh SHA2566dbd157d914ed3416e128221d38d9479b6979fb22bfe1fefdf1dce310253f17a",
+      "main_git_cccl_pin": "16bd510c9b712e82b0ab6cbb630d8e29ba1f7116",
+      "main_git_cub_version_header_sha256": "d6a712b98e0410329c98279b39fbb91106028cda2b17cca5304e46262f76165c",
+      "cutlass_and_spdlog_git_pins_match_installed_package_source_commit": true,
+      "full_pinned_dependency_package_requalification_pending": true
     }
   },
   "exposed_native_context_diagnostic": {
