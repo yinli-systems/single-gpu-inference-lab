@@ -1,0 +1,117 @@
+{
+  "pass": true,
+  "receipts": {
+    "sgi-tensor-control-process-handoff-gate": {
+      "state": "CANCELLED_BEFORE_DISPATCH_FOR_STRICT_CACHE_HIT_CHECK",
+      "helpers": {
+        "prepare_process_handoff.py": "6a25a8ac9805dd8917f32a45233a266121888ceea67baf0ccd95f3dafe6cc3c4",
+        "process_handoff.py": "325577f8836c63e659c50847b13b89a0a2cfb94fc5b721677548bbc162f776e1",
+        "process_handoff.sbatch": "120de1e150ae10d9dcd324e01c041ce1e2c3abfef89c07c6e4c4123d868400b5"
+      },
+      "fresh_cases_consumed": 0,
+      "default_promotion": false,
+      "serving_promotion": false,
+      "updated_utc": "2026-10-01T13:56:14.682641+00:00",
+      "terminal": true,
+      "reason": "Static review found stats.cache_misses is not incremented by this lookup; new helper must assert actual search_cache hit. No GPU handoff jobs started."
+    },
+    "sgi-public-path-prequalification-gate-bb9d764": {
+      "state": "CANCELLED_BEFORE_DISPATCH_FOR_FIXED_NATIVE_CONDITIONING",
+      "helpers": {
+        "prepare_public_path_prequal.py": "9026ffca12ac7f4b745731b972b8b347fdc736a4d6d6416fcd0236143acca7ca",
+        "public_path_prequal.py": "f581ca8ce8d5c675a41ab6c7380d8f3532ebdfa032d3d9cd8c62e992ac015c58",
+        "public_path_contract.py": "229458bd5a781cedcf3503d9527c15cc9c84ea6863d53971cb982d7ee2cd3320",
+        "public_path_prequal.sbatch": "dd74af8894906b7d9491b0ed3ca4e3f99c8d87934555d25c051c7f388980d71b",
+        "public_path_exposed_cases.json": "b3888a42920e65320833d9f48d3c44eb92d80c5c906a4cf04699be6e5338c1e9",
+        "public_path_harness_commit.txt": "84fcc0c721faf6f222572b766a655b375e2e0d429e4a54e8cba693e4080ba8f2"
+      },
+      "fresh_cases_consumed": 0,
+      "release_consumed": 0,
+      "stress_consumed": 0,
+      "default_promotion": false,
+      "serving_promotion": false,
+      "qualification_authority": false,
+      "updated_utc": "2026-10-01T14:39:43.784539+00:00",
+      "handoff_jobs": {
+        "gpu_4090": "1647026",
+        "gpu_5090": "1647027"
+      },
+      "terminal": true,
+      "reason": "Add preregistered30s native-only conditioning after per-process compile/cache hydration to prevent cold pristine vs warmed candidate comparison. No performance jobs or fresh cases started."
+    },
+    "sgi-public-path-prequalification-gate-c6879fb": {
+      "state": "TWO_EXPOSED_PUBLIC_PATH_DEV_CASES_DISPATCHED",
+      "helpers": {
+        "prepare_public_path_prequal.py": "6770df1b6eb79a6cc132b06bfa129737eff513cbc8c72b298289ece961e79bb4",
+        "public_path_prequal.py": "9052d6be4a3d52b610214b744f50192da5aeaa92c18bab2513fd2cf839d35a0f",
+        "public_path_contract.py": "6d873c5a52425e1114328917dc7aee3ef18070d5a14888b9893bb82f4f85bd6b",
+        "public_path_prequal.sbatch": "dd74af8894906b7d9491b0ed3ca4e3f99c8d87934555d25c051c7f388980d71b",
+        "public_path_exposed_cases.json": "b3888a42920e65320833d9f48d3c44eb92d80c5c906a4cf04699be6e5338c1e9",
+        "public_path_harness_commit.txt": "cfae2bfbe7f46b9ac5481cdf80b0a7ca3ec694ac5b895f2a8bbbd55d1bc770f5",
+        "analyze_public_path_prequal.py": "7589ee8bbf39778c2e72f6706dc213aefe3314c2e4418a775f2aec46d6de080b",
+        "audit_public_path_sass.py": "1465db261360866a9835688eaa153efcc6abf6ae247b70388d840e2b493d6a00",
+        "audit_main_sass.py": "5c0f357403c63182775bb90260d8964dab9e6fb8570edb293153b6a0298d7cb2"
+      },
+      "fresh_cases_consumed": 0,
+      "release_consumed": 0,
+      "stress_consumed": 0,
+      "default_promotion": false,
+      "serving_promotion": false,
+      "qualification_authority": false,
+      "updated_utc": "2026-10-01T14:51:36.902172+00:00",
+      "handoff_jobs": {
+        "gpu_4090": "1647026",
+        "gpu_5090": "1647027"
+      },
+      "terminal": true,
+      "campaign": "/ssd/scxi253/sgi-public-path-prequal-c6879fb-75544a17-20261001",
+      "jobs": {
+        "gpu_4090": {
+          "0": "1647198",
+          "1": "1647199"
+        },
+        "gpu_5090": {
+          "0": "1647200",
+          "1": "1647201"
+        }
+      }
+    }
+  },
+  "files": {
+    "sgi-tensor-control-process-handoff-gate/receipt.json": "c3322d6b94a34d8ecc4367840f2f175bc65eaac94eae10a2865dc049b72a1187",
+    "prepare_process_handoff.py": "6a25a8ac9805dd8917f32a45233a266121888ceea67baf0ccd95f3dafe6cc3c4",
+    "process_handoff.py": "325577f8836c63e659c50847b13b89a0a2cfb94fc5b721677548bbc162f776e1",
+    "process_handoff.sbatch": "120de1e150ae10d9dcd324e01c041ce1e2c3abfef89c07c6e4c4123d868400b5",
+    "sgi-public-path-prequalification-gate-bb9d764/receipt.json": "7205b1ddc6e060a2fcd94975bd2ee50bb373d64d20a89968ab23a1b73a6b56ab",
+    "prepare_public_path_prequal.py": "9026ffca12ac7f4b745731b972b8b347fdc736a4d6d6416fcd0236143acca7ca",
+    "public_path_prequal.py": "f581ca8ce8d5c675a41ab6c7380d8f3532ebdfa032d3d9cd8c62e992ac015c58",
+    "public_path_contract.py": "229458bd5a781cedcf3503d9527c15cc9c84ea6863d53971cb982d7ee2cd3320",
+    "public_path_prequal.sbatch": "dd74af8894906b7d9491b0ed3ca4e3f99c8d87934555d25c051c7f388980d71b",
+    "public_path_exposed_cases.json": "b3888a42920e65320833d9f48d3c44eb92d80c5c906a4cf04699be6e5338c1e9",
+    "public_path_harness_commit.txt": "84fcc0c721faf6f222572b766a655b375e2e0d429e4a54e8cba693e4080ba8f2",
+    "sgi-public-path-prequalification-gate-c6879fb/preparation.log": "2f761281d4b9a7b3a230c1fb3dad386a919c349877604c4910c65fd439f189b3",
+    "sgi-public-path-prequalification-gate-c6879fb/receipt.json": "554aa628a0be1c1c844b447f5df1695712e4451e645be80458a0f90c5dbec991",
+    "public-path-helpers-c6879fb/analyze_public_path_prequal.py": "7589ee8bbf39778c2e72f6706dc213aefe3314c2e4418a775f2aec46d6de080b",
+    "public-path-helpers-c6879fb/audit_main_sass.py": "5c0f357403c63182775bb90260d8964dab9e6fb8570edb293153b6a0298d7cb2",
+    "public-path-helpers-c6879fb/audit_public_path_sass.py": "1465db261360866a9835688eaa153efcc6abf6ae247b70388d840e2b493d6a00",
+    "public-path-helpers-c6879fb/dispatch_public_path_prequal.py": "c432eca9c286ebde1fa8e0dd8b8020e7d8a5370963917ac229c5fe1495e85c64",
+    "public-path-helpers-c6879fb/prepare_public_path_prequal.py": "6770df1b6eb79a6cc132b06bfa129737eff513cbc8c72b298289ece961e79bb4",
+    "public-path-helpers-c6879fb/public_path_contract.py": "6d873c5a52425e1114328917dc7aee3ef18070d5a14888b9893bb82f4f85bd6b",
+    "public-path-helpers-c6879fb/public_path_exposed_cases.json": "b3888a42920e65320833d9f48d3c44eb92d80c5c906a4cf04699be6e5338c1e9",
+    "public-path-helpers-c6879fb/public_path_harness_commit.txt": "cfae2bfbe7f46b9ac5481cdf80b0a7ca3ec694ac5b895f2a8bbbd55d1bc770f5",
+    "public-path-helpers-c6879fb/public_path_prequal.py": "9052d6be4a3d52b610214b744f50192da5aeaa92c18bab2513fd2cf839d35a0f",
+    "public-path-helpers-c6879fb/public_path_prequal.sbatch": "dd74af8894906b7d9491b0ed3ca4e3f99c8d87934555d25c051c7f388980d71b",
+    "sgi-public-path-prequal-c6879fb-75544a17-20261001/binding.json": "bb83f8a3d5ded05efea27dcd95eb31fde46f4419551dada8a404665575bae0a1",
+    "sgi-public-path-prequal-c6879fb-75544a17-20261001/validation.sha256": "0875921b8fd0fc9507b3eefd2c134b1df947ce512dc1b52384349cfaac6d748c",
+    "sgi-public-path-prequal-c6879fb-75544a17-20261001/receipts/jobs.json": "22db1f9dace251b68f1535f818814ed02de191af11734f1edb01fdfe41856dec"
+  },
+  "archive_sha256": "3cd6159705418ef3aba752d413f6ac8495ef8cbdef03c92143ab3b62fb1986af",
+  "archive_bytes": 517887,
+  "scope": "Predispatch cancellation provenance and current exposed development binding only.",
+  "fresh_cases_consumed": 0,
+  "release_consumed": 0,
+  "stress_consumed": 0,
+  "default_promotion": false,
+  "serving_promotion": false,
+  "qualification_authority": false
+}
