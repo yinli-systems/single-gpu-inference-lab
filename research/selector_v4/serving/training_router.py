@@ -66,6 +66,9 @@ class TrainingPrefixRouter:
             raise RuntimeError("Seal once at an explicit idle boundary outside metadata updates")
         try:
             bindings = self.session.seal()
+            # Restore invokes before_update. The training session is now sealed
+            # and has already released every lease; never notify it again.
+            self.phase = "SEALING"
             backend = self.adapter.backend
             self.adapter.restore()
             replacement = self.adapter_factory(backend)

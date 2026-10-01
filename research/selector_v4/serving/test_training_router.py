@@ -41,6 +41,8 @@ def setup():
     binding = Binding(registry, "trained", inputs, (3, 5), (10, 20), lease.options)
 
     def release():
+        if session.sealed:
+            raise RuntimeError("A sealed training session cannot own metadata releases")
         events.append("release")
         registry.before_metadata_update()
 
