@@ -22,20 +22,23 @@ def phase_transition(scheduler, values, *, make_session):
     if (
         set(values) != {CONTROL_KEY}
         or type(values[CONTROL_KEY]) is not int
-        or values[CONTROL_KEY] not in (1, 2)
+        or values[CONTROL_KEY] not in (1, 2, 3)
         or not scheduler.is_fully_idle()
     ):
         return False
     runner = scheduler.tp_worker.model_runner
     router = runner.attn_backend._sgi_training_router
-    expected = "NATIVE_STARTUP" if values[CONTROL_KEY] == 1 else "EXPLICIT_CALIBRATION"
+    expected = {1: "NATIVE_STARTUP", 2: "EXPLICIT_CALIBRATION", 3: "FROZEN_SERVING"}[
+        values[CONTROL_KEY]
+    ]
     if router.adapter.depth or router.phase != expected:
         return False
     runner.forward_stream.synchronize()
     if values[CONTROL_KEY] == 1:
         router.begin(make_session())
-    else:
+    elif values[CONTROL_KEY] == 2:
         router.seal()
+    router.control_sequence += 1
     return True
 
 
@@ -108,9 +111,12 @@ def install():
             if not phase_transition(self, values, make_session=make_session):
                 return SetInternalStateReqOutput(updated=False)
             router = self.tp_worker.model_runner.attn_backend._sgi_training_router
-            (root / f"phase-{os.getpid()}-{values[CONTROL_KEY]}.json").write_text(
-                json.dumps(router.evidence(), indent=2) + "\n"
+            record = (
+                root
+                / f"phase-{os.getpid()}-{values[CONTROL_KEY]}-{router.control_sequence:04d}.json"
             )
+            with record.open("x") as stream:
+                stream.write(json.dumps(router.evidence(), indent=2) + "\n")
             return SetInternalStateReqOutput(updated=True)
         except Exception as error:  # noqa: BLE001 - retain failed control, never promote it
             root.mkdir(parents=True, exist_ok=True)

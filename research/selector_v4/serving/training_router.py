@@ -22,6 +22,7 @@ class TrainingPrefixRouter:
         self.phase = "NATIVE_STARTUP"
         self.session = None
         self.frozen_router = None
+        self.control_sequence = 0
         original_before = adapter.before_update
 
         def before_update(graph):
@@ -95,4 +96,6 @@ class TrainingPrefixRouter:
             "request_time_training": False,
             "full_http_qualified": False,
             "router": self.frozen_router.evidence() if self.frozen_router is not None else None,
+            "metadata_boundaries": dict(self.adapter.counters),
+            "metadata_depth": self.adapter.depth,
         }

@@ -71,6 +71,7 @@ async def collect_block(session, url, work, tag, *, logprobs=False):
         raise ValueError("Bounded HTTP concurrency required")
     gate = asyncio.Semaphore(concurrency)
     started = time.perf_counter()
+    wall_started = time.time()
 
     async def one(index, cell):
         async with gate:
@@ -85,6 +86,8 @@ async def collect_block(session, url, work, tag, *, logprobs=False):
         "workload": work["name"],
         "concurrency": concurrency,
         "elapsed": elapsed,
+        "monotonic_started": started,
+        "unix_started": wall_started,
         "requests": rows,
         "errors": errors,
         "complete": not errors,

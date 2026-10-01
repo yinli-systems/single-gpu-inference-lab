@@ -96,6 +96,9 @@ def test_startup_training_release_and_frozen_rebind_preserve_order():
     for _ in range(36):
         assert router.run(owner, inputs[0], tuple(inputs[1:]), causal=True) == "prepared_eager"
     assert events.count("train") == before and lease.bind_calls == 1 and lease.run_calls == 36
+    assert phase_transition(scheduler, {CONTROL_KEY: 3}, make_session=lambda: None)
+    assert router.evidence()["metadata_boundaries"]["early_binds"] == 1
+    assert router.evidence()["router"]["counters"]["prepared_attempts"] == 36
     assert not phase_transition(scheduler, {CONTROL_KEY: 1}, make_session=lambda: session)
     assert not phase_transition(scheduler, {CONTROL_KEY: 2}, make_session=lambda: None)
 
@@ -111,7 +114,7 @@ def test_phase_rejection_happens_before_barrier_or_session_creation(reason):
     elif reason == "metadata":
         router.adapter.depth = 1
     elif reason == "unknown":
-        values[CONTROL_KEY] = 3
+        values[CONTROL_KEY] = 4
     elif reason == "mixed":
         values["pp_max_micro_batch_size"] = 8
     elif reason == "bool":
