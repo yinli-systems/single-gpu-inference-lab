@@ -1,20 +1,17 @@
+import sys
+sys.path.insert(0, '/ssd/scxi253/sgi-public-path-prequal-c6879fb-75544a17-20261001')
+from choice_integrity_supplement import verify_choice_record
 """Complete-data analysis of actual public-path development measurements."""
 
 import argparse
+import csv
 import hashlib
 import json
 import math
 from pathlib import Path
 
 import numpy as np
-
-from research.selector_v4.exposed_diagnostics.public_path_contract import (
-    CONTRACT,
-    digest,
-    full_call_choice,
-)
-from research.selector_v4.public_qualification.choice_integrity import verify_choice_record
-from research.selector_v4.public_qualification.telemetry import read_clock_csv
+from public_path_contract import CONTRACT, digest, full_call_choice
 
 
 def sha(path):
@@ -75,7 +72,30 @@ def check_rows(rows, role):
     return grouped
 
 
-telemetry = read_clock_csv
+def telemetry(path):
+    active = []
+    with path.open() as stream:
+        for row in csv.DictReader(stream):
+            clock = next((v for k, v in row.items() if k and "clocks.sm" in k), None)
+            utilization = next((v for k, v in row.items() if k and "utilization.gpu" in k), None)
+            try:
+                if float(utilization.split()[0]) >= 90:
+                    active.append(float(clock.split()[0]))
+            except (ValueError, AttributeError, TypeError):
+                continue
+    if len(active) < 10:
+        return {
+            "stable": False,
+            "reason": "insufficient active samples",
+            "active_samples": len(active),
+        }
+    lo, hi = np.quantile(active, [0.05, 0.95])
+    return {
+        "stable": bool(lo > 0 and hi / lo <= 1.05),
+        "active_samples": len(active),
+        "p05_mhz": float(lo),
+        "p95_mhz": float(hi),
+    }
 
 
 def analyze(campaign, gpu, out):
@@ -144,9 +164,7 @@ def analyze(campaign, gpu, out):
                     )
                     assert not conditioning["includes_scored_windows"]
                 decision = json.loads((phase / "frozen-choice-before-scoring.json").read_text())
-                verify_choice_record(
-                    decision, full_call_choice(training, rep, key + ":" + policy["identity"])
-                )
+                verify_choice_record(decision, full_call_choice(training, rep, key + ":" + policy["identity"]))
                 assert policy["choice"] == decision["choice"]
                 assert policy["input_hashes"] == pristine["input_hashes"]
                 assert policy["native_output_lse_sha256"] == pristine["native_output_lse_sha256"]
@@ -218,7 +236,7 @@ def analyze(campaign, gpu, out):
         assert sass["pass"] and sass["binding_sha256"] == files["binding.json"]
         files[str(sass_path.relative_to(campaign))] = sha(sass_path)
         telemetry_path = campaign / f"logs/telemetry-{job}.csv"
-        health.append(telemetry(telemetry_path, environments[0]["gpu_uuid"]))
+        health.append(telemetry(telemetry_path))
         files[str(telemetry_path.relative_to(campaign))] = sha(telemetry_path)
     selected = [r for r in records if r["selected"]]
     joint = lambda array: (
