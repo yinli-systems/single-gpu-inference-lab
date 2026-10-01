@@ -98,3 +98,7 @@ Exact sourceb769e7c dual dev passed every requirement after all four jobs1644068
 ## Latest pinned SGLang request-lifetime PASS
 
 Rebased independent patch3825c5a4 on upstreambaae019:49 full-import registered CPU tests PASS. Full Qwen3-4B BF16 real-HTTP job1644258 COMPLETED0:0 in12m56s with isolated official FlashInfer0.7.0.post1; original8/10 and candidate10/10 expected completions, plus one intentional n=2 disconnect per arm. Candidate zero stale-owner aborts and zero remaining owned states. Source/SSE/events/logs archive locally verified: `evidence/v42-http-ownership-current-main/`. This supersedes the earlier dependency startup failure as the ownership verdict; all failure receipts are preserved. Resource tuning/performance and original2/432 attribution are independent and still unqualified.
+
+## Current-main experimental prepared runner: dual GPU PASS
+
+Source d7683dd/native85744da1, jobs1644585/1644586 COMPLETED0:0.49 tests perGPU(37CPU+12GPU), including page1/noncausal, plus source-bound managed-v2 eager/Graph1/Graph16 persistence/reload/capture exact checks. 4090 eager duplicate controls are inconclusive and selectnative; graph gates pass.5090 all three selectresource. Evidence: `evidence/v42-current-main-managed-v2/`. This does not certify dynamic metadata updates or full serving. The metadata-lease bridge270b26c is separately submitted as exposed functional jobs1644734/1644735; no fullHTTP tuning or promotion is authorized yet.

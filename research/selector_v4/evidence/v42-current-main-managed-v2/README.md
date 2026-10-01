@@ -1,0 +1,7 @@
+# Current-main dual-GPU prepared managed-v2 PASS
+
+FlashInfer experimental d7683dd on native main85744da1. Jobs1644585(4090,18m02s)/1644586(5090,16m40s) both COMPLETED0:0. Each has49 tests PASS:37 CPU and12 GPU coveringFP16/BF16 x causal/noncausal x ragged/paged16/paged1. Native/resource/native and repeat-resource outputs/LSE match exactly; the native15-field planner and compiled native modules remain unchanged.
+
+Eager/Graph1/Graph16 each have a distinct source/device/execution identity,32 balanced384ms calibration blocks, successfully profiled managed winners, zero failed offered tactics, exact source/certificate-bound JSON persistence, memory-winner clearing/disk reload, exact replay and graph capture outputs. 48 raw files and final source checksum verification were reverified locally.
+
+4090 eager calibration mean1.391199x but duplicate controls FAIL: the certificate and managed selection correctly stay native(0). Its Graph1/16 gates pass and resource(1) is selected. 5090 all three gates pass and resource(1) is selected, with exposed-sample calibration means around1.358x. These one-process calibrations are conditional on this representative geometry and execution envelope. They are not independent-process release, input/metadata-update, full-model or HTTP performance evidence. Frozen official0.7 qualification remains a separate campaign. Defaults and serving stayOFF; historical2/432 remains unresolved.

@@ -1,0 +1,712 @@
+{
+  "pass": true,
+  "binding": {
+    "git_commit": "d7683dd8e86af2f37e8d25162c45b01f80824378",
+    "native_base": "85744da1a397c0c4bea1a83b8345281750eb61a9",
+    "unchanged_backend_git_commit": "c1c95378d3cd61fbaffc4f487bf36b9b2f7e45c5",
+    "source": "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source",
+    "source_ledger_sha256": "fdc9ee9323efaf7a34f9520cf838e0116a96665b4b3646da841bb039678cd74c",
+    "delta_sha256": "135225894a8c4bdae9e5cfe63695d54a97a3ea8b5b337400e09c90b54649bfa7",
+    "tests_expected": 49,
+    "gpu_matrix": "FP16/BF16 x causal/noncausal x ragged/paged16/paged1",
+    "managed_native_default_minus1": "accepted only if profiling succeeds, no offered tactic fails, exact source/certificate-bound winner is persisted and reloads",
+    "sdk": "isolated library headers only; original compiler runtime headers",
+    "helpers_and_sdk": {
+      "/ssd/scxi253/sgi-flashinfer-managed-v2-d7683dd-20261001/sdk-libraries/cublasLt.h": "8be43fbf48625b98b8562d7df394e6af0d7ee1c05beeb5333577d5e33182fa3e",
+      "/ssd/scxi253/sgi-flashinfer-managed-v2-d7683dd-20261001/sdk-libraries/cublas_api.h": "f6b443f43358de591584d38810d60fcf7c1080677a6ba1605a99e8b58b349890",
+      "/ssd/scxi253/sgi-flashinfer-managed-v2-d7683dd-20261001/sdk-libraries/cublas_v2.h": "78514be9bda58bf84a21eb35a8d31b6744562a62beab78757ce22eae7c6f1b26",
+      "/ssd/scxi253/sgi-flashinfer-managed-v2-d7683dd-20261001/sdk-libraries/curand.h": "2644c6c6500e1e11ee63cdfff3ce84284e8cae5a0785d6c587b6dda90e10369b",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_fmha/request_ordered_paged_decode/generated/sm_103a/._cake_fmha_request_ordered_paged_decode_04ef94685346243ca94f_binding.cpp": "7f40075bfbb16ac56c95faa7ddcbf95a6de534c2d21368475d4dc7970a682394",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_fmha/request_ordered_paged_decode/generated/sm_103a/._cake_fmha_request_ordered_paged_decode_104bb89fe1bc7e36bb0d_binding.cpp": "7f40075bfbb16ac56c95faa7ddcbf95a6de534c2d21368475d4dc7970a682394",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_fmha/request_ordered_paged_decode/generated/sm_103a/._cake_fmha_request_ordered_paged_decode_1c19b4be7cbb9ff51e92_binding.cpp": "7f40075bfbb16ac56c95faa7ddcbf95a6de534c2d21368475d4dc7970a682394",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_fmha/request_ordered_paged_decode/generated/sm_103a/._cake_fmha_request_ordered_paged_decode_4383dbfd21846d617689_binding.cpp": "7f40075bfbb16ac56c95faa7ddcbf95a6de534c2d21368475d4dc7970a682394",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_fmha/request_ordered_paged_decode/generated/sm_103a/._cake_fmha_request_ordered_paged_decode_52a95bea12fdd04c9c0e_binding.cpp": "7f40075bfbb16ac56c95faa7ddcbf95a6de534c2d21368475d4dc7970a682394",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_fmha/request_ordered_paged_decode/generated/sm_103a/._cake_fmha_request_ordered_paged_decode_5f5a47b078803d7b97b0_binding.cpp": "7f40075bfbb16ac56c95faa7ddcbf95a6de534c2d21368475d4dc7970a682394",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_fmha/request_ordered_paged_decode/generated/sm_103a/._cake_fmha_request_ordered_paged_decode_827d15cce46c00f6c8c3_binding.cpp": "7f40075bfbb16ac56c95faa7ddcbf95a6de534c2d21368475d4dc7970a682394",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_fmha/request_ordered_paged_decode/generated/sm_103a/._cake_fmha_request_ordered_paged_decode_8fba1d3aed7bf0c967aa_binding.cpp": "7f40075bfbb16ac56c95faa7ddcbf95a6de534c2d21368475d4dc7970a682394",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_fmha/request_ordered_paged_decode/generated/sm_103a/._cake_fmha_request_ordered_paged_decode_9baf89b875984fa7e528_binding.cpp": "7f40075bfbb16ac56c95faa7ddcbf95a6de534c2d21368475d4dc7970a682394",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_fmha/request_ordered_paged_decode/generated/sm_103a/._cake_fmha_request_ordered_paged_decode_d14d1b1672e0080133c5_binding.cpp": "7f40075bfbb16ac56c95faa7ddcbf95a6de534c2d21368475d4dc7970a682394",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_fmha/request_ordered_paged_decode/generated/sm_103a/._cake_fmha_request_ordered_paged_decode_ea6d4be187161c18ecb8_binding.cpp": "7f40075bfbb16ac56c95faa7ddcbf95a6de534c2d21368475d4dc7970a682394",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_fmha/request_ordered_paged_decode/generated/sm_103a/._cake_fmha_request_ordered_paged_decode_ee84fbc48f3343169da8_binding.cpp": "7f40075bfbb16ac56c95faa7ddcbf95a6de534c2d21368475d4dc7970a682394",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_fmha/request_ordered_paged_decode/generated/sm_103a/._cake_fmha_request_ordered_paged_decode_f2cb676bd2e1c46f3227_binding.cpp": "7f40075bfbb16ac56c95faa7ddcbf95a6de534c2d21368475d4dc7970a682394",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_fmha/request_ordered_paged_decode/generated/sm_103a/cake_fmha_request_ordered_paged_decode_04ef94685346243ca94f_binding.cpp": "9eabc5589036cf12a2346e2692a5d8d119ea00e4cd7a7f2dc2bb0b01e87f2643",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_fmha/request_ordered_paged_decode/generated/sm_103a/cake_fmha_request_ordered_paged_decode_104bb89fe1bc7e36bb0d_binding.cpp": "798f904fe659f25631cb66a96d3984728ec0fb619969404571b87aa0e343f5c5",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_fmha/request_ordered_paged_decode/generated/sm_103a/cake_fmha_request_ordered_paged_decode_1c19b4be7cbb9ff51e92_binding.cpp": "a31187b4c20d1a5e19a3d2adb2d80c2e88b06674161aa4ea48ae033eb666982e",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_fmha/request_ordered_paged_decode/generated/sm_103a/cake_fmha_request_ordered_paged_decode_4383dbfd21846d617689_binding.cpp": "53a79fed6b984c20671784beefd19647a43931c9e3920ab3f2d1824c98417819",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_fmha/request_ordered_paged_decode/generated/sm_103a/cake_fmha_request_ordered_paged_decode_52a95bea12fdd04c9c0e_binding.cpp": "ca88c8cf63bd74f6b5d5c5e2b59bb189a88a97677d2de32e429f69ab8ba830cb",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_fmha/request_ordered_paged_decode/generated/sm_103a/cake_fmha_request_ordered_paged_decode_5f5a47b078803d7b97b0_binding.cpp": "3ad792e749f132608d5aa0c2a98c460a904f12aa82bcff5d76d8b899798196e2",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_fmha/request_ordered_paged_decode/generated/sm_103a/cake_fmha_request_ordered_paged_decode_827d15cce46c00f6c8c3_binding.cpp": "40b9737ee29313fcae74cad13cc4fe3157c6fd0405c6309750fe16f03a7a40d6",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_fmha/request_ordered_paged_decode/generated/sm_103a/cake_fmha_request_ordered_paged_decode_8fba1d3aed7bf0c967aa_binding.cpp": "8718f8eea16496ddde82151bc59fe183ced063dad596c2bc3b7b9d86d397fa46",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_fmha/request_ordered_paged_decode/generated/sm_103a/cake_fmha_request_ordered_paged_decode_9baf89b875984fa7e528_binding.cpp": "a1a4115bec40a1b596c035e50de5f60386d794a5c984591766a7982587544336",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_fmha/request_ordered_paged_decode/generated/sm_103a/cake_fmha_request_ordered_paged_decode_d14d1b1672e0080133c5_binding.cpp": "46474e7ebc85ac72d48cda63694c382e099a2e2ecf50c494769d04e3f0670522",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_fmha/request_ordered_paged_decode/generated/sm_103a/cake_fmha_request_ordered_paged_decode_ea6d4be187161c18ecb8_binding.cpp": "2287579e1c7fc37e4e781339237c0bbf2ee8b427ab2b00a6ba93e31123b02c0c",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_fmha/request_ordered_paged_decode/generated/sm_103a/cake_fmha_request_ordered_paged_decode_ee84fbc48f3343169da8_binding.cpp": "656b75841383bbfe0f9a7b2911392cf68c2b210c21dc76c32f9306e8d8dee473",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_fmha/request_ordered_paged_decode/generated/sm_103a/cake_fmha_request_ordered_paged_decode_f2cb676bd2e1c46f3227_binding.cpp": "791c8a72da19d15c497aed8e8d5296b8df731fb4fc9baf303ac0d63f489b9db1",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_mamba_ssd_combined/generated/host/sm_100a/._factorized_persistent_segment_preprocess_7ae61d5f32.cpp": "7f40075bfbb16ac56c95faa7ddcbf95a6de534c2d21368475d4dc7970a682394",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_mamba_ssd_combined/generated/host/sm_100a/._mamba_ssd_combined_exact_bf16_batched.cpp": "7f40075bfbb16ac56c95faa7ddcbf95a6de534c2d21368475d4dc7970a682394",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_mamba_ssd_combined/generated/host/sm_100a/._mamba_ssd_combined_exact_bf16_varlen.cpp": "7f40075bfbb16ac56c95faa7ddcbf95a6de534c2d21368475d4dc7970a682394",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_mamba_ssd_combined/generated/host/sm_100a/._mamba_ssd_combined_exact_f16_batched.cpp": "7f40075bfbb16ac56c95faa7ddcbf95a6de534c2d21368475d4dc7970a682394",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_mamba_ssd_combined/generated/host/sm_100a/._mamba_ssd_combined_exact_f16_varlen.cpp": "7f40075bfbb16ac56c95faa7ddcbf95a6de534c2d21368475d4dc7970a682394",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_mamba_ssd_combined/generated/host/sm_100a/._mamba_ssd_combined_r12_bf16_varlen.cpp": "7f40075bfbb16ac56c95faa7ddcbf95a6de534c2d21368475d4dc7970a682394",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_mamba_ssd_combined/generated/host/sm_100a/._mamba_ssd_combined_r12_f16_varlen.cpp": "7f40075bfbb16ac56c95faa7ddcbf95a6de534c2d21368475d4dc7970a682394",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_mamba_ssd_combined/generated/host/sm_100a/._mamba_ssd_combined_r7_bf16_varlen.cpp": "7f40075bfbb16ac56c95faa7ddcbf95a6de534c2d21368475d4dc7970a682394",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_mamba_ssd_combined/generated/host/sm_100a/._mamba_ssd_combined_r7_f16_varlen.cpp": "7f40075bfbb16ac56c95faa7ddcbf95a6de534c2d21368475d4dc7970a682394",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_mamba_ssd_combined/generated/host/sm_100a/factorized_persistent_segment_preprocess_7ae61d5f32.cpp": "b90741a2e9fb16e063e9374a699c8cb381277a0b4e2c9307a8c936fe6d489a75",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_mamba_ssd_combined/generated/host/sm_100a/mamba_ssd_combined_exact_bf16_batched.cpp": "4a04d30045670a9f678122324d89c84d3753a6fbbb86a9da341beba7d5a696a6",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_mamba_ssd_combined/generated/host/sm_100a/mamba_ssd_combined_exact_bf16_varlen.cpp": "5901c4c02c2f2fe2d6f6f75fbc1a9c33a2649aa88e77a1e62bf725bc714802b9",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_mamba_ssd_combined/generated/host/sm_100a/mamba_ssd_combined_exact_f16_batched.cpp": "61596d69ec4bc3c583ff51b6486d0d264b5796adead899cb2f9d1454e983c119",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_mamba_ssd_combined/generated/host/sm_100a/mamba_ssd_combined_exact_f16_varlen.cpp": "e6edfe7fed0aca29c038e6ed037aa3e2732b6949d77e2d8684b3cc8c86058c1e",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_mamba_ssd_combined/generated/host/sm_100a/mamba_ssd_combined_r12_bf16_varlen.cpp": "951f7367c23a607c7291a2b355921b21ef919c3395d350a471930b88b944a6d2",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_mamba_ssd_combined/generated/host/sm_100a/mamba_ssd_combined_r12_f16_varlen.cpp": "df06b17f47eda0f5063a9b89285c3ebad09be593e8ea3c89754ff20ec924ad98",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_mamba_ssd_combined/generated/host/sm_100a/mamba_ssd_combined_r7_bf16_varlen.cpp": "6a8dca04e5037f66d730634cca379f5449f1267bed2583ce66f4c76a3bbdce4d",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_mamba_ssd_combined/generated/host/sm_100a/mamba_ssd_combined_r7_f16_varlen.cpp": "844aa60d4bf2714a5f6ba4ce43eeabcbca17ac76b2fb9edbd0e8fbba2f991b9d",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_mamba_ssd_combined/generated/host/sm_103a/._factorized_persistent_segment_preprocess_7ae61d5f32.cpp": "7f40075bfbb16ac56c95faa7ddcbf95a6de534c2d21368475d4dc7970a682394",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_mamba_ssd_combined/generated/host/sm_103a/._mamba_ssd_combined_exact_bf16_batched.cpp": "7f40075bfbb16ac56c95faa7ddcbf95a6de534c2d21368475d4dc7970a682394",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_mamba_ssd_combined/generated/host/sm_103a/._mamba_ssd_combined_exact_bf16_varlen.cpp": "7f40075bfbb16ac56c95faa7ddcbf95a6de534c2d21368475d4dc7970a682394",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_mamba_ssd_combined/generated/host/sm_103a/._mamba_ssd_combined_exact_f16_batched.cpp": "7f40075bfbb16ac56c95faa7ddcbf95a6de534c2d21368475d4dc7970a682394",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_mamba_ssd_combined/generated/host/sm_103a/._mamba_ssd_combined_exact_f16_varlen.cpp": "7f40075bfbb16ac56c95faa7ddcbf95a6de534c2d21368475d4dc7970a682394",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_mamba_ssd_combined/generated/host/sm_103a/._mamba_ssd_combined_r12_bf16_varlen.cpp": "7f40075bfbb16ac56c95faa7ddcbf95a6de534c2d21368475d4dc7970a682394",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_mamba_ssd_combined/generated/host/sm_103a/._mamba_ssd_combined_r12_f16_varlen.cpp": "7f40075bfbb16ac56c95faa7ddcbf95a6de534c2d21368475d4dc7970a682394",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_mamba_ssd_combined/generated/host/sm_103a/._mamba_ssd_combined_r7_bf16_varlen.cpp": "7f40075bfbb16ac56c95faa7ddcbf95a6de534c2d21368475d4dc7970a682394",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_mamba_ssd_combined/generated/host/sm_103a/._mamba_ssd_combined_r7_f16_varlen.cpp": "7f40075bfbb16ac56c95faa7ddcbf95a6de534c2d21368475d4dc7970a682394",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_mamba_ssd_combined/generated/host/sm_103a/factorized_persistent_segment_preprocess_7ae61d5f32.cpp": "1cedeb99e00930a00bf7da6de61b360c295f0a894e0d623c86cb7287b97210c5",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_mamba_ssd_combined/generated/host/sm_103a/mamba_ssd_combined_exact_bf16_batched.cpp": "2c392e97f143807040ae65adecb9e5a325e2df066731c69ca99b68f5c91803c1",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_mamba_ssd_combined/generated/host/sm_103a/mamba_ssd_combined_exact_bf16_varlen.cpp": "bab1905bde254c634c14128132f23132f115ef0c08ebc718079e2d61645029f1",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_mamba_ssd_combined/generated/host/sm_103a/mamba_ssd_combined_exact_f16_batched.cpp": "0421eb5a05be74eb173c8b57cd8ee983f6099f9469294e44e6bcd981004aead9",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_mamba_ssd_combined/generated/host/sm_103a/mamba_ssd_combined_exact_f16_varlen.cpp": "2e643fb55433c18214315d7c430b2b1da5cb5f8ad719713355adac640fd11744",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_mamba_ssd_combined/generated/host/sm_103a/mamba_ssd_combined_r12_bf16_varlen.cpp": "d6339f7afc61986bec84506e953175e566b2f34acef26e01d31d318f40e235ba",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_mamba_ssd_combined/generated/host/sm_103a/mamba_ssd_combined_r12_f16_varlen.cpp": "0341ab749ce48037a5d3fd1f7e28803a374fd6c4fa97542433ff0926fe86ad78",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_mamba_ssd_combined/generated/host/sm_103a/mamba_ssd_combined_r7_bf16_varlen.cpp": "8d9a3be7da43790785dde93ea6a811cfc3739e54a47be81d1dfa5aa71dea0a96",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_mamba_ssd_combined/generated/host/sm_103a/mamba_ssd_combined_r7_f16_varlen.cpp": "a5fa3d68368a2843359a067baf8cda6a500d651d8cf5f9f14dee212ba816dd48",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_trtllm_mla_blackwell/generated/host/sm_100a_148/._cake_mla_bf16_clc.cpp": "7f40075bfbb16ac56c95faa7ddcbf95a6de534c2d21368475d4dc7970a682394",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_trtllm_mla_blackwell/generated/host/sm_100a_148/._cake_mla_bf16_native_split8_pdl.cpp": "7f40075bfbb16ac56c95faa7ddcbf95a6de534c2d21368475d4dc7970a682394",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_trtllm_mla_blackwell/generated/host/sm_100a_148/._cake_mla_bf16_tail.cpp": "7f40075bfbb16ac56c95faa7ddcbf95a6de534c2d21368475d4dc7970a682394",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_trtllm_mla_blackwell/generated/host/sm_100a_148/._cake_mla_bf16_unsplit.cpp": "7f40075bfbb16ac56c95faa7ddcbf95a6de534c2d21368475d4dc7970a682394",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_trtllm_mla_blackwell/generated/host/sm_100a_148/._cake_mla_bf16_vhalf.cpp": "7f40075bfbb16ac56c95faa7ddcbf95a6de534c2d21368475d4dc7970a682394",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_trtllm_mla_blackwell/generated/host/sm_100a_148/._cake_mla_bf16_vquarter.cpp": "7f40075bfbb16ac56c95faa7ddcbf95a6de534c2d21368475d4dc7970a682394",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_trtllm_mla_blackwell/generated/host/sm_100a_148/._cake_mla_fp8_p32_qk_l2.cpp": "7f40075bfbb16ac56c95faa7ddcbf95a6de534c2d21368475d4dc7970a682394",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_trtllm_mla_blackwell/generated/host/sm_100a_148/._cake_mla_fp8_page64_pdl.cpp": "7f40075bfbb16ac56c95faa7ddcbf95a6de534c2d21368475d4dc7970a682394",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_trtllm_mla_blackwell/generated/host/sm_100a_148/._cake_mla_fp8_tail.cpp": "7f40075bfbb16ac56c95faa7ddcbf95a6de534c2d21368475d4dc7970a682394",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_trtllm_mla_blackwell/generated/host/sm_100a_148/cake_mla_bf16_clc.cpp": "2352595e7f6ec406b3cfdd2f83313209a20d375da9bc3791cf9febddea38c248",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_trtllm_mla_blackwell/generated/host/sm_100a_148/cake_mla_bf16_native_split8_pdl.cpp": "9fe8c20b2c22c3f50fe2a57f201affae5d9b234604f88acbfa79d464659f3dd3",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_trtllm_mla_blackwell/generated/host/sm_100a_148/cake_mla_bf16_tail.cpp": "f3ca35b0e44305d75ddf5c3efd014aceb5cee9145de313e311066fa46c60535a",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_trtllm_mla_blackwell/generated/host/sm_100a_148/cake_mla_bf16_unsplit.cpp": "3887503b20179a96f4694a07976587a741216afe44b0b272c44ab19e1ddf5b98",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_trtllm_mla_blackwell/generated/host/sm_100a_148/cake_mla_bf16_vhalf.cpp": "1e85327a7dcfae872a09f315d930e4bb887447e83dc292c39f656a56a6ea01e8",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_trtllm_mla_blackwell/generated/host/sm_100a_148/cake_mla_bf16_vquarter.cpp": "06121b12f9e51fabc401296e511cb322f664ba721f7b7ce5ba9a659a8af73903",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_trtllm_mla_blackwell/generated/host/sm_100a_148/cake_mla_fp8_p32_qk_l2.cpp": "64a566dcdac4a6cd4467b6aa3756b3b0dc5a3a56d3aea7124cc6634095e6ebc4",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_trtllm_mla_blackwell/generated/host/sm_100a_148/cake_mla_fp8_page64_pdl.cpp": "b731c559a3c5ebf2d7a5cd4a88f89140ef8b8dbce063b42d856085ffb4d9f043",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_trtllm_mla_blackwell/generated/host/sm_100a_148/cake_mla_fp8_tail.cpp": "af8c1d282e6afb338cdf6e5e97ac7526b6775f096297c2364c4ec25129d18bfc",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_trtllm_mla_blackwell/generated/host/sm_103a_152/._cake_mla_bf16_clc.cpp": "7f40075bfbb16ac56c95faa7ddcbf95a6de534c2d21368475d4dc7970a682394",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_trtllm_mla_blackwell/generated/host/sm_103a_152/._cake_mla_bf16_native_split8_pdl.cpp": "7f40075bfbb16ac56c95faa7ddcbf95a6de534c2d21368475d4dc7970a682394",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_trtllm_mla_blackwell/generated/host/sm_103a_152/._cake_mla_bf16_tail.cpp": "7f40075bfbb16ac56c95faa7ddcbf95a6de534c2d21368475d4dc7970a682394",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_trtllm_mla_blackwell/generated/host/sm_103a_152/._cake_mla_bf16_unsplit.cpp": "7f40075bfbb16ac56c95faa7ddcbf95a6de534c2d21368475d4dc7970a682394",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_trtllm_mla_blackwell/generated/host/sm_103a_152/._cake_mla_bf16_vhalf.cpp": "7f40075bfbb16ac56c95faa7ddcbf95a6de534c2d21368475d4dc7970a682394",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_trtllm_mla_blackwell/generated/host/sm_103a_152/._cake_mla_bf16_vquarter.cpp": "7f40075bfbb16ac56c95faa7ddcbf95a6de534c2d21368475d4dc7970a682394",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_trtllm_mla_blackwell/generated/host/sm_103a_152/._cake_mla_fp8_p32_qk_l2.cpp": "7f40075bfbb16ac56c95faa7ddcbf95a6de534c2d21368475d4dc7970a682394",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_trtllm_mla_blackwell/generated/host/sm_103a_152/._cake_mla_fp8_page64_pdl.cpp": "7f40075bfbb16ac56c95faa7ddcbf95a6de534c2d21368475d4dc7970a682394",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_trtllm_mla_blackwell/generated/host/sm_103a_152/._cake_mla_fp8_tail.cpp": "7f40075bfbb16ac56c95faa7ddcbf95a6de534c2d21368475d4dc7970a682394",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_trtllm_mla_blackwell/generated/host/sm_103a_152/cake_mla_bf16_clc.cpp": "35c42a9fde6fd28722721ba7afdb3caac36d93c40fe71bfde21f2fa478b6860c",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_trtllm_mla_blackwell/generated/host/sm_103a_152/cake_mla_bf16_native_split8_pdl.cpp": "9fe8c20b2c22c3f50fe2a57f201affae5d9b234604f88acbfa79d464659f3dd3",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_trtllm_mla_blackwell/generated/host/sm_103a_152/cake_mla_bf16_tail.cpp": "f3ca35b0e44305d75ddf5c3efd014aceb5cee9145de313e311066fa46c60535a",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_trtllm_mla_blackwell/generated/host/sm_103a_152/cake_mla_bf16_unsplit.cpp": "3887503b20179a96f4694a07976587a741216afe44b0b272c44ab19e1ddf5b98",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_trtllm_mla_blackwell/generated/host/sm_103a_152/cake_mla_bf16_vhalf.cpp": "1e85327a7dcfae872a09f315d930e4bb887447e83dc292c39f656a56a6ea01e8",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_trtllm_mla_blackwell/generated/host/sm_103a_152/cake_mla_bf16_vquarter.cpp": "06121b12f9e51fabc401296e511cb322f664ba721f7b7ce5ba9a659a8af73903",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_trtllm_mla_blackwell/generated/host/sm_103a_152/cake_mla_fp8_p32_qk_l2.cpp": "ad1c2ad58476b6f1b3b41a8d07f4797bf358fd758a37ca9a3d98191e74f3782b",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_trtllm_mla_blackwell/generated/host/sm_103a_152/cake_mla_fp8_page64_pdl.cpp": "47aca45a107ad66261f2fd2ea34ebe3b56fb16d828f11dff1b7c2ff05e539f2f",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_trtllm_mla_blackwell/generated/host/sm_103a_152/cake_mla_fp8_tail.cpp": "af8c1d282e6afb338cdf6e5e97ac7526b6775f096297c2364c4ec25129d18bfc",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_vsa/._cake_vsa_blk128_compact_host.cpp": "7f40075bfbb16ac56c95faa7ddcbf95a6de534c2d21368475d4dc7970a682394",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_vsa/._cake_vsa_blk128_fp16_compact_host.cpp": "7f40075bfbb16ac56c95faa7ddcbf95a6de534c2d21368475d4dc7970a682394",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_vsa/._cake_vsa_blk64_persistent_host.cpp": "7f40075bfbb16ac56c95faa7ddcbf95a6de534c2d21368475d4dc7970a682394",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_vsa/._cake_vsa_blk64_persistent_ws_m64n256_host.cpp": "7f40075bfbb16ac56c95faa7ddcbf95a6de534c2d21368475d4dc7970a682394",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_vsa/._cake_vsa_fp16_direct_host.cpp": "7f40075bfbb16ac56c95faa7ddcbf95a6de534c2d21368475d4dc7970a682394",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_vsa/._cake_vsa_gqa_mask_host.cpp": "7f40075bfbb16ac56c95faa7ddcbf95a6de534c2d21368475d4dc7970a682394",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_vsa/._cake_vsa_head64_native_host.cpp": "7f40075bfbb16ac56c95faa7ddcbf95a6de534c2d21368475d4dc7970a682394",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_vsa/._cake_vsa_head96_native_host.cpp": "7f40075bfbb16ac56c95faa7ddcbf95a6de534c2d21368475d4dc7970a682394",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_vsa/._cake_vsa_longseq_host.cpp": "7f40075bfbb16ac56c95faa7ddcbf95a6de534c2d21368475d4dc7970a682394",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_vsa/._cake_vsa_ultrasparse_bsr_host.cpp": "7f40075bfbb16ac56c95faa7ddcbf95a6de534c2d21368475d4dc7970a682394",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_vsa/cake_vsa_blk128_compact_host.cpp": "dcc930b21f660658a26e7666f36d8b35340cd768f19ebfdfacb3d141f4cece13",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_vsa/cake_vsa_blk128_fp16_compact_host.cpp": "9b8361f592b69d1db9119479433cf08d024876f477aefcfb251760eeb58675d7",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_vsa/cake_vsa_blk64_persistent_host.cpp": "699ec495ab7379c7bdc001f7123b036f0f4e4c7ee6eb9a4b315b07b2e0e392f0",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_vsa/cake_vsa_blk64_persistent_ws_m64n256_host.cpp": "cb94577818fb583d0b3d347a7c5e3634558a19eaaadb47f3a2519bafec42bffd",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_vsa/cake_vsa_fp16_direct_host.cpp": "dd5bd65c6b612b6add8a71468b00ebd36cd841df16e9374c0dba28eff3e96a56",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_vsa/cake_vsa_gqa_mask_host.cpp": "1b481467ebcde52194a83ab1c085df073b00ed038cffbf594e0d72ab6d0b420a",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_vsa/cake_vsa_head64_native_host.cpp": "b843d9df655a9d139a05b644a99bcf1e58e74c9c6c4e1a886fbc9459b5d02e7a",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_vsa/cake_vsa_head96_native_host.cpp": "9cf093adc1164b7a7bf179d3cc528b0bd68e9f9da9936ff3502b0e4fbc3925da",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_vsa/cake_vsa_longseq_host.cpp": "6e27b1c75d921adf67a6e45dff04969048f60abc86e16411072fb374c2f17f69",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/cake_vsa/cake_vsa_ultrasparse_bsr_host.cpp": "a88b910a68ff36a31a33c903f37784f307a0363f67acfc4f0e505cf441ca1f88",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/kda/._flashkda_generated_indexed_bf16_bt16_chain_m64_d3d65ffa34_binding.cpp": "7f40075bfbb16ac56c95faa7ddcbf95a6de534c2d21368475d4dc7970a682394",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/kda/._flashkda_generated_indexed_bf16_bt16_prepare_0d8e6c8011_binding.cpp": "7f40075bfbb16ac56c95faa7ddcbf95a6de534c2d21368475d4dc7970a682394",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/kda/._flashkda_generated_indexed_bf16_fused_m128_223f916392_binding.cpp": "7f40075bfbb16ac56c95faa7ddcbf95a6de534c2d21368475d4dc7970a682394",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/kda/._flashkda_generated_indexed_bf16_fused_m128_2d7ddfcb93_binding.cpp": "7f40075bfbb16ac56c95faa7ddcbf95a6de534c2d21368475d4dc7970a682394",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/kda/._flashkda_generated_indexed_bf16_fused_m128_30418cc9b5_binding.cpp": "7f40075bfbb16ac56c95faa7ddcbf95a6de534c2d21368475d4dc7970a682394",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/kda/._flashkda_generated_indexed_bf16_fused_m128_38be180429_binding.cpp": "7f40075bfbb16ac56c95faa7ddcbf95a6de534c2d21368475d4dc7970a682394",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/kda/._flashkda_generated_indexed_bf16_fused_m128_421878c5ec_binding.cpp": "7f40075bfbb16ac56c95faa7ddcbf95a6de534c2d21368475d4dc7970a682394",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/kda/._flashkda_generated_indexed_bf16_fused_m128_46a794abe6_binding.cpp": "7f40075bfbb16ac56c95faa7ddcbf95a6de534c2d21368475d4dc7970a682394",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/kda/._flashkda_generated_indexed_bf16_fused_m128_5ae1699f79_binding.cpp": "7f40075bfbb16ac56c95faa7ddcbf95a6de534c2d21368475d4dc7970a682394",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/kda/._flashkda_generated_indexed_bf16_fused_m128_610103ee26_binding.cpp": "7f40075bfbb16ac56c95faa7ddcbf95a6de534c2d21368475d4dc7970a682394",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/kda/._flashkda_generated_indexed_bf16_fused_m128_6b71cdd707_binding.cpp": "7f40075bfbb16ac56c95faa7ddcbf95a6de534c2d21368475d4dc7970a682394",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/kda/._flashkda_generated_indexed_bf16_fused_m128_96798cbfff_binding.cpp": "7f40075bfbb16ac56c95faa7ddcbf95a6de534c2d21368475d4dc7970a682394",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/kda/._flashkda_generated_indexed_bf16_fused_m128_a9715f44b8_binding.cpp": "7f40075bfbb16ac56c95faa7ddcbf95a6de534c2d21368475d4dc7970a682394",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/kda/._flashkda_generated_indexed_bf16_fused_m128_c4d1225064_binding.cpp": "7f40075bfbb16ac56c95faa7ddcbf95a6de534c2d21368475d4dc7970a682394",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/kda/._flashkda_generated_indexed_bf16_fused_m128_d9b7b81b3a_binding.cpp": "7f40075bfbb16ac56c95faa7ddcbf95a6de534c2d21368475d4dc7970a682394",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/kda/._flashkda_generated_indexed_bf16_fused_m128_vtile_11bf731116_binding.cpp": "7f40075bfbb16ac56c95faa7ddcbf95a6de534c2d21368475d4dc7970a682394",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/kda/._flashkda_generated_indexed_bf16_fused_m128_vtile_4b7d3b6523_binding.cpp": "7f40075bfbb16ac56c95faa7ddcbf95a6de534c2d21368475d4dc7970a682394",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/kda/._flashkda_generated_indexed_bf16_fused_m64_5eb5b5da39_binding.cpp": "7f40075bfbb16ac56c95faa7ddcbf95a6de534c2d21368475d4dc7970a682394",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/kda/._flashkda_generated_indexed_bf16_persistent_m128_6a2d6561e1_binding.cpp": "7f40075bfbb16ac56c95faa7ddcbf95a6de534c2d21368475d4dc7970a682394",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/kda/._flashkda_generated_indexed_bf16_persistent_m128_88e7929a07_binding.cpp": "7f40075bfbb16ac56c95faa7ddcbf95a6de534c2d21368475d4dc7970a682394",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/kda/._flashkda_generated_indexed_split_scan_bf16_m128_3263b0aaf3_binding.cpp": "7f40075bfbb16ac56c95faa7ddcbf95a6de534c2d21368475d4dc7970a682394",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/kda/flashkda_generated_indexed_bf16_bt16_chain_m64_d3d65ffa34_binding.cpp": "244f5c01b4dfcbd66cbe215683d6dbcade599229e9eb41a51e7138f997b8a4e5",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/kda/flashkda_generated_indexed_bf16_bt16_prepare_0d8e6c8011_binding.cpp": "89e85667fb92ebcf9c06d95e5c8510f63056b25bd4568e1d6c9f69a6de9d41f5",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/kda/flashkda_generated_indexed_bf16_fused_m128_223f916392_binding.cpp": "bedd42e17d23b039e637932300cb334fc2dbd6e7b79ccd843d624d5380083284",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/kda/flashkda_generated_indexed_bf16_fused_m128_2d7ddfcb93_binding.cpp": "dce792c9ee1d61b4cc36f8d3947f420c8bd3b7960d707deb5ae8f12fcfa8c261",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/kda/flashkda_generated_indexed_bf16_fused_m128_30418cc9b5_binding.cpp": "565ff1c1ab8c79f2eadd4b3788860fea40596163ad8c27ae2cac05262b0cbff7",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/kda/flashkda_generated_indexed_bf16_fused_m128_38be180429_binding.cpp": "5528104432cf596343e56069a24aa5a92ec9034cfef2bd9a3e944daf49ec6fbf",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/kda/flashkda_generated_indexed_bf16_fused_m128_421878c5ec_binding.cpp": "86d7de7e438b6f2965c22538c8c54493f8f3311142c4f9b933dc9c764e91691f",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/kda/flashkda_generated_indexed_bf16_fused_m128_46a794abe6_binding.cpp": "cf5fd1e6ca74bb5df08af1fa8b8bcd263cd51e83fc2e0dd0a9b26c2dd12c3202",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/kda/flashkda_generated_indexed_bf16_fused_m128_5ae1699f79_binding.cpp": "92fd8080b19e6d09f9eb4e9e584add0686716afbe5bb551f05d18e974ffddf2c",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/kda/flashkda_generated_indexed_bf16_fused_m128_610103ee26_binding.cpp": "3d8ffdfad588bbe0911766a7b9ed914be389c34e1ffe5346ca9ee1cee65a8c2c",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/kda/flashkda_generated_indexed_bf16_fused_m128_6b71cdd707_binding.cpp": "b8d0222c32d3af7ef8f4b432b5273d33b1b963fd34496772b0feb03cd5c35eeb",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/kda/flashkda_generated_indexed_bf16_fused_m128_96798cbfff_binding.cpp": "3824dce3e4e42a162379cfaecd6acbf7524a679071c25a6598f00a763ed1c6c6",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/kda/flashkda_generated_indexed_bf16_fused_m128_a9715f44b8_binding.cpp": "3ef9ab620d033b5bd580a041d9e23669f9ca69573204d530b115a06ebdcd4612",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/kda/flashkda_generated_indexed_bf16_fused_m128_c4d1225064_binding.cpp": "6c4ec216542325c2012a7608030d40a3140c660a3fdcd1d7434e8f49d21dba48",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/kda/flashkda_generated_indexed_bf16_fused_m128_d9b7b81b3a_binding.cpp": "1f489892d1ce856e7654b16d6bfa97b9e9fb4020b91e45f5778f8bd19f84684d",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/kda/flashkda_generated_indexed_bf16_fused_m128_vtile_11bf731116_binding.cpp": "f64d42887198178d879c602a55157c8efca86bb734eab6b97599e6a301150807",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/kda/flashkda_generated_indexed_bf16_fused_m128_vtile_4b7d3b6523_binding.cpp": "a07d3793c335ffe5f3a9bbafe49ae844f00f8bd5540bef786f9ad97fa1c580ac",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/kda/flashkda_generated_indexed_bf16_fused_m64_5eb5b5da39_binding.cpp": "3b841092a26679b4259026e6fb13a9ec27dd6e43d3526e5968721ec2d4249df6",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/kda/flashkda_generated_indexed_bf16_persistent_m128_6a2d6561e1_binding.cpp": "bc5789a6b2c60bdf2612454651a40c257568831c3e3cbe61dbe7dde2e65da6a7",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/kda/flashkda_generated_indexed_bf16_persistent_m128_88e7929a07_binding.cpp": "1d018c5c4522f0b2cb3f5b7307b3a78a9f9b1cc0adc033188c2730f3b3cb405f",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/kda/flashkda_generated_indexed_split_scan_bf16_m128_3263b0aaf3_binding.cpp": "5aa61e1bb7427900061289cbae13af4188192017e0cf97f3277dbc6f6049ca16",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/nv_internal/cpp/common/._envUtils.cpp": "7f40075bfbb16ac56c95faa7ddcbf95a6de534c2d21368475d4dc7970a682394",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/nv_internal/cpp/common/._logger.cpp": "7f40075bfbb16ac56c95faa7ddcbf95a6de534c2d21368475d4dc7970a682394",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/nv_internal/cpp/common/._stringUtils.cpp": "7f40075bfbb16ac56c95faa7ddcbf95a6de534c2d21368475d4dc7970a682394",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/nv_internal/cpp/common/._tllmException.cpp": "7f40075bfbb16ac56c95faa7ddcbf95a6de534c2d21368475d4dc7970a682394",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/nv_internal/cpp/common/envUtils.cpp": "314022dc45304a7f2a5d8b08effb863194ee670a5c1c3542c825d5f37f2a74ad",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/nv_internal/cpp/common/logger.cpp": "9d6dda87aa806f3ce9896b57d47181f107611abb221fbc09f2cbe9b53f275821",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/nv_internal/cpp/common/stringUtils.cpp": "96fcce166acfada0990f37fe1bae27347847e563705a76a3887dfffa56327f77",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/nv_internal/cpp/common/tllmException.cpp": "a045207f1615ca4a190e88b6072787e5ff3619bb38fb84d36cabc112e725c42a",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/nv_internal/tensorrt_llm/kernels/cutlass_kernels/._cutlass_heuristic.cpp": "7f40075bfbb16ac56c95faa7ddcbf95a6de534c2d21368475d4dc7970a682394",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/nv_internal/tensorrt_llm/kernels/cutlass_kernels/cutlass_heuristic.cpp": "68e2f4adda902c34ec5876557ac4c7e15c3b3383e240e749cdf4ef43f0eb485b",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/nv_internal/tensorrt_llm/kernels/lora/._lora.cpp": "7f40075bfbb16ac56c95faa7ddcbf95a6de534c2d21368475d4dc7970a682394",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/nv_internal/tensorrt_llm/kernels/lora/lora.cpp": "cefa03fdef1a21c7bf632984cdf789f1580f75bd7b7823edcad30bd7a1c47a59",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/nv_internal/tensorrt_llm/thop/._fp4Op.cpp": "7f40075bfbb16ac56c95faa7ddcbf95a6de534c2d21368475d4dc7970a682394",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/nv_internal/tensorrt_llm/thop/._fp4Quantize.cpp": "7f40075bfbb16ac56c95faa7ddcbf95a6de534c2d21368475d4dc7970a682394",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/nv_internal/tensorrt_llm/thop/._fp8Quantize.cpp": "7f40075bfbb16ac56c95faa7ddcbf95a6de534c2d21368475d4dc7970a682394",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/nv_internal/tensorrt_llm/thop/fp4Op.cpp": "446b880dfc6b43e444630f028dfa306745456f1c4632ebfdf9eede5fc84eba25",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/nv_internal/tensorrt_llm/thop/fp4Quantize.cpp": "c95f89d84383b98625e070197c9c6e7c42f3a40f7cbbff2fe5e863dcc1f62ba9",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/nv_internal/tensorrt_llm/thop/fp8Quantize.cpp": "01b817ccd194672c0e49482a2b7eaa74bfdedf386b2d6bf9c702443e13117d34",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/xqa/._tensorMap.cpp": "7f40075bfbb16ac56c95faa7ddcbf95a6de534c2d21368475d4dc7970a682394",
+      "/ssd/scxi253/sgi-flashinfer-main-resource-current-d7683dd-source/csrc/xqa/tensorMap.cpp": "76242f3c6c7e5ebcce9c79a0db86286ec822ea5c402c5779fb96ceb6cf763e49"
+    },
+    "fresh_cases_consumed": 0,
+    "default_promotion": false,
+    "full_serving_qualified": false,
+    "historical_token_divergence_resolved": false
+  },
+  "results": {
+    "gpu_4090": {
+      "job": "1644585",
+      "sacct": "1644585       COMPLETED      0:0   00:18:02 \n",
+      "cpu_pass": 37,
+      "gpu_pass": 12,
+      "modes": {
+        "pass": true,
+        "three_distinct_execution_identities": true,
+        "hardware": {
+          "name": "NVIDIA GeForce RTX 4090",
+          "uuid": "0d2cc24f-6cf9-f7fb-5bf6-d30465b2df70"
+        },
+        "script_sha256": "759aaafd264a26a63fc2b709ddbc9dbaeed5dd361e311184685eccaa1935267a",
+        "inputs_sha256": [
+          "098ad374b7759fafd7c70e86324f78b588f324029ebfeafa50fa7b34ca43b6b2",
+          "75a44b64f548e8f3b93c6b342bf5567331a8bdc184da83ba3fa3c30b2060ca9c",
+          "469e34bcd0f60d483b0e3fca6a414ab27e53453b869e11b61aca70dfbb132c4e"
+        ],
+        "modes": {
+          "eager_run-1": {
+            "identity": "4d5a9bcd8a9eaa92b24a1f6c29b71f366f9333de26689039ac02430e2c77df15",
+            "managed_measurement_policy": "eager",
+            "managed_tactic": 0,
+            "persisted_winner": {
+              "key": "('experimental_prefill_resource', 'ResourceCapRunner', ((1289, 32, 128), (63801, 8, 128), (63801, 8, 128)), ('4d5a9bcd8a9eaa92b24a1f6c29b71f366f9333de26689039ac02430e2c77df15', 'f8288e6d7d44feb97cbd4661ca500980417c3fd39546bfccb5625b898629d097'))",
+              "key_fields": {
+                "__tuple__": [
+                  "experimental_prefill_resource",
+                  "ResourceCapRunner",
+                  {
+                    "__tuple__": [
+                      {
+                        "__tuple__": [
+                          1289,
+                          32,
+                          128
+                        ]
+                      },
+                      {
+                        "__tuple__": [
+                          63801,
+                          8,
+                          128
+                        ]
+                      },
+                      {
+                        "__tuple__": [
+                          63801,
+                          8,
+                          128
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "__tuple__": [
+                      "4d5a9bcd8a9eaa92b24a1f6c29b71f366f9333de26689039ac02430e2c77df15",
+                      "f8288e6d7d44feb97cbd4661ca500980417c3fd39546bfccb5625b898629d097"
+                    ]
+                  }
+                ]
+              },
+              "runner": "ResourceCapRunner",
+              "tactic": 0
+            },
+            "managed_output_sha256": "f7d35d027eb59b83c126c5f014884c58c9e7633c732d17199103aed2780a8191",
+            "native_output_sha256": "f7d35d027eb59b83c126c5f014884c58c9e7633c732d17199103aed2780a8191",
+            "resource_module_prepared": true,
+            "managed_exact": true,
+            "disk_reload_replay_exact": true,
+            "reloaded_tactic": 0,
+            "captured_managed_exact": false,
+            "scope": "preplanned eager wall-time or pure replay only; no metadata updates/model/HTTP",
+            "default_promotion": false,
+            "serving_promotion": false,
+            "tactic": 0,
+            "geomean": 1.391198689968259,
+            "checks": {
+              "exact": true,
+              "gain_mean": true,
+              "gain_lcb95": true,
+              "block_floor": true,
+              "duplicate_controls": false
+            }
+          },
+          "graph_replay-1": {
+            "identity": "4438ba5224ecb6fbf7e430b340e37e3113cf59c09d6805d64e024d14dcd47a8f",
+            "managed_measurement_policy": "cuda_graph",
+            "managed_tactic": 1,
+            "persisted_winner": {
+              "key": "('experimental_prefill_resource', 'ResourceCapRunner', ((1289, 32, 128), (63801, 8, 128), (63801, 8, 128)), ('4438ba5224ecb6fbf7e430b340e37e3113cf59c09d6805d64e024d14dcd47a8f', '87f8b3c2fca284f6f4820cca00a0b5fa260e88d317d07a2a017b0cbfe79b3126'))",
+              "key_fields": {
+                "__tuple__": [
+                  "experimental_prefill_resource",
+                  "ResourceCapRunner",
+                  {
+                    "__tuple__": [
+                      {
+                        "__tuple__": [
+                          1289,
+                          32,
+                          128
+                        ]
+                      },
+                      {
+                        "__tuple__": [
+                          63801,
+                          8,
+                          128
+                        ]
+                      },
+                      {
+                        "__tuple__": [
+                          63801,
+                          8,
+                          128
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "__tuple__": [
+                      "4438ba5224ecb6fbf7e430b340e37e3113cf59c09d6805d64e024d14dcd47a8f",
+                      "87f8b3c2fca284f6f4820cca00a0b5fa260e88d317d07a2a017b0cbfe79b3126"
+                    ]
+                  }
+                ]
+              },
+              "runner": "ResourceCapRunner",
+              "tactic": 1
+            },
+            "managed_output_sha256": "f7d35d027eb59b83c126c5f014884c58c9e7633c732d17199103aed2780a8191",
+            "native_output_sha256": "f7d35d027eb59b83c126c5f014884c58c9e7633c732d17199103aed2780a8191",
+            "resource_module_prepared": true,
+            "managed_exact": true,
+            "disk_reload_replay_exact": true,
+            "reloaded_tactic": 1,
+            "captured_managed_exact": true,
+            "scope": "preplanned eager wall-time or pure replay only; no metadata updates/model/HTTP",
+            "default_promotion": false,
+            "serving_promotion": false,
+            "tactic": 1,
+            "geomean": 1.3892762566334047,
+            "checks": {
+              "exact": true,
+              "gain_mean": true,
+              "gain_lcb95": true,
+              "block_floor": true,
+              "duplicate_controls": true
+            }
+          },
+          "graph_replay-16": {
+            "identity": "3ecb6163ab683ae9e6de3e3dd60ce998c704b2ff9a76b3f7e312a8a132aef4b8",
+            "managed_measurement_policy": "cuda_graph",
+            "managed_tactic": 1,
+            "persisted_winner": {
+              "key": "('experimental_prefill_resource', 'ResourceCapRunner', ((1289, 32, 128), (63801, 8, 128), (63801, 8, 128)), ('3ecb6163ab683ae9e6de3e3dd60ce998c704b2ff9a76b3f7e312a8a132aef4b8', 'fd15bcdd4cf8066552b96bab875b7d6c961032bb1e21cd25ab293e13ab4443ec'))",
+              "key_fields": {
+                "__tuple__": [
+                  "experimental_prefill_resource",
+                  "ResourceCapRunner",
+                  {
+                    "__tuple__": [
+                      {
+                        "__tuple__": [
+                          1289,
+                          32,
+                          128
+                        ]
+                      },
+                      {
+                        "__tuple__": [
+                          63801,
+                          8,
+                          128
+                        ]
+                      },
+                      {
+                        "__tuple__": [
+                          63801,
+                          8,
+                          128
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "__tuple__": [
+                      "3ecb6163ab683ae9e6de3e3dd60ce998c704b2ff9a76b3f7e312a8a132aef4b8",
+                      "fd15bcdd4cf8066552b96bab875b7d6c961032bb1e21cd25ab293e13ab4443ec"
+                    ]
+                  }
+                ]
+              },
+              "runner": "ResourceCapRunner",
+              "tactic": 1
+            },
+            "managed_output_sha256": "f7d35d027eb59b83c126c5f014884c58c9e7633c732d17199103aed2780a8191",
+            "native_output_sha256": "f7d35d027eb59b83c126c5f014884c58c9e7633c732d17199103aed2780a8191",
+            "resource_module_prepared": true,
+            "managed_exact": true,
+            "disk_reload_replay_exact": true,
+            "reloaded_tactic": 1,
+            "captured_managed_exact": true,
+            "scope": "preplanned eager wall-time or pure replay only; no metadata updates/model/HTTP",
+            "default_promotion": false,
+            "serving_promotion": false,
+            "tactic": 1,
+            "geomean": 1.388393966901169,
+            "checks": {
+              "exact": true,
+              "gain_mean": true,
+              "gain_lcb95": true,
+              "block_floor": true,
+              "duplicate_controls": true
+            }
+          }
+        },
+        "fresh_holdout_cases_consumed": 0,
+        "full_serving_qualified": false,
+        "historical_token_divergence_resolved": false
+      }
+    },
+    "gpu_5090": {
+      "job": "1644586",
+      "sacct": "1644586       COMPLETED      0:0   00:16:40 \n",
+      "cpu_pass": 37,
+      "gpu_pass": 12,
+      "modes": {
+        "pass": true,
+        "three_distinct_execution_identities": true,
+        "hardware": {
+          "name": "NVIDIA GeForce RTX 5090",
+          "uuid": "17828c02-208d-a85f-9068-dcb028c7508e"
+        },
+        "script_sha256": "759aaafd264a26a63fc2b709ddbc9dbaeed5dd361e311184685eccaa1935267a",
+        "inputs_sha256": [
+          "40ca3de57e545a8ef24dbad858b8f9d8c43a5f584b39a47d1d6ab4d8ff19ac17",
+          "7ed928b559ea0660c7906a41f463924ec51c9daaa4db0a0cc7dc44e67afd848c",
+          "9aecd967bf9597ac1c67aa94f66d759735e7ae71cf9f6d7e44b49aacb18278b1"
+        ],
+        "modes": {
+          "eager_run-1": {
+            "identity": "5f783d85cba0a22f1a1eb20934da947de72e3d01a24b1f244eac8228299d9395",
+            "managed_measurement_policy": "eager",
+            "managed_tactic": 1,
+            "persisted_winner": {
+              "key": "('experimental_prefill_resource', 'ResourceCapRunner', ((1289, 32, 128), (63801, 8, 128), (63801, 8, 128)), ('5f783d85cba0a22f1a1eb20934da947de72e3d01a24b1f244eac8228299d9395', '3d5deac83aea457969d34e000bca42c70b53fe71b3a402ab0743bcd25c787aa2'))",
+              "key_fields": {
+                "__tuple__": [
+                  "experimental_prefill_resource",
+                  "ResourceCapRunner",
+                  {
+                    "__tuple__": [
+                      {
+                        "__tuple__": [
+                          1289,
+                          32,
+                          128
+                        ]
+                      },
+                      {
+                        "__tuple__": [
+                          63801,
+                          8,
+                          128
+                        ]
+                      },
+                      {
+                        "__tuple__": [
+                          63801,
+                          8,
+                          128
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "__tuple__": [
+                      "5f783d85cba0a22f1a1eb20934da947de72e3d01a24b1f244eac8228299d9395",
+                      "3d5deac83aea457969d34e000bca42c70b53fe71b3a402ab0743bcd25c787aa2"
+                    ]
+                  }
+                ]
+              },
+              "runner": "ResourceCapRunner",
+              "tactic": 1
+            },
+            "managed_output_sha256": "107fd5888b1b3ceb998534196693667557dba37dc508ac07d7346ee2d5cace24",
+            "native_output_sha256": "107fd5888b1b3ceb998534196693667557dba37dc508ac07d7346ee2d5cace24",
+            "resource_module_prepared": true,
+            "managed_exact": true,
+            "disk_reload_replay_exact": true,
+            "reloaded_tactic": 1,
+            "captured_managed_exact": false,
+            "scope": "preplanned eager wall-time or pure replay only; no metadata updates/model/HTTP",
+            "default_promotion": false,
+            "serving_promotion": false,
+            "tactic": 1,
+            "geomean": 1.3570022236184462,
+            "checks": {
+              "exact": true,
+              "gain_mean": true,
+              "gain_lcb95": true,
+              "block_floor": true,
+              "duplicate_controls": true
+            }
+          },
+          "graph_replay-1": {
+            "identity": "533079efa88334900a395c334c381ea96a85aec9789f97596338f885d40ff330",
+            "managed_measurement_policy": "cuda_graph",
+            "managed_tactic": 1,
+            "persisted_winner": {
+              "key": "('experimental_prefill_resource', 'ResourceCapRunner', ((1289, 32, 128), (63801, 8, 128), (63801, 8, 128)), ('533079efa88334900a395c334c381ea96a85aec9789f97596338f885d40ff330', 'a7856938d5e22dff731682f9ab298006ef06d8391df212dcd1c3bed40fd6919b'))",
+              "key_fields": {
+                "__tuple__": [
+                  "experimental_prefill_resource",
+                  "ResourceCapRunner",
+                  {
+                    "__tuple__": [
+                      {
+                        "__tuple__": [
+                          1289,
+                          32,
+                          128
+                        ]
+                      },
+                      {
+                        "__tuple__": [
+                          63801,
+                          8,
+                          128
+                        ]
+                      },
+                      {
+                        "__tuple__": [
+                          63801,
+                          8,
+                          128
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "__tuple__": [
+                      "533079efa88334900a395c334c381ea96a85aec9789f97596338f885d40ff330",
+                      "a7856938d5e22dff731682f9ab298006ef06d8391df212dcd1c3bed40fd6919b"
+                    ]
+                  }
+                ]
+              },
+              "runner": "ResourceCapRunner",
+              "tactic": 1
+            },
+            "managed_output_sha256": "107fd5888b1b3ceb998534196693667557dba37dc508ac07d7346ee2d5cace24",
+            "native_output_sha256": "107fd5888b1b3ceb998534196693667557dba37dc508ac07d7346ee2d5cace24",
+            "resource_module_prepared": true,
+            "managed_exact": true,
+            "disk_reload_replay_exact": true,
+            "reloaded_tactic": 1,
+            "captured_managed_exact": true,
+            "scope": "preplanned eager wall-time or pure replay only; no metadata updates/model/HTTP",
+            "default_promotion": false,
+            "serving_promotion": false,
+            "tactic": 1,
+            "geomean": 1.3573184054929597,
+            "checks": {
+              "exact": true,
+              "gain_mean": true,
+              "gain_lcb95": true,
+              "block_floor": true,
+              "duplicate_controls": true
+            }
+          },
+          "graph_replay-16": {
+            "identity": "d97db01b7f75f5ade5a441ec85f3511ac1fa1f6700fb2670e3b42b05aad5d4c7",
+            "managed_measurement_policy": "cuda_graph",
+            "managed_tactic": 1,
+            "persisted_winner": {
+              "key": "('experimental_prefill_resource', 'ResourceCapRunner', ((1289, 32, 128), (63801, 8, 128), (63801, 8, 128)), ('d97db01b7f75f5ade5a441ec85f3511ac1fa1f6700fb2670e3b42b05aad5d4c7', '410ce3924cf60aa9aea76bb1aee6ff43137ebecd07e784135a1e08d3a3d8a00e'))",
+              "key_fields": {
+                "__tuple__": [
+                  "experimental_prefill_resource",
+                  "ResourceCapRunner",
+                  {
+                    "__tuple__": [
+                      {
+                        "__tuple__": [
+                          1289,
+                          32,
+                          128
+                        ]
+                      },
+                      {
+                        "__tuple__": [
+                          63801,
+                          8,
+                          128
+                        ]
+                      },
+                      {
+                        "__tuple__": [
+                          63801,
+                          8,
+                          128
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "__tuple__": [
+                      "d97db01b7f75f5ade5a441ec85f3511ac1fa1f6700fb2670e3b42b05aad5d4c7",
+                      "410ce3924cf60aa9aea76bb1aee6ff43137ebecd07e784135a1e08d3a3d8a00e"
+                    ]
+                  }
+                ]
+              },
+              "runner": "ResourceCapRunner",
+              "tactic": 1
+            },
+            "managed_output_sha256": "107fd5888b1b3ceb998534196693667557dba37dc508ac07d7346ee2d5cace24",
+            "native_output_sha256": "107fd5888b1b3ceb998534196693667557dba37dc508ac07d7346ee2d5cace24",
+            "resource_module_prepared": true,
+            "managed_exact": true,
+            "disk_reload_replay_exact": true,
+            "reloaded_tactic": 1,
+            "captured_managed_exact": true,
+            "scope": "preplanned eager wall-time or pure replay only; no metadata updates/model/HTTP",
+            "default_promotion": false,
+            "serving_promotion": false,
+            "tactic": 1,
+            "geomean": 1.3578195801314181,
+            "checks": {
+              "exact": true,
+              "gain_mean": true,
+              "gain_lcb95": true,
+              "block_floor": true,
+              "duplicate_controls": true
+            }
+          }
+        },
+        "fresh_holdout_cases_consumed": 0,
+        "full_serving_qualified": false,
+        "historical_token_divergence_resolved": false
+      }
+    }
+  },
+  "archive_sha256": "0e545bd6591d770e132e910cbb88bf8e999866fdc2e5e981ac2971a226024b2c",
+  "archive_bytes": 260608,
+  "files": {
+    "binding.json": "1ca5023484f5bc51aca4a7225558e19b2f18810330619543b902888a0c6aa0af",
+    "cache/1644585/.cache/flashinfer/autotune/v2/089513a97a7a5188/entries/a97fd8b360d917f5bc2b110e.json": "b715c492cbfa645d1f01eac4cc7f4046a6ef30f584445e4eb0681c061545734d",
+    "cache/1644585/.cache/flashinfer/autotune/v2/089513a97a7a5188/manifest.json": "928ca61df6d3a19db5a317a42ae70a41e1e3cc10b12cd153e9c6f33c6253de84",
+    "cache/1644586/.cache/flashinfer/autotune/v2/fcebd134fc3c5fbb/entries/71b3510edd15e3d9dc44565f.json": "3e42f8c350772da076f5ec9f29e7fad8f42f2c573f06b603f972f4c9df656196",
+    "cache/1644586/.cache/flashinfer/autotune/v2/fcebd134fc3c5fbb/manifest.json": "4276fab36835319c181a3a532e070b712af2a4add806400c56dcdfd476b33313",
+    "logs/1644585.err": "7b1a70c946261485c66b3073eebd1f5c0e6a9ffde61c8135a8841b8f5d188574",
+    "logs/1644585.out": "5b40c799aaacfda4f5d76d4b5e0d7f2746efa8d8cd3cfadf321399e017bc4bc7",
+    "logs/1644586.err": "162e6c22953fb430ffba12d0d75c09e86d551904ba98cb2dde858b11fee55f04",
+    "logs/1644586.out": "32a2a6d6771c073c90d97dcd646b17a07497773c63ed598c6b8fa5c3057d8d5b",
+    "logs/telemetry-1644585.csv": "df14cb967960101f03d35db9bfb12307b82d343644a5d3c74acff67d21d651d0",
+    "logs/telemetry-1644586.csv": "cd6f66b5e998e64d031f2f9e77ef8eea44ca05ad5e1675d36c87dfb03187cc75",
+    "main_execution_modes_v2.py": "759aaafd264a26a63fc2b709ddbc9dbaeed5dd361e311184685eccaa1935267a",
+    "managed_v2_sdk.sbatch": "41448f63aa76c9b15fffc7514f4566f16e1127cbc88f7b127cb0b28fbc885b3d",
+    "modes-1644585/eager_run-1.json": "6be748c436733504b3eb9deaf9b5b673c71a195b052c668efabd37ed4a919215",
+    "modes-1644585/graph_replay-1.json": "054450c8599e0508aec2a86a276e45195adf26cf9d73f261ee53bc16838f23bb",
+    "modes-1644585/graph_replay-16.json": "c90dede5b2f2988e6176bda6c7967e070a5c96dc99a1076dfb45a8d96329b51e",
+    "modes-1644585/managed-cache/v2/089513a97a7a5188/entries/a5824f0a866fde9914034ef3.json": "dfbe93e492770d80d38261901de3e48403e0b5bbedeeb0e2a5bd5f05a8ff609a",
+    "modes-1644585/managed-cache/v2/089513a97a7a5188/manifest.json": "928ca61df6d3a19db5a317a42ae70a41e1e3cc10b12cd153e9c6f33c6253de84",
+    "modes-1644585/managed-cache/v2/165b6c41bb5d0e57/entries/db3f834985553de95a2992a7.json": "d53c007eba1a9673259fd009748db43a6bb97ed7eb5997029c2b2ca2030fe20d",
+    "modes-1644585/managed-cache/v2/165b6c41bb5d0e57/entries/fb8d2b443f70216d0b1f0d36.json": "63034850fc83abd10849003e0bb5b19bf86cd4ad322260d1e40c34dce32686e8",
+    "modes-1644585/managed-cache/v2/165b6c41bb5d0e57/manifest.json": "7c3319d7861ed7b0b403a2ef236ab0dc2413fb0086716452441428b74ed4ab2c",
+    "modes-1644585/summary.json": "662fc9f08234dc992300d54a48900c1c436dcf720f5a6f081983260e435b365d",
+    "modes-1644586/eager_run-1.json": "2118d237fb2a0d5762c93df025818881db73e3c04ca63c52703a9f3df89be394",
+    "modes-1644586/graph_replay-1.json": "7e70018c4fad8d300241f5b7486fa95d8c8143391dbfaa7062979a2e03e7d4ed",
+    "modes-1644586/graph_replay-16.json": "484fdcad71fe54680083629ecdeccc305e56ffa675836110c8f5ed09f73927f1",
+    "modes-1644586/managed-cache/v2/a0ed95ad0b52a5c3/entries/230c8b763507201b2794869f.json": "37eec664615551bd4e8483f1c4db3db2ebd510ece61c06aeda2593bcc4dd8fa4",
+    "modes-1644586/managed-cache/v2/a0ed95ad0b52a5c3/entries/73d4a5c88df466b838814af6.json": "0fdf73b2d36612ed72b67223a487e62dcadd3d8975dd9aab5c958eeac82a921f",
+    "modes-1644586/managed-cache/v2/a0ed95ad0b52a5c3/manifest.json": "bcd8208717c0fff05706cadbd9164a517eae9cceef6d645e6c9c086e5ea6a43f",
+    "modes-1644586/managed-cache/v2/fcebd134fc3c5fbb/entries/6cbc53584ebdfecd3589f506.json": "124209b39cb193866f2b8324c82d20d6379eeadccf29c22bb2491f2da9b6b243",
+    "modes-1644586/managed-cache/v2/fcebd134fc3c5fbb/manifest.json": "4276fab36835319c181a3a532e070b712af2a4add806400c56dcdfd476b33313",
+    "modes-1644586/summary.json": "56a00b524a699a74c1b573e4e5a48878f66ce57d616c03884f8f9930e93fca19",
+    "prefill_resource_v2_example.py": "33a47fc989b857aa4e367986587ee55271bbef5a4709382da4bab39f7f0c8fb8",
+    "receipts/calibration-1644585.txt": "5b9c8a5ac2ab8690d72246d0a2a8de70742353f68a9f950252e6095aa5006953",
+    "receipts/calibration-1644586.txt": "e4b88ba86dc8ba13c1a51696ccdecd67ace6eecb9a019382339f09ead5b7860b",
+    "receipts/exit-1644585.txt": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "receipts/exit-1644586.txt": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "receipts/hardware-1644585.csv": "e0cdb914ed891f2cfaa101b9564838a8b18bf279dda350a2e988d91170d99750",
+    "receipts/hardware-1644586.csv": "defcc1c5b1e8ac54847925417b1e7f4f3bdf0c467bdd3cda5bfbcbdb0bdd91c4",
+    "receipts/jobs.json": "ffd1c95e0585312bfd97b26186093d91aa0506a0d119690cab56c65689e276e4",
+    "receipts/slurm-1644585.txt": "17961f857fdd622d31edd08d5fcc50e1b99c30b61b1eef650e1323294d7892b0",
+    "receipts/slurm-1644586.txt": "65e82a05188df8a26aa8b9b547ab759f44bb20970a111b4e17f9bee9cade1e61",
+    "receipts/source-verification-1644585.txt": "51b15c7780773fd051a46f12ab6e64386f9d2194439d1661dc6ee04606a43a36",
+    "receipts/source-verification-1644586.txt": "51b15c7780773fd051a46f12ab6e64386f9d2194439d1661dc6ee04606a43a36",
+    "receipts/tests-1644585.xml": "003ceb3605fee4815caecf87509c286e6e447fff04cdf2bee0dc81eb7ef69c78",
+    "receipts/tests-1644586.xml": "ef6ed37710fdba200a97103f8167b63d40b4232d23fc690c1f8bd972a7f52fed",
+    "receipts/validation-verification-1644585.txt": "e75e28205bd1e48b3cd2f409c12f14f7d82888f6d9f79c6b9d2f0149b56100ad",
+    "receipts/validation-verification-1644586.txt": "e75e28205bd1e48b3cd2f409c12f14f7d82888f6d9f79c6b9d2f0149b56100ad",
+    "validation.sha256": "045415310dcbf6ed90c3176e0b3d486562e60e1b607608e4a394558edd35742a"
+  },
+  "source_final_verification_sha256": "51b15c7780773fd051a46f12ab6e64386f9d2194439d1661dc6ee04606a43a36",
+  "scope": "exposed geometry; prepared eager and pure Graph1/16; no metadata updates/full serving",
+  "independent_process_release_qualified": false,
+  "fresh_cases_consumed": 0,
+  "default_promotion": false,
+  "serving_promotion": false,
+  "historical_token_divergence_resolved": false
+}
