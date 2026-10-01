@@ -1,0 +1,540 @@
+{
+  "pass": true,
+  "binding": {
+    "source_git_commit": "bab48695bbe72ba23c49bad69818b2975f3de6f7",
+    "native_base": "85744da1a397c0c4bea1a83b8345281750eb61a9",
+    "wheel": "/ssd/scxi253/sgi-flashinfer-official-build-bab48695-20261001/wheels/flashinfer_python-0.7.1-py3-none-any.whl",
+    "wheel_sha256": "f311c2f01a928de03cbe07df55f7afaab1df11fa34d421edf754ef8c86c0784b",
+    "normal_package_metadata": "\"\"\"Build metadata for flashinfer package.\"\"\"\n__version__ = \"0.7.1\"\n__git_commit__ = \"bab48695bbe72ba23c49bad69818b2975f3de6f7\"\n",
+    "vendor_git_pins": {
+      "cccl": "16bd510c9b712e82b0ab6cbb630d8e29ba1f7116",
+      "cutlass": "b46b16d003484063bca4ed365e44095c4c6ed633",
+      "spdlog": "c3aed4b68373955e1cc94307683d44dca1515d2b"
+    },
+    "build_receipt_sha256": "52398e03767dec8c3fd13abc2713d0287853af8281d3364cf4523b35fb4efbd0",
+    "source_ledger_sha256": "cad5eb10b32b63cbe0d6596f4fa641047e0ff4bebc5ad97d98f8e4cd96d33af3",
+    "source": "/ssd/scxi253/sgi-official-wheel-validation-bab48695-20261001/wheel-overlay",
+    "tests_expected": 69,
+    "test_matrix": "Prior12 GPU cases +4 FP16/BF16 prefix Q1024 KV128 paged/ragged +53 CPU tests",
+    "managed_execution_modes": [
+      "eager_run-1",
+      "graph_replay-1",
+      "graph_replay-16"
+    ],
+    "new_private_jit_cache_per_gpu": true,
+    "fresh_cases_consumed": 0,
+    "release_qualified": false,
+    "full_http_qualified": false,
+    "default_promotion": false,
+    "historical_token_divergence_resolved": false,
+    "prior_old_cccl_overlay_results_retained": true,
+    "compiler_header_identity_bound": true
+  },
+  "results": {
+    "gpu_4090": {
+      "job": "1645930",
+      "sacct": "1645930       COMPLETED      0:0   00:17:59 \n",
+      "cpu_pass": 53,
+      "gpu_pass": 16,
+      "modes": {
+        "pass": true,
+        "three_distinct_execution_identities": true,
+        "hardware": {
+          "name": "NVIDIA GeForce RTX 4090",
+          "uuid": "bdce2660-25eb-d632-5729-2b165e1573d4"
+        },
+        "script_sha256": "759aaafd264a26a63fc2b709ddbc9dbaeed5dd361e311184685eccaa1935267a",
+        "inputs_sha256": [
+          "098ad374b7759fafd7c70e86324f78b588f324029ebfeafa50fa7b34ca43b6b2",
+          "75a44b64f548e8f3b93c6b342bf5567331a8bdc184da83ba3fa3c30b2060ca9c",
+          "469e34bcd0f60d483b0e3fca6a414ab27e53453b869e11b61aca70dfbb132c4e"
+        ],
+        "modes": {
+          "eager_run-1": {
+            "identity": "8a5f1fed76951215e5a8df8be4ab39cb429e7fd25824c6a7bad2df1f2467f826",
+            "managed_measurement_policy": "eager",
+            "managed_tactic": 0,
+            "persisted_winner": {
+              "key": "('experimental_prefill_resource', 'ResourceCapRunner', ((1289, 32, 128), (63801, 8, 128), (63801, 8, 128)), ('8a5f1fed76951215e5a8df8be4ab39cb429e7fd25824c6a7bad2df1f2467f826', '987758598b0d2990cd1951b2b08b4cbc3eef0123e52cfd5894b59d159ed98420'))",
+              "key_fields": {
+                "__tuple__": [
+                  "experimental_prefill_resource",
+                  "ResourceCapRunner",
+                  {
+                    "__tuple__": [
+                      {
+                        "__tuple__": [
+                          1289,
+                          32,
+                          128
+                        ]
+                      },
+                      {
+                        "__tuple__": [
+                          63801,
+                          8,
+                          128
+                        ]
+                      },
+                      {
+                        "__tuple__": [
+                          63801,
+                          8,
+                          128
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "__tuple__": [
+                      "8a5f1fed76951215e5a8df8be4ab39cb429e7fd25824c6a7bad2df1f2467f826",
+                      "987758598b0d2990cd1951b2b08b4cbc3eef0123e52cfd5894b59d159ed98420"
+                    ]
+                  }
+                ]
+              },
+              "runner": "ResourceCapRunner",
+              "tactic": 0
+            },
+            "managed_output_sha256": "f7d35d027eb59b83c126c5f014884c58c9e7633c732d17199103aed2780a8191",
+            "native_output_sha256": "f7d35d027eb59b83c126c5f014884c58c9e7633c732d17199103aed2780a8191",
+            "resource_module_prepared": true,
+            "managed_exact": true,
+            "disk_reload_replay_exact": true,
+            "reloaded_tactic": 0,
+            "captured_managed_exact": false,
+            "scope": "preplanned eager wall-time or pure replay only; no metadata updates/model/HTTP",
+            "default_promotion": false,
+            "serving_promotion": false,
+            "tactic": 0,
+            "geomean": 1.3881611922164703,
+            "checks": {
+              "exact": true,
+              "gain_mean": true,
+              "gain_lcb95": true,
+              "block_floor": true,
+              "duplicate_controls": false
+            }
+          },
+          "graph_replay-1": {
+            "identity": "bd6345aff7a92420d2267a4aa3f3b375a21f353f6ba7f4cb6d078108810f9031",
+            "managed_measurement_policy": "cuda_graph",
+            "managed_tactic": 1,
+            "persisted_winner": {
+              "key": "('experimental_prefill_resource', 'ResourceCapRunner', ((1289, 32, 128), (63801, 8, 128), (63801, 8, 128)), ('bd6345aff7a92420d2267a4aa3f3b375a21f353f6ba7f4cb6d078108810f9031', '145d863e6822f3ba198325f80315967bef558c3901fb2018615c783b3a191468'))",
+              "key_fields": {
+                "__tuple__": [
+                  "experimental_prefill_resource",
+                  "ResourceCapRunner",
+                  {
+                    "__tuple__": [
+                      {
+                        "__tuple__": [
+                          1289,
+                          32,
+                          128
+                        ]
+                      },
+                      {
+                        "__tuple__": [
+                          63801,
+                          8,
+                          128
+                        ]
+                      },
+                      {
+                        "__tuple__": [
+                          63801,
+                          8,
+                          128
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "__tuple__": [
+                      "bd6345aff7a92420d2267a4aa3f3b375a21f353f6ba7f4cb6d078108810f9031",
+                      "145d863e6822f3ba198325f80315967bef558c3901fb2018615c783b3a191468"
+                    ]
+                  }
+                ]
+              },
+              "runner": "ResourceCapRunner",
+              "tactic": 1
+            },
+            "managed_output_sha256": "f7d35d027eb59b83c126c5f014884c58c9e7633c732d17199103aed2780a8191",
+            "native_output_sha256": "f7d35d027eb59b83c126c5f014884c58c9e7633c732d17199103aed2780a8191",
+            "resource_module_prepared": true,
+            "managed_exact": true,
+            "disk_reload_replay_exact": true,
+            "reloaded_tactic": 1,
+            "captured_managed_exact": true,
+            "scope": "preplanned eager wall-time or pure replay only; no metadata updates/model/HTTP",
+            "default_promotion": false,
+            "serving_promotion": false,
+            "tactic": 1,
+            "geomean": 1.3872412100312663,
+            "checks": {
+              "exact": true,
+              "gain_mean": true,
+              "gain_lcb95": true,
+              "block_floor": true,
+              "duplicate_controls": true
+            }
+          },
+          "graph_replay-16": {
+            "identity": "e8d38bf0e37206b996443e7b9c1e0659cd8295aa4de4cee7640a84a3af095de4",
+            "managed_measurement_policy": "cuda_graph",
+            "managed_tactic": 1,
+            "persisted_winner": {
+              "key": "('experimental_prefill_resource', 'ResourceCapRunner', ((1289, 32, 128), (63801, 8, 128), (63801, 8, 128)), ('e8d38bf0e37206b996443e7b9c1e0659cd8295aa4de4cee7640a84a3af095de4', 'e92d9569f52b348d9688b53e94446a44b41f4b63f3c199ce61978a1fa58ef5a6'))",
+              "key_fields": {
+                "__tuple__": [
+                  "experimental_prefill_resource",
+                  "ResourceCapRunner",
+                  {
+                    "__tuple__": [
+                      {
+                        "__tuple__": [
+                          1289,
+                          32,
+                          128
+                        ]
+                      },
+                      {
+                        "__tuple__": [
+                          63801,
+                          8,
+                          128
+                        ]
+                      },
+                      {
+                        "__tuple__": [
+                          63801,
+                          8,
+                          128
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "__tuple__": [
+                      "e8d38bf0e37206b996443e7b9c1e0659cd8295aa4de4cee7640a84a3af095de4",
+                      "e92d9569f52b348d9688b53e94446a44b41f4b63f3c199ce61978a1fa58ef5a6"
+                    ]
+                  }
+                ]
+              },
+              "runner": "ResourceCapRunner",
+              "tactic": 1
+            },
+            "managed_output_sha256": "f7d35d027eb59b83c126c5f014884c58c9e7633c732d17199103aed2780a8191",
+            "native_output_sha256": "f7d35d027eb59b83c126c5f014884c58c9e7633c732d17199103aed2780a8191",
+            "resource_module_prepared": true,
+            "managed_exact": true,
+            "disk_reload_replay_exact": true,
+            "reloaded_tactic": 1,
+            "captured_managed_exact": true,
+            "scope": "preplanned eager wall-time or pure replay only; no metadata updates/model/HTTP",
+            "default_promotion": false,
+            "serving_promotion": false,
+            "tactic": 1,
+            "geomean": 1.3865317948300444,
+            "checks": {
+              "exact": true,
+              "gain_mean": true,
+              "gain_lcb95": true,
+              "block_floor": true,
+              "duplicate_controls": true
+            }
+          }
+        },
+        "fresh_holdout_cases_consumed": 0,
+        "full_serving_qualified": false,
+        "historical_token_divergence_resolved": false
+      }
+    },
+    "gpu_5090": {
+      "job": "1645931",
+      "sacct": "1645931       COMPLETED      0:0   00:21:18 \n",
+      "cpu_pass": 53,
+      "gpu_pass": 16,
+      "modes": {
+        "pass": true,
+        "three_distinct_execution_identities": true,
+        "hardware": {
+          "name": "NVIDIA GeForce RTX 5090",
+          "uuid": "5a5cb51d-20e5-32f5-d514-c6504482cb9e"
+        },
+        "script_sha256": "759aaafd264a26a63fc2b709ddbc9dbaeed5dd361e311184685eccaa1935267a",
+        "inputs_sha256": [
+          "40ca3de57e545a8ef24dbad858b8f9d8c43a5f584b39a47d1d6ab4d8ff19ac17",
+          "7ed928b559ea0660c7906a41f463924ec51c9daaa4db0a0cc7dc44e67afd848c",
+          "9aecd967bf9597ac1c67aa94f66d759735e7ae71cf9f6d7e44b49aacb18278b1"
+        ],
+        "modes": {
+          "eager_run-1": {
+            "identity": "98e5d05024ea7677a74d699618a2c3664b3593b241123298c061dbb6f558c4c7",
+            "managed_measurement_policy": "eager",
+            "managed_tactic": 0,
+            "persisted_winner": {
+              "key": "('experimental_prefill_resource', 'ResourceCapRunner', ((1289, 32, 128), (63801, 8, 128), (63801, 8, 128)), ('98e5d05024ea7677a74d699618a2c3664b3593b241123298c061dbb6f558c4c7', 'af4b6da14e6ca66b70fa42000af5b0fdc065d2abfb18320af145818bdb3d151e'))",
+              "key_fields": {
+                "__tuple__": [
+                  "experimental_prefill_resource",
+                  "ResourceCapRunner",
+                  {
+                    "__tuple__": [
+                      {
+                        "__tuple__": [
+                          1289,
+                          32,
+                          128
+                        ]
+                      },
+                      {
+                        "__tuple__": [
+                          63801,
+                          8,
+                          128
+                        ]
+                      },
+                      {
+                        "__tuple__": [
+                          63801,
+                          8,
+                          128
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "__tuple__": [
+                      "98e5d05024ea7677a74d699618a2c3664b3593b241123298c061dbb6f558c4c7",
+                      "af4b6da14e6ca66b70fa42000af5b0fdc065d2abfb18320af145818bdb3d151e"
+                    ]
+                  }
+                ]
+              },
+              "runner": "ResourceCapRunner",
+              "tactic": 0
+            },
+            "managed_output_sha256": "107fd5888b1b3ceb998534196693667557dba37dc508ac07d7346ee2d5cace24",
+            "native_output_sha256": "107fd5888b1b3ceb998534196693667557dba37dc508ac07d7346ee2d5cace24",
+            "resource_module_prepared": true,
+            "managed_exact": true,
+            "disk_reload_replay_exact": true,
+            "reloaded_tactic": 0,
+            "captured_managed_exact": false,
+            "scope": "preplanned eager wall-time or pure replay only; no metadata updates/model/HTTP",
+            "default_promotion": false,
+            "serving_promotion": false,
+            "tactic": 1,
+            "geomean": 1.3583105039840446,
+            "checks": {
+              "exact": true,
+              "gain_mean": true,
+              "gain_lcb95": true,
+              "block_floor": true,
+              "duplicate_controls": true
+            }
+          },
+          "graph_replay-1": {
+            "identity": "02e6697a3ad73538743fa357882b40a4aa1bc13f22b35c65656de2743fd11bf6",
+            "managed_measurement_policy": "cuda_graph",
+            "managed_tactic": 1,
+            "persisted_winner": {
+              "key": "('experimental_prefill_resource', 'ResourceCapRunner', ((1289, 32, 128), (63801, 8, 128), (63801, 8, 128)), ('02e6697a3ad73538743fa357882b40a4aa1bc13f22b35c65656de2743fd11bf6', '6f5de03e85b03fdba84df52d2ba9b77f81d74893bffd3cc08fdbd3d6607060bd'))",
+              "key_fields": {
+                "__tuple__": [
+                  "experimental_prefill_resource",
+                  "ResourceCapRunner",
+                  {
+                    "__tuple__": [
+                      {
+                        "__tuple__": [
+                          1289,
+                          32,
+                          128
+                        ]
+                      },
+                      {
+                        "__tuple__": [
+                          63801,
+                          8,
+                          128
+                        ]
+                      },
+                      {
+                        "__tuple__": [
+                          63801,
+                          8,
+                          128
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "__tuple__": [
+                      "02e6697a3ad73538743fa357882b40a4aa1bc13f22b35c65656de2743fd11bf6",
+                      "6f5de03e85b03fdba84df52d2ba9b77f81d74893bffd3cc08fdbd3d6607060bd"
+                    ]
+                  }
+                ]
+              },
+              "runner": "ResourceCapRunner",
+              "tactic": 1
+            },
+            "managed_output_sha256": "107fd5888b1b3ceb998534196693667557dba37dc508ac07d7346ee2d5cace24",
+            "native_output_sha256": "107fd5888b1b3ceb998534196693667557dba37dc508ac07d7346ee2d5cace24",
+            "resource_module_prepared": true,
+            "managed_exact": true,
+            "disk_reload_replay_exact": true,
+            "reloaded_tactic": 1,
+            "captured_managed_exact": true,
+            "scope": "preplanned eager wall-time or pure replay only; no metadata updates/model/HTTP",
+            "default_promotion": false,
+            "serving_promotion": false,
+            "tactic": 1,
+            "geomean": 1.3586564562138639,
+            "checks": {
+              "exact": true,
+              "gain_mean": true,
+              "gain_lcb95": true,
+              "block_floor": true,
+              "duplicate_controls": true
+            }
+          },
+          "graph_replay-16": {
+            "identity": "8ba47d64d1539b09fd3cdf2f05ac5d1b71ac9ab1001096f1aaf0bd7bdcf421ce",
+            "managed_measurement_policy": "cuda_graph",
+            "managed_tactic": 1,
+            "persisted_winner": {
+              "key": "('experimental_prefill_resource', 'ResourceCapRunner', ((1289, 32, 128), (63801, 8, 128), (63801, 8, 128)), ('8ba47d64d1539b09fd3cdf2f05ac5d1b71ac9ab1001096f1aaf0bd7bdcf421ce', 'af622a306b6c6abc3e6c09cbf00d8e912bd48dc5bada2a70f57001c654883ef7'))",
+              "key_fields": {
+                "__tuple__": [
+                  "experimental_prefill_resource",
+                  "ResourceCapRunner",
+                  {
+                    "__tuple__": [
+                      {
+                        "__tuple__": [
+                          1289,
+                          32,
+                          128
+                        ]
+                      },
+                      {
+                        "__tuple__": [
+                          63801,
+                          8,
+                          128
+                        ]
+                      },
+                      {
+                        "__tuple__": [
+                          63801,
+                          8,
+                          128
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "__tuple__": [
+                      "8ba47d64d1539b09fd3cdf2f05ac5d1b71ac9ab1001096f1aaf0bd7bdcf421ce",
+                      "af622a306b6c6abc3e6c09cbf00d8e912bd48dc5bada2a70f57001c654883ef7"
+                    ]
+                  }
+                ]
+              },
+              "runner": "ResourceCapRunner",
+              "tactic": 1
+            },
+            "managed_output_sha256": "107fd5888b1b3ceb998534196693667557dba37dc508ac07d7346ee2d5cace24",
+            "native_output_sha256": "107fd5888b1b3ceb998534196693667557dba37dc508ac07d7346ee2d5cace24",
+            "resource_module_prepared": true,
+            "managed_exact": true,
+            "disk_reload_replay_exact": true,
+            "reloaded_tactic": 1,
+            "captured_managed_exact": true,
+            "scope": "preplanned eager wall-time or pure replay only; no metadata updates/model/HTTP",
+            "default_promotion": false,
+            "serving_promotion": false,
+            "tactic": 1,
+            "geomean": 1.357677003380088,
+            "checks": {
+              "exact": true,
+              "gain_mean": true,
+              "gain_lcb95": true,
+              "block_floor": true,
+              "duplicate_controls": true
+            }
+          }
+        },
+        "fresh_holdout_cases_consumed": 0,
+        "full_serving_qualified": false,
+        "historical_token_divergence_resolved": false
+      }
+    }
+  },
+  "archive_sha256": "c34f6b11e0bb19f6bb1bdd08d524d1b1c8c7b599d48f9dc485ebd6fad0b34093",
+  "archive_bytes": 200936,
+  "files": {
+    "binding.json": "09e4a937391414b6dd0c6deb5951fe447de88f4c9bb8e01268a79725602244cc",
+    "cache/1645930/.cache/flashinfer/autotune/v2/156f30c3888fa9d1/entries/48b0b77d0d5f83f6d59b8212.json": "59dfa69ad78ba14e92393f65a03cbf38e086c6f432bb66104a3af40aa1369ff9",
+    "cache/1645930/.cache/flashinfer/autotune/v2/156f30c3888fa9d1/manifest.json": "7523cfa33220c4b5b72661be89cf159f4e4622f0bf8de76b89d922b619d28ada",
+    "cache/1645931/.cache/flashinfer/autotune/v2/a2f11eaa63cd5fea/entries/c132dbe8f75c2006c292fe14.json": "b32b13bff0c4437ecb8b401ae47bd06bd249dee88e9d1c1134b1a9e517a45699",
+    "cache/1645931/.cache/flashinfer/autotune/v2/a2f11eaa63cd5fea/manifest.json": "eb4a01cefb60fe7bc9012a07fabd060b3bf932a20b05738b7e6bb70577d3e280",
+    "logs/1645930.err": "2a8c487341ed048678082789141f360a7e4bc3346ebb1bd3e91a71bae0539717",
+    "logs/1645930.out": "034a9e843af5fc01466db60456478f5d598061930816eead3441532defb1b200",
+    "logs/1645931.err": "831eab73d981ff25395bce774ae19d9a3c332721d66de90aee69b5d7672fd519",
+    "logs/1645931.out": "576d5f00f1bc0ac1ca951f4af9db2ec90659207a93d6fa073649c4ee8913dfc4",
+    "logs/telemetry-1645930.csv": "c423fd6df4b8617fb0333bcc0ac27ab0e2da17a1f753eb23dc27ce79b9d05865",
+    "logs/telemetry-1645931.csv": "4c060f88ef7fdee15fc49949d04f5a05995abde7ef552a7033bad1df5f2abd5e",
+    "main_execution_modes_v2.py": "759aaafd264a26a63fc2b709ddbc9dbaeed5dd361e311184685eccaa1935267a",
+    "modes-1645930/eager_run-1.json": "1e37f03fd7b363ee5b9ee5a54ba3e9c8d61bc31f296fa9fd9bb54cb844d76461",
+    "modes-1645930/graph_replay-1.json": "a08acbd24fa0280a17b2c9a88be58f679e730d089918c73e2e4703a3c67f8a9d",
+    "modes-1645930/graph_replay-16.json": "5566f9d9886af5f0dd85e44ffa2df41025a1b77c6f08f6c8e9f91d8d6e6fe84f",
+    "modes-1645930/managed-cache/v2/156f30c3888fa9d1/entries/e1e7316f80938ec0e335e34b.json": "0e0dd09f1e411560f402aa600368f82058b466f4f13d4d1558c70a17f44ea820",
+    "modes-1645930/managed-cache/v2/156f30c3888fa9d1/manifest.json": "7523cfa33220c4b5b72661be89cf159f4e4622f0bf8de76b89d922b619d28ada",
+    "modes-1645930/managed-cache/v2/d662d9ed0207adcf/entries/89068edc06179124beefbafa.json": "1a15672a3a97db51583fb81b3efb8d8965a511cb302246ba66c10438162fd6a1",
+    "modes-1645930/managed-cache/v2/d662d9ed0207adcf/entries/d82c6f9714eb6d2f99b46972.json": "1c2fd4295ef83ac362616153c066a475504ae77b77fd3a3c8a38cedef53693a5",
+    "modes-1645930/managed-cache/v2/d662d9ed0207adcf/manifest.json": "85714ea3aa6a05798e969fedcda03b07f6d6528e467b6a27d15ac26c945dd56e",
+    "modes-1645930/summary.json": "458d4d61ca85cced0f407d06bc49550421788cb4e544f563572c0b3e591d494e",
+    "modes-1645931/eager_run-1.json": "b129d9a3d1dc1be7a63ccfd276d9146e013407916f4818f1a574f0ede4e06db9",
+    "modes-1645931/graph_replay-1.json": "b0075d85a6f4b177bb8e963d61bfd51bb1bb68be0c0cbfcf29f5ef93709ab3db",
+    "modes-1645931/graph_replay-16.json": "484998fbbca3b7658a91e2f4c3c231cf49ff9efbb41c9ecc9a58ef3d24632af7",
+    "modes-1645931/managed-cache/v2/7b1b10109fa04cfd/entries/16c66bd2a92556af42975a49.json": "bc37d604662aa8e2b792ad4612d0b3ee4f7caed7546743d62770ac755701901d",
+    "modes-1645931/managed-cache/v2/7b1b10109fa04cfd/entries/3b7024aa572416c4d79466bf.json": "8919b94c836af3a31a313b832ccab76b194cc9b41c2c329d9e08366ad82caa23",
+    "modes-1645931/managed-cache/v2/7b1b10109fa04cfd/manifest.json": "065ac4b6c9524c5384c634897b3099fe0c305e487c639ab84d026daab173bb3a",
+    "modes-1645931/managed-cache/v2/a2f11eaa63cd5fea/entries/5c402d45a67c953600bcd2be.json": "a18a03932d44cac35b2a7d145230f41ad53b5128fc9abb048b1cfeee97488b86",
+    "modes-1645931/managed-cache/v2/a2f11eaa63cd5fea/manifest.json": "eb4a01cefb60fe7bc9012a07fabd060b3bf932a20b05738b7e6bb70577d3e280",
+    "modes-1645931/summary.json": "4e82e684633465dc7989fac2ed73295a24dd58748a7954fbaf57e6bf71843765",
+    "official_wheel.sbatch": "c475b0f6802cbb07b7233183aecb86b80166d04ae2c9f9cfd5132d33a1dfde50",
+    "prefill_resource_v2_example.py": "33a47fc989b857aa4e367986587ee55271bbef5a4709382da4bab39f7f0c8fb8",
+    "receipts/calibration-1645930.txt": "c3c3922b8b34d6410db37957fe019e7686b34fb8da5bcf5f5004fbf1a8afc2da",
+    "receipts/calibration-1645931.txt": "4fef39732948a3bc0df9000a58233af6e178766b213b897fbfe41eb2d0fb56c2",
+    "receipts/exit-1645930.txt": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "receipts/exit-1645931.txt": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "receipts/hardware-1645930.csv": "4836284b2bdcbebd91ddef0ef5f7978f7d7b1c80d04ab7186860a2a312ad8efc",
+    "receipts/hardware-1645931.csv": "2f14995e3fade30fcac4c5e6f1c6badd1ae1b2c4464eb573e3a5e2d25fd6234d",
+    "receipts/jobs.json": "837fbf7877e5d85a70debda768a5262d9df249aa42de2cb864367b32657ca267",
+    "receipts/slurm-1645930.txt": "3656b9fdbe590d42fefb1cfca317f4fb7ccba98d95300d2e4c5ac75182108869",
+    "receipts/slurm-1645931.txt": "db00e79c5a48fb0e096759fb9943eb67a84b46b486926b264cd05a362dd22b8d",
+    "receipts/source-verification-1645930.txt": "f0fce1370a1cc396fca059969ecfd29cac99f3f9945c02143d5edcd4698a08ac",
+    "receipts/source-verification-1645931.txt": "f0fce1370a1cc396fca059969ecfd29cac99f3f9945c02143d5edcd4698a08ac",
+    "receipts/tests-1645930.xml": "f629751afe398d9e2de7a54e1d578b456e06358204a87c74f89fa4e32a5a2eec",
+    "receipts/tests-1645931.xml": "81ec122fe0e7e094deea3015de9ee2787c2dc484aae78ab42e227ddcbcfdb6d7",
+    "receipts/validation-verification-1645930.txt": "9d916aa8a257a4ff503ec5d26587225baba85dea7fd2d75037f3425d6d344802",
+    "receipts/validation-verification-1645931.txt": "9d916aa8a257a4ff503ec5d26587225baba85dea7fd2d75037f3425d6d344802",
+    "validation.sha256": "285551530fc8de3a6d4bf0fc6c514f69e33406ef1d740f1bf74b628767929b25"
+  },
+  "source_final_verification_sha256": "f0fce1370a1cc396fca059969ecfd29cac99f3f9945c02143d5edcd4698a08ac",
+  "scope": "normal upstream 0.7.1 wheel frombab48695 with exact current CCCL/CUTLASS/spdlog pins; exposed geometry; prepared eager and pure Graph1/16; no metadata updates/full serving",
+  "independent_process_release_qualified": false,
+  "fresh_cases_consumed": 0,
+  "default_promotion": false,
+  "serving_promotion": false,
+  "historical_token_divergence_resolved": false
+}
