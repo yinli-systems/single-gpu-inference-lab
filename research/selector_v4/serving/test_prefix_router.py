@@ -67,6 +67,19 @@ def test_current_early_bound_inputs_use_public_registry_with_native_fallback():
     assert router.evidence()["actual_resource_launch_count"] is None
 
 
+def test_unknown_host_geometry_returns_native_before_tensor_unpack_or_signatures():
+    router, adapter, _, owner, inputs, _, calls, native = setup()
+    adapter.current_prefix_lengths = ((999,), (8888,))
+
+    def forbidden(*args):
+        raise AssertionError("Unknown host geometry must avoid KV unpack and tensor inspection")
+
+    router.unpack_paged_cache = forbidden
+    inputs[0].stride = forbidden
+    assert router.run(owner, inputs[0], object(), causal=False) == ("native-o", "native-lse")
+    assert not calls and len(native) == 1
+
+
 @pytest.mark.parametrize(
     "reason",
     [

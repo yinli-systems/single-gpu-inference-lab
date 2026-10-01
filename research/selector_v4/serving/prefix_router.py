@@ -21,6 +21,7 @@ class PagedPrefixRouter:
         self.bindings = {}
         self.counters = {"native_calls": 0, "prepared_attempts": 0}
         self.owners = set()
+        self.host_geometries = set()
         for binding in adapter.bindings:
             entry = binding.registry.entries.get(binding.key)
             if entry is None:
@@ -37,6 +38,9 @@ class PagedPrefixRouter:
                 raise ValueError("Keep one frozen decision for each actual input geometry")
             self.bindings[key] = binding
             self.owners.add(id(binding.registry.owner))
+            self.host_geometries.add(
+                (id(binding.registry.owner), binding.qo_lengths, binding.kv_lengths)
+            )
         self.unpack_paged_cache = unpack_paged_cache
         if self.bindings and self.unpack_paged_cache is None:
             from flashinfer.utils import _unpack_paged_kv_cache
@@ -50,6 +54,9 @@ class PagedPrefixRouter:
         native = functools.partial(owner.forward_return_lse, q, kv_cache, **forward_options)
         geometry = self.adapter.current_prefix_lengths
         if geometry is None or self.adapter.depth or self.graph_or_tracing():
+            self.counters["native_calls"] += 1
+            return native()
+        if (id(owner), *geometry) not in self.host_geometries:
             self.counters["native_calls"] += 1
             return native()
         # Native supports tuple and packed Tensor payloads, including an implicit
