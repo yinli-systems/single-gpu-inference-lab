@@ -117,23 +117,28 @@ def run(out):
                         assert current.receipt["checksum"] == cert["checksum"]
                     else:
                         assert current.receipt is None and not current._receipt_valid
-                torch.testing.assert_close(result, reference, rtol=0, atol=0)
                 rows.append(
                     dict(
                         block=block,
                         position=position,
                         arm=arm,
                         wall_ms=(finished - start) / 1e6,
-                        plan_host_ms=(planned - start) / 1e6,
-                        constructor_host_ms=(constructed - planned) / 1e6,
+                        plan_call_wall_ms=(planned - start) / 1e6,
+                        constructor_call_wall_ms=(constructed - planned) / 1e6,
                         run_and_sync_ms=(finished - constructed) / 1e6,
-                        exact=True,
+                        exact=torch.equal(result, reference),
                         confidence_identity_stable=current.identity == runner.identity
                         if current
                         else None,
                     )
                 )
-            save(out / "measurements.json", rows)
+                save(out / "measurements.json", rows)
+                if not rows[-1]["exact"]:
+                    torch.save(
+                        {"actual": result, "native_reference": reference},
+                        out / f"mismatch-{block}-{position}.pt",
+                    )
+                    raise RuntimeError("Setup diagnosis output mismatch; raw tensors retained")
     save(
         out / "complete.json",
         dict(
