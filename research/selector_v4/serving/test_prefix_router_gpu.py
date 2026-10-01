@@ -82,6 +82,11 @@ def test_real_packed_prefix_router_and_announced_epochs(packed, tmp_path, monkey
             _, tactic = AutoTuner.get().choose_one(
                 "experimental_prefill_resource", [lease.runner], lease.runner.tuning_config, inputs
             )
+        # Keep the complete first certificate and actual winner before any
+        # witness assertion, including failed diagnostic attempts.
+        (root / (label + "-training.json")).write_text(
+            json.dumps({"certificate": receipt, "actual_managed_tactic": tactic}, indent=2) + "\n"
+        )
         registry = ServingEpochRegistry(owner)
         registry.register(label, lease, actual_managed_tactic=tactic)
         registry.freeze()
@@ -156,6 +161,7 @@ def test_real_packed_prefix_router_and_announced_epochs(packed, tmp_path, monkey
                             [lease.runner],
                             tuple(tuner._get_input_sizes(inputs)),
                             config,
+                            inputs=inputs,
                         )
                         assert hit and index == 0 and cached == 1
                         hits.append(cached)
