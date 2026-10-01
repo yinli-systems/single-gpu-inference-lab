@@ -39,6 +39,7 @@ class MetadataEpochAdapter:
         self.bindings = []
         self.frozen = False
         self.depth = 0
+        self.current_prefix_lengths = None
         self.originals = {}
         self.counters = {"updates": 0, "graph_updates": 0, "early_binds": 0}
 
@@ -74,6 +75,7 @@ class MetadataEpochAdapter:
         )
 
     def before_update(self, graph):
+        self.current_prefix_lengths = None
         self.counters["updates"] += 1
         self.counters["graph_updates"] += int(graph)
         seen = set()
@@ -98,6 +100,7 @@ class MetadataEpochAdapter:
         kv = host_lengths(forward_batch.extend_prefix_lens_cpu)
         if qo is None or kv is None or len(qo) != len(kv) or not all(qo) or not all(kv):
             return
+        self.current_prefix_lengths = (qo, kv)
         owners = metadata.prefill_wrappers
         for binding in self.bindings:
             if (
