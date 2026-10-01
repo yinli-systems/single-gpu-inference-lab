@@ -6,6 +6,7 @@ The native and resource calls share every input/output/workspace/metadata buffer
 
 from __future__ import annotations
 import argparse, gc, hashlib, itertools, json, math, os, time
+from functools import partial
 from pathlib import Path
 
 CELLS = [
@@ -131,7 +132,11 @@ def run(out, rep):
         lse = torch.empty(q.shape[0], 32, dtype=torch.float32, device="cuda")
         kw = {"out": output, "lse": lse, "return_lse": True}
         inputs = [q, k, v]
-        native = lambda: w.run(q, (k, v), **kw) if c["layout"] == "paged" else w.run(q, k, v, **kw)
+        native = (
+            partial(w.run, q, (k, v), **kw)
+            if c["layout"] == "paged"
+            else partial(w.run, q, k, v, **kw)
+        )
         native()
         reference = [output.clone(), lse.clone()]
         before = libraries()
@@ -147,10 +152,12 @@ def run(out, rep):
         proxy = runner._proxy
         if proxy._float_workspace_buffer.data_ptr() != w._float_workspace_buffer.data_ptr():
             raise RuntimeError("workspace not shared")
-        resource = lambda: (
-            proxy.run(q, (k, v), **kw) if c["layout"] == "paged" else proxy.run(q, k, v, **kw)
+        resource = (
+            partial(proxy.run, q, (k, v), **kw)
+            if c["layout"] == "paged"
+            else partial(proxy.run, q, k, v, **kw)
         )
-        fallback = lambda: runner.forward(inputs, tactic=1)
+        fallback = partial(runner.forward, inputs, tactic=1)
         for call in (resource, native, fallback, native):
             call()
             torch.cuda.synchronize()
@@ -272,7 +279,28 @@ def run(out, rep):
         )
         save(out / "measurements.json", rows)
         save(out / "numerics.json", numerics)
-        del graphs, runner, proxy, w, ws, q, k, v, output, lse, reference
+        del (
+            graphs,
+            g,
+            calls,
+            actions,
+            call,
+            native,
+            resource,
+            fallback,
+            runner,
+            proxy,
+            w,
+            ws,
+            q,
+            k,
+            v,
+            output,
+            lse,
+            reference,
+            inputs,
+            kw,
+        )
         gc.collect()
         torch.cuda.empty_cache()
     save(
