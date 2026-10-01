@@ -974,8 +974,8 @@
     "cpu_patch_evidence": "evidence/v42-eager-rebind-cpu/",
     "all5_patched_files_match_commit": true,
     "example_requires_gpu_validation": true,
-    "normal_build_pending": true,
-    "normal_gpu_validation_pending": true,
+    "normal_build_pending": false,
+    "normal_gpu_validation_pending": false,
     "normal_tests_expected_per_gpu": 86,
     "normal_cpu_expected": 66,
     "normal_gpu_expected": 20,
@@ -983,18 +983,31 @@
     "normal_validation_root": "/ssd/scxi253/sgi-official-wheel-validation-d3d080ce-20261001",
     "finite_source_gate": "/ssd/scxi253/sgi-eager-rebind-source-prequalification",
     "functional_gpu_gate_mocking_not_a_performance_certificate": true,
-    "actual_same_geometry_eager_cost_unqualified": true,
+    "actual_same_geometry_eager_cost_unqualified": false,
     "graph_rebinding_supported": false,
     "immutable_package_compiler_contract": true,
     "qualified_release": false,
     "qualified_http": false,
     "default_promotion": false,
-    "fresh_cases_consumed": 0
+    "fresh_cases_consumed": 0,
+    "normal_tests_passed_per_gpu": 86,
+    "normal_cpu_tests_passed": 66,
+    "normal_gpu_tests_passed": 20,
+    "normal_build_evidence": "evidence/v42-normal-eager-rebind-wheel-build/",
+    "normal_gpu_evidence": "evidence/v42-normal-eager-rebind-wheel-functional/",
+    "sass_evidence": "evidence/v42-normal-eager-rebind-wheel-sass/",
+    "native_resource_sass_pairs": 352,
+    "normal_gpu_jobs": {
+      "gpu_4090": "1646256",
+      "gpu_5090": "1646257"
+    },
+    "exposed_same_geometry_eager_cost_observed": true,
+    "new_tensor_control_fix_requires_own_source_qualification": true
   },
   "public_plan_rebind_cost_diagnostic": {
     "harness_commit": "58da590d65abba94d3ffb9df89b40755779170ea",
     "source_commit": "d3d080ce36bf074136d4b2093b775a8cb1d7dfc5",
-    "dispatch_pending_normal_dual86_and_sass": true,
+    "dispatch_pending_normal_dual86_and_sass": false,
     "campaign": "/ssd/scxi253/sgi-public-plan-rebind-58da590-d3d080ce-20261001",
     "observations_per_gpu": 32,
     "blocks": 8,
@@ -1004,6 +1017,38 @@
     "managed_profiling_repeat_fixed": 256,
     "initial_source_audit_jit_calibration_training_not_scored": true,
     "qualification_authority": false,
-    "fresh_cases_consumed": 0
+    "fresh_cases_consumed": 0,
+    "jobs": {
+      "gpu_4090": "1646459",
+      "gpu_5090": "1646460"
+    },
+    "complete": true,
+    "all32_observations_per_gpu_retained": true,
+    "all_output_exact": true,
+    "resource_rebound_calls_per_gpu": 16,
+    "evidence": "evidence/v42-public-plan-rebind-complete/",
+    "mean_native_ms": {
+      "gpu_4090": 2.367618625,
+      "gpu_5090": 1.9567138125
+    },
+    "mean_full_rebind_ms": {
+      "gpu_4090": 2.1632910625,
+      "gpu_5090": 1.7621609375
+    },
+    "mean_native_over_rebind": {
+      "gpu_4090": 1.094452182622097,
+      "gpu_5090": 1.1104058493522246
+    },
+    "independent_release_qualified": false
+  },
+  "self_review_tensor_control_hardening": {
+    "source_commit_pending_cpu_proof": true,
+    "scope": "Bind control Tensor address/version, reject untracked controls before cold source scan, preserve output/LSE scratch writes, reject changed control during rebind.",
+    "normal_new_source_qualified": false,
+    "private_cpu_expected_passes": 70,
+    "private_gpu_skips_expected": 20,
+    "private_cpu_root": "/ssd/scxi253/sgi-tensor-control-cpu-20261001T1315Z",
+    "qualified_release": false,
+    "qualified_http": false
   }
 }

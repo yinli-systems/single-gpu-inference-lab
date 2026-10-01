@@ -140,3 +140,15 @@ NormalbuilderPID2398314 andfinitewheelgatePID2398527 active, build /ssd/scxi253/
 Researchharness58da590d65abba94d3ffb9df89b40755779170ea, planned /ssd/scxi253/sgi-public-plan-rebind-58da590-d3d080ce-20261001, fixed32shortcalls8ABBA/BAABblocks/GPU, oneprocess, actualplan+metadata-validation/rebind+managedrun. Managedprofiling_repeat fixed256; notcausalproof about12msoutlier. Initialsourceaudit/JIT/calibration/training outsidecalls. Inconclusiveconfidence oractualnativewinner retainsdirectnative. Allcompletedrows durable beforeassert; noformalreleaseauthority.
 
 Frozenv4.2dualHOLDstillstands; no v4.3freshsource/casesfrozen. New10canarynotgenerated/dispatched;48release/12stress untouched; historical2/432unresolved; fullresourceHTTP unqualified; default/servingOFF; twoPRsstilllast.
+
+## 2026-10-01T13:16Z normal d3 dual86/SASS and actual rebind cost complete
+
+Normal d3d080ce wheel65833431bytesSHA6c6c9dfc85cf45924c114cdc5a0b64680d912a9bdf691c2e6ce6e5c227eff76a,10126sourcefilesverified.1646256/1646257COMPLETED0:0 dual86(66CPU+20GPU),example,all3realmanagedmodes.352native/resourceSASSpairsPASS. Allrawbuild/functional/SASSarchives locallySHAverified andevidence/v42-normal-eager-rebind-wheel-*. No thresholdrelaxation/promotion.
+
+Fullplan-rebind diagnostic1646459/1646460COMPLETED0:0,32calls/card,alloutputexact,bothrealcertificateaccepted+actualmanagedresource1,16resource rebindcalls/card. Mean native/rebind4090=2.367619/2.163291ms(1.09445218),5090=1.956714/1.762161ms(1.11040585). Independentofpriornewconstructor seconds; actualplan/metadatavalidation/managedrunincluded. Exposed oneprocessshortcalls only, noformalreleasecontrols/CI. RawarchiveSHA8fe5dc99fae2da6fb78f1fec91dfc2460d4ecbd60cd05196dbba9289e5d3322b,231028bytes, locallyverified. evidence/v42-public-plan-rebind-complete/.
+
+Applying repo self-review skill aftersourcefunctionalcompletion. gitfetchupstreammainnow1cad3816,11commitsafterpinned85744da1. TargetedFA2prefill/scheduler/C++/nativePython/JITcore/compiler/generator/vendorpins/version diffempty. Unrelatedcake kernels/pyproject additions advanced; do notclaimnewupstreamfullpackage qualified bypinnednormalbuild. Needkeepactualbase/hash inreview.
+
+Self-reviewfoundTensorcontroloptions onlyboundshape/stride; nowuncommitted hardening bindsaddress/version,rejectsunknowninferencecontrols early,preservesoutput/LSEscratchwrites, adds3CPU tests+1rebind parametercase. PrivateCPU patchproofPIDpending at /ssd/scxi253/sgi-tensor-control-cpu-20261001T1315Z expects70CPU+20GPUSKIP,readonlydependency symlinkoverlay overnormald3source,3patchedregularfiles. No oldoverlay source mutation. README fourthchangedfile outsideCPU proof; sourcecommitrequiresCPUPASS. Currentnormald3 resultsdonotcovernewsource.
+
+ResearchHEAD updates normal/rebindarchives. No newv4.3protocol orfresh10cases frozen/consumed, original48/12untouched, frozenv4.2dualHOLD/historical2/432unresolved, fullresourceHTTP unqualified, twoPRslast. Nextnormalnewsource+90tests+SASS beforeformal newrevision/development route.

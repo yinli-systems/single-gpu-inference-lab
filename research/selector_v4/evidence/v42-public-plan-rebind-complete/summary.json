@@ -1,0 +1,249 @@
+{
+  "binding": {
+    "harness_commit": "58da590d65abba94d3ffb9df89b40755779170ea",
+    "flashinfer_source_commit": "d3d080ce36bf074136d4b2093b775a8cb1d7dfc5",
+    "normal_wheel_sha256": "6c6c9dfc85cf45924c114cdc5a0b64680d912a9bdf691c2e6ce6e5c227eff76a",
+    "source": "/ssd/scxi253/sgi-official-wheel-validation-d3d080ce-20261001/wheel-overlay",
+    "source_ledger_sha256": "80d3d55983ceb1193edb2bda7a432abe676e4ddb6f62f0f24155970f50c0b22a",
+    "vendor_git_pins": {
+      "cccl": "16bd510c9b712e82b0ab6cbb630d8e29ba1f7116",
+      "cutlass": "b46b16d003484063bca4ed365e44095c4c6ed633",
+      "spdlog": "c3aed4b68373955e1cc94307683d44dca1515d2b"
+    },
+    "geometry": "Previously exposed BF16 ragged unsplit causal, ordered Q[3,39,107,175,243,311,411] and cached[22528,16512,11840,8256,2624,672,80]",
+    "observations_per_gpu": 32,
+    "balanced_abba_blocks": 8,
+    "independent_processes": 1,
+    "includes_native_plan_and_public_rebind_and_managed_run": true,
+    "fixed_managed_profiling_repeat": 256,
+    "native_managed_winner_bypasses_rebind": true,
+    "rebind_rejection_stays_native_and_is_retained": true,
+    "initial_source_audit_jit_calibration_training_not_scored": true,
+    "immutable_package_compiler_envelope": true,
+    "construction_of_new_runner_per_plan": false,
+    "actual_geometry_metadata_validation_in_scored_calls": true,
+    "fresh_cases_consumed": 0,
+    "all_started_observations_retained": true,
+    "qualification_authority": false,
+    "full_http_qualified": false,
+    "default_promotion": false,
+    "historical_token_divergence_resolved": false
+  },
+  "gpus": {
+    "gpu_4090": {
+      "job": "1646459",
+      "environment": {
+        "source_commit": "d3d080ce36bf074136d4b2093b775a8cb1d7dfc5",
+        "package_version": "0.7.1",
+        "gpu_uuid": "609be493-8290-7630-a52e-272a091204df",
+        "gpu_name": "NVIDIA GeForce RTX 4090",
+        "source_sha256": "f4b3cf246824b50101545609da3c09f8d9f100209af13c5855c0f00c32a7af02",
+        "confidence_identity": "385ce05636806161a81209338862d1cd449c94413f4365e3a029fe6f265cb9eb",
+        "confidence_checksum": "9d2bee3eaf75e115daa2c6a2bde766f0bdfea8625727a4084c94f673ea763d4d",
+        "confidence_accepted": true,
+        "confidence_published": true,
+        "initial_managed_tactic": 1,
+        "fixed_managed_profiling_repeat": 256,
+        "initial_confidence_checksum": "9d2bee3eaf75e115daa2c6a2bde766f0bdfea8625727a4084c94f673ea763d4d",
+        "native_winner_uses_direct_native_path": true,
+        "source_compiler_files_immutable_for_prepared_lifetime": true,
+        "geometry_metadata_validation_in_scored_calls": true,
+        "previously_exposed_geometry": true,
+        "fresh_cases_consumed": 0,
+        "qualification_authority": false
+      },
+      "observations": 32,
+      "all_output_exact": true,
+      "resource_rebound_calls": 16,
+      "native_fallback_calls_in_rebind_arm": 0,
+      "by_arm": {
+        "native": {
+          "wall_ms": {
+            "mean": 2.367618625,
+            "median": 2.3313875,
+            "minimum": 2.319213,
+            "maximum": 2.753813
+          },
+          "plan_call_wall_ms": {
+            "mean": 0.147200125,
+            "median": 0.1242,
+            "minimum": 0.1203,
+            "maximum": 0.436811
+          },
+          "rebind_call_wall_ms": {
+            "mean": 0.000415,
+            "median": 0.00036,
+            "minimum": 0.00034,
+            "maximum": 0.00083
+          },
+          "run_and_sync_ms": {
+            "mean": 2.2200035,
+            "median": 2.2002425,
+            "minimum": 2.196862,
+            "maximum": 2.316172
+          }
+        },
+        "rebind": {
+          "wall_ms": {
+            "mean": 2.1632910625,
+            "median": 2.0687975,
+            "minimum": 2.049742,
+            "maximum": 2.545612
+          },
+          "plan_call_wall_ms": {
+            "mean": 0.145268875,
+            "median": 0.12234,
+            "minimum": 0.120401,
+            "maximum": 0.22611
+          },
+          "rebind_call_wall_ms": {
+            "mean": 0.21022156250000001,
+            "median": 0.1713105,
+            "minimum": 0.16098,
+            "maximum": 0.34066
+          },
+          "run_and_sync_ms": {
+            "mean": 1.807800625,
+            "median": 1.7728920000000001,
+            "minimum": 1.765081,
+            "maximum": 1.979812
+          }
+        }
+      },
+      "native_over_public_block_ratios": [
+        1.1496218267481078,
+        1.003180792383027,
+        1.0313809233046947,
+        1.1556671127609197,
+        1.1076754823455746,
+        1.1386274850089382,
+        1.1425614719745496,
+        1.0450362492743184
+      ],
+      "native_over_public_block_geomean": 1.0952137795157544,
+      "native_over_public_mean_wall": 1.094452182622097
+    },
+    "gpu_5090": {
+      "job": "1646460",
+      "environment": {
+        "source_commit": "d3d080ce36bf074136d4b2093b775a8cb1d7dfc5",
+        "package_version": "0.7.1",
+        "gpu_uuid": "d5611dcb-2010-c7a0-50f0-d2296645e9cc",
+        "gpu_name": "NVIDIA GeForce RTX 5090",
+        "source_sha256": "f4b3cf246824b50101545609da3c09f8d9f100209af13c5855c0f00c32a7af02",
+        "confidence_identity": "3c7126441ffe7c376b1892e6f60ca6503eb5f1e3cc852d589eb8c79ed40fb12f",
+        "confidence_checksum": "11b06fc95d072ea96d603e9c7784333b1598aca8be771188eb6aecab78d0a6e7",
+        "confidence_accepted": true,
+        "confidence_published": true,
+        "initial_managed_tactic": 1,
+        "fixed_managed_profiling_repeat": 256,
+        "initial_confidence_checksum": "11b06fc95d072ea96d603e9c7784333b1598aca8be771188eb6aecab78d0a6e7",
+        "native_winner_uses_direct_native_path": true,
+        "source_compiler_files_immutable_for_prepared_lifetime": true,
+        "geometry_metadata_validation_in_scored_calls": true,
+        "previously_exposed_geometry": true,
+        "fresh_cases_consumed": 0,
+        "qualification_authority": false
+      },
+      "observations": 32,
+      "all_output_exact": true,
+      "resource_rebound_calls": 16,
+      "native_fallback_calls_in_rebind_arm": 0,
+      "by_arm": {
+        "native": {
+          "wall_ms": {
+            "mean": 1.9567138125,
+            "median": 1.9434874999999998,
+            "minimum": 1.934862,
+            "maximum": 2.092441
+          },
+          "plan_call_wall_ms": {
+            "mean": 0.16002325,
+            "median": 0.150758,
+            "minimum": 0.14053,
+            "maximum": 0.277972
+          },
+          "rebind_call_wall_ms": {
+            "mean": 0.0003915,
+            "median": 0.00038100000000000005,
+            "minimum": 0.000329,
+            "maximum": 0.000502
+          },
+          "run_and_sync_ms": {
+            "mean": 1.7962990625,
+            "median": 1.7956405,
+            "minimum": 1.783721,
+            "maximum": 1.814019
+          }
+        },
+        "rebind": {
+          "wall_ms": {
+            "mean": 1.7621609375,
+            "median": 1.756013,
+            "minimum": 1.708236,
+            "maximum": 1.878869
+          },
+          "plan_call_wall_ms": {
+            "mean": 0.1557346875,
+            "median": 0.1532845,
+            "minimum": 0.140439,
+            "maximum": 0.17432
+          },
+          "rebind_call_wall_ms": {
+            "mean": 0.162787375,
+            "median": 0.157535,
+            "minimum": 0.137818,
+            "maximum": 0.23033
+          },
+          "run_and_sync_ms": {
+            "mean": 1.443638875,
+            "median": 1.4412829999999999,
+            "minimum": 1.427129,
+            "maximum": 1.474219
+          }
+        }
+      },
+      "native_over_public_block_ratios": [
+        1.1164523995379672,
+        1.105780299843876,
+        1.1221301873097933,
+        1.0954758093606276,
+        1.106654427208937,
+        1.1195776704740104,
+        1.112148467689559,
+        1.1053038901344117
+      ],
+      "native_over_public_block_geomean": 1.110409649621118,
+      "native_over_public_mean_wall": 1.1104058493522246
+    }
+  },
+  "input_files_sha256": {
+    "binding.json": "48d8d9e80551d857863baca475a70089514fdf270ba23db8d4def3f3155699cf",
+    "runs/gpu_4090-1646459/calibration.json": "1c217b060e5367f927d255ef8a0bc0188a173a1b571a0829288cf1164524cf78",
+    "runs/gpu_4090-1646459/complete.json": "4066115992d209997b39d69292231fdb169589224006860a445aa2bd8187cbba",
+    "runs/gpu_4090-1646459/environment.json": "509b994b34858578ebc8f8d173cf904d7a624ba44e1f814628487932cc42d380",
+    "runs/gpu_4090-1646459/measurements.json": "db2ecd0a7c4e743449b55f36a2f3b36bb2225ffe9fe14cae9c5a3011028217c9",
+    "runs/gpu_4090-1646459/managed-cache/v2/156f30c3888fa9d1/manifest.json": "7523cfa33220c4b5b72661be89cf159f4e4622f0bf8de76b89d922b619d28ada",
+    "runs/gpu_4090-1646459/managed-cache/v2/156f30c3888fa9d1/entries/555ca96d5db48e4913765515.json": "89026fc3394586c704c59f01e9e2721e6f4eb5982d7e7d62905f487f0c488a71",
+    "runs/gpu_5090-1646460/calibration.json": "ede1d376438d92164bc4fa41f7a264e8541081aed330ce153085720959be58f6",
+    "runs/gpu_5090-1646460/complete.json": "da5c2c2a6de66b26f162c50c062ea426b0efb1666f67508f8977291fea0b948b",
+    "runs/gpu_5090-1646460/environment.json": "66c289bc04cb7b0c2f178047d1b44d1903d2f6728292a235838ec92387adda1c",
+    "runs/gpu_5090-1646460/measurements.json": "042a95d6aa93b14a9cd5e44dbaddada55406cf07368c6380289a8c09b6416760",
+    "runs/gpu_5090-1646460/managed-cache/v2/a2f11eaa63cd5fea/manifest.json": "eb4a01cefb60fe7bc9012a07fabd060b3bf932a20b05738b7e6bb70577d3e280",
+    "runs/gpu_5090-1646460/managed-cache/v2/a2f11eaa63cd5fea/entries/c230d9b27511390d5afc2b95.json": "d35c467918ed4d0c046cb24ee5f1c13a85252efb604307ebd7c849f0aed2b8ba"
+  },
+  "analyzer_sha256": "ba30ab20d9da999bc400972827115aebf2145716d11205530f3181d2aa1e922b",
+  "trimmed_observations": 0,
+  "all32_observations_per_gpu_retained": true,
+  "fresh_cases_consumed": 0,
+  "qualification_authority": false,
+  "full_http_qualified": false,
+  "default_promotion": false,
+  "historical_token_divergence_resolved": false,
+  "limitations": [
+    "One exposed geometry and one process per GPU; short calls do not satisfy release windows or independent-process controls.",
+    "Actual native plan, geometry validation/rebind and selected managed run are included; initial source audit/compilation/calibration/training is excluded. Prepared package/compiler files must remain immutable; Graph runners and changing serving geometries remain unqualified.",
+    "Component times are wall durations and can include synchronization; they are not pure CPU or kernel cycles.",
+    "Ratios are descriptive only; no confidence interval or formal qualification is inferred from these correlated samples."
+  ]
+}
