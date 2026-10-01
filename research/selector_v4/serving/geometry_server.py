@@ -119,7 +119,10 @@ def install():
         if any(x is None for x in row["metadata_version_tracking"].values()):
             reasons.append("current_main_prepared_runner_rejects_untracked_metadata")
         row["integration_gaps_to_validate"] = reasons
-        key = hashlib.sha256(json.dumps(row, sort_keys=True).encode()).hexdigest()
+        # Counter values change across equivalent plans; record the first actual
+        # counters, while deduplicating by geometry and tracking availability.
+        key_fields = {k: v for k, v in row.items() if k != "metadata_version_tracking"}
+        key = hashlib.sha256(json.dumps(key_fields, sort_keys=True).encode()).hexdigest()
         if key in seen:
             return
         if len(seen) >= 256:
