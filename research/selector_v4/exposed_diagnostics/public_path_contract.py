@@ -7,7 +7,7 @@ import math
 import numpy as np
 
 CONTRACT = {
-    "scope": "EXPOSED_PUBLIC_PATH_PREQUAL_1",
+    "scope": "EXPOSED_PUBLIC_PATH_PREQUAL_2",
     "blocks_per_process": 24,
     "independent_training_processes": 3,
     "independent_policy_processes": 3,
@@ -20,6 +20,7 @@ CONTRACT = {
     "duplicate_control_tolerance": 0.005,
     "bootstrap_draws": 20000,
     "managed_profiling_repeat": 256,
+    "native_conditioning_seconds": 30,
     "fresh_cases_consumed": 0,
     "canary_authority": False,
     "release_authority": False,

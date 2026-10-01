@@ -327,6 +327,26 @@ def run(args):
                 )
                 return eager(use_resource)
 
+            # Apply the same native workload after compilation/cache hydration
+            # in every process; initialization must not give one arm a cold GPU.
+            conditioning_started = time.monotonic()
+            conditioning_batches = 0
+            while time.monotonic() - conditioning_started < CONTRACT["native_conditioning_seconds"]:
+                for _ in range(16):
+                    call("native")
+                torch.cuda.synchronize()
+                conditioning_batches += 1
+            save(
+                root / "native-conditioning.json",
+                {
+                    "seconds_minimum": CONTRACT["native_conditioning_seconds"],
+                    "elapsed_seconds": time.monotonic() - conditioning_started,
+                    "batches": conditioning_batches,
+                    "includes_scored_windows": False,
+                    "workload": "native only; identical rule for pristine/train/policy",
+                },
+            )
+
             if args.role == "pristine" and args.rep == 0:
                 pilots = []
                 for _ in range(2):
