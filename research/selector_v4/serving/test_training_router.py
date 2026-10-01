@@ -9,7 +9,9 @@ from research.selector_v4.serving.metadata_adapter import Binding, MetadataEpoch
 from research.selector_v4.serving.prefix_training_server import CONTROL_KEY, phase_transition
 from research.selector_v4.serving.test_epoch_registry import Lease
 from research.selector_v4.serving.test_prefix_router import tensor
+from research.selector_v4.serving.test_training_session import complete_kernel
 from research.selector_v4.serving.training_router import TrainingPrefixRouter
+from research.selector_v4.serving.training_session import PrefixTrainingSession
 
 
 def setup():
@@ -137,6 +139,7 @@ def test_graph_and_unknown_geometry_cannot_train_and_failed_seal_cannot_route():
     backend.init_forward_metadata(batch)
     graph[0] = True
     assert router.run(owner, inputs[0], tuple(inputs[1:]), causal=True) == "native"
+
     graph[0] = False
     router.adapter.current_prefix_lengths = None
     assert router.run(owner, inputs[0], tuple(inputs[1:]), causal=True) == "native"
@@ -150,3 +153,22 @@ def test_graph_and_unknown_geometry_cannot_train_and_failed_seal_cannot_route():
         router.seal()
     assert router.phase == "FAILED" and router.frozen_router is None
     assert router.run(owner, inputs[0], tuple(inputs[1:]), causal=True) == "native"
+
+
+def test_actual_training_session_seal_hands_release_ownership_to_serving_adapter(tmp_path):
+    router, backend, batch, _, inputs, owner, _, _, _, lease = setup()
+    root, expected = complete_kernel(tmp_path)
+    session = PrefixTrainingSession(
+        root, tmp_path / "real-session-state", candidate_commit=expected["candidate_commit"]
+    )
+    router.begin(session)
+    # Synthetic lease/tensors; the session and adapter lifecycle are actual.
+    registry = ServingEpochRegistry(owner)
+    registry.register("prepared", lease, actual_managed_tactic=1)
+    session.registries[id(owner)] = registry
+    session.bindings.append(Binding(registry, "prepared", inputs, (3, 5), (10, 20), lease.options))
+    router.seal()
+    assert session.sealed and router.phase == "FROZEN_SERVING" and lease.state == "RELEASED"
+    backend.init_forward_metadata(batch)
+    assert router.run(owner, inputs[0], tuple(inputs[1:]), causal=True) == "prepared_eager"
+    assert router.evidence()["metadata_boundaries"]["early_binds"] == 1
