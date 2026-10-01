@@ -437,10 +437,15 @@ def archive(campaign, output):
             need(statuses[job]["terminal"], "Known job still active")
     binding = verify_sources(campaign)
     complete = len(statuses) == 4 and all(v["completed"] for v in statuses.values())
+    completeness_errors = {}
     if complete:
         for gpu, group in jobs.items():
             for case, job in group.items():
-                completeness(campaign, gpu, case, job)
+                try:
+                    completeness(campaign, gpu, case, job)
+                except (ValueError, OSError, KeyError) as error:
+                    completeness_errors[job] = {"type": type(error).__name__, "message": str(error)}
+        complete = not completeness_errors
     passed = complete and controller["state"] == "PUBLIC_PATH_DEVELOPMENT_PASS"
     need(
         not passed or set(controller["analyses"]) == {"gpu_4090", "gpu_5090"},
@@ -496,6 +501,7 @@ def archive(campaign, output):
         "controller": controller,
         "jobs": jobs,
         "statuses": statuses,
+        "completeness_errors": completeness_errors,
         "analyses": controller["analyses"],
         "files": files,
         "archive_sha256": sha(target),

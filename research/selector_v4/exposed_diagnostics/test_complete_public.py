@@ -117,3 +117,34 @@ def test_prior_archive_member_integrity_required(tmp_path):
     )
     with pytest.raises(ValueError, match="Prior archive member"):
         c.verify_archive(tmp_path)
+
+
+def test_incomplete_completed_jobs_are_archived_as_hold(tmp_path, monkeypatch):
+    campaign = tmp_path / "campaign"
+    (campaign / "receipts").mkdir(parents=True)
+    (campaign / "raw.pt").write_bytes(b"original failed raw reference")
+    jobs = {"gpu_4090": {"0": "123", "1": "124"}, "gpu_5090": {"0": "125", "1": "126"}}
+    (campaign / "receipts/jobs.json").write_text(json.dumps(jobs))
+    (campaign / "receipts/controller.json").write_text(
+        json.dumps(
+            {
+                "terminal": True,
+                "state": "PUBLIC_PATH_DEVELOPMENT_COMPLETION_HOLD",
+                "analyses": {},
+            }
+        )
+    )
+    monkeypatch.setattr(c, "status", lambda _: {"terminal": True, "completed": True})
+    monkeypatch.setattr(c, "verify_sources", lambda _: {"original_campaign_remains_hold": True})
+
+    def incomplete(*args):
+        raise ValueError("All 24 cells required")
+
+    monkeypatch.setattr(c, "completeness", incomplete)
+    output = tmp_path / "archive"
+    result = c.archive(campaign, output)
+    assert result["pass_public_path_development"] is False
+    assert result["all_nine_phases_complete_on_both_cases_and_cards"] is False
+    assert len(result["completeness_errors"]) == 4
+    assert "raw.pt" in result["files"]
+    c.verify_payload(output / "raw-public-path-development.tar.gz", result["files"])
