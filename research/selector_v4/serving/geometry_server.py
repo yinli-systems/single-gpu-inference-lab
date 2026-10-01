@@ -43,7 +43,11 @@ def install():
 
     def observe(wrapper, method, bound, paged):
         q = bound["q"]
-        if not q.is_cuda or torch.cuda.is_current_stream_capturing():
+        if (
+            not q.is_cuda
+            or torch.compiler.is_compiling()
+            or torch.cuda.is_current_stream_capturing()
+        ):
             return
         batch = getattr(wrapper, "_batch_size", None)
         qi = wrapper._qo_indptr_buf.detach().cpu().tolist()
