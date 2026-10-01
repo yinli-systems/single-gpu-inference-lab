@@ -1058,6 +1058,60 @@
     "normal_build_root": "/ssd/scxi253/sgi-flashinfer-official-build-75544a17-20261001",
     "normal_dual90_pending": true,
     "build_pid": 858462,
-    "wheel_gate_pid": 858475
+    "wheel_gate_pid": 858475,
+    "normal_build_pass": true,
+    "normal_wheel_sha256": "2044882df7413bff1946b5eb78d291c0f6fb715c55263d5e1dd5fa6b28dc94d1",
+    "normal_wheel_bytes": 65833543,
+    "normal_package_files_verified": 10126,
+    "normal_dual90_jobs": {
+      "gpu_4090": "1646876",
+      "gpu_5090": "1646877"
+    },
+    "source_gate_pid": 910001
+  },
+  "independent_pristine_normal_package": {
+    "source_commit": "85744da1a397c0c4bea1a83b8345281750eb61a9",
+    "build_root": "/ssd/scxi253/sgi-flashinfer-official-build-85744da1-20261001",
+    "build_pass": true,
+    "wheel_sha256": "2f2daa468b0342cd4d9cd4d68b96c61a8c6a6b07928c78b66f5cf8d15d8c1adc",
+    "wheel_bytes": 65818279,
+    "package_files_verified": 10121,
+    "gpu_qualified": false,
+    "builder_pid": 909999
+  },
+  "cross_process_prepared_handoff": {
+    "harness_commit": "6aaa0b9f99d846380344b93df80a79ea919a7223",
+    "gate_pid": 1267945,
+    "gate_root": "/ssd/scxi253/sgi-tensor-control-process-handoff-strict-gate",
+    "expected_scope": "producer plus two fresh consumers per GPU, eager/Graph1/Graph16, real confidence and v2 disk hit, eager rebind and fixed-pointer Graph input updates",
+    "state": "WAIT_EXACT_NORMAL90_SASS",
+    "performance_qualified": false,
+    "fresh_cases_consumed": 0,
+    "old_gate_cancelled_before_dispatch": 1196013,
+    "old_gate_reason": "Static cache-miss counter did not prove actual cache hit; strict replacement asserts search_cache hit and preserved actual winner."
+  },
+  "public_path_prequalification": {
+    "harness_commit": "bb9d764a8db56621f2ff51468b2d23e985c1f25b",
+    "cpu_contract_tests_passed": 7,
+    "cases": "Only two exposed dev descriptors; no new holdouts generated",
+    "processes_per_gpu_case": {
+      "pristine": 3,
+      "training": 3,
+      "scoring": 3
+    },
+    "execution_modes": [
+      "eager_full_call",
+      "graph1_replay",
+      "graph16_replay"
+    ],
+    "training": "other two training processes only; deterministic primary rotation; require real certificates and actual v2 resource winners plus full-call gates",
+    "blocks": 24,
+    "target_window_us": 384000,
+    "minimum_window_us": 120000,
+    "held_out_oracle_never_trains": true,
+    "all_started_rows_retained": true,
+    "state": "PREPARED_NOT_DISPATCHED",
+    "qualification_authority": false,
+    "fresh_cases_consumed": 0
   }
 }
