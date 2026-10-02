@@ -1,40 +1,41 @@
-# 固定 capture 的 Resource Graph 元数据诊断
+# 固定 capture 的 Resource Graph 元数据诊断：双卡 PASS
 
-这是新的、独立的开发诊断。它不更新原始 v4.2 双卡 canary 的 HOLD，不授权默认或 serving promotion，不闭环原始 2/432 token divergence。
+本轮固定 exposed 几何的最小 driver 诊断已完成；Paracloud 与本地均复核通过。它关闭了这一具体实验的功能验证，不改变原始 v4.2 双卡 canary 的 HOLD，不授权默认或 serving promotion，不闭环原始 2/432 token divergence。
 
-## 已完成并可复核
+| GPU | Slurm job / 终态 | GPU 单元 | 元数据 epoch | pytest | 独立 Native/Resource SASS |
+|---|---|---:|---:|---|---|
+| RTX4090 | 1649088 / COMPLETED0:0 | 16 | 48 | 24通过，0跳过 | 176对完全一致 |
+| RTX5090 | 1649089 / COMPLETED0:0 | 16 | 48 | 24通过，0跳过 | 176对完全一致 |
 
-- 冻结诊断源码 `c3f5a8cba2b382b151a9908477bf3728f60ffea7`；11 个归档成员，9 个源文件均取自该 Git commit。
-- 本地 13 项 CPU 边界/归档测试通过；新增执行代码静态检查及 sbatch 语法检查通过。
-- Paracloud 实际 Python3.12 / Torch2.13.0+cu130 / 普通 candidate FlashInfer75544a17 环境：13 项 CPU 测试通过，16 项 GPU 测试因不可见 CUDA 而跳过。跳过不构成 GPU 通过。
-- 独立复制 455 个已校验的测试依赖文件；pytest8.4.2。共享 Python 环境及 candidate package 未安装或改写。
-- 保存第一次预检缺少 pytest 的失败记录；该失败发生在任何新 GPU 提交之前。新版预检是新的源码快照。
-- 本地重新核验 CPU 原始归档、每个源文件、提交回执；测试 XML 和源码包的实际损坏负例均被拒绝。
+32 个 GPU 单元覆盖 FP16/BF16、NHD/HND、packed/tuple、Graph1/Graph16。每个单元的同一个 captured graph 和全部 owned buffer 地址经历三次真实物理页映射与 Q/K/V 更新。96 份原始 CUDA trace 共包含3264次实际 ResourceKernel attention launch，shared memory 全部为65536字节。每个 epoch 的 Resource O/LSE 及之后的 Native 均精确匹配在 Resource 执行前建立的当前 Native 对照；物理页与输出哈希真实变化。
 
-## 已实际提交的有限作业
+更新期间调用被拒绝；未通知的 inference metadata 写入，以及总 Q 相同但 ordered geometry 不同的情况，均拒绝旧 Graph 并按契约回到当前 Native。测试以禁止 replay 的毒化 Graph 对象验证不会误执行过期 capture。
 
-| GPU | Slurm job | 源码 | GPU 单元 | 初始期限 |
-|---|---|---|---:|---|
-| RTX4090 | 1649088 | c3f5a8c | 16 | 1小时 |
-| RTX5090 | 1649089 | c3f5a8c | 16 | 1小时 |
+## 可复核证据
 
-诊断 root：`/ssd/scxi253/sgi-graph-epochs-c3f5a8c-20261002`。
-控制器 PID3514328；最多等待6小时，超时仅取消自己提交的两项作业。禁止重复提交、失败补尾或替换原始失败记录。只有所有作业停止后才能完整归档。
+冻结诊断源码：`c3f5a8cba2b382b151a9908477bf3728f60ffea7`。
+普通 FlashInfer candidate package：`75544a17ce0019ca877f50354d95451ee089f859`，未改写共享 package 或 Python 环境。
 
-调度环境请求排除现有四项正式重复实验的节点；Slurm 的 `ExcNodeList` 回执为 null，因此不能声称排除限制已被调度器确认。实际新节点为 wqd10nba07g8 / wqd10nah09g3，与四项现有作业节点不同，当前没有共置。详见原始 `dispatch-intent.json` 和 `dispatch-snapshot.json`。
+完整原始归档：`raw-complete.tar.gz`，87570053字节，1994个成员。
+SHA256：`16e72deb189876f23f0a0d992e132c50c945334c91e84fc06776cd97b0cb070b`。
+Paracloud 原始 root：`/ssd/scxi253/sgi-graph-epochs-c3f5a8c-20261002`。
 
-截至 `2026-10-02T01:41:12Z`，5090 的 `float16-NHD-tuple-graph1` 首个单元已完成三个 epoch；三份原始 trace 各4个实际 ResourceKernel，shared memory 均65536字节。原始 trace 和结果已独立归档、逐成员校验，单元功能检查通过。这是单个诊断单元，尚无双卡终态/SASS结论。详见 `first-cell-independent-verification.json`。
+远端有限控制器完成所有作业终态、完整矩阵、原始 traces、helper/package/SDK/private pytest 依赖前后校验、独立 SASS 和逐成员归档验证。本地再次顺序检查全部1994成员，独立重解析全部96份 trace，并比对实际 ResourceKernel 名称、64KiB launch、完整32单元、O/LSE契约及实际binary/SASS哈希；见 `local-full-verification.json` 和 `verify_gpu_archive.py`。
 
-GPU 结果应以终态控制器及逐成员验证的完整原始归档为准；本文不把 RUNNING/0:0 当作成功。原始四项完整重复实验仍由原来的独立控制器管理，冻结源码和判据不变。
+`build-recipes.tar.gz` 另保存主归档过滤器未收录的8份原始 Ninja 构建命令与生成 C++；25成员均再次校验，含 nvcc / cuobjdump 路径、实际二进制哈希与版本输出。它只补充可重建性，不重新执行或替换任何 GPU 结果。
 
-## 本轮必须证明的边界
+本地与 Paracloud CPU 预检分别13项通过；Paracloud预检的16项 CUDA skip 仅说明当时没有GPU。GPU作业每卡另执行8项CPU边界加16项GPU单元，实际均无skip。第一次缺少pytest的预检失败完整保留；它发生在任何新GPU提交之前。依赖455个文件由已有校验过的wheel测试支持目录复制到诊断私有目录。
 
-两卡各覆盖 FP16/BF16、NHD/HND、packed/tuple、Graph1/Graph16。每个单元使用既有 exposed 几何，不消耗 fresh case；同一个 captured graph 和所有 owned buffer 地址必须经历三次真实物理页映射、Q/K/V 更新及原始 Native 规划。
+`verify_evidence.py` 检查CPU/源码/提交字节；`verify_gpu_archive.py` 检查GPU完整归档。CPU XML、源码包损坏负例及仅使用Git已提交文件的复核均通过。
 
-每个 epoch 在 Resource replay 之前建立 Native 对照；Resource O/LSE 与之后的 Native 都必须完全匹配该对照。原始 CUPTI trace 必须证明实际 Resource attention launches 和65536字节 shared memory。未通知的 inference metadata 写入、更新中的调用，以及相同总 Q 下的不同 ordered geometry 都必须拒绝旧 Graph，必要时回到当前 Native。
+## 结果边界与继续执行的工作
 
-事务计时包含 GPU 元数据读回、同步、Native planning、前置 Native 对照、payload 更新、全 workspace/metadata copy 和四次 Graph 调用。它含验证对照，不能解读为部署一步的延迟或 serving 提升，也不提供性能置信区间。
+这是单个固定 exposed 几何、每卡一个进程、每单元三个相邻 epoch 的功能诊断。它不提供跨进程性能置信区间、不测不同几何间泛化、不认证公共 managed Graph runner，也不覆盖真实SGLang Graph生命周期。
 
-即使本轮功能全部通过，也只证明此最小 driver 的固定几何元数据转移。它不认证公共 managed Graph runner，不证明真实 SGLang Graph 生命周期、正式新鲜测试、HTTP 性能、历史 divergence 或上游接受。`default_promotion=false`、`serving_promotion=false` 始终保留。
+每次更新实际复制151245084字节，约144.24MiB。事务计时还包含元数据GPU读回、同步、Native planning、前置Native对照、payload更新和四次Graph调用。因此它含验证对照和保守全workspace复制，不能当作部署一步延迟或serving提升。后续必须独立完成实际serving所有权/lease集成、成本降低、部署边界匹配的成对计时与新鲜qualification，才能扩大支持边界。
 
-运行 `python verify_evidence.py` 可独立复核本地 CPU、源码和提交字节完整性。GPU 终态尚未包含在此 CPU 完整性回执内。
+原有四项完整重复实验1648991 /1648992 /1648993 /1649001仍由原来的有限控制器管理，冻结源码0a5c735/c34d5d9及0.99判据不变；见 `final-progress-snapshot.json`。新的诊断不消耗fresh case，不修改已消耗的原始10-case canary或尚未开放的原始48+12。
+
+诊断节点为wqd10nba07g8 /wqd10nah09g3，实际与四项原实验不同。提交环境请求排除原实验节点，但Slurm的ExcNodeList为null，故不能声称该排除约束已获调度器确认；原始请求和实际分配均保留。
+
+`default_promotion=false`；`serving_promotion=false`；原始canary=HOLD；原始历史2/432仍未closure。本轮PASS不能替代这些独立门槛。

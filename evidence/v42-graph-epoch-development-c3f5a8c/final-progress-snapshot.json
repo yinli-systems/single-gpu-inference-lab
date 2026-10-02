@@ -1,0 +1,96 @@
+{
+  "utc": "2026-10-02T01:58:47.819693+00:00",
+  "controllers": {
+    "/ssd/scxi253/sgi-complete-qualification-c34d5d9-20261002/controller.json": {
+      "state": "EXPOSED_COMPLETE_REPETITION",
+      "terminal": false,
+      "stages": {},
+      "default_promotion": false,
+      "serving_promotion": false,
+      "historical_token_divergence_resolved": false,
+      "full_http_qualified": false,
+      "updated_utc": "2026-10-02T00:07:51.940074+00:00"
+    },
+    "/ssd/scxi253/sgi-public-complete-r2-0a5c735-20261002/receipts/controller.json": {
+      "state": "WAIT_ALL_FOUR_COMPLETE_EXPOSED_JOBS",
+      "terminal": false,
+      "fresh_cases_consumed": 0,
+      "qualification_authority": false,
+      "default_promotion": false,
+      "serving_promotion": false,
+      "full_http_qualified": false,
+      "original_campaign_remains_hold": true,
+      "jobs": {
+        "gpu_4090": {
+          "0": "1648991",
+          "1": "1648992"
+        },
+        "gpu_5090": {
+          "0": "1648993",
+          "1": "1649001"
+        }
+      },
+      "analyses": {},
+      "updated_utc": "2026-10-02T00:10:55.427723+00:00"
+    },
+    "/ssd/scxi253/sgi-graph-epochs-c3f5a8c-20261002/receipts/controller.json": {
+      "state": "DUAL_GRAPH_EPOCH_DIAGNOSTIC_PASS",
+      "terminal": true,
+      "jobs": {
+        "gpu_4090": "1649088",
+        "gpu_5090": "1649089"
+      },
+      "qualification_authority": false,
+      "default_promotion": false,
+      "serving_promotion": false,
+      "historical_token_divergence_resolved": false,
+      "slurm": {
+        "1649088": {
+          "state": "COMPLETED",
+          "exit": "0:0"
+        },
+        "1649089": {
+          "state": "COMPLETED",
+          "exit": "0:0"
+        }
+      },
+      "analyses": {
+        "gpu_4090": {
+          "pass": true,
+          "job": "1649088",
+          "gpu": "gpu_4090",
+          "cells": 16,
+          "failures": [],
+          "scope": "Uncertified fixed-geometry Graph metadata minimal driver only",
+          "qualification_authority": false,
+          "default_promotion": false,
+          "serving_promotion": false,
+          "historical_token_divergence_resolved": false
+        },
+        "gpu_5090": {
+          "pass": true,
+          "job": "1649089",
+          "gpu": "gpu_5090",
+          "cells": 16,
+          "failures": [],
+          "scope": "Uncertified fixed-geometry Graph metadata minimal driver only",
+          "qualification_authority": false,
+          "default_promotion": false,
+          "serving_promotion": false,
+          "historical_token_divergence_resolved": false
+        }
+      },
+      "archive": {
+        "pass": true,
+        "archive_sha256": "16e72deb189876f23f0a0d992e132c50c945334c91e84fc06776cd97b0cb070b",
+        "archive_bytes": 87570053,
+        "verified_members": 1994
+      }
+    }
+  },
+  "squeue": "1648992|RUNNING|1:48:59|12:00:00|wqd10naf06g1\n1648991|RUNNING|1:49:29|12:00:00|wqd10naf05g5\n1649001|RUNNING|1:47:52|12:00:00|wqd10nbj04g3\n1648993|RUNNING|1:48:27|12:00:00|wqd10nbj03g1\n",
+  "qualification_controller_process": "1725873    01:50:58 /ssd/scxi253/q7b-engines-20260925T1247Z/envs/sglang312/bin/python -m research.selector_v4.complete_campaign /ssd/scxi253/sgi-complete-qualification-c34d5d9-20261002\n",
+  "default_promotion": false,
+  "serving_promotion": false,
+  "historical_token_divergence_resolved": false
+}
