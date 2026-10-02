@@ -7,6 +7,7 @@ another node. All original gates/analyzers remain byte-identical.
 """
 
 import argparse
+import datetime
 import json
 import os
 import shutil
@@ -218,11 +219,96 @@ def finish_dev(shadow, binding, jobs):
     need(all(value["pass"] for value in verdicts.values()), "Unchanged dual dev gates HOLD")
 
 
-def run(shadow):
+def scheduler_command(root, script, arguments, node):
+    return [
+        "sbatch",
+        "--parsable",
+        "--exclude=" + node,
+        "-p",
+        str(arguments[0]),
+        "-o",
+        str(root / "logs/%j.out"),
+        "-e",
+        str(root / "logs/%j.err"),
+        str(script),
+        *map(str, arguments[1:]),
+    ]
+
+
+def submit_excluding(root, script, arguments, node):
+    label = str(arguments[0]) + "-" + str(arguments[3])
+    intent = root / f"receipts/submit-intent-{label}.json"
+    command = scheduler_command(root, script, arguments, node)
+    k.save_new(
+        intent,
+        {
+            "arguments": list(map(str, arguments)),
+            "command": command,
+            "script_sha256": sha(script),
+            "scheduler_excluded_node": node,
+            "utc": k.now(),
+        },
+    )
+    job = subprocess.check_output(command, text=True, timeout=60).strip().split(";")[0]
+    need(job.isdigit(), "Actual unambiguous submission")
+    k.save_new(
+        root / f"receipts/submit-confirmed-{label}.json",
+        {"job": job, "intent_sha256": sha(intent), "utc": k.now()},
+    )
+    actual = subprocess.check_output(["scontrol", "show", "job", "-o", job], text=True, timeout=60)
+    k.save_new(
+        root / f"receipts/scheduler-{job}.json",
+        {"job": job, "actual_scontrol": actual, "explicit_exclude": node},
+    )
+    need("ExcNodeList=" + node in actual.split(), "Actual scheduler must acknowledge excluded node")
+    return job
+
+
+def existing_jobs(shadow, correction):
+    root = shadow / "stages/dev"
+    jobs = read(root / "receipts/jobs.json")
+    need(
+        set(jobs) == set(k.GPUS) and all(set(group) == {"0", "1"} for group in jobs.values()),
+        "Exact four existing dev allocations",
+    )
+    for gpu, group in jobs.items():
+        for index, job in group.items():
+            if gpu + ":" + index in correction["unstarted_failures"]:
+                expected = read(root / f"receipts/unstarted-correction-{gpu}-{index}.json")[
+                    "successor_job"
+                ]
+            else:
+                expected = correction["original_jobs"][gpu][index]
+            need(job == expected, "No started job identity may change at scheduler amendment")
+    amendment = read(shadow / "receipts/scheduler-amendment.json")
+    need(
+        sha(root / "receipts/jobs.json") == amendment["existing_jobs_sha256"],
+        "Frozen coordinator checkpoint",
+    )
+    return jobs
+
+
+def run(shadow, *, continue_existing=False):
     correction = read(shadow / "receipts/infrastructure-correction-binding.json")
     original = Path(correction["original"])
     binding = read(shadow / "frozen-binding.json")
-    k.save_new(shadow / "receipts/controller-start.json", {"pid": os.getpid(), "utc": k.now()})
+    need(
+        not (shadow / "receipts/controller-terminal.json").exists(),
+        "Never restart a terminal scientific HOLD",
+    )
+    if continue_existing:
+        amendment = read(shadow / "receipts/scheduler-amendment.json")
+        need(
+            sha(Path(__file__)) == amendment["new_helper_sha256"],
+            "Reviewed scheduler-only amendment",
+        )
+        k.save_new(
+            shadow / f"receipts/controller-restart-{os.getpid()}.json",
+            {"pid": os.getpid(), "utc": k.now(), "existing_jobs_only": True},
+        )
+    else:
+        amendment = None
+        k.save_new(shadow / "receipts/controller-start.json", {"pid": os.getpid(), "utc": k.now()})
     state = {
         "state": "DEV_UNSTARTED_INFRASTRUCTURE_CORRECTION",
         "terminal": False,
@@ -231,10 +317,19 @@ def run(shadow):
         "historical_token_divergence_resolved": False,
         "original_hold_retained": True,
     }
-    deadline = time.monotonic() + correction["finite_days"] * 86400
+    started = datetime.datetime.fromisoformat(
+        read(shadow / "receipts/controller-start.json")["utc"]
+    )
+    elapsed = (datetime.datetime.now(datetime.timezone.utc) - started).total_seconds()
+    deadline = time.monotonic() + max(0, correction["finite_days"] * 86400 - elapsed)
     try:
         need(
-            sha(Path(__file__)) == correction["correction_helper_sha256"],
+            sha(Path(__file__))
+            == (
+                amendment["new_helper_sha256"]
+                if amendment
+                else correction["correction_helper_sha256"]
+            ),
             "Frozen independent correction helper",
         )
         need(
@@ -249,50 +344,57 @@ def run(shadow):
         )
         k.verify_helpers(shadow, binding)
         k.build_stage_ticket(shadow, "dev")
-        os.environ["SBATCH_EXCLUDE"] = correction["scheduler_excluded_node"]
+        # Only the submission adapter changes; scripts, numerical helpers,
+        # manifests, thresholds and all measurement arguments stay frozen.
+        k.submit = lambda root, script, args: submit_excluding(
+            root, script, args, correction["scheduler_excluded_node"]
+        )
         root = shadow / "stages/dev"
         jobs = {gpu: {} for gpu in k.GPUS}
         script = shadow / "harness/research/selector_v4/public_qualification/case.sbatch"
-        for gpu, group in correction["original_jobs"].items():
-            for index, old_job in group.items():
-                key = gpu + ":" + index
-                if key in correction["unstarted_failures"]:
-                    unstarted(
-                        original / "stages/dev",
-                        gpu,
-                        old_job,
-                        status(old_job)[1],
-                        correction["scheduler_excluded_node"],
-                    )
-                    job = k.submit(
-                        root,
-                        script,
-                        [
+        if continue_existing:
+            jobs = existing_jobs(shadow, correction)
+        else:
+            for gpu, group in correction["original_jobs"].items():
+                for index, old_job in group.items():
+                    key = gpu + ":" + index
+                    if key in correction["unstarted_failures"]:
+                        unstarted(
+                            original / "stages/dev",
                             gpu,
-                            root,
-                            binding["candidate_source"],
-                            int(index),
-                            binding["pristine_source"],
-                        ],
-                    )
-                    k.save_new(
-                        root / f"receipts/unstarted-correction-{gpu}-{index}.json",
-                        {
-                            "original_failed_job": old_job,
-                            "successor_job": job,
-                            "scheduler_excluded_node": correction["scheduler_excluded_node"],
-                            "scored_requests_started_in_original": 0,
-                        },
-                    )
-                else:
-                    job = old_job
-                    for prefix in ("submit-intent-", "submit-confirmed-", "dispatch-"):
-                        name = f"{prefix}{gpu}-{index}.json"
-                        shutil.copyfile(
-                            original / "stages/dev/receipts" / name, root / "receipts" / name
+                            old_job,
+                            status(old_job)[1],
+                            correction["scheduler_excluded_node"],
                         )
-                jobs[gpu][index] = job
-        k.save_new(root / "receipts/jobs.json", jobs)
+                        job = k.submit(
+                            root,
+                            script,
+                            [
+                                gpu,
+                                root,
+                                binding["candidate_source"],
+                                int(index),
+                                binding["pristine_source"],
+                            ],
+                        )
+                        k.save_new(
+                            root / f"receipts/unstarted-correction-{gpu}-{index}.json",
+                            {
+                                "original_failed_job": old_job,
+                                "successor_job": job,
+                                "scheduler_excluded_node": correction["scheduler_excluded_node"],
+                                "scored_requests_started_in_original": 0,
+                            },
+                        )
+                    else:
+                        job = old_job
+                        for prefix in ("submit-intent-", "submit-confirmed-", "dispatch-"):
+                            name = f"{prefix}{gpu}-{index}.json"
+                            shutil.copyfile(
+                                original / "stages/dev/receipts" / name, root / "receipts" / name
+                            )
+                    jobs[gpu][index] = job
+            k.save_new(root / "receipts/jobs.json", jobs)
         # Existing jobs continue in the original root; copy their complete bytes
         # only after successful termination. Their processes are never relaunched.
         active = {(gpu, index, job) for gpu, group in jobs.items() for index, job in group.items()}
@@ -355,12 +457,13 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("shadow", type=Path)
     parser.add_argument("--initialize", action="store_true")
+    parser.add_argument("--continue-existing-jobs", action="store_true")
     parser.add_argument("--original", type=Path)
     parser.add_argument("--excluded-node")
     args = parser.parse_args()
     result = (
         initialize(args.original, args.shadow, args.excluded_node)
         if args.initialize
-        else run(args.shadow)
+        else run(args.shadow, continue_existing=args.continue_existing_jobs)
     )
     print(json.dumps(result, indent=2))
