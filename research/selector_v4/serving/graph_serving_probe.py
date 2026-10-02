@@ -13,7 +13,7 @@ import socket
 import subprocess
 from pathlib import Path
 
-from research.release_qualification.serving.workloads import prefix_tokens, work_specs
+from research.release_qualification.serving.workloads import prefix_tokens
 from research.selector_v4.public_qualification.gates import need, sha
 from research.selector_v4.serving.http_measure import (
     profile,
@@ -26,6 +26,8 @@ from research.selector_v4.serving.metric_gate import WORKLOADS
 from research.selector_v4.serving.model_binding import verify_model
 from research.selector_v4.serving.parity_gate import compare_blocks
 from research.selector_v4.serving.slo_report import summarize
+from research.selector_v4.serving.workload_modes import specs as mode_specs
+from research.selector_v4.serving.workload_modes import verify_configuration
 
 
 async def arm(arguments, role, model, memory, *, stage="functional", logprobs=False):
@@ -51,7 +53,8 @@ async def arm(arguments, role, model, memory, *, stage="functional", logprobs=Fa
             "instrumented": role == "graph_diagnostic",
             "timing_valid": role == "native_baseline",
             "resource_enabled": False,
-            "deterministic_trial": stage == "parity",
+            "deterministic_trial": stage == "deterministic_control",
+            "fixed_single_request_parity": stage in ("parity", "fixed_parity"),
             "complete_output_and_top5_logprobs": logprobs,
         },
     )
@@ -68,14 +71,7 @@ async def arm(arguments, role, model, memory, *, stage="functional", logprobs=Fa
                 info = await response.json()
                 need(response.status == 200, "Actual server config")
             save_new(out / "server-info.json", info)
-            need(
-                not info["disable_cuda_graph"] and not info["disable_overlap_schedule"],
-                "Ordinary Graph/overlap serving required",
-            )
-            need(
-                bool(info["enable_deterministic_inference"]) == (stage == "parity"),
-                "Actual separately declared deterministic mode",
-            )
+            verify_configuration(info, stage)
             need(
                 info["attention_backend"] == "flashinfer" and info["dtype"] == "bfloat16",
                 "Actual backend and dtype",
@@ -83,12 +79,22 @@ async def arm(arguments, role, model, memory, *, stage="functional", logprobs=Fa
             warm = out / "warmup"
             warm.mkdir()
             await workloads(
-                session, url, warm, arguments.model_id + "-warm-" + role, logprobs=logprobs
+                session,
+                url,
+                warm,
+                arguments.model_id + "-warm-" + role,
+                logprobs=logprobs,
+                stage=stage,
             )
             observations = out / "observations"
             observations.mkdir()
             await workloads(
-                session, url, observations, arguments.model_id + "-" + role, logprobs=logprobs
+                session,
+                url,
+                observations,
+                arguments.model_id + "-" + role,
+                logprobs=logprobs,
+                stage=stage,
             )
             await profile(
                 session,
@@ -96,10 +102,11 @@ async def arm(arguments, role, model, memory, *, stage="functional", logprobs=Fa
                 out,
                 observations,
                 arguments.model_id + "-" + role + "-independent-profile",
+                stage=stage,
             )
         reports = {}
         for block in range(4):
-            specs = work_specs(prefix_tokens(), block)
+            specs = mode_specs(prefix_tokens(), block, stage=stage)
             for name in WORKLOADS:
                 key = f"{name}-b{block}.json"
                 reports[key] = summarize(json.loads((observations / key).read_text()), specs[name])

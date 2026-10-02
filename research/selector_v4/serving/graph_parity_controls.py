@@ -1,7 +1,7 @@
 """Finite new diagnostic controls; original natural parity failures stay HOLD.
 
 Two uninstrumented ordinary Native processes test repeatability independently.
-Two deterministic processes compare ordinary Native to the readback observer,
+Two fixed-schedule cached processes compare Native to the readback observer,
 including full output/top5 logprobs. Each mode keeps all five workloads and
 four blocks. No scored retry, Resource activation, gain or historical closure.
 """
@@ -18,8 +18,9 @@ from research.selector_v4.serving.http_measure import save_new
 from research.selector_v4.serving.metric_gate import WORKLOADS
 from research.selector_v4.serving.model_binding import verify_model
 from research.selector_v4.serving.parity_gate import compare_blocks
+from research.selector_v4.serving.workload_modes import PARITY_SCOPE
 
-MODES = ("ordinary_native_repeat", "deterministic_observer")
+MODES = ("ordinary_native_repeat", "deterministic_observer", "fixed_schedule_observer")
 
 
 def comparison(root, *, right, logprobs):
@@ -64,8 +65,12 @@ async def run(a):
         a.out = original_out / mode
         a.out.mkdir()
         right = "native_repeat" if mode == "ordinary_native_repeat" else "graph_diagnostic"
-        deterministic = mode == "deterministic_observer"
-        stage = "parity" if deterministic else "functional"
+        deterministic = mode != "ordinary_native_repeat"
+        stage = {
+            "ordinary_native_repeat": "functional",
+            "deterministic_observer": "deterministic_control",
+            "fixed_schedule_observer": "fixed_parity",
+        }[mode]
         for role in ("native_baseline", right):
             await arm(a, role, model, a.memory, stage=stage, logprobs=deterministic)
         results = comparison(a.out, right=right, logprobs=deterministic)
@@ -74,6 +79,7 @@ async def run(a):
             {
                 "complete": True,
                 "mode": mode,
+                "parity_scope": PARITY_SCOPE if mode == "fixed_schedule_observer" else mode,
                 "all_twenty_blocks_parity_pass": all(r["parity_pass"] for r in results),
                 "comparison": results,
                 "qualification_authority": False,
@@ -91,5 +97,10 @@ if __name__ == "__main__":
     parser.add_argument("--model-binding", type=Path, required=True)
     parser.add_argument("--model-id", required=True)
     parser.add_argument("--memory", type=float, required=True)
-    parser.add_argument("--modes", nargs="+", choices=MODES, default=list(MODES))
+    parser.add_argument(
+        "--modes",
+        nargs="+",
+        choices=MODES,
+        default=["ordinary_native_repeat", "fixed_schedule_observer"],
+    )
     asyncio.run(run(parser.parse_args()))

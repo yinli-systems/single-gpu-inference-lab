@@ -25,11 +25,14 @@ def test_kernel_hold_blocks_model_or_server_launch_before_creating_output(tmp_pa
 
 
 @pytest.mark.parametrize("role", ["pristine", "candidate"])
-def test_ordinary_and_deterministic_trials_use_explicit_separate_process_modes(role):
+def test_ordinary_and_cached_fixed_schedule_trials_use_explicit_separate_process_modes(role):
     ordinary = server_command("/synthetic/model", 12345, 0.8, role, "performance")
     parity = server_command("/synthetic/model", 12345, 0.8, role, "parity")
     assert "--enable-deterministic-inference" not in ordinary
-    assert parity == ordinary + ["--enable-deterministic-inference"]
+    expected = ordinary.copy()
+    expected[expected.index("--max-running-requests") + 1] = "1"
+    assert parity == expected
+    assert "--enable-deterministic-inference" not in parity
     assert "--disable-overlap-schedule" not in ordinary and "--disable-cuda-graph" not in ordinary
     assert ordinary[ordinary.index("--context-length") + 1] == "12288"
     assert ordinary[ordinary.index("--attention-backend") + 1] == "flashinfer"

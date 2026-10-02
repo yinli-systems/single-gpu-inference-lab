@@ -17,8 +17,9 @@ case "$TASK_MODULE" in
 esac
 TASK_MODE_FLAGS=()
 if [ -n "${5:-}" ]; then
- if [ "$TASK_MODULE" != research.selector_v4.serving.graph_parity_controls ] || [ "$5" != deterministic_observer ]; then exit 64; fi
- TASK_MODE_FLAGS=(--modes deterministic_observer)
+ if [ "$TASK_MODULE" != research.selector_v4.serving.graph_parity_controls ]; then exit 64; fi
+ case "$5" in deterministic_observer|fixed_schedule_observer) ;; *) exit 64 ;; esac
+ TASK_MODE_FLAGS=(--modes "$5")
 fi
 TASK_ENV=/ssd/scxi253/q7b-engines-20260925T1247Z/envs/sglang312
 TASK_SOURCE=/ssd/scxi253/sgi-official-wheel-validation-75544a17-20261001/wheel-overlay

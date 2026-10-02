@@ -26,6 +26,7 @@ from research.selector_v4.serving.cccl_namespace import prepare as prepare_cccl
 from research.selector_v4.serving.http_analysis import analyze
 from research.selector_v4.serving.model_binding import verify_model
 from research.selector_v4.serving.training_session import authorize_http_training
+from research.selector_v4.serving.workload_modes import PARITY_SCOPE
 
 MODELS = ("qwen25-coder-1.5b", "qwen3-4b", "qwen25-7b", "qwen3-8b")
 STAGES = ("functional", "performance", "parity")
@@ -97,6 +98,8 @@ def initialize(root, kernel, archive, model_evidence, sglang_source):
         "cuda13_cccl_header_files": cccl["headers"],
         "models": models,
         "stages": list(STAGES),
+        "parity_scope": PARITY_SCOPE,
+        "ordinary_concurrent_parity_required": True,
         "gpus": list(GPUS),
         "allocations_per_model_gpu_stage": 3,
         "maximum_inflight_allocations": 4,

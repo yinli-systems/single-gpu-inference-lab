@@ -1,7 +1,7 @@
 """Prospective full-model HTTP measurement after complete formal kernel PASS.
 
 No action on import. All five workloads, four blocks and full failures remain.
-Ordinary serving and deterministic token/logprob trials are separate processes.
+Ordinary serving and fixed-schedule token/logprob trials are separate processes.
 This draft has not yet run a real model or granted HTTP qualification.
 """
 
@@ -16,12 +16,19 @@ import sys
 import time
 from pathlib import Path
 
-from research.release_qualification.serving.workloads import prefix_tokens, suffix, work_specs
+from research.release_qualification.serving.workloads import prefix_tokens, suffix
 from research.selector_v4.public_qualification.gates import need, sha
 from research.selector_v4.serving.http_client import collect_block
 from research.selector_v4.serving.metric_gate import WORKLOADS
 from research.selector_v4.serving.model_binding import verify_model
 from research.selector_v4.serving.training_session import authorize_http_training
+from research.selector_v4.serving.workload_modes import (
+    PARITY_SCOPE,
+    verify_configuration,
+)
+from research.selector_v4.serving.workload_modes import (
+    specs as mode_specs,
+)
 
 
 def save_new(path, value):
@@ -61,8 +68,10 @@ def server_command(model, port, memory, role, stage):
         "--random-seed",
         "42",
     ]
-    if stage == "parity":
+    if stage == "deterministic_control":
         command.append("--enable-deterministic-inference")
+    elif stage in ("parity", "fixed_parity"):
+        command[command.index("--max-running-requests") + 1] = "1"
     return command
 
 
@@ -122,10 +131,10 @@ async def seed(session, url, prefix, output, tag):
     need(result["complete"], "Failed prefix seed; no measurement retry")
 
 
-async def workloads(session, url, output, tag, *, logprobs):
+async def workloads(session, url, output, tag, *, logprobs, stage="functional"):
     prefix = prefix_tokens()
     for block in range(4):
-        specs = work_specs(prefix, block)
+        specs = mode_specs(prefix, block, stage=stage)
         order = WORKLOADS[block % 5 :] + WORKLOADS[: block % 5]
         for name in order:
             work = specs[name]
@@ -136,7 +145,7 @@ async def workloads(session, url, output, tag, *, logprobs):
             need(result["complete"], "Full HTTP workload failed; all outcomes retained")
 
 
-async def profile(session, url, root, output, tag):
+async def profile(session, url, root, output, tag, *, stage="functional"):
     traces = root / "profile"
     traces.mkdir()
     await post(
@@ -148,7 +157,7 @@ async def profile(session, url, root, output, tag):
     try:
         await seed(session, url, prefix_tokens(), output, tag + "-seed")
         result = await collect_block(
-            session, url, work_specs(prefix_tokens(), 99)["guarded_prefix"], tag
+            session, url, mode_specs(prefix_tokens(), 99, stage=stage)["guarded_prefix"], tag
         )
         save_new(output / "profile-workload.json", result)
         need(result["complete"], "Independent profile workload failed")
@@ -305,26 +314,31 @@ async def run(arguments):
                 info["attention_backend"] == "flashinfer" and info["dtype"] == "bfloat16",
                 "Actual serving backend/dtype changed",
             )
-            if arguments.stage != "parity":
-                need(
-                    not info["disable_cuda_graph"] and not info["disable_overlap_schedule"],
-                    "Ordinary Graph/overlap serving required",
-                )
+            verify_configuration(info, arguments.stage)
             # Both arms receive identical complete premeasurement workloads.
             # Only candidate enables separate explicit training during this phase.
             if arguments.role == "candidate":
                 await phase(session, url, training, 1)
             preparation = arguments.out / "premeasurement"
             preparation.mkdir()
-            await workloads(session, url, preparation, tag + "-calibration", logprobs=False)
+            await workloads(
+                session,
+                url,
+                preparation,
+                tag + "-calibration",
+                logprobs=False,
+                stage=arguments.stage,
+            )
             if arguments.role == "candidate":
                 await phase(session, url, training, 2)
             frozen_warmup = arguments.out / "frozen-warmup"
             frozen_warmup.mkdir()
-            await workloads(session, url, frozen_warmup, tag + "-frozen", logprobs=False)
+            await workloads(
+                session, url, frozen_warmup, tag + "-frozen", logprobs=False, stage=arguments.stage
+            )
             warm = {
                 "name": "conditioning",
-                "concurrency": 2,
+                "concurrency": 1 if arguments.stage == "parity" else 2,
                 "cells": [
                     {
                         "id": str(i),
@@ -338,10 +352,19 @@ async def run(arguments):
             warm_result = await collect_block(session, url, warm, tag + "-conditioning")
             save_new(arguments.out / "conditioning.json", warm_result)
             need(warm_result["complete"], "Conditioning failed")
-            await workloads(session, url, observations, tag, logprobs=arguments.stage == "parity")
+            await workloads(
+                session,
+                url,
+                observations,
+                tag,
+                logprobs=arguments.stage == "parity",
+                stage=arguments.stage,
+            )
             if arguments.role == "candidate":
                 await phase(session, url, training, 3)
-            await profile(session, url, arguments.out, observations, tag + "-profile")
+            await profile(
+                session, url, arguments.out, observations, tag + "-profile", stage=arguments.stage
+            )
             if arguments.role == "candidate":
                 await phase(session, url, training, 3)
                 need(
@@ -357,6 +380,9 @@ async def run(arguments):
                 "complete": True,
                 "role": arguments.role,
                 "stage": arguments.stage,
+                "parity_scope": PARITY_SCOPE
+                if arguments.stage == "parity"
+                else "ordinary_concurrent",
                 "allocation": arguments.allocation,
                 "model_id": arguments.model_id,
                 "files": {

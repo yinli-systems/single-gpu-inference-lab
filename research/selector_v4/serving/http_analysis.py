@@ -14,12 +14,19 @@ from pathlib import Path
 
 import numpy as np
 
-from research.release_qualification.serving.workloads import prefix_tokens, work_specs
+from research.release_qualification.serving.workloads import prefix_tokens
 from research.selector_v4.public_qualification.gates import need, sha
 from research.selector_v4.public_qualification.runtime.audit_main_sass import parse
 from research.selector_v4.serving.http_stream import TokenStream
 from research.selector_v4.serving.metric_gate import METRICS, WORKLOADS, evaluate_metrics
 from research.selector_v4.serving.parity_gate import compare_blocks
+from research.selector_v4.serving.workload_modes import (
+    PARITY_SCOPE,
+    verify_configuration,
+)
+from research.selector_v4.serving.workload_modes import (
+    specs as mode_specs,
+)
 
 
 def derived_metrics(block, expected):
@@ -126,6 +133,9 @@ def load_arm(root, *, role, stage, allocation, model_id, binding_sha, model_sha)
         need(not path.is_absolute() and ".." not in path.parts, "Safe HTTP raw path")
         need(sha(root / path) == digest, "HTTP raw evidence changed: " + name)
     environment = json.loads((root / "environment.json").read_text())
+    verify_configuration(json.loads((root / "actual-server-info.json").read_text()), stage)
+    if stage == "parity":
+        need(complete["parity_scope"] == PARITY_SCOPE, "Explicit fixed-schedule parity scope")
     need(
         environment["http_binding_sha256"] == binding_sha
         and environment["model_binding_sha256"] == model_sha,
@@ -140,7 +150,7 @@ def load_arm(root, *, role, stage, allocation, model_id, binding_sha, model_sha)
     expected = {f"{w}-b{b}.json" for w in WORKLOADS for b in range(4)}
     need(actual == expected, "Exactly all20 workload blocks required")
     for block in range(4):
-        specs = work_specs(prefix_tokens(), block)
+        specs = mode_specs(prefix_tokens(), block, stage=stage)
         for workload in WORKLOADS:
             key = f"{workload}-b{block}.json"
             value = json.loads((root / "observations" / key).read_text())
@@ -174,7 +184,9 @@ def profile_evidence(root, role):
                 and e.get("name") == "sgi_actual_decode_graph_step"
                 for e in events
             ):
-                graph_proofs.append(correlated_decode(events, allow_eager_resource=role == "candidate"))
+                graph_proofs.append(
+                    correlated_decode(events, allow_eager_resource=role == "candidate")
+                )
             kernels.extend(
                 e
                 for e in data.get("traceEvents", [])
