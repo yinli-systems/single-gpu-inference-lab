@@ -248,7 +248,23 @@ def completeness(campaign, gpu, case, job):
     binding = json.loads((campaign / "binding.json").read_text())
     need((campaign / f"receipts/exit-{job}.txt").read_text().strip() == "0", "Actual process exit")
     root = campaign / f"runs/{gpu}-{job}"
-    need({d.name for d in root.iterdir() if d.is_dir()} == set(PHASES), "All nine original phases")
+    directories = {d.name for d in root.iterdir() if d.is_dir()}
+    need(
+        directories == set(PHASES) | {"references"},
+        "All nine original phases and original references",
+    )
+    references = {p.name for p in (root / "references").iterdir()}
+    need(
+        len(references) == 8 and all(re.fullmatch(r"[0-9a-f]{64}\.pt", n) for n in references),
+        "All eight original references",
+    )
+    need(
+        all(
+            p.is_file() and not p.is_symlink() and p.stat().st_size > 0
+            for p in (root / "references").iterdir()
+        ),
+        "Regular nonempty original references",
+    )
     keys = None
     for identity in PHASES:
         role, repetition = identity.rsplit("-", 1)
@@ -262,6 +278,8 @@ def completeness(campaign, gpu, case, job):
         current = set(complete["cells"])
         need(keys is None or keys == current, "Identical complete cell set")
         keys = current
+        expected_reference_names = {key.rsplit("-", 1)[0] + ".pt" for key in current}
+        need(expected_reference_names == references, "Phase/reference geometry correspondence")
         need(env["case"] == binding["cases"][int(case)], "Original exposed descriptor")
         need(env["role"] == role and env["rep"] == int(repetition), "Phase identity")
         expected = binding["pristine_commit"] if role == "pristine" else binding["candidate_commit"]

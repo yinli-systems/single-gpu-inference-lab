@@ -34,13 +34,20 @@ def fixture_campaign(tmp_path):
     (tmp_path / "binding.json").write_text(json.dumps(binding))
     (tmp_path / "receipts/exit-123.txt").write_text("0\n")
     root = tmp_path / "runs/gpu_4090-123"
+    references = root / "references"
+    references.mkdir(parents=True)
+    for i in range(8):
+        (references / (f"{i:064x}.pt")).write_bytes(b"original raw reference fixture")
+    cells = {
+        f"{i:064x}-{mode}": {}
+        for i in range(8)
+        for mode in ("eager_full_call", "graph1_replay", "graph16_replay")
+    }
     for identity in c.PHASES:
         phase = root / identity
         phase.mkdir(parents=True)
         role, rep = identity.rsplit("-", 1)
-        (phase / "complete.json").write_text(
-            json.dumps({"complete": True, "cells": {str(i): {} for i in range(24)}})
-        )
+        (phase / "complete.json").write_text(json.dumps({"complete": True, "cells": cells}))
         (phase / "environment.json").write_text(
             json.dumps(
                 {
@@ -148,3 +155,25 @@ def test_incomplete_completed_jobs_are_archived_as_hold(tmp_path, monkeypatch):
     assert len(result["completeness_errors"]) == 4
     assert "raw.pt" in result["files"]
     c.verify_payload(output / "raw-public-path-development.tar.gz", result["files"])
+
+
+def test_expected_reference_directory_is_not_a_tenth_phase(tmp_path):
+    root = fixture_campaign(tmp_path)
+    assert c.completeness(tmp_path, "gpu_4090", "0", "123")
+    (root / "unexpected-extra-phase").mkdir()
+    with pytest.raises(ValueError, match="All nine original phases"):
+        c.completeness(tmp_path, "gpu_4090", "0", "123")
+
+
+@pytest.mark.parametrize("fault", ["missing", "empty", "wrong-name"])
+def test_missing_or_changed_original_reference_set_rejected(tmp_path, fault):
+    root = fixture_campaign(tmp_path)
+    path = root / "references" / (f"{0:064x}.pt")
+    if fault == "missing":
+        path.unlink()
+    elif fault == "empty":
+        path.write_bytes(b"")
+    else:
+        path.rename(path.with_name("foreign.pt"))
+    with pytest.raises(ValueError, match="references"):
+        c.completeness(tmp_path, "gpu_4090", "0", "123")
