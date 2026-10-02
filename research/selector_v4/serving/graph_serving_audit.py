@@ -6,11 +6,13 @@ import json
 from collections import defaultdict
 from pathlib import Path
 
-from research.release_qualification.serving.workloads import prefix_tokens, work_specs
+from research.release_qualification.serving.workloads import prefix_tokens
 from research.selector_v4.public_qualification.gates import need, sha
 from research.selector_v4.serving.metric_gate import WORKLOADS
 from research.selector_v4.serving.parity_gate import compare_blocks
 from research.selector_v4.serving.slo_report import summarize
+from research.selector_v4.serving.workload_modes import PARITY_SCOPE, verify_configuration
+from research.selector_v4.serving.workload_modes import specs as mode_specs
 
 
 def correlated_decode(events, *, allow_eager_resource=False):
@@ -33,7 +35,8 @@ def correlated_decode(events, *, allow_eager_resource=False):
     need(
         all(
             allow_eager_resource and e.get("args", {}).get("graph id") == 0
-            for e in kernels if "ResourceKernel" in e.get("name", "")
+            for e in kernels
+            if "ResourceKernel" in e.get("name", "")
         ),
         "Native diagnostic forbids Resource; qualified serving allows only eager Resource",
     )
@@ -76,7 +79,7 @@ def correlated_decode(events, *, allow_eager_resource=False):
     }
 
 
-def natural_parity(root):
+def natural_parity(root, *, require_logprobs=False):
     rows = []
     for block in range(4):
         for name in WORKLOADS:
@@ -85,25 +88,48 @@ def natural_parity(root):
                 json.loads((root / role / "observations" / key).read_text())
                 for role in ("native_baseline", "graph_diagnostic")
             ]
-            rows.append({"block": key, **compare_blocks(*values, require_logprobs=False)})
+            rows.append(
+                {"block": key, **compare_blocks(*values, require_logprobs=require_logprobs)}
+            )
     return rows
 
 
-def observe(root):
+def observe(root, *, fixed_schedule=False):
     complete = json.loads((root / "complete.json").read_text())
+    field = "comparison" if fixed_schedule else "native_instrumentation_token_parity"
+    stage = "fixed_parity" if fixed_schedule else "functional"
     need(
-        complete["complete"] and len(complete["native_instrumentation_token_parity"]) == 20,
+        complete["complete"] and len(complete[field]) == 20,
         "Both complete HTTP matrices",
     )
+    if fixed_schedule:
+        need(
+            complete["mode"] == "fixed_schedule_observer"
+            and complete["parity_scope"] == PARITY_SCOPE,
+            "Declared separately scoped cached parity diagnostic",
+        )
     for role in ("native_baseline", "graph_diagnostic"):
         arm = root / role
         done = json.loads((arm / "complete.json").read_text())
         need(done["complete"], "Actual complete HTTP arm")
         for name, digest in done["files"].items():
+            relative = Path(name)
+            need(
+                not relative.is_absolute() and ".." not in relative.parts,
+                "Safe diagnostic raw path",
+            )
             need(sha(arm / name) == digest, "Original HTTP/Graph artifact changed")
+        verify_configuration(json.loads((arm / "server-info.json").read_text()), stage)
+        if fixed_schedule:
+            command = json.loads((arm / "command.json").read_text())
+            need(
+                command["fixed_single_request_parity"]
+                and command["complete_output_and_top5_logprobs"],
+                "Both arms require complete fixed-schedule token/logprob trials",
+            )
         reports = json.loads((arm / "descriptive-slo.json").read_text())
         for block in range(4):
-            specs = work_specs(prefix_tokens(), block)
+            specs = mode_specs(prefix_tokens(), block, stage=stage)
             for name in WORKLOADS:
                 key = f"{name}-b{block}.json"
                 raw = json.loads((arm / "observations" / key).read_text())
@@ -111,10 +137,10 @@ def observe(root):
                     summarize(raw, specs[name]) == reports["blocks"][key],
                     "Independently reconstruct every original HTTP/SLO observation",
                 )
-    parity = natural_parity(root)
+    parity = natural_parity(root, require_logprobs=fixed_schedule)
     need(
-        parity == complete["native_instrumentation_token_parity"],
-        "Natural parity receipt must equal all original token streams",
+        parity == complete[field],
+        "Parity receipt must equal all original complete token/logprob streams",
     )
     parity_pass = all(p["parity_pass"] for p in parity)
     arm = root / "graph_diagnostic"
@@ -176,7 +202,7 @@ def observe(root):
         ):
             proofs.append(correlated_decode(data["traceEvents"]))
     need(proofs, "Independent correlated serving profile required")
-    return {
+    result = {
         "pass_native_graph_serving_boundary_diagnostic": parity_pass,
         "state": "PASS_NATIVE_DIAGNOSTIC_ONLY" if parity_pass else "HOLD_NATURAL_TOKEN_PARITY",
         "actual_decode_graph_replay_and_input_boundary_verified": True,
@@ -193,6 +219,19 @@ def observe(root):
         "serving_promotion": False,
         "historical_token_divergence_resolved": False,
     }
+    if fixed_schedule:
+        result.pop("natural_token_parity_pass")
+        result.pop("natural_token_parity")
+        result.update(
+            state="PASS_FIXED_SCHEDULE_DIAGNOSTIC_ONLY"
+            if parity_pass
+            else "HOLD_FIXED_SCHEDULE_PARITY",
+            parity_scope=PARITY_SCOPE,
+            fixed_schedule_full_token_logprob_parity_pass=parity_pass,
+            fixed_schedule_parity=parity,
+            original_natural_parity_failure_closed=False,
+        )
+    return result
 
 
 def audit(root):

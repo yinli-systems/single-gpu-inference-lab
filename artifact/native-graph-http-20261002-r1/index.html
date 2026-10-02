@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="zh">
+<meta charset="utf-8">
+<title>
+GraphServing / HTTP-SLO evidence</title>
+<style>
+body{max-width:1350px;margin:48px auto;padding:0 24px;background:#f5f7fb;color:#17283c;font:16px/1.7 system-ui}h1{font-size:32px}article{background:white;border:1px solid #dce3ed;border-radius:12px;padding:24px;margin:24px 0}img{width:100%}table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:14px}th,td{text-align:left;padding:9px;border-bottom:1px solid #e2e7ef}code{background:#edf2f8;padding:2px 5px}a{color:#1754b5}</style>
+<h1>
+GraphServing 与完整 HTTP/SLO 原始证据</h1>
+<p>
+已完成双卡、Qwen2.5-Coder-1.5B、5 类负载 × 4 个完整块。每卡单次 allocation，Resource 关闭；吞吐与尾延迟均为描述性基线，不具备收益、置信区间或完整 HTTP 资格。</p>
+<article>
+<b>
+真实 Graph 证据：</b>
+每卡 2,395 个实际输入 epoch，34 次独立关联 Graph launch、952 次注意力内核。4090：128 请求 / 7,936 token 一致；5090：9 / 128 请求存在差异，共 900 个 token 位置，诊断 HOLD。保留全部差异，不能归因或删除。<p>
+历史 2/432 仍未 closure；<code>
+default_promotion=false</code>
+，<code>
+serving_promotion=false</code>
+。</p>
+</article>
+<article>
+<h2>
+普通 Native 基线</h2>
+<p>
+跨 4 个块按所有实际请求汇总分位数，吞吐分母为完整块耗时之和；仪器读回与 profile 数据不参与性能表。Goodput 固定 TTFT ≤ 2s、TPOT ≤ 50ms。</p>
+<table>
+<tr>
+<th>
+GPU</th>
+<th>
+负载</th>
+<th>
+请求</th>
+<th>
+输出 token/s</th>
+<th>
+TTFT p99 ms</th>
+<th>
+TPOT p99 ms</th>
+<th>
+Goodput 请求/s</th>
+</tr>
+<tr><td>RTX4090</td><td>guarded_prefix</td><td>24</td><td>861.8</td><td>59.32</td><td>6.10</td><td>26.93</td></tr><tr><td>RTX4090</td><td>balanced_prefix</td><td>24</td><td>879.4</td><td>54.26</td><td>5.93</td><td>27.48</td></tr><tr><td>RTX4090</td><td>short_prefill</td><td>24</td><td>843.1</td><td>74.59</td><td>6.61</td><td>26.35</td></tr><tr><td>RTX4090</td><td>decode</td><td>32</td><td>1578.1</td><td>36.99</td><td>4.93</td><td>12.33</td></tr><tr><td>RTX4090</td><td>mixed</td><td>24</td><td>973.1</td><td>66.73</td><td>5.75</td><td>15.20</td></tr><tr><td>RTX5090</td><td>guarded_prefix</td><td>24</td><td>1306.8</td><td>38.26</td><td>4.20</td><td>40.84</td></tr><tr><td>RTX5090</td><td>balanced_prefix</td><td>24</td><td>1343.4</td><td>34.04</td><td>4.10</td><td>41.98</td></tr><tr><td>RTX5090</td><td>short_prefill</td><td>24</td><td>1249.3</td><td>52.50</td><td>4.57</td><td>39.04</td></tr><tr><td>RTX5090</td><td>decode</td><td>32</td><td>2371.9</td><td>26.20</td><td>3.31</td><td>18.53</td></tr><tr><td>RTX5090</td><td>mixed</td><td>24</td><td>1486.4</td><td>43.97</td><td>3.86</td><td>23.23</td></tr></table></article><article><img src="slo-grid-RTX4090.png" alt="4090 full SLO threshold grid"></article><article><img src="slo-grid-RTX5090.png" alt="5090 full SLO threshold grid"></article><p><a href="analysis.json">完整可复核 JSON</a> · <a href="native-http-baseline.csv">基线 CSV</a> · <a href="slo-grid-RTX4090.svg">4090 SVG</a> · <a href="slo-grid-RTX5090.svg">5090 SVG</a></p></html>
