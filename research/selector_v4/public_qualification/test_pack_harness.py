@@ -67,3 +67,17 @@ def test_uncommitted_or_untracked_source_cannot_be_packed(repository, tmp_path, 
     with pytest.raises(ValueError, match="Commit"):
         pack(repo, output, git)
     assert not output.exists()
+
+
+def test_only_redundant_archives_omitted_and_their_exact_blob_hashes_retained(repository, tmp_path):
+    repo, git = repository
+    raw = b"synthetic historical archive bytes"
+    (repo / "research/history.tar.gz").write_bytes(raw)
+    (repo / "research/manifest.json").write_text('{"consumed": true}')
+    subprocess.run([git, "add", "research"], cwd=repo, check=True)
+    subprocess.run([git, "-c", "user.name=Synthetic", "-c", "user.email=synthetic@example.invalid", "commit", "-qm", "archive"], cwd=repo, check=True)
+    output = tmp_path / "helpers.tar.gz"
+    metadata = pack(repo, output, git, omit_evidence_archives=True)
+    assert metadata["redundant_historical_evidence_archives_sha256"] == {"research/history.tar.gz": hashlib.sha256(raw).hexdigest()}
+    with tarfile.open(output) as bundle:
+        assert set(bundle.getnames()) == {"research/control.txt", "research/manifest.json", "harness-commit.json"}

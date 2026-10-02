@@ -9,7 +9,7 @@ import tarfile
 from pathlib import Path
 
 
-def pack(repo, output, git="git"):
+def pack(repo, output, git="git", *, omit_evidence_archives=False):
     if output.exists():
         raise FileExistsError("Never replace a frozen helper archive")
     run = lambda *args: subprocess.check_output([git, *args], cwd=repo)
@@ -18,6 +18,14 @@ def pack(repo, output, git="git"):
     commit = run("rev-parse", "HEAD").decode().strip()
     names = run("ls-tree", "-r", "--name-only", "HEAD", "research").decode().splitlines()
     files = {name: run("show", "HEAD:" + name) for name in names}
+    omitted = {}
+    if omit_evidence_archives:
+        # These are redundant historical evidence bundles, not executable
+        # helpers or manifests. Keep their exact committed hashes in metadata;
+        # every source, test, ledger and historical manifest remains included.
+        for name in list(files):
+            if name.endswith((".tar.gz", ".tgz", ".tar", ".zip")):
+                omitted[name] = hashlib.sha256(files.pop(name)).hexdigest()
     if not files:
         raise ValueError("Missing committed research source")
     metadata = {
@@ -25,6 +33,7 @@ def pack(repo, output, git="git"):
         "git_blob_files_sha256": {n: hashlib.sha256(raw).hexdigest() for n, raw in files.items()},
         "fresh_cases_generated": 0,
         "qualification_authority": False,
+        "redundant_historical_evidence_archives_sha256": omitted,
     }
     files["harness-commit.json"] = (json.dumps(metadata, indent=2) + "\n").encode()
     with output.open("xb") as stream, tarfile.open(fileobj=stream, mode="w:gz") as bundle:
@@ -41,8 +50,9 @@ if __name__ == "__main__":
     parser.add_argument("repo", type=Path)
     parser.add_argument("output", type=Path)
     parser.add_argument("--git", default="git")
+    parser.add_argument("--omit-evidence-archives", action="store_true")
     args = parser.parse_args()
-    metadata = pack(args.repo, args.output, args.git)
+    metadata = pack(args.repo, args.output, args.git, omit_evidence_archives=args.omit_evidence_archives)
     print(
         json.dumps(
             {
