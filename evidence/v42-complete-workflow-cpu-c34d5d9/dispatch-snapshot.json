@@ -1,0 +1,244 @@
+{
+  "utc": "2026-10-02T00:12:44.724473+00:00",
+  "workflow_pid": 1725873,
+  "workflow": {
+    "state": "EXPOSED_COMPLETE_REPETITION",
+    "terminal": false,
+    "stages": {},
+    "default_promotion": false,
+    "serving_promotion": false,
+    "historical_token_divergence_resolved": false,
+    "full_http_qualified": false,
+    "updated_utc": "2026-10-02T00:07:51.940074+00:00"
+  },
+  "public_controller": {
+    "state": "WAIT_ALL_FOUR_COMPLETE_EXPOSED_JOBS",
+    "terminal": false,
+    "fresh_cases_consumed": 0,
+    "qualification_authority": false,
+    "default_promotion": false,
+    "serving_promotion": false,
+    "full_http_qualified": false,
+    "original_campaign_remains_hold": true,
+    "jobs": {
+      "gpu_4090": {
+        "0": "1648991",
+        "1": "1648992"
+      },
+      "gpu_5090": {
+        "0": "1648993",
+        "1": "1649001"
+      }
+    },
+    "analyses": {},
+    "updated_utc": "2026-10-02T00:10:55.427723+00:00"
+  },
+  "jobs": {
+    "gpu_4090": {
+      "0": "1648991",
+      "1": "1648992"
+    },
+    "gpu_5090": {
+      "0": "1648993",
+      "1": "1649001"
+    }
+  },
+  "allocations": {
+    "1648991": {
+      "gpu": "gpu_4090",
+      "case": "0",
+      "fields": {
+        "JobState": "RUNNING",
+        "TimeLimit": "12:00:00",
+        "NodeList": "wqd10naf05g5",
+        "RunTime": "00:03:26",
+        "ReqTRES": "cpu=6,mem=60000M,node=1,billing=6,gres/gpu=1",
+        "AllocTRES": "cpu=6,mem=60000M,node=1,billing=6,gres/gpu=1"
+      },
+      "raw_scontrol": "JobId=1648991 JobName=sgi-public-complete-r2 UserId=scxi253(1256) GroupId=scxi253(1256) MCS_label=N/A Priority=1 Nice=0 Account=scxi253 QOS=gpugpu WCKey=* JobState=RUNNING Reason=None Dependency=(null) Requeue=0 Restarts=0 BatchFlag=1 Reboot=0 ExitCode=0:0 RunTime=00:03:26 TimeLimit=12:00:00 TimeMin=N/A SubmitTime=2026-10-02T08:09:07 EligibleTime=2026-10-02T08:09:07 AccrueTime=2026-10-02T08:09:07 StartTime=2026-10-02T08:09:18 EndTime=2026-10-02T20:09:18 Deadline=N/A SuspendTime=None SecsPreSuspend=0 LastSchedEval=2026-10-02T08:09:18 Scheduler=Backfill Partition=gpu_4090 AllocNode:Sid=wqd10nbf05c05:1713202 ReqNodeList=(null) ExcNodeList=(null) NodeList=wqd10naf05g5 BatchHost=wqd10naf05g5 NumNodes=1 NumCPUs=6 NumTasks=1 CPUs/Task=6 ReqB:S:C:T=0:0:*:* ReqTRES=cpu=6,mem=60000M,node=1,billing=6,gres/gpu=1 AllocTRES=cpu=6,mem=60000M,node=1,billing=6,gres/gpu=1 Socks/Node=* NtasksPerN:B:S:C=0:0:*:* CoreSpec=* MinCPUsNode=6 MinMemoryCPU=10000M MinTmpDiskNode=0 Features=(null) DelayBoot=00:00:00 OverSubscribe=OK Contiguous=0 Licenses=(null) Network=(null) Command=/ssd/scxi253/sgi-public-complete-r2-0a5c735-20261002/public_path_prequal.sbatch WorkDir=/ssd/scxi253/sgi-complete-workflow-c34d5d9-source-20261002 StdErr=/ssd/scxi253/sgi-public-complete-r2-0a5c735-20261002/logs/1648991.err StdIn=/dev/null StdOut=/ssd/scxi253/sgi-public-complete-r2-0a5c735-20261002/logs/1648991.out TresPerNode=gres/gpu:1 TresPerTask=cpu=6 \n",
+      "pristine_environment": {
+        "source_commit": "85744da1a397c0c4bea1a83b8345281750eb61a9",
+        "role": "pristine",
+        "rep": 0,
+        "pid": 1369325,
+        "gpu_uuid": "ae004b62-9152-1157-98c9-9228a1ef13a4",
+        "gpu_name": "NVIDIA GeForce RTX 4090",
+        "cpu_affinity": [
+          0,
+          1
+        ],
+        "profiled_scoring": false,
+        "case": {
+          "id": "dev-v4-v32-below",
+          "family": "dev",
+          "index": 0,
+          "regime": "historical-below",
+          "batch_size": 7,
+          "descriptor_count": 39,
+          "q": [
+            3,
+            39,
+            107,
+            143,
+            211,
+            247,
+            379
+          ],
+          "cached": [
+            22528,
+            16512,
+            11840,
+            8256,
+            2624,
+            672,
+            80
+          ],
+          "max_cached": 22528,
+          "shape_eligible": true,
+          "generator_seed": null,
+          "exposed_development": true,
+          "provenance": "selector-v3.2 canary-v32-below"
+        },
+        "fresh_cases_consumed": 0
+      },
+      "source_validation_passed": true
+    },
+    "1648992": {
+      "gpu": "gpu_4090",
+      "case": "1",
+      "fields": {
+        "JobState": "RUNNING",
+        "TimeLimit": "12:00:00",
+        "NodeList": "wqd10naf06g1",
+        "RunTime": "00:02:56",
+        "ReqTRES": "cpu=6,mem=60000M,node=1,billing=6,gres/gpu=1",
+        "AllocTRES": "cpu=6,mem=60000M,node=1,billing=6,gres/gpu=1"
+      },
+      "raw_scontrol": "JobId=1648992 JobName=sgi-public-complete-r2 UserId=scxi253(1256) GroupId=scxi253(1256) MCS_label=N/A Priority=1 Nice=0 Account=scxi253 QOS=gpugpu WCKey=* JobState=RUNNING Reason=None Dependency=(null) Requeue=0 Restarts=0 BatchFlag=1 Reboot=0 ExitCode=0:0 RunTime=00:02:56 TimeLimit=12:00:00 TimeMin=N/A SubmitTime=2026-10-02T08:09:43 EligibleTime=2026-10-02T08:09:43 AccrueTime=2026-10-02T08:09:43 StartTime=2026-10-02T08:09:48 EndTime=2026-10-02T20:09:48 Deadline=N/A SuspendTime=None SecsPreSuspend=0 LastSchedEval=2026-10-02T08:09:48 Scheduler=Backfill Partition=gpu_4090 AllocNode:Sid=wqd10nbf05c05:1713202 ReqNodeList=(null) ExcNodeList=(null) NodeList=wqd10naf06g1 BatchHost=wqd10naf06g1 NumNodes=1 NumCPUs=6 NumTasks=1 CPUs/Task=6 ReqB:S:C:T=0:0:*:* ReqTRES=cpu=6,mem=60000M,node=1,billing=6,gres/gpu=1 AllocTRES=cpu=6,mem=60000M,node=1,billing=6,gres/gpu=1 Socks/Node=* NtasksPerN:B:S:C=0:0:*:* CoreSpec=* MinCPUsNode=6 MinMemoryCPU=10000M MinTmpDiskNode=0 Features=(null) DelayBoot=00:00:00 OverSubscribe=OK Contiguous=0 Licenses=(null) Network=(null) Command=/ssd/scxi253/sgi-public-complete-r2-0a5c735-20261002/public_path_prequal.sbatch WorkDir=/ssd/scxi253/sgi-complete-workflow-c34d5d9-source-20261002 StdErr=/ssd/scxi253/sgi-public-complete-r2-0a5c735-20261002/logs/1648992.err StdIn=/dev/null StdOut=/ssd/scxi253/sgi-public-complete-r2-0a5c735-20261002/logs/1648992.out TresPerNode=gres/gpu:1 TresPerTask=cpu=6 \n",
+      "pristine_environment": {
+        "source_commit": "85744da1a397c0c4bea1a83b8345281750eb61a9",
+        "role": "pristine",
+        "rep": 0,
+        "pid": 1622760,
+        "gpu_uuid": "8b0466c1-bf58-c581-3b20-7109a7f925bf",
+        "gpu_name": "NVIDIA GeForce RTX 4090",
+        "cpu_affinity": [
+          36,
+          37
+        ],
+        "profiled_scoring": false,
+        "case": {
+          "id": "dev-v4-v32-both",
+          "family": "dev",
+          "index": 1,
+          "regime": "historical-selected",
+          "batch_size": 7,
+          "descriptor_count": 44,
+          "q": [
+            3,
+            39,
+            107,
+            175,
+            243,
+            311,
+            411
+          ],
+          "cached": [
+            22528,
+            16512,
+            11840,
+            8256,
+            2624,
+            672,
+            80
+          ],
+          "max_cached": 22528,
+          "shape_eligible": true,
+          "generator_seed": null,
+          "exposed_development": true,
+          "provenance": "selector-v3.2 canary-v32-both"
+        },
+        "fresh_cases_consumed": 0
+      },
+      "source_validation_passed": true
+    },
+    "1648993": {
+      "gpu": "gpu_5090",
+      "case": "0",
+      "fields": {
+        "JobState": "RUNNING",
+        "TimeLimit": "12:00:00",
+        "NodeList": "wqd10nbj03g1",
+        "RunTime": "00:02:24",
+        "ReqTRES": "cpu=6,mem=94500M,node=1,billing=6,gres/gpu=1",
+        "AllocTRES": "cpu=6,mem=94500M,node=1,billing=6,gres/gpu=1"
+      },
+      "raw_scontrol": "JobId=1648993 JobName=sgi-public-complete-r2 UserId=scxi253(1256) GroupId=scxi253(1256) MCS_label=N/A Priority=1 Nice=0 Account=scxi253 QOS=gpugpu WCKey=* JobState=RUNNING Reason=None Dependency=(null) Requeue=0 Restarts=0 BatchFlag=1 Reboot=0 ExitCode=0:0 RunTime=00:02:24 TimeLimit=12:00:00 TimeMin=N/A SubmitTime=2026-10-02T08:10:19 EligibleTime=2026-10-02T08:10:19 AccrueTime=2026-10-02T08:10:19 StartTime=2026-10-02T08:10:20 EndTime=2026-10-02T20:10:20 Deadline=N/A SuspendTime=None SecsPreSuspend=0 LastSchedEval=2026-10-02T08:10:20 Scheduler=Main Partition=gpu_5090 AllocNode:Sid=wqd10nbf05c05:1713202 ReqNodeList=(null) ExcNodeList=(null) NodeList=wqd10nbj03g1 BatchHost=wqd10nbj03g1 NumNodes=1 NumCPUs=6 NumTasks=1 CPUs/Task=6 ReqB:S:C:T=0:0:*:* ReqTRES=cpu=6,mem=94500M,node=1,billing=6,gres/gpu=1 AllocTRES=cpu=6,mem=94500M,node=1,billing=6,gres/gpu=1 Socks/Node=* NtasksPerN:B:S:C=0:0:*:* CoreSpec=* MinCPUsNode=6 MinMemoryCPU=15750M MinTmpDiskNode=0 Features=(null) DelayBoot=00:00:00 OverSubscribe=OK Contiguous=0 Licenses=(null) Network=(null) Command=/ssd/scxi253/sgi-public-complete-r2-0a5c735-20261002/public_path_prequal.sbatch WorkDir=/ssd/scxi253/sgi-complete-workflow-c34d5d9-source-20261002 StdErr=/ssd/scxi253/sgi-public-complete-r2-0a5c735-20261002/logs/1648993.err StdIn=/dev/null StdOut=/ssd/scxi253/sgi-public-complete-r2-0a5c735-20261002/logs/1648993.out TresPerNode=gres/gpu:1 TresPerTask=cpu=6 \n",
+      "pristine_environment": {
+        "source_commit": "85744da1a397c0c4bea1a83b8345281750eb61a9",
+        "role": "pristine",
+        "rep": 0,
+        "pid": 1508708,
+        "gpu_uuid": "4968595d-05d8-7491-397c-47124bb047bf",
+        "gpu_name": "NVIDIA GeForce RTX 5090",
+        "cpu_affinity": [
+          8,
+          9
+        ],
+        "profiled_scoring": false,
+        "case": {
+          "id": "dev-v4-v32-below",
+          "family": "dev",
+          "index": 0,
+          "regime": "historical-below",
+          "batch_size": 7,
+          "descriptor_count": 39,
+          "q": [
+            3,
+            39,
+            107,
+            143,
+            211,
+            247,
+            379
+          ],
+          "cached": [
+            22528,
+            16512,
+            11840,
+            8256,
+            2624,
+            672,
+            80
+          ],
+          "max_cached": 22528,
+          "shape_eligible": true,
+          "generator_seed": null,
+          "exposed_development": true,
+          "provenance": "selector-v3.2 canary-v32-below"
+        },
+        "fresh_cases_consumed": 0
+      },
+      "source_validation_passed": true
+    },
+    "1649001": {
+      "gpu": "gpu_5090",
+      "case": "1",
+      "fields": {
+        "JobState": "RUNNING",
+        "TimeLimit": "12:00:00",
+        "NodeList": "wqd10nbj04g3",
+        "RunTime": "00:01:49",
+        "ReqTRES": "cpu=6,mem=94500M,node=1,billing=6,gres/gpu=1",
+        "AllocTRES": "cpu=6,mem=94500M,node=1,billing=6,gres/gpu=1"
+      },
+      "raw_scontrol": "JobId=1649001 JobName=sgi-public-complete-r2 UserId=scxi253(1256) GroupId=scxi253(1256) MCS_label=N/A Priority=1 Nice=0 Account=scxi253 QOS=gpugpu WCKey=* JobState=RUNNING Reason=None Dependency=(null) Requeue=0 Restarts=0 BatchFlag=1 Reboot=0 ExitCode=0:0 RunTime=00:01:49 TimeLimit=12:00:00 TimeMin=N/A SubmitTime=2026-10-02T08:10:55 EligibleTime=2026-10-02T08:10:55 AccrueTime=2026-10-02T08:10:55 StartTime=2026-10-02T08:10:55 EndTime=2026-10-02T20:10:55 Deadline=N/A SuspendTime=None SecsPreSuspend=0 LastSchedEval=2026-10-02T08:10:55 Scheduler=Main Partition=gpu_5090 AllocNode:Sid=wqd10nbf05c05:1713202 ReqNodeList=(null) ExcNodeList=(null) NodeList=wqd10nbj04g3 BatchHost=wqd10nbj04g3 NumNodes=1 NumCPUs=6 NumTasks=1 CPUs/Task=6 ReqB:S:C:T=0:0:*:* ReqTRES=cpu=6,mem=94500M,node=1,billing=6,gres/gpu=1 AllocTRES=cpu=6,mem=94500M,node=1,billing=6,gres/gpu=1 Socks/Node=* NtasksPerN:B:S:C=0:0:*:* CoreSpec=* MinCPUsNode=6 MinMemoryCPU=15750M MinTmpDiskNode=0 Features=(null) DelayBoot=00:00:00 OverSubscribe=OK Contiguous=0 Licenses=(null) Network=(null) Command=/ssd/scxi253/sgi-public-complete-r2-0a5c735-20261002/public_path_prequal.sbatch WorkDir=/ssd/scxi253/sgi-complete-workflow-c34d5d9-source-20261002 StdErr=/ssd/scxi253/sgi-public-complete-r2-0a5c735-20261002/logs/1649001.err StdIn=/dev/null StdOut=/ssd/scxi253/sgi-public-complete-r2-0a5c735-20261002/logs/1649001.out TresPerNode=gres/gpu:1 TresPerTask=cpu=6 \n",
+      "pristine_environment": null,
+      "source_validation_passed": true
+    }
+  },
+  "default_promotion": false,
+  "fresh_cases_consumed": 0,
+  "full_http_qualified": false,
+  "historical_token_divergence_resolved": false
+}
