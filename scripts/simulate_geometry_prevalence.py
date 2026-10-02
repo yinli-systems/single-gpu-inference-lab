@@ -91,7 +91,21 @@ def ridge(X, y, lam=1e-2):
     return lambda x: float(((np.asarray(x) - mu) / sd) @ w + b)
 
 
-def build_clock(steps_csv: Path):
+def attention_feature(kind, chunks):
+    """The attention term of the prefill clock for a step's (q, kv_before) chunks, in millions:
+    geometry = per-request work sum q (kv + (q + 1) / 2); meanfield = its marginal-only mean-field value
+    (sum q)(sum kv) / n + sum q (q + 1) / 2; aggregate = M0's interaction (sum q)(sum kv). "legacy" is the
+    clock of every committed result: fitted on the tracer's attn_proxy (which adds decode KV and uses q/2)
+    but evaluated with the geometry form, a small train/simulate mismatch kept only for reproduction."""
+    q = [c for c, _ in chunks]; k = [kv for _, kv in chunks]
+    if kind in ("geometry", "legacy"):
+        return sum(c * (kv + (c + 1) / 2) for c, kv in chunks) / 1e6
+    if kind == "meanfield":
+        return (sum(q) * sum(k) / len(q) + sum(c * (c + 1) / 2 for c in q)) / 1e6
+    return sum(q) * sum(k) / 1e6
+
+
+def build_clock(steps_csv: Path, kind: str = "legacy"):
     pre_X, pre_y, dec_X, dec_y = [], [], [], []
     for r in csv.DictReader(open(steps_csv)):
         if r["cuda_ms"] in ("", "nan") or r["i"] == "0":
@@ -102,7 +116,16 @@ def build_clock(steps_csv: Path):
             if g > 0:
                 dec_X.append([g, gkv / 1e4]); dec_y.append(y)
         else:
-            pre_X.append([g, gkv / 1e4, ct / 1e3, int(r["ctx_reqs"]), float(r["attn_proxy"]) / 1e6]); pre_y.append(y)
+            ch = [int(x) for x in r["ctx_chunks"].split()]
+            if kind == "legacy":
+                att = float(r["attn_proxy"]) / 1e6   # includes decode KV and q/2; simulate() prices without them
+            elif kind == "geometry":
+                # exact per-request work, same definition as simulate(): attn_proxy minus decode KV, q/2 -> (q+1)/2
+                att = (float(r["attn_proxy"]) - int(r["gen_kv_sum"]) + sum(ch) / 2) / 1e6
+            else:
+                kv = int(r["ctx_kv_sum"])
+                att = attention_feature(kind, [(c, kv / len(ch)) for c in ch])  # only sums of kv enter these forms
+            pre_X.append([g, gkv / 1e4, ct / 1e3, int(r["ctx_reqs"]), att]); pre_y.append(y)
     pre_X, pre_y = np.array(pre_X), np.array(pre_y)
     # drop one-off compile steps the same way the analysis does (> 10x the median)
     keep = pre_y <= 10 * np.median(pre_y)
@@ -143,7 +166,8 @@ class Stats:
     steps: int = 0
 
 
-def simulate(reqs, *, budget, threshold, max_seqs, kv_capacity, slope, clock, clock_range, rate_scale, block=512):
+def simulate(reqs, *, budget, threshold, max_seqs, kv_capacity, slope, clock, clock_range, rate_scale, block=512,
+             clock_kind="legacy"):
     pre_clock, dec_clock = clock
     arrivals = collections.deque(Req(t / rate_scale, p, o, h) for t, p, o, h in reqs)
     waiting, running = collections.deque(), []
@@ -196,8 +220,7 @@ def simulate(reqs, *, budget, threshold, max_seqs, kv_capacity, slope, clock, cl
         # step cost
         if chunks:
             ct = sum(q for q, _ in chunks)
-            proxy = sum(q * (kv + (q + 1) / 2) for q, kv in chunks)
-            ms = pre_clock([n_dec, dec_kv / 1e4, ct / 1e3, len(chunks), proxy / 1e6])
+            ms = pre_clock([n_dec, dec_kv / 1e4, ct / 1e3, len(chunks), attention_feature(clock_kind, chunks)])
             geo = slope * (ct * sum(kv for _, kv in chunks) - sum(q * kv for q, kv in chunks)) / 1e6
             st.prefill_steps += 1; st.prefill_time += ms; st.nprefill[len(chunks)] += 1; st.geo.append(geo)
             if len(chunks) >= 2:
@@ -267,8 +290,10 @@ def main():
     ap.add_argument("--window-s", type=float, default=None,
                     help="only requests arriving within this many (scaled) seconds; off by default (whole trace)")
     ap.add_argument("--output", type=Path, required=True)
+    ap.add_argument("--clock", choices=["legacy", "geometry", "meanfield", "aggregate"], default="legacy",
+                    help="attention term of the prefill clock (legacy reproduces committed results)")
     args = ap.parse_args()
-    pre, dec, rng = build_clock(args.steps)
+    pre, dec, rng = build_clock(args.steps, args.clock)
     out = {"clock": rng, "slope_ms_per_M": args.slope, "kv_capacity_tokens": args.kv_capacity,
            "max_seqs": args.max_seqs, "results": {}}
     print(f"clock from {args.steps}: {rng}")
@@ -287,7 +312,7 @@ def main():
             for s in map(float, args.rate_scales.split(",")):
                 sreqs = reqs if args.window_s is None else [x for x in reqs if x[0] / s < args.window_s]
                 st = simulate(sreqs, budget=int(b), threshold=int(thr), max_seqs=args.max_seqs, kv_capacity=args.kv_capacity,
-                              slope=args.slope, clock=(pre, dec), clock_range=rng, rate_scale=s)
+                              slope=args.slope, clock=(pre, dec), clock_range=rng, rate_scale=s, clock_kind=args.clock)
                 sm = summarize(st)
                 out["results"][name]["runs"][f"{cn}@x{s:g}"] = sm
                 print(f"  {cn:10s} x{s:<4g} TTFT p50/p99 {sm['ttft_s_p50_p99'][0]:6.2f}/{sm['ttft_s_p50_p99'][1]:7.2f} s | prefill steps {sm['prefill_steps']:6d} "
