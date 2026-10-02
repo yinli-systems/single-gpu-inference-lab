@@ -23,7 +23,9 @@ indices and actual Q/K/V payloads, calls the real original Native planner,
 validates the same ordered geometry and15 planner values, copies scheduling
 state and metadata into the existing captured buffers, and replays the graph.
 
-Native reference O/LSE and Native-after-Resource must be exact. Output and page
+Each epoch establishes current Native reference O/LSE before Resource replay;
+Resource and subsequent Native-after-Resource must both match that reference.
+Output and page
 digests must actually change. Four traced calls per epoch must show4 or64
 attention launches, all with actual65536 shared-memory bytes. Retain each raw
 CUPTI/Kineto trace; zero profiler occupancy estimates are not residency evidence.
@@ -36,8 +38,10 @@ retire and use current Native. A poisoned graph object's replay method ensures
 these rejections cannot accidentally execute the stale graph.
 
 Private workspaces are fully copied on transition. GPU readback, synchronization,
-Native planning, payload updates, copying and four calls are included in the
-recorded full-step wall time. This deliberately conservative implementation is
+Native planning, a pre-Resource Native control, payload updates, copying and four
+calls are included in the recorded transaction wall time. This contains a
+validation control and must not be interpreted as deployment-step timing.
+This deliberately conservative implementation is
 not a low-overhead serving path. Three diagnostic observations provide no
 performance confidence interval. Pure replay timing is not substituted for it.
 

@@ -106,13 +106,15 @@ def test_physical_page_epochs_preserve_one_capture(dtype_name, layout, packed, r
             k.mul_(0.984375)
             v.add_(0.03125)
             plan()
+            # Establish the current epoch's control BEFORE any Resource replay,
+            # so a Native-after-Resource drift cannot corrupt its own reference.
+            expected = native()
             assert probe.bind_after_metadata_update(inputs, forward_options=options)
             for _ in range(4):
                 result = probe.replay(inputs, forward_options=options)
                 assert probe.last_execution == "uncertified_resource_graph"
             torch.cuda.synchronize()
             full_step_ms = (time.perf_counter_ns()-start)/1e6
-            expected = native()
             exact(result, expected)
             # Native-after-Resource is evaluated against the current plan.
             exact(native(), expected)
@@ -131,8 +133,8 @@ def test_physical_page_epochs_preserve_one_capture(dtype_name, layout, packed, r
             trace = json.loads(trace_path.read_text())
             kernels = [e for e in trace['traceEvents'] if e.get('cat') == 'kernel'
                        and 'BatchPrefillWithPagedKV' in e.get('name', '')]
-            row = {"epoch": epoch+1, "full_update_plus_four_calls_wall_ms": full_step_ms,
-                   "timing_scope": "Metadata value readback, synchronization, copies, Native plan, payload updates and four graph calls; diagnostic only",
+            row = {"epoch": epoch+1, "full_transaction_with_native_reference_plus_four_calls_wall_ms": full_step_ms,
+                   "timing_scope": "Metadata value readback, synchronization, copies, Native plan AND pre-Resource Native control, payload updates and four graph calls; diagnostic only, not deployment timing",
                    "physical_pages_sha256": digest(metadata[2]), "output_lse_sha256": [digest(x) for x in expected],
                    "output_lse_exact": True, "native_after_resource_exact": True,
                    "trace_sha256": hashlib.sha256(trace_path.read_bytes()).hexdigest(),
