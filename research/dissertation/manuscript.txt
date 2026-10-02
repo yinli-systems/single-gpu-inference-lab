@@ -1,0 +1,377 @@
+@@ Abstract
+
+GPU attention can change performance when the launch reserves more shared memory even though the audited machine instructions remain identical. This project investigates whether that observation can become a reliable inference optimisation. It separates a resource intervention from tactic selection, Native-path transparency, and end-to-end serving correctness. The research is evaluated on RTX 4090 and RTX 5090 systems using source-bound experiments, independent processes, paired timing blocks, exact output checks, and retained failures.
+
+A diagnostic intervention on an exposed BF16 cached-prefix workload changes the actual reservation from 48 KiB to 64 KiB while preserving audited SASS. Median CUPTI kernel times change from 2070.3665 to 1482.2165 microseconds on the RTX 4090 and from 1782.9890 to 1304.7355 microseconds on the RTX 5090. Raising only the function's attribute ceiling does not produce a comparable reduction. The same reservation change slows a short ragged suffix, demonstrating that a useful intervention requires workload-sensitive selection. These are diagnostic medians, not confidence-qualified serving improvements.
+
+A static v3.2.2 selector fails its fresh release qualification despite favourable average selected speedups and exact operator outputs. A confidence-gated v4.2 selector passes exposed development tests but subsequently fails its ten-case dual-card canary. A later, separately frozen public-path supplement passes on the original complete RTX 5090 development records only. None of these results authorises default or serving promotion. The historical two divergent requests among 432 capped-arm requests remain unresolved: matched-state replay is diagnostic evidence, but it did not reproduce the original failure.
+
+The contribution is therefore a bounded resource intervention, a fresh counterexample to the tested static rule, a Native-transparent experimental architecture, and a fail-closed evidence pipeline. The conclusion is conditional: resource-sensitive attention is promising, but complete fresh qualification, full-model HTTP performance and parity, real Resource Graph metadata updates, and historical causal closure are still required.
+
+@@ Reader's contract and evidence cutoff
+
+This is an English research draft based on persisted evidence available on 2 October 2026. It is intended to support a Birmingham BSc Computer Science final-year project, but no cohort-specific assessment rubric, word limit, deadline, supervisor requirements, or citation style has been supplied. The public programme page describes a 40-credit final-year project [6]; it does not establish the marking scheme for this student's submission. No numerical grade prediction is made.
+
+The manuscript distinguishes an experiment's completion, its diagnostic usefulness, its qualification authority, and deployment permission. PASS always carries a named source and scope. HOLD is a positive decision to withhold a claim when any required condition is missing or fails. Code and CPU tests can establish preparation or functional properties without establishing a GPU performance result. A running job is an observation about execution state, not a completed measurement.
+
+The frozen claim ledger maps 90 machine-extracted facts to ten source snapshots and exact JSON pointers. Each snapshot is SHA-256 bound. Presentation changes, including conversion of regret fractions to percentages, are independently verified. The report does not claim that hashes prove experimental truth; they make the particular inputs and deductions inspectable. New results must enter as a dated revision rather than silently replacing a failed campaign.
+
+@@ 1. Introduction
+
+@@@ 1.1 Problem and motivation
+
+Inference optimisation involves several layers that can each defeat an apparently strong kernel result. A faster operator may handle only a small fraction of request time. A selector may improve its chosen subset while adding overhead to every fallback. A cache may return a tactic trained under a different execution mode. A graph may replay with stale page-table metadata. A request can terminate with the expected length while containing a different token sequence. A completed benchmark can still fail a control, an uncertainty bound, or numerical parity.
+
+This project starts with a particularly constrained intervention: changing the dynamic shared-memory reservation of an attention launch while auditing the Native and Resource functions for matching instruction bodies. This limits the direct implementation change and makes a resource explanation plausible. It does not establish that the GPU achieves a specific occupancy, nor that every workload benefits. Shared memory interacts with scheduling and the rest of the execution environment; the sign and size of the performance effect must be measured.
+
+The engineering question is whether a bounded optimisation can be introduced without disturbing the ordinary Native path and without converting development gains into unjustified deployment claims. A useful design must preserve the Native plan and launch, reject unknown or stale identities, count the actual public-call costs, and retain the original evidence when a gate fails. A useful research report must explain why attractive averages did not satisfy that design's release conditions.
+
+@@@ 1.2 Research questions
+
+RQ1 asks whether the actual launch reservation has a measurable effect distinct from increasing the function's permitted shared-memory ceiling. RQ2 asks whether the tested static selection rule generalises to fresh workload geometries on both GPU families. RQ3 asks whether a confidence-gated, persisted tactic policy can preserve Native behaviour and whole-call performance while obtaining selected gains. RQ4 asks whether those operator-level results survive full-model HTTP serving, changing metadata, graph execution, and complete token parity.
+
+These questions have different evidential requirements. RQ1 needs a controlled intervention and verified launches. RQ2 needs a genuinely withheld population and a frozen rule. RQ3 needs training and scoring separation, actual persisted winners, absolute pristine comparisons, and explicit fallback costs. RQ4 needs full-model request experiments with observable resource use and complete raw output traces. Evidence that answers one question cannot automatically answer the others.
+
+@@@ 1.3 Contributions and boundaries
+
+The first contribution is a diagnostic experiment separating the attribute ceiling from the launch reservation while auditing the instruction bodies. Its strongest interpretation is an effect of this resource intervention under the tested conditions. The second is a fresh release counterexample to the particular static rule: its selected average improves while its worst-case and control requirements fail. This refutes the rule's qualified claim on that population rather than disproving every possible static selector.
+
+The third contribution is an experimental interface and policy architecture that isolates Resource execution from ordinary Native execution, binds persisted choices to their environment, and treats uncertainty or stale metadata as reasons to use Native. The fourth is a durable qualification pipeline that records submission intent, validates complete jobs and artifacts, and prevents later stages from proceeding after a failed prerequisite. A separate SGLang request-ownership correction improves a scoped lifecycle test; it is reported separately from the unresolved historical token-value failure.
+
+This work does not claim to invent execution-mode-aware autotuning, persisted tactic caches, atomic cache publication, or baseline competition. Those already appear in FlashInfer's current autotuner [2,3]. The experimental delta is the particular resource tactic, its Native-transparent isolation, and the explicit qualification and causal-evidence requirements imposed here. It does not establish production safety, universal no-regression performance, achieved occupancy, or a positive HTTP goodput result.
+
+@@ 2. Background and related work
+
+@@@ 2.1 Attention runtimes and resource sensitivity
+
+FlashInfer is an attention library designed around customisable kernels, composable KV-cache formats, and dynamic serving requirements. Its paper describes a framework that combines specialised execution with flexible inference workloads and CUDA Graph compatibility [1]. Those requirements make a fixed tensor shape an incomplete description of deployment: layout, execution mode, cache representation, and runtime integration matter. This project examines one narrow additional resource dimension within that setting.
+
+CUDA distinguishes a function attribute controlling the permitted dynamic shared-memory size from the byte count passed to a kernel launch [4]. Allowing a function to request a larger amount is not the same intervention as actually reserving that amount at launch. The distinction motivates the four-arm diagnostic in this report. The cited live API documentation is current CUDA documentation; the actual experiment toolchain is CUDA 13.0. The documented API distinction is used as context, while the experiment records establish what was launched.
+
+The mechanism should be stated cautiously. A shared-memory capacity bound can rule out some residency configurations, but it cannot measure achieved occupancy or identify every cause of a latency change. Registers, warp limits, scheduling, and memory behaviour remain relevant. This study has launch traces and SASS comparisons, but no qualifying hardware-residency counter collection. Any more specific occupancy explanation remains a hypothesis.
+
+@@@ 2.2 Existing autotuning and prefix reuse
+
+FlashInfer's September 2026 autotuner description emphasises matching tuning to deployed execution, including host costs for eager calls and replay timing for graphs. It also describes environment and operation identity, the default tactic as a competitor, and persistence and validation of choices [2]. These are useful design precedents. The present evaluation uses actual persisted winners and separates training from held-out scoring rather than assuming that a cached preferred tactic is a measured winner.
+
+The accompanying v0.7 release notes distinguish experimental capabilities from graduation into ordinary use [3]. That distinction fits this study's opt-in Resource interface and default-off status. It does not imply that the upstream release endorses this candidate. Neither library-level benchmark claims nor selection-regret statistics from another workload are imported as measurements of this project.
+
+SGLang's paper introduces a serving system for structured language-model programs and describes RadixAttention for sharing cached prefixes [5]. Prefix reuse makes mutable ownership and physical KV metadata important in this project: two logically similar requests can execute with different cache contexts. The serving experiments therefore retain request identity, token sequences, and relevant execution metadata instead of treating an HTTP status or output length as complete correctness evidence.
+
+@@@ 2.3 Position of this study
+
+The related systems provide the runtime context, not an external baseline that has been experimentally beaten here. The main comparisons are paired pristine Native, candidate Native, and candidate Resource or policy calls under explicitly bound sources. This makes the report a study of a local intervention and its qualification, rather than a ranking of attention libraries or serving systems.
+
+The most important research distinction is between discovering an attractive tactic and qualifying its introduction. Discovery can tolerate exposed workloads and profiling. Qualification requires new cases, frozen thresholds, complete raw artifacts, independently observed execution, and the cost of fallback. Serving adds another level: full-model request behaviour and service-level outcomes. The structure of the experiments follows those different responsibilities.
+
+@@@ 2.4 Benchmarking uncertainty and deployment evaluation
+
+Kalibera and Jones argue that systems benchmarking must account for uncertainty at multiple repetition levels, because additional iterations within an execution do not substitute for repeated executions or builds [7]. This motivates the distinction between process, block, and call in the present methodology. Their framework is not cited as a validation of this project's exact estimator or thresholds. In particular, three processes and independently resampled coordinates remain limitations despite twenty thousand bootstrap draws. Repetition should target the source of variation that matters, not merely increase the largest convenient count.
+
+FlashInfer-Bench connects workload and implementation descriptions, correctness and performance evaluation, and deployment through a common trace schema and substitution mechanism [8]. That work provides a broader evaluation context for moving kernel improvements into inference systems. This project does not claim a leaderboard result or adopt another system's gains. Its narrower focus is whether one resource intervention can pass a specified Native introduction boundary, then survive full-model serving with complete token parity. A standard workload schema is valuable provenance infrastructure, but the qualification verdict still depends on the experiment's own controls and retained raw evidence.
+
+@@ 3. Resource intervention and Native-transparent design
+
+@@@ 3.1 Four-arm diagnostic
+
+The diagnostic uses Native and three Resource variants: an attribute ceiling and launch reservation of 49152/49152 bytes, 65536/49152 bytes, and 65536/65536 bytes. Each Resource variant has an isolated function symbol. The candidate is FlashInfer commit 75544a17; the diagnostic harness is 9f7b80a. The two Slurm jobs, 1648595 and 1648596, complete with exit status 0:0. The population is two previously exposed BF16 workload forms: a long page-1 cached prefix and a short ragged projection suffix [E-intervention].
+
+Each arm, layout, and card has sixteen actual CUPTI kernel launches. Separate event observations include warm and cold L2 states, eight blocks per state, and fixed windows of sixty-four iterations. All started observations are retained. Output and log-sum-exp comparisons are exact, including Native calls after Resource calls. Each card has 264 audited SASS pairs across the three Resource variants, with no missing, extra, or mismatched pairs. The intervention therefore preserves the audited instruction bodies while changing the requested launch resource.
+
+{{table:intervention}}
+
+{{figure:mechanism}}
+
+On the long-prefix workload, the 65536/49152 arm remains close to Native whereas 65536/65536 reduces the diagnostic median on both cards. This supports actual reservation, rather than the increased attribute ceiling alone, as the operative intervention in this comparison. The 49152/49152 arm is a useful control for introducing the isolated Resource function without the larger reservation. The short suffix moves in the opposite direction, so a global switch to the larger reservation is contradicted by the diagnostic workload itself.
+
+The observations do not provide a qualification confidence interval: the CUPTI collection is diagnostic, and the timing population differs from the release benchmark. Sixteen traced launches are repeated observations on a configuration, not sixteen independent machines. The event data and CUPTI data are retained separately. A profiler's estimated zero occupancy for successful Resource launches is not used as a physical measurement. The trace verifies requested launch bytes, not achieved resident CTAs.
+
+@@@ 3.2 Ordinary Native execution as an invariant
+
+The candidate uses a distinct Resource-only path rather than adding a resource field to ordinary Native planning. The retained Native plan has fifteen fields. Source-prefix identity, compiled symbol isolation, and SASS identity constrain implementation changes at the audited boundaries. The normal package remains importable and usable without enabling Resource execution. Dual-card source tests and independent SASS audits provide functional and binary evidence for those boundaries [E-functional].
+
+This approach follows an earlier failure of transparency qualification. In v4.1.1, selected development gains are large, but Native/pristine uncertainty on the RTX 5090 does not satisfy the 0.99 lower-bound requirement. Matching instructions alone cannot settle that discrepancy because host dispatch, planning, cache behaviour, timing order, and environmental variation can still affect a public call. The subsequent Native-transparent design addresses the path boundary; its success must still be measured against pristine execution.
+
+Three baseline meanings are kept distinct. Pristine Native is the unmodified baseline package. Candidate Native uses the candidate package while selecting Native execution. Candidate policy includes actual selection lookup, dispatch, lease checks, and fallback. Candidate Native versus pristine measures transparency; Resource versus candidate Native measures the local tactic; candidate policy versus pristine measures the practical introduction. An internal Native-normalised policy ratio of one on fallback does not prove that fallback is free relative to pristine.
+
+@@@ 3.3 Identity, persistence, and safe rejection
+
+A valid persisted choice needs more than a geometry label. Its identity includes relevant operation parameters, execution mode, source and environment bindings, and the metadata conditions the tactic depends on. The training result must refer to a certified available tactic and to the actual v2 persisted winner. A receipt without an actual winner is not sufficient. Separate-process consumers demonstrate that a choice can be loaded without tuning again; they do not establish that an unrecognised future environment should reuse it.
+
+The runtime has an explicit plan lease and lifecycle. Bound metadata cannot be silently reused after a Native replan, an external metadata write, or a change to the physical KV interpretation. Invalid, unrecognised, or retired state routes to Native. This is a functional safety boundary, not a statement that the selection lookup has no cost. The public-call benchmark must include that cost in the deployed execution mode.
+
+Cross-process persistence, reusable eager leases, and epoch-aware metadata tests establish bounded functional properties. The recorded epoch and packed-layout driver tests execute real Resource/cache hits and check exact outputs. A failed packed-layout source is retained alongside its corrected successor. Native Graph fixed-pointer payload tests establish a Native property. They do not qualify a Resource graph that updates page tables or indices during real serving [E-functional].
+
+@@@ 3.4 State transitions and failure containment
+
+The deployment-facing states are intentionally more restrictive than a convenient demo. Training is explicitly authorised, bounded, and separated from measurement. The policy is sealed before scored requests. Unknown identities, cache overflow, unresolved controls, or invalid lifecycle state cannot trigger unrecorded tuning during scoring. Measurements that encounter such conditions either follow the defined Native path or fail the qualification contract; they are not removed to improve an average.
+
+At the campaign level, source binding precedes submission, submission intent precedes confirmed job identity, and complete artifacts precede analysis authority. An uncertain submission outcome blocks destructive cleanup or a claim that no job ran. A Slurm TIMEOUT with a shell exit code of zero remains a timeout. These state transitions are part of reproducibility: they prevent a partial process sequence from being treated as the intended experiment.
+
+@@ 4. Experimental design and statistical interpretation
+
+@@@ 4.1 Populations and units
+
+The study uses consumer RTX 4090 and RTX 5090 GPU families on Paracloud. Actual GPU UUIDs, driver information, source commits, model files where relevant, and artifact checksums are part of the receipts. The source-validation and diagnostic toolchain uses CUDA 13.0. Historical experiments have their own software bindings and are not relabelled as if they used the latest candidate. The report makes no claim about datacentre accelerators or every device in either consumer family.
+
+A geometry is an input-design unit. A cell adds dtype, layout, split choice, and execution mode. A fold record is a scored choice under a held-out repetition. A process is an independently launched benchmark role. A block contains paired timing observations; iterations within it share the execution context. A request is a serving observation. These units must not be substituted for one another: 144 fold records do not imply 144 fresh geometries, and thousands of calls do not imply thousands of independent GPUs.
+
+The v3.2.2 release uses thirty unseen geometries and 720 cells per card. The original v4.2 canary consumes ten geometries and 720 fold records per card after its retained execution recovery. Development experiments expose two geometries and 144 fold records per card. The later public-path prerequisite also uses the two exposed cases. A fresh replacement canary must contain new geometries; rerunning the consumed ten cannot restore their freshness.
+
+@@@ 4.2 Training and scoring separation
+
+The complete public-path experiment specifies three pristine, three training, and three policy processes for each case and card. Each has twenty-four cells. The total is 864 cells across four case/card allocations. A case/card job is complete only when all nine roles and their required cells are present. The process order is recorded, and the initial conditioning and caches are bound to the experiment rather than chosen after observing performance.
+
+For held-out repetition i, training uses the other two fixed training repetitions. Their primary and secondary roles follow the predetermined cyclic assignment; the fastest process is not selected retrospectively. The held-out oracle is used only to score regret over the available certified tactics. It never trains the policy. The policy must satisfy exact outputs, valid certificates, actual persisted choices, and the training controls before it can select Resource.
+
+The frozen training contract requires a geometric-mean gain of at least 1.05, a gain confidence lower bound of at least 1.01, a minimum paired-block ratio of at least 0.99, and duplicate-control equivalence within [1/1.005, 1.005]. Scoring uses its separately specified one-percent control resolution. These are acceptance rules of this experiment. A control interval that includes equality but is too wide is unresolved; it is not a successful equivalence test.
+
+@@@ 4.3 Timing and estimands
+
+The paired timing sequence is a six-arm Latin palindrome: Native, oracle, policy, policy, oracle, Native. The intended reduction in temporal-order sensitivity is checked with controls rather than assumed. Windows target 384 milliseconds and must reach the fixed 120-millisecond minimum. Native conditioning, the managed profile, all call costs, and telemetry populations are specified in the bound protocol [E-protocol]. Eager full calls and one- or sixteen-replay graph modes have different overhead structures and are analysed separately.
+
+For a comparison, a speedup is baseline latency divided by candidate latency. A value above one favours the candidate. The geometric mean is computed through mean log ratios, preserving the multiplicative interpretation. A speedup of 1.33 corresponds to roughly 24.8 percent less latency, not 33 percent less latency. Selected speedup describes only selected records. Whole-policy performance and absolute comparisons to pristine must accompany it because fallback and dispatch are paid by real users.
+
+The regret definition used for the public-path supplement is chosen latency divided by available held-out oracle latency, minus one. The oracle's availability is constrained by certification and includes the policy's available choices. This is not regret against an unconstrained fastest implementation. Legacy v4.2 development summaries use the reversed ratio, oracle/chosen minus one; their zero-valued regret summaries are excluded from comparisons instead of silently reinterpreted.
+
+@@@ 4.4 Uncertainty and the joint minimum
+
+The public-path absolute comparisons resample the three processes and their twenty-four timing blocks hierarchically, with twenty thousand bootstrap draws. For each scored coordinate, the estimator produces log-speedup draws. The reported joint-minimum lower bound exponentiates the 2.5th percentile of the minimum coordinate log ratio across the stacked draws. This makes the tested minimum visible instead of allowing a good mean to hide a poor coordinate.
+
+The estimator has limits that affect interpretation. Coordinate draws are seeded independently, so cross-coordinate covariance is not preserved as a shared workload or environment bootstrap. Some selected-cluster calculations use held-out block logs rather than the same hierarchical process estimator. The qualification reports therefore use the frozen estimator as a protocol gate, not as a universal simultaneous guarantee covering arbitrary future inputs. A redesigned shared-draw estimator would need a newly registered protocol and new qualification rather than a retroactive improvement to an inconvenient result.
+
+Training repetitions are reused across cross-validation folds. The folds are not fully independent experiments. Three processes improve process-level coverage, but they are still a small basis for estimating between-process tails. Confidence intervals condition on the observed source, settings, and population. The 0.99 floor is a speedup-ratio bound: its reciprocal allows approximately 1.01 percent more latency. It is neither a hard real-time guarantee nor evidence that every unseen request meets that tolerance.
+
+@@@ 4.5 Completeness, clocks, and artifacts
+
+Completeness is checked independently of numeric pass/fail. Slurm must report COMPLETED with the required exit status, all started roles must be accounted for, the complete expected cell set must exist, source bindings must match, and the independent SASS and full raw archive must be available. Missing cells are not filled by extrapolation, trimming, or continuing only the missing tail under the old experiment name.
+
+The public-path clock check uses its originally specified whole-job active population: at least ninety percent activity, at least ten active samples, and a p95/p05 clock ratio no greater than 1.05. The later HTTP design uses scored-interval telemetry, which is a different population. A CSV-column alias correction makes the actual NVIDIA field readable; it does not justify changing either population or stability threshold. Telemetry is a control for an observed environment, not a measurement of total absence of interference.
+
+Full raw archives preserve timings, choices, certificates, source ledgers, logs, and independent audits. A linear stream verifier checks member hashes without repeated seeks through compressed archives. This changes verification efficiency, not the experiment or archive bytes. Source snapshots, analyzer snapshots, and their receipts remain separate so that an arithmetic-portability supplement can be reviewed without rewriting the original failed analyzer record.
+
+@@ 5. Results: versioned findings and failed qualification
+
+@@@ 5.1 A static rule's fresh counterexample
+
+The v3.2.2 release campaign completes all 96 planned runs with no run failure. Each card has 720 cells, and the recorded operator numerical checks are exact across the relevant arms. Nevertheless, the release verdict is HOLD on both cards. On the RTX 4090, 264 selected cells have a geometric-mean paired speedup of 1.285140 and a selected worst point of 1.145044, but 82 selected control checks remain unresolved. The unselected population also fails relevant absolute and control conditions [E-static].
+
+On the RTX 5090, 216 selected cells have a geometric mean of 1.203699 while the worst selected point is 0.987390. The simultaneous worst interval is [0.985577, 0.988027], entirely below the 0.99 floor. Twenty selected controls fail. The counterexample includes a fresh paged FP16 eager coordinate where the frozen rule selects incorrectly. The resulting evidence is stronger than simply saying that an average gain is noisy: a favourable average coexists with a concrete non-regression failure in the intended withheld population.
+
+The experiment does not prove that static selection is intrinsically impossible. It demonstrates that this rule and its proposed release claim do not survive this population. Replacing the problematic cases after inspecting them would answer a different question. The fresh counterexample motivates confidence-sensitive selection and stronger Native controls, while the original release remains a failed, complete experiment.
+
+@@@ 5.2 Development gains do not imply release
+
+The v4.1.1 exact development experiment produces selected geometric means near 1.39 and 1.40 on the two cards. Its verdict remains HOLD: the RTX 4090 has unresolved held-out controls, while the RTX 5090 Native-overlay joint-minimum lower bound is 0.988980. The audited kernel isolation supports a narrow implementation property. It does not establish that the measured public Native path is sufficiently transparent [E-v411].
+
+The early v4.2 exact development results subsequently pass their defined requirements. Selected geometric means are 1.385991 and 1.398568; Native lower bounds are 0.993662 and 0.992892. The tests use two exposed geometries and sources bound to b769e7c. Their PASS is useful evidence that the architecture can satisfy this development contract. It is neither a fresh canary nor evidence for the later public-interface source 75544a17 [E-dev].
+
+{{table:versions}}
+
+This table is deliberately not an improvement curve. The sources, selected subsets, process populations, and qualification stages differ. The rows cannot support a paired claim that each version makes the same population faster. Their research value is in the progression of questions: a failed static release, an initial transparency failure, a scoped development pass, and a fresh canary that still fails.
+
+@@@ 5.3 The authoritative v4.2 dual-card canary
+
+The old v4.2 canary consumes all ten originally withheld cases. After retained recovery of an execution interruption, the complete authority remains QUALIFICATION_HOLD. The RTX 4090 selects 476 of 720 fold records, with a selected geometric mean of 1.537934 and selected lower bound of 1.065018. Its held-out controls do not all resolve. The high selected gain therefore cannot override the failed control requirement [E-authority].
+
+The RTX 5090 selects 255 of 720 fold records, with a selected geometric mean of 1.304570 and selected lower bound of 1.049058. Its Native-overlay lower bound falls to 0.926743, and its actual-policy/pristine worst point is about 0.926764. These are failures at the absolute introduction boundary. Even a strong selected Resource comparison cannot compensate for a Native or policy regression relative to pristine.
+
+The ten consumed cases remain exposed. Forty-eight release cases and twelve stress cases remain untouched, and no new ten-case canary has yet been generated by the current finite workflow. The status flags are false for both default and serving promotion; historical token divergence is unresolved. A report that described v4.2 as an uncommitted draft or described the old ten cases as still fresh would be inconsistent with the persisted authority.
+
+@@@ 5.4 Original public-path completeness failure
+
+The later original public-path prerequisite tests the public interface on two exposed cases per card. Three of four eight-hour jobs complete, but RTX 4090 case 1 ends as TIMEOUT after approximately eight hours. Its shell exit is zero; its scheduler state is still TIMEOUT. Across all four jobs, 853 of the intended 864 cells exist. The last policy repetition in that case has only thirteen of twenty-four cells. The original campaign is therefore HOLD irrespective of any partial performance result [E-public].
+
+The complete original archive is 1,317,298,697 bytes and contains 4,617 members. Its SHA-256 is recorded in the reproducibility appendix. The full source, outputs, choice artifacts, logs, and independent SASS diagnostics are retained. All four independent SASS checks pass for their audited populations, but SASS completion does not replace missing benchmark cells. The complete archive documents an incomplete experiment; those are compatible statements.
+
+Two analysis portability issues are reported separately. Reconstructed derived geometric means can differ by one float64 ULP from their serialised originals. The supplemental checker verifies the original serialised checksum exactly and permits only bounded adjacent float64 differences in selected derived quantities, without relaxing thresholds, choices, booleans, source identity, or seeds. The original NVIDIA clock CSV also uses a longer field name than the initial parser expects. A separate frozen analyzer corrects that field access while keeping the original activity and stability rules.
+
+@@@ 5.5 Scoped RTX 5090 supplemental result
+
+Both original RTX 5090 jobs are complete. The separately frozen arithmetic-and-column supplement therefore evaluates those records without the missing RTX 4090 case. All sixteen defined requirements pass for its exposed two-case scope. It has 144 fold records, 108 selected, selected geometric mean 1.331737, selected lower bound 1.104280, Native/pristine lower bound 0.992711, and actual-policy/pristine lower bound 0.992585 [E-public5090].
+
+The available-oracle P99 regret is {{fact:public5090_regret_p99_percent:.6f}} percent; its worst regret is {{fact:public5090_regret_worst_percent:.6f}} percent. The fraction-to-percent conversion multiplies by one hundred. This result is not a claim of 0.00042468 percent P99, and it is not an unconstrained-oracle comparison. No record exceeds one-percent regret in this defined available-tactic population.
+
+This PASS establishes a bounded positive public-interface development finding on the complete RTX 5090 records. It does not turn the original dual-card experiment into a pass, repair the old canary, establish fresh generalisation, or demonstrate HTTP performance. The source and analyzer are separately identified so that readers can see what changed in analysis and what remained untouched in measurement.
+
+@@@ 5.6 Current repetition and future stages
+
+The finite complete-workflow controller runs under source c34d5d9 and the new exposed repetition under 0a5c735. The actual remote CPU checks are 214 passed with ten GPU skips for the controller source, and 209 passed with ten GPU skips for the repetition source. Those counts apply to those exact sources and test collections. They establish tested preparation, not a new GPU speedup.
+
+At the recorded 00:29 UTC snapshot on 2 October, jobs 1648991, 1648992, 1648993, and 1649001 are RUNNING with initial twelve-hour allocations. They are complete repetitions of the original exposed protocol, not continuations of the eleven missing cells. Their outcomes remain pending. A later observation may update their execution state, but this document does not predict their verdict.
+
+{{table:pending}}
+
+The finite workflow requires all four jobs, strict analysis, independent SASS, and a full verified archive before it can prepare formal fresh qualification. Only an actual archived dual PASS permits the subsequent exact smoke, development, new ten-case canary, original forty-eight-case release, and original twelve-case stress sequence. Any failed prerequisite stops successors. Historical parity closure, real Resource Graph updates, and upstream review remain separate even if future kernel and HTTP stages pass.
+
+@@ 6. Full-model serving and historical parity
+
+@@@ 6.1 Why operator gains may not improve HTTP
+
+A full request includes tokenisation or request preparation, scheduling, KV management, projection and feed-forward layers, attention, sampling, and transmission. For an illustrative serial decomposition, if the accelerated component accounts for fraction f of baseline time and has speedup s, the idealised total speedup is 1/((1-f)+f/s). This is an explanatory upper-bound model under its assumptions, not a fitted measurement of this project. Contention, changed batching, or overhead can make the actual result worse.
+
+Consequently, a kernel speedup cannot be restated as a request-throughput gain. Graph-replay improvement may be hidden by network cost, and an eager lookup may consume some of the operator benefit. Goodput additionally depends on meeting service objectives and returning correct outputs. A faster response that violates token parity or an agreed latency objective is not a qualified goodput improvement.
+
+The report excludes an earlier claimed small aggregate HTTP benefit because its attachment-level summary is not enough to establish units, scope, and paired raw evidence here. Historical unnamed values in the 215-to-750 range were throughput in tokens per second, not milliseconds. Unit-bearing raw fields must be used. This is a practical reason to keep per-request traces and derived summaries linked rather than trusting copied prose.
+
+@@@ 6.2 Prepared full-model HTTP protocol
+
+The implemented preparation binds four full Qwen models, covering 1.5B, 4B, 7B, and 8B configurations with their actual layer counts and memory settings. All thirteen weight files total 42,745,237,808 bytes and are byte-bound together with configuration and tokenizer files. The reviewed SGLang source is 3825c5a. These bindings establish model identity; they do not establish that the future experiment has run [E-serving].
+
+The formal HTTP design plans seventy-two paired allocations: four models, two GPU families, three qualification stages, and three paired allocations for each coordinate. Twenty-four scoped verdicts are required. Each allocation alternates pristine/candidate, candidate/pristine, and pristine/candidate order on the same assigned GPU and CPU environment, using private caches and exact source checks. Kernel-stage PASS and the full kernel archive are prerequisites, so HTTP jobs are not currently submitted.
+
+Within serving, training starts only at a verified idle scheduler boundary and after forward-stream synchronisation. Training is bounded by allowed geometry identities, then sealed before scoring. The candidate must actually use the persisted Resource winner; Native fallback remains explicit. Unknown geometry, overflow, or unsafe graph metadata does not invite on-the-fly tuning in a scored request. Compilation and training costs are recorded separately from steady-state measurement and must still be considered in a deployment discussion.
+
+The client retains complete streamed token IDs, request identifiers, arrival times, raw SSE payloads, and finish information. It handles cumulative and incremental data, partial frames, CRLF boundaries, and completion markers. Malformed streams, server errors, short output lengths, missing arrivals, invalid TTFT or TPOT, and cache-selection failures are rejected under the bound protocol. It does not invent an epsilon to make a nonpositive time pass.
+
+TTFT is time to the first observed output token; TPOT uses subsequent token arrivals under the specified averaging rule. Throughput and goodput have separately named denominators and workload objectives. Independent analysis reparses raw payloads and recomputes metrics rather than trusting a client summary. The full design includes five workloads across four scored blocks each, forty non-regression metric coordinates, and twenty-thousand-draw uncertainty calculations. The exact protocol documents are the authority for schedules and SLOs [E-serving].
+
+Performance and deterministic correctness are separate runs. Complete token parity and the specified token/logprob checks cannot be inferred from status codes or counts. Independent launch audits must observe actual 64 KiB Resource launches when claimed, while pristine retains its documented launch behaviour. Scored-interval GPU UUID and clock telemetry bind the measured environment. None of those prepared checks is presented as a completed serving result.
+
+@@@ 6.3 Separate request-ownership correction
+
+An earlier lifecycle experiment exposes incorrect ownership of request identifiers under repeated or disconnected HTTP activity. The reviewed correction scopes request cleanup to the request being completed, rather than allowing a reused identifier or related parallel output to lose state. In the latest full thirty-six-layer Qwen test, the original source passes eight of ten scoped cases and the corrected source passes ten of ten, including the n=2 disconnect case. Resource execution is off [E-ownership].
+
+This supports a request-lifecycle fix under that test. It does not explain the historical two full-token value divergences. Incorrect cleanup and a different next token are distinct failures, even when both occur in serving code. Reporting them together without the distinction would falsely imply causal closure. The patch is retained as a separate upstream candidate and has not been published in this work.
+
+@@@ 6.4 Historical 2/432 remains open
+
+The original capped-arm HTTP campaign has two requests with different complete token sequences among 432 capped-arm requests. The total 1,296 requests includes all three arms and is not the denominator for that rate. At zero-based output index 74, decode-11 has pristine token 315 and capped token 304. At index 114, decode-13 has pristine token 30280 and capped token 785. The full pre-divergence execution states were not captured in the original campaign [E-history].
+
+Later attempts must therefore be interpreted by what they reproduce. An old-configuration replay with no mismatch provides evidence about that replay, not the original failing states. Deterministic-wire testing changes execution context. Sampler and layer observers alter batching and produce different divergence populations. Those observer runs can help locate hypotheses, but their performance and rates cannot be substituted for the original experiment.
+
+The strongest retained forced-history diagnostic, source 6416791 and job 1640986, uses four ABBA arms across two target conditions. Matched execution comparisons have equal history, physical page tables, all seventy-two KV tensors, shadow tensors, and logits. Natural next tokens are 304 and 785 in all arms. The original failure is not reproduced and the first differing original state is not attributed. Eight pair comparisons reuse the same small set of arms; they are not eight independent replications.
+
+This result constrains one explanation: at the matched reconstructed states, the compared paths agree. It does not exonerate the resource intervention in the original runs or prove that sampling ties caused the failure. Equality under reconstructed state cannot reconstruct the missing original upstream trajectory. The authority therefore continues to record historical_token_divergence_resolved=false.
+
+@@@ 6.5 A concrete causal-closure protocol
+
+Future causal capture must bind an execution-state tuple rather than only the token history. Relevant state includes the logical history, physical KV mapping and payloads, hidden states, batch composition and graph bucket, prefill trajectory, RNG and sampler state, source environment, and selected kernels. Equal history alone does not imply equal logits if upstream state or batch context differs.
+
+The practical protocol starts with the exact failing workload definition and a paired source-bound reproduction. Both arms use the same minimal observer, outside performance qualification. At the earliest impending divergence, capture immutable inputs and outputs at every layer boundary, physical and logical KV state, projection outputs, attention outputs, final logits, and the sampler decision. Checksums authenticate the captures, but exact tensor comparisons identify the first differing boundary.
+
+Once a discrepant state is captured, replay one bound state under both kernels in a predetermined A/B/B/A order. If projection inputs already differ, investigate upstream batching or state before blaming attention. If attention inputs match and outputs first diverge, isolate the attention implementation and resource choice. If logits match but the token differs, inspect the complete sampler state and decision. Any proposed fix must be followed by exact original-workload token parity and an independent full serving qualification.
+
+If the original pre-divergence state cannot be recovered, the report must retain a historical-unresolved finding. A new campaign can establish new scoped parity, but cannot retrospectively assert a root cause for missing evidence. Closure is either a reproduced, attributed and corrected failure with preserved evidence, or a transparently bounded unresolved limitation. A run with zero mismatches is not by itself either causal attribution or retrospective closure.
+
+@@ 7. Discussion, validity, and engineering implications
+
+@@@ 7.1 Answers to the research questions
+
+RQ1 has a bounded positive answer. Actual larger reservation, with matched audited instructions, reduces long-prefix diagnostic medians; the ceiling-only control does not produce the same effect. The same change slows the short suffix. The evidence establishes workload dependence of the intervention under the observed conditions, while achieved occupancy and a general mechanism across kernels remain open.
+
+RQ2 is answered negatively for the tested static rule and fresh release population. Exact outputs and a positive selected mean coexist with failed worst-case and control requirements. The release cannot be promoted. This is a useful research finding because it demonstrates why aggregate optimisation numbers require both fresh selection tests and explicit fallback controls.
+
+RQ3 has mixed evidence. The architecture supports actual persisted choices, bounded lifecycle checks, and Native-path isolation. Exposed development passes and the scoped RTX 5090 supplement are positive findings. The authoritative dual-card canary still fails, and the original public prerequisite is incomplete. A claim of generalised Native-transparent non-regression has therefore not been established.
+
+RQ4 remains open. Full-model HTTP preparation and a separate ownership correction are complete in their stated scopes, but the formal Resource HTTP campaign has not started, real Resource Graph metadata updates remain unqualified, and the original token divergence is unresolved. The strongest defensible conclusion is an opt-in research candidate with meaningful evidence and explicit deployment blockers.
+
+@@@ 7.2 Internal validity
+
+The intervention's isolated symbols, source bindings, output checks, and SASS audits reduce several implementation-confounding possibilities. Paired timing orders and duplicate controls address temporal drift. Actual launch traces reduce the risk that a preferred tactic was never used. These controls are stronger together than individually: identical SASS alone cannot exclude host overhead, while a launch trace alone cannot establish exact numerics or complete measurement.
+
+Potential interference remains. Clocks do not capture every competing resource, kernel cache effects can differ by phase, and instrumentation can change the serving batch. The public whole-job telemetry population and HTTP scored-interval population answer different environmental questions. Profiling runs are kept separate from qualified timing. The report does not use selection coverage or a profiler occupancy estimate as a proxy for hardware residency.
+
+Arithmetic portability is an additional reproducibility issue. An exact checksum authenticates the original serialised decision; recomputing a derived float can nevertheless differ in its last bit. A bounded derived-only supplement is appropriate when it preserves every semantic decision and threshold, but it must remain a supplement with its own analyzer hash. A permissive tolerance applied to booleans or winners would change the experiment and is rejected.
+
+@@@ 7.3 Construct and statistical validity
+
+Selected speedup measures conditional benefit; it is not whole-workload benefit. Regret measures closeness to an available oracle; it does not measure service quality. Exact O and LSE establish operator agreement on tested inputs; they do not establish complete language-model token parity. Output length establishes a count; it does not establish values. CPU tests establish logic under their fixtures; skipped GPU tests cannot establish execution performance.
+
+The statistical gate is conservative in its intent but limited by the small number of independent processes, dependence among folds, and independently resampled coordinates. Bootstrap counts increase numerical resolution, not the number of independent experimental units. The report consequently describes observed lower bounds and frozen gate decisions, without giving them an unrestricted population guarantee. A future confirmatory design should register a covariance-preserving process/block estimator before exposing new canary outcomes.
+
+Thresholds can also obscure effect size if reported alone. A pass at 0.9927 and a pass at 1.10 have different margins. A high selected mean with a failed absolute Native boundary has no deployment authority. The version table therefore reports coverage and multiple boundaries together. The largest attractive number is not chosen as the project's headline result.
+
+@@@ 7.4 External validity and costs
+
+The GPU families, exposed geometric forms, dtypes, layouts, and modes are bounded. No evidence establishes transfer to H100-class devices, other model architectures, quantisation formats, or arbitrary cache organisations. Even among Qwen configurations, kernel coverage and attention's share of request time can differ. Full-model file binding avoids a truncated-model claim, but actual request qualification is still necessary.
+
+Training, cold compilation, cache loading, metadata management, and fallback have economic costs. The retained three-observation rebind timings are descriptive rather than a confident amortisation result. Cold constructor compilation can take seconds. A deployment claim must report the break-even usage horizon and behaviour under unseen geometry rather than advertising only steady-state selected latency.
+
+The engineering trade-off favours explicit opt-in operation with safe Native rejection. The current evidence does not justify a global default change. That decision is consistent with the mechanism: one workload improves while another slows. The architecture is valuable insofar as it makes that conditionality observable and reproducible, rather than hiding it behind a general fast-path label.
+
+@@@ 7.5 Research integrity and evaluation scope
+
+Failed campaigns, timeouts, unresolved controls, and observer perturbations are part of the result. Keeping them prevents post-selection of successful measurements and exposes why promotion was withheld. Freshness is an irreversible property of access to a case's outcomes; a consumed case does not become fresh when a source changes or a scheduler allocation is restarted.
+
+The project should be assessed through a coherent question, implementation rationale, appropriate experiments, critical interpretation, and reproducibility. Those are this report's quality criteria, not an invented Birmingham marking rubric. Author contribution, supervisor confirmation, required institutional declarations, and permitted AI assistance need to be documented by the student before submission. The report makes no unsupported assertion about those administrative facts.
+
+@@ 8. Completion plan and reviewable deliverables
+
+@@@ 8.1 Kernel and public-path closure
+
+The first remaining milestone is the current complete exposed repetition. All four twelve-hour jobs must finish as defined, with the entire 864-cell population, independent SASS, strict source and choice verification, resolved controls, and a full verified raw archive. Failure ends that repetition as HOLD and stops later stages. Increasing its allowance was decided before its results; it does not repair or erase the original timeout.
+
+Only archived dual PASS permits a newly bound formal campaign. The next sequence is exact dual smoke, exposed development, a newly generated ten-case canary, the original forty-eight-case release, and the original twelve-case stress. Source and case manifests are frozen before dispatch. The new canary is generated once under the authorised rules; it is not regenerated after observing an unfavourable sample. Every stage retains its own artifacts and gate results.
+
+Acceptance requires exact numerical checks, valid actual persisted choices, all specified execution modes and data representations, control resolution, selected and whole-policy thresholds, Native/pristine and actual-policy/pristine thresholds, complete jobs, and verified artifacts. A single failed component prevents promotion. The existing source and qualification authority remain available for comparison; they are not rewritten by later success.
+
+@@@ 8.2 Serving, graphs, and historical closure
+
+Full-model HTTP starts only after all required kernel stages and the kernel archive pass. The seventy-two allocations and twenty-four scoped verdicts must retain complete tokens, valid timing, actual Resource usage, raw launch checks, source/model hashes, clock controls, and both gain and non-regression results. Full raw HTTP archival is part of completion, not an optional final backup.
+
+Real Resource Graph metadata updates need a separate, concrete implementation and qualification. Fixed-pointer Native Graph payload checks do not cover changing page tables or indices under Resource replay. The next implementation must explicitly bind graph lifecycle, update ownership, physical KV identity, and fallback on unsupported transitions; its new source must be qualified without modifying the currently running frozen source. Until then, unsafe graph boundaries use Native.
+
+Historical causal closure follows the state-capture protocol in Section 6.5 and remains independent of a new HTTP parity pass. If no original failure can be reproduced with sufficient state, that limitation remains in the final report. Neither upstream publication nor a new average performance result can remove the historical evidence requirement by renaming it.
+
+@@@ 8.3 Upstream and academic readiness
+
+The FlashInfer and SGLang patches are separate review units with distinct motivation, tests, and evidence. A proposed FlashInfer change should explain the actual resource intervention, public Native invariant, choice identity, costs, and full qualification status. The SGLang ownership patch should explain its lifecycle trigger and the concrete before/after result. Neither description should imply that the ownership patch closes token-value divergence.
+
+Both patches need final source-current review and their repository contribution requirements before publication. No pull request, issue, push, merge, or external message has been made as part of this report. Publishing the patches is a later milestone with a reviewable final diff and evidence; it is not a substitute for completing qualification.
+
+Academic readiness also needs the actual project rubric and word limit, accurate authorship and contribution statements, supervisor requirements, an appropriate final reference format, and a demonstration that reproduces a bounded claim. The present deliverables provide editable source, a PDF reading edition, a verified evidence ledger, and a Chinese defence guide. They are a research draft with clearly pending experiments, not a submission certificate or grade estimate.
+
+@@ 9. Conclusion
+
+Increasing the actual shared-memory reservation can improve the tested long-prefix attention execution while leaving audited instructions unchanged; raising only the attribute ceiling does not reproduce that benefit, and the short suffix becomes slower. This bounded mechanism finding explains why resource choice must be conditional. A fresh release experiment then demonstrates that the tested static selector's attractive averages do not satisfy its non-regression and control requirements.
+
+The resulting architecture separates Resource execution from Native execution and couples cached selection to provenance, execution mode, and metadata lifecycle. Exposed passes establish useful local properties. They coexist with a dual-card canary HOLD, an incomplete original public-path prerequisite, and an unresolved historical two-of-432 token divergence. Preserving all of those findings is essential to the conclusion.
+
+The next decisive evidence is complete new qualification and full-model serving, with actual Resource use, real graph boundaries, full token parity, and retained raw artifacts. Until those requirements and the independent historical investigation are satisfied, default_promotion=false and serving_promotion=false remain the correct operational state. The project's defensible achievement is a concrete, auditable optimisation candidate and a rigorous account of what still prevents deployment.
+
+@@ Appendix A. Reproducibility and evidence map
+
+The authoritative experiment evidence resides in the research repository and the named Paracloud campaign roots. This report's inputs directory contains byte-identical snapshots of ten JSON sources. claim_ledger.json records original paths, snapshot hashes, JSON pointers, units, raw values, and any derived conversion. build_evidence.py checks those frozen inputs without changing campaign state. verification.json records the verified ledger hash and the state invariants.
+
+build_report.py produces the standalone LaTeX document and a separate ReportLab PDF from this single manuscript and the verified ledger. Numerical tables are generated from ledger values. The standalone LaTeX source contains its tables and vector figures, avoiding external project-file dependencies in the built-in editor. The exported PDF uses the same resolved manuscript; successful native compilation and PDF layout verification are separate checks.
+
+{{table:evidence}}
+
+The normal FlashInfer candidate is 75544a17ce0019ca877f50354d95451ee089f859, with Native base 85744da1a397c0c4bea1a83b8345281750eb61a9. The early v4.2 development and canary source is b769e7c18e93c9d6cfdcd79b58edf76955313859. The current GPU repetition source is 0a5c735fd3b70edb9b8ec46d520a6dedb6d90c04, while its finite controller source is c34d5d902ca065e7d012180aeb9ec056b3495ea0. The reviewed SGLang candidate is 3825c5a4b5e8a1a73ae62f0c0ba6eb35beb1a2ca. They have distinct responsibilities and are not interchangeable version labels.
+
+The complete original public-path archive SHA-256 is 0b1b695d0376611f4ecc8c9774c044673f8948fa4ea3e68f9e383f2abc9842e7. The RTX 5090 supplemental summary SHA-256 is 93bc3562f9fb1134fe72177a36fd4798fe4233ddaaeeeeaacfb4c4f039659e6c. The running repetition source archive SHA-256 is a8d795cb41f8010df41f31fd4b764cbeaa43b4fb33187190058f5fa020ac1a99. These strings identify artifacts; they do not imply PASS beyond the associated receipts.
+
+Reproduction should first verify snapshot hashes and inspect the original receipts, then install the bound dependency and toolchain sources on the specified GPU environment. Re-running GPU experiments is a new run with a new receipt, not a byte-for-byte recreation of wall-clock timing or an opportunity to choose a more favourable subset. A reviewer can reproduce the manuscript tables without any GPU by using the bundled Python environment and running the two build scripts.
+
+@@ Appendix B. Oral defence questions
+
+Why can performance change if SASS matches? The tested intervention changes launch-resource reservation while keeping audited instruction bodies identical. The traces verify that intervention, but achieved residency and the detailed hardware mechanism were not measured. The claim is a bounded resource effect, not a proof of a particular occupancy.
+
+Why keep a result with a speedup above 1.5 on HOLD? That number describes selected canary records. The release contract also requires resolved controls and absolute Native and policy comparisons. Failed requirements remain failed even when a conditional average is attractive.
+
+Does the RTX 5090 supplemental PASS repair the dual-card result? It applies only to original complete RTX 5090 exposed records with a separately frozen analyzer. The RTX 4090 original campaign is incomplete, the old canary is still HOLD, and new fresh qualification has not run.
+
+Does forced-history equality prove the old divergence harmless? It proves agreement at matched reconstructed states. The original failure was not reproduced, the original pre-divergence state is missing, and the first original differing boundary was not attributed. Historical closure therefore remains open.
+
+What would change the deployment decision? Complete source-bound fresh kernel qualification, full-model HTTP gain and non-regression with complete token parity and actual Resource use, qualified real Graph metadata boundaries, and the independent historical causal review. Each requirement needs its own retained evidence.
+
+What is novel relative to the current library? The specific resource intervention, Native-isolated interface and lifecycle qualification, fresh counterexample, and fail-closed evidence workflow. Mode-aware tuning, persisted caches, and default-tactic competition already exist upstream and are acknowledged.
+
+@@ References
+
+[1] Ye, Z., Chen, L., Lai, R., et al. FlashInfer: Efficient and Customizable Attention Engine for LLM Inference Serving. MLSys 2025; arXiv:2501.01005, version 2, 21 April 2025. https://arxiv.org/abs/2501.01005
+
+[2] FlashInfer project. FlashInfer Autotuner v2. 22 September 2026. Official technical article. https://flashinfer.ai/2026/09/22/autotuner-v2.html
+
+[3] FlashInfer project. FlashInfer v0.7 release article. 22 September 2026. Official release context. https://flashinfer.ai/2026/09/22/flashinfer-v07.html
+
+[4] NVIDIA. CUDA Driver API: Execution Control, cuFuncSetAttribute and cuLaunchKernel. Live documentation checked 2 October 2026; current documentation version differs from the experiment's CUDA 13.0 toolchain. https://docs.nvidia.com/cuda/cuda-driver-api/cuda_driver_api/group__CUDA__EXEC.html
+
+[5] Zheng, L., Yin, L., Xie, Z., et al. SGLang: Efficient Execution of Structured Language Model Programs. NeurIPS 2024; arXiv:2312.07104, version 2, 6 June 2024. https://arxiv.org/abs/2312.07104
+
+[6] University of Birmingham. Computer Science BSc, public programme page. Checked 2 October 2026. Generic project-credit context only; not a cohort-specific project rubric. https://www.birmingham.ac.uk/study/undergraduate/subjects/computer-science-courses/computer-science-bsc
+
+[7] Kalibera, T., and Jones, R. E. Rigorous Benchmarking in Reasonable Time. ACM ISMM 2013, pp. 63-74. DOI:10.1145/2464157.2464160. University of Kent accepted-manuscript record, noting corrections to the conference version. https://kar.kent.ac.uk/33611/
+
+[8] Xing, S., Zhai, Y., Jiang, A., et al. FlashInfer-Bench: Building the Virtuous Cycle for AI-driven LLM Systems. arXiv:2601.00227, version 1, 1 January 2026. https://arxiv.org/abs/2601.00227

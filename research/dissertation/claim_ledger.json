@@ -1,0 +1,1003 @@
+{
+  "schema": 1,
+  "evidence_cutoff": "2026-10-02",
+  "qualification": "HOLD",
+  "sources": {
+    "authority": {
+      "original_path": "research/selector_v4/STATUS.json",
+      "snapshot_path": "inputs/authority.json",
+      "sha256": "fb8b726cc71b73f27c6bd9e2b9ba18ebe7dc8572c9ffdcfba41bf39566783155",
+      "bytes": 52133
+    },
+    "static4090": {
+      "original_path": "research/selector_v32/release_v322/evidence/final/4090-summary.json",
+      "snapshot_path": "inputs/static4090.json",
+      "sha256": "61b6893049a0b4eec0e5f0eb918907155dcf8086fc7340b799a3582d7572d83e",
+      "bytes": 3061691
+    },
+    "static5090": {
+      "original_path": "research/selector_v32/release_v322/evidence/final/5090-summary.json",
+      "snapshot_path": "inputs/static5090.json",
+      "sha256": "6eb756a6a6eb44b0d6e76cab5d68729cda1dcb10a5a731941ff4538b4a9cbbbf",
+      "bytes": 3059320
+    },
+    "v4114090": {
+      "original_path": "research/selector_v4/evidence/v411-exact-dev/analysis/gpu_4090-summary.json",
+      "snapshot_path": "inputs/v4114090.json",
+      "sha256": "fb2bdd259d6bb7f8d5ebe453b7315aa3e937c544953e56537cffe3fd9fcc0b4d",
+      "bytes": 264782
+    },
+    "v4115090": {
+      "original_path": "research/selector_v4/evidence/v411-exact-dev/analysis/gpu_5090-summary.json",
+      "snapshot_path": "inputs/v4115090.json",
+      "sha256": "f88b9410a296009f44c5d9b6376ba22ef7bf0bc46bf388b66e7d703e6277c01d",
+      "bytes": 260216
+    },
+    "dev4090": {
+      "original_path": "research/selector_v4/evidence/v42-exact-dev/gpu_4090-summary.json",
+      "snapshot_path": "inputs/dev4090.json",
+      "sha256": "685564c62fde1b804080556a1a60908eb051605b542f2610c2f810d2f3a0096f",
+      "bytes": 266490
+    },
+    "dev5090": {
+      "original_path": "research/selector_v4/evidence/v42-exact-dev/gpu_5090-summary.json",
+      "snapshot_path": "inputs/dev5090.json",
+      "sha256": "2dd43bc0862b144af555e9a6c565d68293c4e81200cc0c52a81337e9c40b4ddf",
+      "bytes": 261745
+    },
+    "public5090": {
+      "original_path": "evidence/v42-public-path-5090-supplement/public-path-5090-column-arithmetic-supplement/analysis/summary.json",
+      "snapshot_path": "inputs/public5090.json",
+      "sha256": "93bc3562f9fb1134fe72177a36fd4798fe4233ddaaeeeeaacfb4c4f039659e6c",
+      "bytes": 658886
+    },
+    "intervention": {
+      "original_path": "research/selector_v4/evidence/v42-attribute-launch-dual-controls/receipt.json",
+      "snapshot_path": "inputs/intervention.json",
+      "sha256": "80482f92a0e9759cd9071877cf5f2dfbfb36c8309223962a2612a9a084ceed70",
+      "bytes": 53067
+    },
+    "history": {
+      "original_path": "research/parity_remediation/evidence/forced-history-v3/summary.json",
+      "snapshot_path": "inputs/history.json",
+      "sha256": "b84f8147cb1068d326805669c245340ccf5fccc08e87649eb651b180cbfcfa29",
+      "bytes": 6485
+    }
+  },
+  "facts": [
+    {
+      "id": "default_promotion",
+      "source": "authority",
+      "json_pointer": "/default_promotion",
+      "scope": "Authoritative old v4.2 qualification state",
+      "unit": "boolean",
+      "raw_value": false,
+      "transform": null,
+      "value": false
+    },
+    {
+      "id": "serving_promotion",
+      "source": "authority",
+      "json_pointer": "/serving_promotion",
+      "scope": "Authoritative old v4.2 qualification state",
+      "unit": "boolean",
+      "raw_value": false,
+      "transform": null,
+      "value": false
+    },
+    {
+      "id": "historical_token_divergence_resolved",
+      "source": "authority",
+      "json_pointer": "/historical_token_divergence_resolved",
+      "scope": "Authoritative old v4.2 qualification state",
+      "unit": "boolean",
+      "raw_value": false,
+      "transform": null,
+      "value": false
+    },
+    {
+      "id": "old_canary_state",
+      "source": "authority",
+      "json_pointer": "/v42/canary_state",
+      "scope": "Old consumed ten-case canary",
+      "unit": "status",
+      "raw_value": "QUALIFICATION_HOLD",
+      "transform": null,
+      "value": "QUALIFICATION_HOLD"
+    },
+    {
+      "id": "static_4090_count",
+      "source": "static4090",
+      "json_pointer": "/release_gate/paired_selected/count",
+      "scope": "v3.2.2 fresh release; 30 geometries; 720 cells/card; selected subset",
+      "unit": "fold/cell count",
+      "raw_value": 264,
+      "transform": null,
+      "value": 264
+    },
+    {
+      "id": "static_4090_ratio",
+      "source": "static4090",
+      "json_pointer": "/release_gate/paired_selected/ratio",
+      "scope": "v3.2.2 fresh release; 30 geometries; 720 cells/card; selected subset",
+      "unit": "ratio",
+      "raw_value": 1.2851399641335814,
+      "transform": null,
+      "value": 1.2851399641335814
+    },
+    {
+      "id": "static_4090_worst_point_ratio",
+      "source": "static4090",
+      "json_pointer": "/release_gate/paired_selected/worst_point_ratio",
+      "scope": "v3.2.2 fresh release; 30 geometries; 720 cells/card; selected subset",
+      "unit": "ratio",
+      "raw_value": 1.1450441695514955,
+      "transform": null,
+      "value": 1.1450441695514955
+    },
+    {
+      "id": "static_4090_simultaneous_worst_CI95",
+      "source": "static4090",
+      "json_pointer": "/release_gate/paired_selected/simultaneous_worst_CI95",
+      "scope": "v3.2.2 fresh release; 30 geometries; 720 cells/card; selected subset",
+      "unit": "ratio",
+      "raw_value": [
+        1.143572303160465,
+        1.1456697047976157
+      ],
+      "transform": null,
+      "value": [
+        1.143572303160465,
+        1.1456697047976157
+      ]
+    },
+    {
+      "id": "static_4090_controls_failed",
+      "source": "static4090",
+      "json_pointer": "/release_gate/paired_selected/controls_failed",
+      "scope": "v3.2.2 fresh release; 30 geometries; 720 cells/card; selected subset",
+      "unit": "fold/cell count",
+      "raw_value": 82,
+      "transform": null,
+      "value": 82
+    },
+    {
+      "id": "static_4090_pass",
+      "source": "static4090",
+      "json_pointer": "/single_gpu_release_gate_pass",
+      "scope": "v3.2.2 fresh release; 30 geometries; 720 cells/card; selected subset",
+      "unit": "boolean",
+      "raw_value": false,
+      "transform": null,
+      "value": false
+    },
+    {
+      "id": "v411_4090_selected_records",
+      "source": "v4114090",
+      "json_pointer": "/metrics/selected_records",
+      "scope": "v4.1.1 exposed exact development; two geometries",
+      "unit": "fold records",
+      "raw_value": 131,
+      "transform": null,
+      "value": 131
+    },
+    {
+      "id": "v411_4090_fold_records",
+      "source": "v4114090",
+      "json_pointer": "/metrics/fold_records",
+      "scope": "v4.1.1 exposed exact development; two geometries",
+      "unit": "fold records",
+      "raw_value": 144,
+      "transform": null,
+      "value": 144
+    },
+    {
+      "id": "v411_4090_selected_geomean",
+      "source": "v4114090",
+      "json_pointer": "/metrics/selected_geomean",
+      "scope": "v4.1.1 exposed exact development; two geometries",
+      "unit": "ratio",
+      "raw_value": 1.387584906839721,
+      "transform": null,
+      "value": 1.387584906839721
+    },
+    {
+      "id": "v411_4090_selected_joint_min_lcb95",
+      "source": "v4114090",
+      "json_pointer": "/metrics/selected_joint_min_lcb95",
+      "scope": "v4.1.1 exposed exact development; two geometries",
+      "unit": "ratio",
+      "raw_value": 1.3153403759764133,
+      "transform": null,
+      "value": 1.3153403759764133
+    },
+    {
+      "id": "v411_4090_native_overlay_joint_min_lcb95",
+      "source": "v4114090",
+      "json_pointer": "/metrics/native_overlay_joint_min_lcb95",
+      "scope": "v4.1.1 exposed exact development; two geometries",
+      "unit": "ratio",
+      "raw_value": 0.9927031583818556,
+      "transform": null,
+      "value": 0.9927031583818556
+    },
+    {
+      "id": "v411_4090_pass",
+      "source": "v4114090",
+      "json_pointer": "/pass",
+      "scope": "v4.1.1 exposed exact development; two geometries",
+      "unit": "boolean",
+      "raw_value": false,
+      "transform": null,
+      "value": false
+    },
+    {
+      "id": "dev_4090_selected_records",
+      "source": "dev4090",
+      "json_pointer": "/metrics/selected_records",
+      "scope": "v4.2 b769e7c exposed exact development; two geometries",
+      "unit": "fold records",
+      "raw_value": 144,
+      "transform": null,
+      "value": 144
+    },
+    {
+      "id": "dev_4090_fold_records",
+      "source": "dev4090",
+      "json_pointer": "/metrics/fold_records",
+      "scope": "v4.2 b769e7c exposed exact development; two geometries",
+      "unit": "fold records",
+      "raw_value": 144,
+      "transform": null,
+      "value": 144
+    },
+    {
+      "id": "dev_4090_selected_geomean",
+      "source": "dev4090",
+      "json_pointer": "/metrics/selected_geomean",
+      "scope": "v4.2 b769e7c exposed exact development; two geometries",
+      "unit": "ratio",
+      "raw_value": 1.385991064404118,
+      "transform": null,
+      "value": 1.385991064404118
+    },
+    {
+      "id": "dev_4090_selected_joint_min_lcb95",
+      "source": "dev4090",
+      "json_pointer": "/metrics/selected_joint_min_lcb95",
+      "scope": "v4.2 b769e7c exposed exact development; two geometries",
+      "unit": "ratio",
+      "raw_value": 1.3164143030120217,
+      "transform": null,
+      "value": 1.3164143030120217
+    },
+    {
+      "id": "dev_4090_native_overlay_joint_min_lcb95",
+      "source": "dev4090",
+      "json_pointer": "/metrics/native_overlay_joint_min_lcb95",
+      "scope": "v4.2 b769e7c exposed exact development; two geometries",
+      "unit": "ratio",
+      "raw_value": 0.9936616110497288,
+      "transform": null,
+      "value": 0.9936616110497288
+    },
+    {
+      "id": "dev_4090_pass",
+      "source": "dev4090",
+      "json_pointer": "/pass",
+      "scope": "v4.2 b769e7c exposed exact development; two geometries",
+      "unit": "boolean",
+      "raw_value": true,
+      "transform": null,
+      "value": true
+    },
+    {
+      "id": "canary_4090_selected_records",
+      "source": "authority",
+      "json_pointer": "/v42/canary_4090/metrics/selected_records",
+      "scope": "Old v4.2 b769e7c ten-case consumed canary; qualification HOLD",
+      "unit": "fold records",
+      "raw_value": 476,
+      "transform": null,
+      "value": 476
+    },
+    {
+      "id": "canary_4090_fold_records",
+      "source": "authority",
+      "json_pointer": "/v42/canary_4090/metrics/fold_records",
+      "scope": "Old v4.2 b769e7c ten-case consumed canary; qualification HOLD",
+      "unit": "fold records",
+      "raw_value": 720,
+      "transform": null,
+      "value": 720
+    },
+    {
+      "id": "canary_4090_selected_geomean",
+      "source": "authority",
+      "json_pointer": "/v42/canary_4090/metrics/selected_geomean",
+      "scope": "Old v4.2 b769e7c ten-case consumed canary; qualification HOLD",
+      "unit": "ratio",
+      "raw_value": 1.5379335365817948,
+      "transform": null,
+      "value": 1.5379335365817948
+    },
+    {
+      "id": "canary_4090_selected_joint_min_lcb95",
+      "source": "authority",
+      "json_pointer": "/v42/canary_4090/metrics/selected_joint_min_lcb95",
+      "scope": "Old v4.2 b769e7c ten-case consumed canary; qualification HOLD",
+      "unit": "ratio",
+      "raw_value": 1.0650180671025005,
+      "transform": null,
+      "value": 1.0650180671025005
+    },
+    {
+      "id": "canary_4090_native_overlay_joint_min_lcb95",
+      "source": "authority",
+      "json_pointer": "/v42/canary_4090/metrics/native_overlay_joint_min_lcb95",
+      "scope": "Old v4.2 b769e7c ten-case consumed canary; qualification HOLD",
+      "unit": "ratio",
+      "raw_value": 0.9927017774909123,
+      "transform": null,
+      "value": 0.9927017774909123
+    },
+    {
+      "id": "canary_4090_actual_policy_vs_pristine_worst",
+      "source": "authority",
+      "json_pointer": "/v42/canary_4090/metrics/actual_policy_vs_pristine_worst",
+      "scope": "Old v4.2 b769e7c ten-case consumed canary; qualification HOLD",
+      "unit": "ratio",
+      "raw_value": 0.9961852635977275,
+      "transform": null,
+      "value": 0.9961852635977275
+    },
+    {
+      "id": "canary_4090_failures",
+      "source": "authority",
+      "json_pointer": "/v42/canary_4090/failed_requirements",
+      "scope": "Old v4.2 b769e7c ten-case consumed canary; qualification HOLD",
+      "unit": "gate names",
+      "raw_value": [
+        "held_out_controls_resolve"
+      ],
+      "transform": null,
+      "value": [
+        "held_out_controls_resolve"
+      ]
+    },
+    {
+      "id": "intervention_4090_paged1_cached_prefix_native",
+      "source": "intervention",
+      "json_pointer": "/results/gpu_4090/layouts/paged1_cached_prefix/cupti/native/median_kernel_us",
+      "scope": "9f7b80a diagnostic; fixed exposed BF16; 16 CUPTI launches/arm/layout/card",
+      "unit": "microseconds",
+      "raw_value": 2070.3665,
+      "transform": null,
+      "value": 2070.3665
+    },
+    {
+      "id": "intervention_4090_paged1_cached_prefix_attribute49152_launch49152",
+      "source": "intervention",
+      "json_pointer": "/results/gpu_4090/layouts/paged1_cached_prefix/cupti/attribute49152_launch49152/median_kernel_us",
+      "scope": "9f7b80a diagnostic; fixed exposed BF16; 16 CUPTI launches/arm/layout/card",
+      "unit": "microseconds",
+      "raw_value": 2070.6695,
+      "transform": null,
+      "value": 2070.6695
+    },
+    {
+      "id": "intervention_4090_paged1_cached_prefix_attribute65536_launch49152",
+      "source": "intervention",
+      "json_pointer": "/results/gpu_4090/layouts/paged1_cached_prefix/cupti/attribute65536_launch49152/median_kernel_us",
+      "scope": "9f7b80a diagnostic; fixed exposed BF16; 16 CUPTI launches/arm/layout/card",
+      "unit": "microseconds",
+      "raw_value": 2070.205,
+      "transform": null,
+      "value": 2070.205
+    },
+    {
+      "id": "intervention_4090_paged1_cached_prefix_attribute65536_launch65536",
+      "source": "intervention",
+      "json_pointer": "/results/gpu_4090/layouts/paged1_cached_prefix/cupti/attribute65536_launch65536/median_kernel_us",
+      "scope": "9f7b80a diagnostic; fixed exposed BF16; 16 CUPTI launches/arm/layout/card",
+      "unit": "microseconds",
+      "raw_value": 1482.2165,
+      "transform": null,
+      "value": 1482.2165
+    },
+    {
+      "id": "intervention_4090_ragged_projection_suffix_native",
+      "source": "intervention",
+      "json_pointer": "/results/gpu_4090/layouts/ragged_projection_suffix/cupti/native/median_kernel_us",
+      "scope": "9f7b80a diagnostic; fixed exposed BF16; 16 CUPTI launches/arm/layout/card",
+      "unit": "microseconds",
+      "raw_value": 51.1045,
+      "transform": null,
+      "value": 51.1045
+    },
+    {
+      "id": "intervention_4090_ragged_projection_suffix_attribute49152_launch49152",
+      "source": "intervention",
+      "json_pointer": "/results/gpu_4090/layouts/ragged_projection_suffix/cupti/attribute49152_launch49152/median_kernel_us",
+      "scope": "9f7b80a diagnostic; fixed exposed BF16; 16 CUPTI launches/arm/layout/card",
+      "unit": "microseconds",
+      "raw_value": 52.64,
+      "transform": null,
+      "value": 52.64
+    },
+    {
+      "id": "intervention_4090_ragged_projection_suffix_attribute65536_launch49152",
+      "source": "intervention",
+      "json_pointer": "/results/gpu_4090/layouts/ragged_projection_suffix/cupti/attribute65536_launch49152/median_kernel_us",
+      "scope": "9f7b80a diagnostic; fixed exposed BF16; 16 CUPTI launches/arm/layout/card",
+      "unit": "microseconds",
+      "raw_value": 50.768,
+      "transform": null,
+      "value": 50.768
+    },
+    {
+      "id": "intervention_4090_ragged_projection_suffix_attribute65536_launch65536",
+      "source": "intervention",
+      "json_pointer": "/results/gpu_4090/layouts/ragged_projection_suffix/cupti/attribute65536_launch65536/median_kernel_us",
+      "scope": "9f7b80a diagnostic; fixed exposed BF16; 16 CUPTI launches/arm/layout/card",
+      "unit": "microseconds",
+      "raw_value": 53.489000000000004,
+      "transform": null,
+      "value": 53.489000000000004
+    },
+    {
+      "id": "static_5090_count",
+      "source": "static5090",
+      "json_pointer": "/release_gate/paired_selected/count",
+      "scope": "v3.2.2 fresh release; 30 geometries; 720 cells/card; selected subset",
+      "unit": "fold/cell count",
+      "raw_value": 216,
+      "transform": null,
+      "value": 216
+    },
+    {
+      "id": "static_5090_ratio",
+      "source": "static5090",
+      "json_pointer": "/release_gate/paired_selected/ratio",
+      "scope": "v3.2.2 fresh release; 30 geometries; 720 cells/card; selected subset",
+      "unit": "ratio",
+      "raw_value": 1.2036987137666677,
+      "transform": null,
+      "value": 1.2036987137666677
+    },
+    {
+      "id": "static_5090_worst_point_ratio",
+      "source": "static5090",
+      "json_pointer": "/release_gate/paired_selected/worst_point_ratio",
+      "scope": "v3.2.2 fresh release; 30 geometries; 720 cells/card; selected subset",
+      "unit": "ratio",
+      "raw_value": 0.9873896964784438,
+      "transform": null,
+      "value": 0.9873896964784438
+    },
+    {
+      "id": "static_5090_simultaneous_worst_CI95",
+      "source": "static5090",
+      "json_pointer": "/release_gate/paired_selected/simultaneous_worst_CI95",
+      "scope": "v3.2.2 fresh release; 30 geometries; 720 cells/card; selected subset",
+      "unit": "ratio",
+      "raw_value": [
+        0.9855767974068549,
+        0.9880274901379325
+      ],
+      "transform": null,
+      "value": [
+        0.9855767974068549,
+        0.9880274901379325
+      ]
+    },
+    {
+      "id": "static_5090_controls_failed",
+      "source": "static5090",
+      "json_pointer": "/release_gate/paired_selected/controls_failed",
+      "scope": "v3.2.2 fresh release; 30 geometries; 720 cells/card; selected subset",
+      "unit": "fold/cell count",
+      "raw_value": 20,
+      "transform": null,
+      "value": 20
+    },
+    {
+      "id": "static_5090_pass",
+      "source": "static5090",
+      "json_pointer": "/single_gpu_release_gate_pass",
+      "scope": "v3.2.2 fresh release; 30 geometries; 720 cells/card; selected subset",
+      "unit": "boolean",
+      "raw_value": false,
+      "transform": null,
+      "value": false
+    },
+    {
+      "id": "v411_5090_selected_records",
+      "source": "v4115090",
+      "json_pointer": "/metrics/selected_records",
+      "scope": "v4.1.1 exposed exact development; two geometries",
+      "unit": "fold records",
+      "raw_value": 108,
+      "transform": null,
+      "value": 108
+    },
+    {
+      "id": "v411_5090_fold_records",
+      "source": "v4115090",
+      "json_pointer": "/metrics/fold_records",
+      "scope": "v4.1.1 exposed exact development; two geometries",
+      "unit": "fold records",
+      "raw_value": 144,
+      "transform": null,
+      "value": 144
+    },
+    {
+      "id": "v411_5090_selected_geomean",
+      "source": "v4115090",
+      "json_pointer": "/metrics/selected_geomean",
+      "scope": "v4.1.1 exposed exact development; two geometries",
+      "unit": "ratio",
+      "raw_value": 1.4000256057401848,
+      "transform": null,
+      "value": 1.4000256057401848
+    },
+    {
+      "id": "v411_5090_selected_joint_min_lcb95",
+      "source": "v4115090",
+      "json_pointer": "/metrics/selected_joint_min_lcb95",
+      "scope": "v4.1.1 exposed exact development; two geometries",
+      "unit": "ratio",
+      "raw_value": 1.3052025342028248,
+      "transform": null,
+      "value": 1.3052025342028248
+    },
+    {
+      "id": "v411_5090_native_overlay_joint_min_lcb95",
+      "source": "v4115090",
+      "json_pointer": "/metrics/native_overlay_joint_min_lcb95",
+      "scope": "v4.1.1 exposed exact development; two geometries",
+      "unit": "ratio",
+      "raw_value": 0.9889796871742721,
+      "transform": null,
+      "value": 0.9889796871742721
+    },
+    {
+      "id": "v411_5090_pass",
+      "source": "v4115090",
+      "json_pointer": "/pass",
+      "scope": "v4.1.1 exposed exact development; two geometries",
+      "unit": "boolean",
+      "raw_value": false,
+      "transform": null,
+      "value": false
+    },
+    {
+      "id": "dev_5090_selected_records",
+      "source": "dev5090",
+      "json_pointer": "/metrics/selected_records",
+      "scope": "v4.2 b769e7c exposed exact development; two geometries",
+      "unit": "fold records",
+      "raw_value": 108,
+      "transform": null,
+      "value": 108
+    },
+    {
+      "id": "dev_5090_fold_records",
+      "source": "dev5090",
+      "json_pointer": "/metrics/fold_records",
+      "scope": "v4.2 b769e7c exposed exact development; two geometries",
+      "unit": "fold records",
+      "raw_value": 144,
+      "transform": null,
+      "value": 144
+    },
+    {
+      "id": "dev_5090_selected_geomean",
+      "source": "dev5090",
+      "json_pointer": "/metrics/selected_geomean",
+      "scope": "v4.2 b769e7c exposed exact development; two geometries",
+      "unit": "ratio",
+      "raw_value": 1.3985678293538328,
+      "transform": null,
+      "value": 1.3985678293538328
+    },
+    {
+      "id": "dev_5090_selected_joint_min_lcb95",
+      "source": "dev5090",
+      "json_pointer": "/metrics/selected_joint_min_lcb95",
+      "scope": "v4.2 b769e7c exposed exact development; two geometries",
+      "unit": "ratio",
+      "raw_value": 1.30480276790437,
+      "transform": null,
+      "value": 1.30480276790437
+    },
+    {
+      "id": "dev_5090_native_overlay_joint_min_lcb95",
+      "source": "dev5090",
+      "json_pointer": "/metrics/native_overlay_joint_min_lcb95",
+      "scope": "v4.2 b769e7c exposed exact development; two geometries",
+      "unit": "ratio",
+      "raw_value": 0.992892450467237,
+      "transform": null,
+      "value": 0.992892450467237
+    },
+    {
+      "id": "dev_5090_pass",
+      "source": "dev5090",
+      "json_pointer": "/pass",
+      "scope": "v4.2 b769e7c exposed exact development; two geometries",
+      "unit": "boolean",
+      "raw_value": true,
+      "transform": null,
+      "value": true
+    },
+    {
+      "id": "canary_5090_selected_records",
+      "source": "authority",
+      "json_pointer": "/v42/canary_5090/metrics/selected_records",
+      "scope": "Old v4.2 b769e7c ten-case consumed canary; qualification HOLD",
+      "unit": "fold records",
+      "raw_value": 255,
+      "transform": null,
+      "value": 255
+    },
+    {
+      "id": "canary_5090_fold_records",
+      "source": "authority",
+      "json_pointer": "/v42/canary_5090/metrics/fold_records",
+      "scope": "Old v4.2 b769e7c ten-case consumed canary; qualification HOLD",
+      "unit": "fold records",
+      "raw_value": 720,
+      "transform": null,
+      "value": 720
+    },
+    {
+      "id": "canary_5090_selected_geomean",
+      "source": "authority",
+      "json_pointer": "/v42/canary_5090/metrics/selected_geomean",
+      "scope": "Old v4.2 b769e7c ten-case consumed canary; qualification HOLD",
+      "unit": "ratio",
+      "raw_value": 1.30456953860456,
+      "transform": null,
+      "value": 1.30456953860456
+    },
+    {
+      "id": "canary_5090_selected_joint_min_lcb95",
+      "source": "authority",
+      "json_pointer": "/v42/canary_5090/metrics/selected_joint_min_lcb95",
+      "scope": "Old v4.2 b769e7c ten-case consumed canary; qualification HOLD",
+      "unit": "ratio",
+      "raw_value": 1.0490582045521695,
+      "transform": null,
+      "value": 1.0490582045521695
+    },
+    {
+      "id": "canary_5090_native_overlay_joint_min_lcb95",
+      "source": "authority",
+      "json_pointer": "/v42/canary_5090/metrics/native_overlay_joint_min_lcb95",
+      "scope": "Old v4.2 b769e7c ten-case consumed canary; qualification HOLD",
+      "unit": "ratio",
+      "raw_value": 0.9267431346715315,
+      "transform": null,
+      "value": 0.9267431346715315
+    },
+    {
+      "id": "canary_5090_actual_policy_vs_pristine_worst",
+      "source": "authority",
+      "json_pointer": "/v42/canary_5090/metrics/actual_policy_vs_pristine_worst",
+      "scope": "Old v4.2 b769e7c ten-case consumed canary; qualification HOLD",
+      "unit": "ratio",
+      "raw_value": 0.926764218098475,
+      "transform": null,
+      "value": 0.926764218098475
+    },
+    {
+      "id": "canary_5090_failures",
+      "source": "authority",
+      "json_pointer": "/v42/canary_5090/failed_requirements",
+      "scope": "Old v4.2 b769e7c ten-case consumed canary; qualification HOLD",
+      "unit": "gate names",
+      "raw_value": [
+        "actual_policy_vs_pristine_worst_at_least_0_99",
+        "native_overlay_worst_at_least_0_99",
+        "native_overlay_joint_min_lcb_at_least_0_99",
+        "native_overlay_controls_resolve_one_percent",
+        "held_out_controls_resolve"
+      ],
+      "transform": null,
+      "value": [
+        "actual_policy_vs_pristine_worst_at_least_0_99",
+        "native_overlay_worst_at_least_0_99",
+        "native_overlay_joint_min_lcb_at_least_0_99",
+        "native_overlay_controls_resolve_one_percent",
+        "held_out_controls_resolve"
+      ]
+    },
+    {
+      "id": "intervention_5090_paged1_cached_prefix_native",
+      "source": "intervention",
+      "json_pointer": "/results/gpu_5090/layouts/paged1_cached_prefix/cupti/native/median_kernel_us",
+      "scope": "9f7b80a diagnostic; fixed exposed BF16; 16 CUPTI launches/arm/layout/card",
+      "unit": "microseconds",
+      "raw_value": 1782.989,
+      "transform": null,
+      "value": 1782.989
+    },
+    {
+      "id": "intervention_5090_paged1_cached_prefix_attribute49152_launch49152",
+      "source": "intervention",
+      "json_pointer": "/results/gpu_5090/layouts/paged1_cached_prefix/cupti/attribute49152_launch49152/median_kernel_us",
+      "scope": "9f7b80a diagnostic; fixed exposed BF16; 16 CUPTI launches/arm/layout/card",
+      "unit": "microseconds",
+      "raw_value": 1784.767,
+      "transform": null,
+      "value": 1784.767
+    },
+    {
+      "id": "intervention_5090_paged1_cached_prefix_attribute65536_launch49152",
+      "source": "intervention",
+      "json_pointer": "/results/gpu_5090/layouts/paged1_cached_prefix/cupti/attribute65536_launch49152/median_kernel_us",
+      "scope": "9f7b80a diagnostic; fixed exposed BF16; 16 CUPTI launches/arm/layout/card",
+      "unit": "microseconds",
+      "raw_value": 1785.87,
+      "transform": null,
+      "value": 1785.87
+    },
+    {
+      "id": "intervention_5090_paged1_cached_prefix_attribute65536_launch65536",
+      "source": "intervention",
+      "json_pointer": "/results/gpu_5090/layouts/paged1_cached_prefix/cupti/attribute65536_launch65536/median_kernel_us",
+      "scope": "9f7b80a diagnostic; fixed exposed BF16; 16 CUPTI launches/arm/layout/card",
+      "unit": "microseconds",
+      "raw_value": 1304.7355,
+      "transform": null,
+      "value": 1304.7355
+    },
+    {
+      "id": "intervention_5090_ragged_projection_suffix_native",
+      "source": "intervention",
+      "json_pointer": "/results/gpu_5090/layouts/ragged_projection_suffix/cupti/native/median_kernel_us",
+      "scope": "9f7b80a diagnostic; fixed exposed BF16; 16 CUPTI launches/arm/layout/card",
+      "unit": "microseconds",
+      "raw_value": 36.272,
+      "transform": null,
+      "value": 36.272
+    },
+    {
+      "id": "intervention_5090_ragged_projection_suffix_attribute49152_launch49152",
+      "source": "intervention",
+      "json_pointer": "/results/gpu_5090/layouts/ragged_projection_suffix/cupti/attribute49152_launch49152/median_kernel_us",
+      "scope": "9f7b80a diagnostic; fixed exposed BF16; 16 CUPTI launches/arm/layout/card",
+      "unit": "microseconds",
+      "raw_value": 37.9835,
+      "transform": null,
+      "value": 37.9835
+    },
+    {
+      "id": "intervention_5090_ragged_projection_suffix_attribute65536_launch49152",
+      "source": "intervention",
+      "json_pointer": "/results/gpu_5090/layouts/ragged_projection_suffix/cupti/attribute65536_launch49152/median_kernel_us",
+      "scope": "9f7b80a diagnostic; fixed exposed BF16; 16 CUPTI launches/arm/layout/card",
+      "unit": "microseconds",
+      "raw_value": 38.9435,
+      "transform": null,
+      "value": 38.9435
+    },
+    {
+      "id": "intervention_5090_ragged_projection_suffix_attribute65536_launch65536",
+      "source": "intervention",
+      "json_pointer": "/results/gpu_5090/layouts/ragged_projection_suffix/cupti/attribute65536_launch65536/median_kernel_us",
+      "scope": "9f7b80a diagnostic; fixed exposed BF16; 16 CUPTI launches/arm/layout/card",
+      "unit": "microseconds",
+      "raw_value": 39.872,
+      "transform": null,
+      "value": 39.872
+    },
+    {
+      "id": "public5090_records",
+      "source": "public5090",
+      "json_pointer": "/metrics/records",
+      "scope": "c6879fb original complete RTX 5090 only; separate frozen arithmetic/CSV-column supplement; exposed two cases",
+      "unit": "fold records",
+      "raw_value": 144,
+      "transform": null,
+      "value": 144
+    },
+    {
+      "id": "public5090_selected",
+      "source": "public5090",
+      "json_pointer": "/metrics/selected",
+      "scope": "c6879fb original complete RTX 5090 only; separate frozen arithmetic/CSV-column supplement; exposed two cases",
+      "unit": "fold records",
+      "raw_value": 108,
+      "transform": null,
+      "value": 108
+    },
+    {
+      "id": "public5090_coverage",
+      "source": "public5090",
+      "json_pointer": "/metrics/coverage",
+      "scope": "c6879fb original complete RTX 5090 only; separate frozen arithmetic/CSV-column supplement; exposed two cases",
+      "unit": "ratio",
+      "raw_value": 0.75,
+      "transform": null,
+      "value": 0.75
+    },
+    {
+      "id": "public5090_selected_geomean",
+      "source": "public5090",
+      "json_pointer": "/metrics/selected_geomean",
+      "scope": "c6879fb original complete RTX 5090 only; separate frozen arithmetic/CSV-column supplement; exposed two cases",
+      "unit": "ratio",
+      "raw_value": 1.3317373667500265,
+      "transform": null,
+      "value": 1.3317373667500265
+    },
+    {
+      "id": "public5090_selected_worst",
+      "source": "public5090",
+      "json_pointer": "/metrics/selected_worst",
+      "scope": "c6879fb original complete RTX 5090 only; separate frozen arithmetic/CSV-column supplement; exposed two cases",
+      "unit": "ratio",
+      "raw_value": 1.105506540980384,
+      "transform": null,
+      "value": 1.105506540980384
+    },
+    {
+      "id": "public5090_selected_block_worst",
+      "source": "public5090",
+      "json_pointer": "/metrics/selected_block_worst",
+      "scope": "c6879fb original complete RTX 5090 only; separate frozen arithmetic/CSV-column supplement; exposed two cases",
+      "unit": "ratio",
+      "raw_value": 1.0987988322308504,
+      "transform": null,
+      "value": 1.0987988322308504
+    },
+    {
+      "id": "public5090_selected_joint_min_lcb95",
+      "source": "public5090",
+      "json_pointer": "/metrics/selected_joint_min_lcb95",
+      "scope": "c6879fb original complete RTX 5090 only; separate frozen arithmetic/CSV-column supplement; exposed two cases",
+      "unit": "ratio",
+      "raw_value": 1.1042798776353413,
+      "transform": null,
+      "value": 1.1042798776353413
+    },
+    {
+      "id": "public5090_whole_policy_worst",
+      "source": "public5090",
+      "json_pointer": "/metrics/whole_policy_worst",
+      "scope": "c6879fb original complete RTX 5090 only; separate frozen arithmetic/CSV-column supplement; exposed two cases",
+      "unit": "ratio",
+      "raw_value": 0.9996260262913025,
+      "transform": null,
+      "value": 0.9996260262913025
+    },
+    {
+      "id": "public5090_native_pristine_worst",
+      "source": "public5090",
+      "json_pointer": "/metrics/native_pristine_worst",
+      "scope": "c6879fb original complete RTX 5090 only; separate frozen arithmetic/CSV-column supplement; exposed two cases",
+      "unit": "ratio",
+      "raw_value": 0.992640205697556,
+      "transform": null,
+      "value": 0.992640205697556
+    },
+    {
+      "id": "public5090_native_pristine_joint_min_lcb95",
+      "source": "public5090",
+      "json_pointer": "/metrics/native_pristine_joint_min_lcb95",
+      "scope": "c6879fb original complete RTX 5090 only; separate frozen arithmetic/CSV-column supplement; exposed two cases",
+      "unit": "ratio",
+      "raw_value": 0.9927107281730666,
+      "transform": null,
+      "value": 0.9927107281730666
+    },
+    {
+      "id": "public5090_actual_policy_pristine_worst",
+      "source": "public5090",
+      "json_pointer": "/metrics/actual_policy_pristine_worst",
+      "scope": "c6879fb original complete RTX 5090 only; separate frozen arithmetic/CSV-column supplement; exposed two cases",
+      "unit": "ratio",
+      "raw_value": 0.9924836128613628,
+      "transform": null,
+      "value": 0.9924836128613628
+    },
+    {
+      "id": "public5090_actual_policy_pristine_joint_min_lcb95",
+      "source": "public5090",
+      "json_pointer": "/metrics/actual_policy_pristine_joint_min_lcb95",
+      "scope": "c6879fb original complete RTX 5090 only; separate frozen arithmetic/CSV-column supplement; exposed two cases",
+      "unit": "ratio",
+      "raw_value": 0.9925850923801468,
+      "transform": null,
+      "value": 0.9925850923801468
+    },
+    {
+      "id": "public5090_regret_p50_percent",
+      "source": "public5090",
+      "json_pointer": "/metrics/regret/p50",
+      "scope": "Available certified held-out oracle; oracle never trains; RTX 5090 exposed supplement only",
+      "unit": "percent",
+      "raw_value": 0.0,
+      "transform": "fraction_to_percent",
+      "value": 0.0
+    },
+    {
+      "id": "public5090_regret_p90_percent",
+      "source": "public5090",
+      "json_pointer": "/metrics/regret/p90",
+      "scope": "Available certified held-out oracle; oracle never trains; RTX 5090 exposed supplement only",
+      "unit": "percent",
+      "raw_value": 0.00014073623236126058,
+      "transform": "fraction_to_percent",
+      "value": 0.014073623236126058
+    },
+    {
+      "id": "public5090_regret_p99_percent",
+      "source": "public5090",
+      "json_pointer": "/metrics/regret/p99",
+      "scope": "Available certified held-out oracle; oracle never trains; RTX 5090 exposed supplement only",
+      "unit": "percent",
+      "raw_value": 0.00042468246096653167,
+      "transform": "fraction_to_percent",
+      "value": 0.042468246096653166
+    },
+    {
+      "id": "public5090_regret_worst_percent",
+      "source": "public5090",
+      "json_pointer": "/metrics/regret/worst",
+      "scope": "Available certified held-out oracle; oracle never trains; RTX 5090 exposed supplement only",
+      "unit": "percent",
+      "raw_value": 0.0005731607183139253,
+      "transform": "fraction_to_percent",
+      "value": 0.057316071831392534
+    },
+    {
+      "id": "history_original_failure_reproduced",
+      "source": "history",
+      "json_pointer": "/original_failure_reproduced",
+      "scope": "Forced-history v3 job1640986; two target conditions; dependent pairs",
+      "unit": "boolean",
+      "raw_value": false,
+      "transform": null,
+      "value": false
+    },
+    {
+      "id": "history_first_state_attributed",
+      "source": "history",
+      "json_pointer": "/first_state_attributed",
+      "scope": "Forced-history v3 job1640986; two target conditions; dependent pairs",
+      "unit": "boolean",
+      "raw_value": false,
+      "transform": null,
+      "value": false
+    },
+    {
+      "id": "history_diagnostic_only",
+      "source": "history",
+      "json_pointer": "/diagnostic_only",
+      "scope": "Forced-history v3 job1640986; two target conditions; dependent pairs",
+      "unit": "boolean",
+      "raw_value": true,
+      "transform": null,
+      "value": true
+    },
+    {
+      "id": "history_performance_claim",
+      "source": "history",
+      "json_pointer": "/performance_claim",
+      "scope": "Forced-history v3 job1640986; two target conditions; dependent pairs",
+      "unit": "boolean",
+      "raw_value": false,
+      "transform": null,
+      "value": false
+    }
+  ],
+  "warnings": [
+    "Legacy v4.2 dev regret uses oracle/chosen-1 and is excluded from regret comparisons.",
+    "Selected subsets and versioned populations are not a paired improvement trend.",
+    "Frozen report inputs include a dated authority snapshot; live state may change.",
+    "Source-byte verification authenticates inputs, not physical or statistical truth."
+  ]
+}

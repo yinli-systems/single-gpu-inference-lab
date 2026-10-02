@@ -1,0 +1,1402 @@
+{
+  "schema": 6,
+  "qualification_revision": "4.2.0",
+  "state": "V42_DUAL_CANARY_QUALIFICATION_HOLD_COMPLETENESS_RECOVERED",
+  "default_promotion": false,
+  "serving_promotion": false,
+  "historical_token_divergence_resolved": false,
+  "v3_2_2_release_repeated": false,
+  "manifest_case_hash": "d54cc31596183165d9f2d18b3a8804d894c5de9d0a7ad4af038079ef316819b8",
+  "fresh_counts": {
+    "dev_exposed": 2,
+    "canary_untouched": 0,
+    "release_untouched": 48,
+    "stress_untouched": 12,
+    "canary_consumed": 10
+  },
+  "cpu_tests_last_complete": 53,
+  "new_v41_gpu_jobs": {
+    "smoke_gpu_4090": "1643827",
+    "smoke_gpu_5090": "1643828"
+  },
+  "max_ui_verified": false,
+  "source_validation_evidence": "evidence/v41-source-validation/",
+  "stage_hashes": {
+    "dev": "f4ae7f3ded5911b2a02239dccaadc56b360263b8d0513427efaf698e4793e486",
+    "canary": "445de8431389fc098f5e499a43e0a75805c5fee962d3bf78e45074c72fd83cbd",
+    "release": "a9f63c330133f66e0b04d9659c64d281d8392ae2479cf48367f5150250c8ebcb",
+    "stress": "ed8fb0e0894327f7b4b279b756796e81765c7426bc186730f029e4ca8f644844"
+  },
+  "preparation_failures": {
+    "shell_redirection": {
+      "python_executed": false,
+      "jobs": 0,
+      "cases_consumed": 0
+    },
+    "release_hash_contract": {
+      "root": "/ssd/scxi253/single-gpu-inference-selector-v41-smoke-20260930T202230Z",
+      "jobs": 0,
+      "cases_consumed": 0,
+      "evidence": "evidence/v41-preparation-failures/"
+    }
+  },
+  "smoke": {
+    "pass": true,
+    "qualification_revision": "4.2.0",
+    "source_archive_sha256": "60ffb32e73e8e9b2ce0e84f2ca20ad3c4559ecbc651cd86c5e168c03074f3d7e",
+    "jobs": {
+      "gpu_4090": "1644061",
+      "gpu_5090": "1644062"
+    },
+    "artifacts": {
+      "runs/gpu_4090/pristine-1644061/results.json": "f439c50f6bb898bf03b095012a72f53efb7622c47dc6892137750c1dbdf461c6",
+      "runs/gpu_4090/candidate-1644061/results.json": "0cbbc302f163654e2a1a9798740375670e839703f0e0c7c3b9cdc0af4d337f5a",
+      "receipts/binary-audit-1644061.json": "30f5c95bc60e40c9c3e190db92f5788e049d4d48d4cfd015e4f2abf1ff714698",
+      "runs/gpu_5090/pristine-1644062/results.json": "30bcd348b1b51e9ebba602913f9d394db50eebb8d7ce1b5cab5291f9288acfae",
+      "runs/gpu_5090/candidate-1644062/results.json": "57b3636916b76743aceb48fd0cb183d27f26c054a673fb0e43c4769b7f38c8aa",
+      "receipts/binary-audit-1644062.json": "a9025c669ac7370b61ae2ab21558313ca876940a7465015c8324851d968c53c8"
+    },
+    "authorized_stage": "dev",
+    "canary_cases_consumed": 10,
+    "release_cases_consumed": 0,
+    "stress_cases_consumed": 0,
+    "default_promotion": false,
+    "serving_promotion": false,
+    "campaign": "/ssd/scxi253/single-gpu-inference-selector-v42-20260930T230508Z",
+    "evidence": "evidence/v42-exact-smoke/",
+    "canary_authorized": true,
+    "dev_authorized": true
+  },
+  "launcher_fix": "persistent per-mode/per-repeat XDG JIT roots under campaign cache for post-run binary audit",
+  "dev_submitted": true,
+  "dev_campaign": "/ssd/scxi253/single-gpu-inference-selector-v42-20260930T230508Z",
+  "dev_source_commit": "b769e7c18e93c9d6cfdcd79b58edf76955313859",
+  "canary_cases_consumed": 10,
+  "release_cases_consumed": 0,
+  "v411_contract_evidence": "evidence/v411-contract-validation/",
+  "v411_clean_archive_sha256": "054401c074135ad4a65e98180db44be6481ff5d5698a4150d7b3e8dd8654ba04",
+  "exact_source_commit": "b769e7c18e93c9d6cfdcd79b58edf76955313859",
+  "exact_source_archive_sha256": "60ffb32e73e8e9b2ce0e84f2ca20ad3c4559ecbc651cd86c5e168c03074f3d7e",
+  "exact_resource_binding_sha256": "5468256db82ad24d5ff20369576802cc504da5fa96f68d2fe24eec9935789263",
+  "v411_dev": {
+    "campaign": "/ssd/scxi253/single-gpu-inference-selector-v411-dev-20260930T211230Z",
+    "jobs": {
+      "gpu_4090": "1643854",
+      "gpu_5090": "1643855"
+    },
+    "terminal": {
+      "gpu_4090": "COMPLETED 0:0",
+      "gpu_5090": "COMPLETED 0:0"
+    },
+    "results": {
+      "gpu_4090": {
+        "pass": false,
+        "metrics": {
+          "fold_records": 144,
+          "selected_records": 131,
+          "coverage": 0.9097222222222222,
+          "selected_geomean": 1.387584906839721,
+          "selected_worst": 1.3201906121938196,
+          "selected_block_worst": 1.286006612290989,
+          "selected_joint_min_lcb95": 1.3153403759764133,
+          "policy_geomean": 1.3471522774553404,
+          "policy_worst": 1.0,
+          "by_execution_mode": {
+            "eager_full_call": {
+              "count": 39,
+              "geomean": 1.3560537291138581,
+              "worst": 1.3201906121938196
+            },
+            "graph1_replay": {
+              "count": 44,
+              "geomean": 1.400134561008727,
+              "worst": 1.3742903892604825
+            },
+            "graph16_replay": {
+              "count": 48,
+              "geomean": 1.402123049159815,
+              "worst": 1.3743503512037996
+            }
+          },
+          "selected_layouts": [
+            "paged",
+            "ragged"
+          ],
+          "selected_dtypes": [
+            "bfloat16",
+            "float16"
+          ],
+          "native_overlay_geomean": 0.9987211625800273,
+          "native_overlay_worst": 0.9958785433620769,
+          "native_overlay_block_worst": 0.9599264046412852,
+          "native_overlay_joint_min_lcb95": 0.9927031583818556
+        },
+        "failed_requirements": [
+          "held_out_controls_resolve"
+        ]
+      },
+      "gpu_5090": {
+        "pass": false,
+        "metrics": {
+          "fold_records": 144,
+          "selected_records": 108,
+          "coverage": 0.75,
+          "selected_geomean": 1.4000256057401848,
+          "selected_worst": 1.307094037984549,
+          "selected_block_worst": 1.2951027183539618,
+          "selected_joint_min_lcb95": 1.3052025342028248,
+          "policy_geomean": 1.287069456228467,
+          "policy_worst": 1.0,
+          "by_execution_mode": {
+            "eager_full_call": {
+              "count": 36,
+              "geomean": 1.3781584823280393,
+              "worst": 1.307094037984549
+            },
+            "graph1_replay": {
+              "count": 36,
+              "geomean": 1.410855513425514,
+              "worst": 1.3439980378523468
+            },
+            "graph16_replay": {
+              "count": 36,
+              "geomean": 1.4113223988336172,
+              "worst": 1.344422302642488
+            }
+          },
+          "selected_layouts": [
+            "paged",
+            "ragged"
+          ],
+          "selected_dtypes": [
+            "bfloat16",
+            "float16"
+          ],
+          "native_overlay_geomean": 0.999169612760455,
+          "native_overlay_worst": 0.9949109377110048,
+          "native_overlay_block_worst": 0.9783673415913128,
+          "native_overlay_joint_min_lcb95": 0.9889796871742721
+        },
+        "failed_requirements": [
+          "native_overlay_joint_min_lcb_at_least_0_99"
+        ]
+      }
+    },
+    "evidence": "evidence/v411-exact-dev/"
+  },
+  "next_action": "Finite workflow1725873 is running exact exposed complete repetition1648991/1648992/1648993/1649001, all12h RUNNING at snapshot. It waits allnine processes/24cells per case/card, strict Slurmcompletion/SASS/fullanalysis/completearchive. Only actualarchiveddualPASS createsformalnewsource/manifest anddispatches dual90/dev2/new10/original48/original12; allkernelstages+archivePASS are requiredbefore72fullHTTPallocations. HOLD stopsall successors/no retries. History2/432, realResourceGraph update support and upstream reviews are independent requirements; defaultsOFF.",
+  "stress_cases_consumed": 0,
+  "v42": {
+    "qualification_revision": "4.2.0",
+    "cpu_tests_passed": 51,
+    "native_plan_vector_size": 15,
+    "native_source_identity": true,
+    "native_sass_identity": true,
+    "canary_cases_consumed": 10,
+    "release_cases_consumed": 0,
+    "stress_cases_consumed": 0,
+    "target_window_ms": 384,
+    "minimum_window_ms": 120,
+    "blocks": 24,
+    "repeats": 3,
+    "default_promotion": false,
+    "serving_promotion": false,
+    "source_commit": "b769e7c18e93c9d6cfdcd79b58edf76955313859",
+    "source_archive_sha256": "60ffb32e73e8e9b2ce0e84f2ca20ad3c4559ecbc651cd86c5e168c03074f3d7e",
+    "smoke_jobs": {
+      "gpu_4090": "1644061",
+      "gpu_5090": "1644062"
+    },
+    "dev_jobs": {
+      "gpu_4090": {
+        "0": "1644068",
+        "1": "1644069"
+      },
+      "gpu_5090": {
+        "0": "1644070",
+        "1": "1644071"
+      }
+    },
+    "dev_shards": 2,
+    "dev_state": "PASS",
+    "dev_evidence": "evidence/v42-exact-dev/",
+    "canary_state": "QUALIFICATION_HOLD",
+    "dev_results": {
+      "gpu_4090": {
+        "pass": true,
+        "requirements": {
+          "numerical_exact": true,
+          "native_after_cap_exact": true,
+          "compiled_kernel_symbol_isolation": true,
+          "native_sass_identity": true,
+          "native_source_identity": true,
+          "telemetry_stable": true,
+          "cache_roundtrip": true,
+          "selected_nonempty": true,
+          "selected_geomean_at_least_1_05": true,
+          "selected_worst_at_least_0_99": true,
+          "selected_block_worst_at_least_0_99": true,
+          "selected_joint_min_lcb_at_least_0_99": true,
+          "policy_worst_at_least_0_99": true,
+          "actual_policy_vs_pristine_worst_at_least_0_99": true,
+          "native_overlay_worst_at_least_0_99": true,
+          "native_overlay_joint_min_lcb_at_least_0_99": true,
+          "native_overlay_controls_resolve_one_percent": true,
+          "held_out_controls_resolve": true,
+          "all_execution_modes_selected": true,
+          "both_layouts_selected": true,
+          "both_dtypes_selected": true
+        },
+        "metrics": {
+          "fold_records": 144,
+          "selected_records": 144,
+          "coverage": 1.0,
+          "selected_geomean": 1.385991064404118,
+          "selected_worst": 1.317029539137776,
+          "selected_block_worst": 1.3115942262543119,
+          "selected_joint_min_lcb95": 1.3164143030120217,
+          "policy_geomean": 1.385991064404118,
+          "policy_worst": 1.317029539137776,
+          "by_execution_mode": {
+            "eager_full_call": {
+              "count": 48,
+              "geomean": 1.3544577322248725,
+              "worst": 1.317029539137776
+            },
+            "graph1_replay": {
+              "count": 48,
+              "geomean": 1.4019979529113935,
+              "worst": 1.3723765116348396
+            },
+            "graph16_replay": {
+              "count": 48,
+              "geomean": 1.4020659900610772,
+              "worst": 1.3724088080261883
+            }
+          },
+          "selected_layouts": [
+            "paged",
+            "ragged"
+          ],
+          "selected_dtypes": [
+            "bfloat16",
+            "float16"
+          ],
+          "native_overlay_geomean": 0.9984351064377128,
+          "native_overlay_worst": 0.9955161842404787,
+          "native_overlay_block_worst": 0.9786249536827967,
+          "native_overlay_joint_min_lcb95": 0.9936616110497288,
+          "regret": {
+            "definition": "held-out oracle latency / chosen latency - 1; native=1 in same-module tactic comparison",
+            "p50": 0.0,
+            "p90": 0.0,
+            "p99": 0.0,
+            "worst": 0.0,
+            "above_one_percent_count": 0,
+            "records": 144
+          },
+          "actual_policy_vs_pristine_geomean": 1.3838221359100444,
+          "actual_policy_vs_pristine_worst": 1.3116215213276
+        },
+        "hardware": {
+          "0": {
+            "uuid": "GPU-8259bf3f-435d-17b5-ef86-7ac16135de44",
+            "driver": "580.105.08",
+            "gpu_name": "NVIDIA GeForce RTX 4090"
+          },
+          "1": {
+            "uuid": "GPU-bdce2660-25eb-d632-5729-2b165e1573d4",
+            "driver": "580.105.08",
+            "gpu_name": "NVIDIA GeForce RTX 4090"
+          }
+        }
+      },
+      "gpu_5090": {
+        "pass": true,
+        "requirements": {
+          "numerical_exact": true,
+          "native_after_cap_exact": true,
+          "compiled_kernel_symbol_isolation": true,
+          "native_sass_identity": true,
+          "native_source_identity": true,
+          "telemetry_stable": true,
+          "cache_roundtrip": true,
+          "selected_nonempty": true,
+          "selected_geomean_at_least_1_05": true,
+          "selected_worst_at_least_0_99": true,
+          "selected_block_worst_at_least_0_99": true,
+          "selected_joint_min_lcb_at_least_0_99": true,
+          "policy_worst_at_least_0_99": true,
+          "actual_policy_vs_pristine_worst_at_least_0_99": true,
+          "native_overlay_worst_at_least_0_99": true,
+          "native_overlay_joint_min_lcb_at_least_0_99": true,
+          "native_overlay_controls_resolve_one_percent": true,
+          "held_out_controls_resolve": true,
+          "all_execution_modes_selected": true,
+          "both_layouts_selected": true,
+          "both_dtypes_selected": true
+        },
+        "metrics": {
+          "fold_records": 144,
+          "selected_records": 108,
+          "coverage": 0.75,
+          "selected_geomean": 1.3985678293538328,
+          "selected_worst": 1.3051706391786877,
+          "selected_block_worst": 1.3006777853162328,
+          "selected_joint_min_lcb95": 1.30480276790437,
+          "policy_geomean": 1.2860642047355375,
+          "policy_worst": 1.0,
+          "by_execution_mode": {
+            "eager_full_call": {
+              "count": 36,
+              "geomean": 1.3753972531328702,
+              "worst": 1.3051706391786877
+            },
+            "graph1_replay": {
+              "count": 36,
+              "geomean": 1.410091611915134,
+              "worst": 1.344115336110882
+            },
+            "graph16_replay": {
+              "count": 36,
+              "geomean": 1.4105065933615015,
+              "worst": 1.344557576572778
+            }
+          },
+          "selected_layouts": [
+            "paged",
+            "ragged"
+          ],
+          "selected_dtypes": [
+            "bfloat16",
+            "float16"
+          ],
+          "native_overlay_geomean": 0.9995229994043195,
+          "native_overlay_worst": 0.9953248633415966,
+          "native_overlay_block_worst": 0.9521659165461163,
+          "native_overlay_joint_min_lcb95": 0.992892450467237,
+          "regret": {
+            "definition": "held-out oracle latency / chosen latency - 1; native=1 in same-module tactic comparison",
+            "p50": 0.0,
+            "p90": 0.0,
+            "p99": 0.0,
+            "worst": 0.0,
+            "above_one_percent_count": 0,
+            "records": 144
+          },
+          "actual_policy_vs_pristine_geomean": 1.2854507513437954,
+          "actual_policy_vs_pristine_worst": 0.9928625405336201
+        },
+        "hardware": {
+          "0": {
+            "uuid": "GPU-2972bc5e-923b-124f-95e7-cc6653616016",
+            "driver": "580.82.07",
+            "gpu_name": "NVIDIA GeForce RTX 5090"
+          },
+          "1": {
+            "uuid": "GPU-20b462ec-0729-3cf8-acac-b41308e38bf6",
+            "driver": "580.82.07",
+            "gpu_name": "NVIDIA GeForce RTX 5090"
+          }
+        }
+      }
+    },
+    "canary_jobs": {
+      "gpu_4090": {
+        "0": "1644188",
+        "1": "1644189",
+        "2": "1644190",
+        "3": "1644191",
+        "4": "1644192",
+        "5": "1644193",
+        "6": "1644194",
+        "7": "1644195",
+        "8": "1644196",
+        "9": "1644197"
+      },
+      "gpu_5090": {
+        "0": "1644198",
+        "1": "1644199",
+        "2": "1644200",
+        "3": "1644201",
+        "4": "1644202",
+        "5": "1644203",
+        "6": "1644204",
+        "7": "1644205",
+        "8": "1644206",
+        "9": "1644207"
+      }
+    },
+    "canary_execution_failure": {
+      "job": "1644197",
+      "reason": "srun unable to confirm allocation: Socket timed out on send/recv before repeat2; original four completed runs retained",
+      "source_changed": false,
+      "thresholds_changed": false,
+      "recovery_pending": false
+    },
+    "canary_5090": {
+      "pass": false,
+      "failed_requirements": [
+        "actual_policy_vs_pristine_worst_at_least_0_99",
+        "native_overlay_worst_at_least_0_99",
+        "native_overlay_joint_min_lcb_at_least_0_99",
+        "native_overlay_controls_resolve_one_percent",
+        "held_out_controls_resolve"
+      ],
+      "metrics": {
+        "fold_records": 720,
+        "selected_records": 255,
+        "coverage": 0.3541666666666667,
+        "selected_geomean": 1.30456953860456,
+        "selected_worst": 1.051294733406868,
+        "selected_block_worst": 1.0430883224902041,
+        "selected_joint_min_lcb95": 1.0490582045521695,
+        "policy_geomean": 1.0987392658192532,
+        "policy_worst": 1.0,
+        "by_execution_mode": {
+          "eager_full_call": {
+            "count": 73,
+            "geomean": 1.3433652643009872,
+            "worst": 1.0754486751919732
+          },
+          "graph1_replay": {
+            "count": 95,
+            "geomean": 1.286624439824573,
+            "worst": 1.0579163995376755
+          },
+          "graph16_replay": {
+            "count": 87,
+            "geomean": 1.2922809348119684,
+            "worst": 1.051294733406868
+          }
+        },
+        "selected_layouts": [
+          "paged",
+          "ragged"
+        ],
+        "selected_dtypes": [
+          "bfloat16",
+          "float16"
+        ],
+        "native_overlay_geomean": 0.9974447917732578,
+        "native_overlay_worst": 0.9318039985603792,
+        "native_overlay_block_worst": 0.9093853905647803,
+        "native_overlay_joint_min_lcb95": 0.9267431346715315,
+        "regret": {
+          "definition": "held-out oracle latency / chosen latency - 1; native=1 in same-module tactic comparison",
+          "p50": 0.0,
+          "p90": 0.06802448931464028,
+          "p99": 0.5012060481005771,
+          "worst": 0.529489136697521,
+          "above_one_percent_count": 99,
+          "records": 720
+        },
+        "actual_policy_vs_pristine_geomean": 1.0959317582081871,
+        "actual_policy_vs_pristine_worst": 0.926764218098475
+      },
+      "evidence": "evidence/v42-canary-5090-hold/"
+    },
+    "rpc_recovery": {
+      "campaign": "/ssd/scxi253/sgi-v42-canary-rpc-recovery-20261001T0505Z-single-gpu",
+      "original_to_resume_jobs": {
+        "1644194": "1644929",
+        "1644196": "1644913",
+        "1644197": "1644914"
+      },
+      "fresh_cases_consumed": 0,
+      "same_gpu_and_cpu_required": true,
+      "superseded_pending_full_node_jobs": [
+        "1644802",
+        "1644803",
+        "1644804"
+      ],
+      "confirmed_original_gpu_and_cpu": [
+        "1644913",
+        "1644914",
+        "1644929"
+      ],
+      "complete_4090_processes": 60,
+      "missing_processes_resumed": 5,
+      "evidence": "evidence/v42-canary-4090-complete-hold/",
+      "cpu_audit_discovery_repaired": true,
+      "original_terminal_receipts_preserved": true
+    },
+    "canary_4090": {
+      "pass": false,
+      "failed_requirements": [
+        "held_out_controls_resolve"
+      ],
+      "metrics": {
+        "fold_records": 720,
+        "selected_records": 476,
+        "coverage": 0.6611111111111111,
+        "selected_geomean": 1.5379335365817948,
+        "selected_worst": 1.0715474111810368,
+        "selected_block_worst": 1.0028470516537515,
+        "selected_joint_min_lcb95": 1.0650180671025005,
+        "policy_geomean": 1.3291882787966691,
+        "policy_worst": 1.0,
+        "by_execution_mode": {
+          "eager_full_call": {
+            "count": 148,
+            "geomean": 1.5091992338867721,
+            "worst": 1.0715474111810368
+          },
+          "graph1_replay": {
+            "count": 160,
+            "geomean": 1.550499558419068,
+            "worst": 1.088181869348399
+          },
+          "graph16_replay": {
+            "count": 168,
+            "geomean": 1.5516281521183344,
+            "worst": 1.0875978630122516
+          }
+        },
+        "selected_layouts": [
+          "paged",
+          "ragged"
+        ],
+        "selected_dtypes": [
+          "bfloat16",
+          "float16"
+        ],
+        "native_overlay_geomean": 0.9991791247724433,
+        "native_overlay_worst": 0.993900961398416,
+        "native_overlay_block_worst": 0.9133838452133353,
+        "native_overlay_joint_min_lcb95": 0.9927017774909123,
+        "regret": {
+          "definition": "held-out oracle latency / chosen latency - 1; native=1 in same-module tactic comparison",
+          "p50": 0.0,
+          "p90": 0.0,
+          "p99": 0.7544275665123181,
+          "worst": 0.77816989742353,
+          "above_one_percent_count": 28,
+          "records": 720
+        },
+        "actual_policy_vs_pristine_geomean": 1.3280971810658462,
+        "actual_policy_vs_pristine_worst": 0.9961852635977275
+      },
+      "evidence": "evidence/v42-canary-4090-complete-hold/",
+      "complete_processes": 60,
+      "recovery_fresh_cases_consumed": 0
+    }
+  },
+  "v41_source_isolation_history": {
+    "native_kernel_byte_identical": true,
+    "candidate_clone_symbols": true,
+    "legacy_default_native": true,
+    "binding_sha256": "7a8778e8dea2892cdd5d317c0d4a8c47365c36400177aaede46af189a8e68354",
+    "patch_sha256": "bb1d385104b5f0be3ee2ab7552b4e2d5e2c946775d6d7688f25fa5b5f19ecfea"
+  },
+  "v41_smoke_history": {
+    "pass": true,
+    "campaign": "/ssd/scxi253/single-gpu-inference-selector-v41-smoke-20260930T202814Z",
+    "verdict_sha256": "fc03e1572d6bdea25095f359fe565b641972f17fb98cd545ea673efa66702d33",
+    "evidence": "evidence/v41-smoke-8ea2169/",
+    "canary_authorized": false,
+    "dev_authorized": true
+  },
+  "source_isolation": {
+    "native_source_identity": true,
+    "native_sass_identity": true,
+    "official_plan_vector_size": 15,
+    "resource_only_entry": true,
+    "resource_binding_sha256": "f39d2eb862536fec0e3d6498d62766148ec2e809ccf9e077b04bd513ccc9ec7b"
+  },
+  "dev_jobs": {
+    "gpu_4090": {
+      "0": "1644068",
+      "1": "1644069"
+    },
+    "gpu_5090": {
+      "0": "1644070",
+      "1": "1644071"
+    }
+  },
+  "http_ownership": {
+    "candidate_commit": "ea34a9d",
+    "cpu_registered_tests_passed": 49,
+    "job": "1644085",
+    "pass": true,
+    "original_expected_complete": 8,
+    "candidate_expected_complete": 10,
+    "expected_requests_per_arm": 10,
+    "intentional_disconnects_per_arm": 1,
+    "evidence": "evidence/v42-http-ownership-main/",
+    "resource_cap_enabled": false,
+    "historical_token_divergence_resolved": false
+  },
+  "http_ownership_latest_main": {
+    "candidate_commit": "3825c5a4b5e8a1a73ae62f0c0ba6eb35beb1a2ca",
+    "upstream_base": "baae019",
+    "job": "1644258",
+    "pass": true,
+    "cpu_registered_tests_passed": 49,
+    "expected_complete_original": 8,
+    "expected_complete_candidate": 10,
+    "expected_requests_per_arm": 10,
+    "intentional_disconnects_per_arm": 1,
+    "resource_cap_enabled": false,
+    "historical_token_divergence_resolved": false,
+    "evidence": "evidence/v42-http-ownership-current-main/"
+  },
+  "current_main_experimental": {
+    "source_commit": "d7683dd8e86af2f37e8d25162c45b01f80824378",
+    "native_base": "85744da1a397c0c4bea1a83b8345281750eb61a9",
+    "functional_tests_per_gpu": 49,
+    "jobs": {
+      "gpu_4090": "1644585",
+      "gpu_5090": "1644586"
+    },
+    "prepared_managed_v2_pass": true,
+    "page_sizes_validated": [
+      1,
+      16
+    ],
+    "mask_modes_validated": [
+      "causal",
+      "noncausal"
+    ],
+    "evidence": "evidence/v42-current-main-managed-v2/",
+    "full_serving_qualified": false,
+    "independent_process_release_qualified": false,
+    "sass_identity": {
+      "pass": true,
+      "paired_kernels_dual_gpu": 352,
+      "evidence": "evidence/v42-current-main-sass-dual/"
+    },
+    "inference_metadata_bridge": {
+      "bridge_source_commit": "70de511ae90d0baa8cc43ff28f26b2eba6ac5b89",
+      "jobs": {
+        "gpu_4090": "1644779",
+        "gpu_5090": "1644780"
+      },
+      "gpu_tests_per_card": 2,
+      "pass": true,
+      "evidence": "evidence/v42-serving-lease-functional-pass/",
+      "full_http_qualified": false
+    },
+    "shared_native_workspace_adapter": {
+      "harness_commit": "43114db",
+      "jobs": {
+        "gpu_4090": "1644920",
+        "gpu_5090": "1644921"
+      },
+      "gpu_tests_per_card": 4,
+      "functional_pass": true,
+      "evidence": "evidence/v42-shared-runtime-functional-pass/",
+      "qualified_serving": false,
+      "prepared_certificates_reused_after_replan": false
+    },
+    "vendor_provenance_note": {
+      "prior_main_tests_cccl_source": "Existing Python environment payload; cub/cub/version.cuh SHA2566dbd157d914ed3416e128221d38d9479b6979fb22bfe1fefdf1dce310253f17a",
+      "main_git_cccl_pin": "16bd510c9b712e82b0ab6cbb630d8e29ba1f7116",
+      "main_git_cub_version_header_sha256": "d6a712b98e0410329c98279b39fbb91106028cda2b17cca5304e46262f76165c",
+      "cutlass_and_spdlog_git_pins_match_installed_package_source_commit": true,
+      "full_pinned_dependency_package_requalification_pending": true
+    }
+  },
+  "exposed_native_context_diagnostic": {
+    "source_commit": "d7683dd8e86af2f37e8d25162c45b01f80824378",
+    "harness_commit": "6ed34e2",
+    "campaign": "/ssd/scxi253/sgi-exposed-native-context-d7683dd-20261001",
+    "jobs": {
+      "gpu_4090": "1644872",
+      "gpu_5090": "1644873"
+    },
+    "fresh_cases_consumed": 0,
+    "qualified_release": false,
+    "qualified_http": false,
+    "campaign_complete": false,
+    "evidence": "evidence/v42-exposed-native-context-persisted/",
+    "all_persisted_rows_retained": true,
+    "rows": {
+      "gpu_4090": 6912,
+      "gpu_5090": 7776
+    },
+    "complete_processes": {
+      "gpu_4090": 2,
+      "gpu_5090": 3
+    },
+    "incomplete_process": {
+      "job": "1644872",
+      "rep": 2,
+      "persisted_rows": 1728,
+      "last_reported_rows": 1920,
+      "at_least192_rows_unpersisted": true,
+      "reason": "Slurm90minuteTIMEOUT; extension denied; no complete data reconstructed"
+    },
+    "analysis_scope": "prepared wrapper/fallback and pure fixed replay only; raw uncertified resource; three exposed cells; older CCCL overlay; not full-plan, outer AutoTuner dispatch, release or HTTP",
+    "future_diagnostic_durability": "Source updated to append each complete paired block with fsync outside scored windows; new jobs require a new harness binding and longer allocation"
+  },
+  "current_main_header_identity_revision": {
+    "source_commit": "eb4e3e60a6de71f00c0fb558da6f21e4b45d8b55",
+    "local_cpu_tests_passed": 29,
+    "local_skips": 2,
+    "normal_pinned_vendor_wheel_build_pending": false,
+    "gpu_requalification_pending": false,
+    "old_d768_results_retained": true,
+    "default_promotion": false,
+    "normal_pinned_vendor_wheel_build_pass": true,
+    "wheel_sha256": "0337548c78844c10bb5dad6276f76a5c50b45cb753636a6438e03621d26b260d",
+    "build_evidence": "evidence/v42-normal-pinned-wheel-build/",
+    "gpu_validation_jobs": {
+      "gpu_4090": "1645384",
+      "gpu_5090": "1645385"
+    },
+    "gpu_requalification_pass": true,
+    "functional_tests_per_gpu": 53,
+    "cpu_tests_per_gpu": 41,
+    "gpu_tests_per_gpu": 12,
+    "functional_evidence": "evidence/v42-normal-pinned-wheel-functional/",
+    "sass_identity_pass": true,
+    "sass_paired_kernels": 352,
+    "sass_evidence": "evidence/v42-normal-pinned-wheel-sass/",
+    "full_serving_qualified": false,
+    "independent_process_release_qualified": false,
+    "managed_5090_eager_winner": -1,
+    "managed_eager_outlier_cause_established": false
+  },
+  "graph_boundary_probe": {
+    "harness_commit": "261123b",
+    "gpu_tests_pending": false,
+    "raw_uncertified_resource_optin_required": true,
+    "automatic_untracked_metadata_detection": false,
+    "exclusive_owner_invalidation_required": true,
+    "serving_qualified": false,
+    "functional_pass": true,
+    "jobs": {
+      "gpu_4090": "1645466",
+      "gpu_5090": "1645467"
+    },
+    "gpu_tests_per_card": 10,
+    "evidence": "evidence/v42-pinned-wheel-graph-boundaries/",
+    "foreign_cuda_writes_require_explicit_invalidation": true
+  },
+  "http_geometry_observer": {
+    "original_job": "1645470",
+    "original_http_complete_samples": 7,
+    "original_paged_derived_geometry_valid": false,
+    "original_evidence": "evidence/v42-http-geometry-original-observer/",
+    "corrected_source": "8f9ab99",
+    "cpu_tests_passed": 12,
+    "cpu_evidence": "evidence/v42-geometry-payload-cpu/",
+    "corrected_live_job": "1645581",
+    "corrected_live_pending": false,
+    "resource_tactic_selected": false,
+    "timing_valid": false,
+    "fresh_cases_consumed": 0,
+    "corrected_live_complete": true,
+    "corrected_evidence": "evidence/v42-http-geometry-native-unpack/",
+    "native_page_sizes": [
+      1
+    ],
+    "native_control_tokens": 112,
+    "native_control_exact": true,
+    "resource_token_parity_qualified": false
+  },
+  "exposed_managed_resolution": {
+    "harness_commit": "e20b74a",
+    "jobs": {
+      "gpu_4090": "1645560",
+      "gpu_5090": "1645561"
+    },
+    "fit_repeat_sequence": [
+      10,
+      256,
+      256,
+      10,
+      256,
+      10,
+      10,
+      256
+    ],
+    "processes_per_gpu": 3,
+    "fresh_cases_consumed": 0,
+    "complete": true,
+    "qualification_authority": false,
+    "all_started_fits_retained": true,
+    "trimmed_fits": 0,
+    "evidence": "evidence/v42-managed-resolution-complete/",
+    "original_outlier_explained": false,
+    "results": {
+      "gpu_4090": {
+        "resource_wins": 8,
+        "resource_offered": 8,
+        "fits": 24,
+        "confidence_certificates_accepted": 1,
+        "confidence_certificates_attempted": 3
+      },
+      "gpu_5090": {
+        "resource_wins": 24,
+        "resource_offered": 24,
+        "fits": 24,
+        "confidence_certificates_accepted": 3,
+        "confidence_certificates_attempted": 3
+      }
+    }
+  },
+  "serving_layout_functional": {
+    "harness_commit": "73fa382",
+    "flashinfer_commit": "eb4e3e60",
+    "jobs": {
+      "gpu_4090": "1645591",
+      "gpu_5090": "1645592"
+    },
+    "tests_per_gpu": 6,
+    "pass": true,
+    "evidence": "evidence/v42-serving-layouts-functional/",
+    "full_serving_qualified": false,
+    "metadata_update_supported": false
+  },
+  "current_main_prefix_geometry_revision": {
+    "source_commit": "13ae45c2283f54fc2cf2461b7ed7a0d4c5e84305",
+    "change": "Accept positive noncausal prefix KV shorter than Q; keep causal KV>=Q and positive lengths guard",
+    "normal_wheel_build_pending": false,
+    "gpu_requalification_pending": false,
+    "tests_expected": 61,
+    "gpu_tests_expected": 16,
+    "cpu_tests_expected": 45,
+    "prior_eb4_results_retained": true,
+    "release_qualified": false,
+    "full_http_qualified": false,
+    "default_promotion": false,
+    "normal_wheel_build_pass": true,
+    "wheel_sha256": "aac1cf58f19e7fc8d8a07a1fc29b89c2c77bf7f1a9059c55049d24e59e2d3ea7",
+    "build_evidence": "evidence/v42-normal-prefix-wheel-build/",
+    "gpu_jobs": {
+      "gpu_4090": "1645718",
+      "gpu_5090": "1645719"
+    },
+    "source_superseding_cache_fix_pending": true,
+    "gpu_tests_pass": true,
+    "functional_evidence": "evidence/v42-normal-prefix-wheel-functional/",
+    "tests_per_gpu": 61,
+    "prepared_managed_modes_pass": true
+  },
+  "current_main_module_identity_revision": {
+    "source_commit": "bab48695bbe72ba23c49bad69818b2975f3de6f7",
+    "cpu_tests_passed": 53,
+    "gpu_skips": 16,
+    "cpu_evidence": "evidence/v42-module-identity-cpu-global/",
+    "normal_build_pending": false,
+    "normal_gpu_expected_tests": 69,
+    "gpu_validation_pending": false,
+    "prior_eb4_and13ae_results_retained": true,
+    "qualified_release": false,
+    "qualified_http": false,
+    "default_promotion": false,
+    "scope": "Reject source/compiler changes across process module templates; verify source identity before first private spec; preserve native fallback.",
+    "normal_build_pass": true,
+    "normal_wheel_sha256": "f311c2f01a928de03cbe07df55f7afaab1df11fa34d421edf754ef8c86c0784b",
+    "normal_gpu_validation_jobs": {
+      "gpu_4090": "1645930",
+      "gpu_5090": "1645931"
+    },
+    "finite_source_gate": "/ssd/scxi253/sgi-module-bound-source-prequalification",
+    "normal_gpu_tests_expected": 69,
+    "normal_gpu_cpu_tests_expected": 53,
+    "normal_gpu_gpu_tests_expected": 16,
+    "normal_gpu_functional_pass": true,
+    "normal_gpu_cpu_tests_passed": 53,
+    "normal_gpu_gpu_tests_passed": 16,
+    "normal_gpu_tests_passed_per_gpu": 69,
+    "normal_build_evidence": "evidence/v42-normal-module-bound-wheel-build/",
+    "normal_gpu_evidence": "evidence/v42-normal-module-bound-wheel-functional/",
+    "native_resource_sass_pass": true,
+    "native_resource_sass_pairs": 352,
+    "sass_evidence": "evidence/v42-normal-module-bound-wheel-sass/",
+    "eager_managed_winners": {
+      "gpu_4090": 0,
+      "gpu_5090": 0
+    },
+    "graph1_and16_managed_resource_on_both": true,
+    "exposed_5090_eager_profile_outlier_ms": 12.745414733886719,
+    "outlier_cause_established": false
+  },
+  "exposed_native_context_pinned_diagnostic": {
+    "source_commit": "eb4e3e60a6de71f00c0fb558da6f21e4b45d8b55",
+    "harness_commit": "7eafb66",
+    "jobs": {
+      "gpu_4090": "1645468",
+      "gpu_5090": "1645469"
+    },
+    "campaign_complete": true,
+    "processes_per_gpu": 3,
+    "rows_per_gpu": 7776,
+    "evidence": "evidence/v42-native-context-pinned-complete/",
+    "qualification_authority": false,
+    "fresh_cases_consumed": 0,
+    "native_5090_unresolved_half_percent_controls": 3,
+    "qualified_http": false,
+    "qualified_release": false
+  },
+  "public_plan_setup_cost_diagnostic": {
+    "harness_commit": "52d7508",
+    "source_commit": "bab48695bbe72ba23c49bad69818b2975f3de6f7",
+    "dispatch_pending_exact_dual69_and_sass": false,
+    "planned_observations_per_gpu": 32,
+    "blocks": 8,
+    "processes_per_gpu": 1,
+    "qualification_authority": false,
+    "includes_native_plan_public_runner_construction_and_managed_run": true,
+    "initial_jit_and_calibration_not_scored": true,
+    "fresh_cases_consumed": 0,
+    "inconclusive_confidence_stays_native": true,
+    "jobs": {
+      "gpu_4090": "1646009",
+      "gpu_5090": "1646010"
+    },
+    "campaign": "/ssd/scxi253/sgi-public-plan-setup-52d7508-bab48695-20261001",
+    "campaign_complete": true,
+    "all32_observations_per_gpu_retained": true,
+    "all_output_exact": true,
+    "evidence": "evidence/v42-public-plan-setup-complete/",
+    "public_per_plan_construction_usable": false,
+    "mean_native_wall_ms": {
+      "gpu_4090": 2.4622299375,
+      "gpu_5090": 2.0230244375
+    },
+    "mean_public_full_wall_ms": {
+      "gpu_4090": 5538.7371030625,
+      "gpu_5090": 9798.872406312501
+    },
+    "mean_public_constructor_wall_ms": {
+      "gpu_4090": 5535.9911011875,
+      "gpu_5090": 9797.0460259375
+    }
+  },
+  "experimental_eager_rebind_revision": {
+    "source_commit": "d3d080ce36bf074136d4b2093b775a8cb1d7dfc5",
+    "cpu_patch_tests_passed": 66,
+    "gpu_skips_in_cpu_proof": 20,
+    "cpu_patch_evidence": "evidence/v42-eager-rebind-cpu/",
+    "all5_patched_files_match_commit": true,
+    "example_requires_gpu_validation": true,
+    "normal_build_pending": false,
+    "normal_gpu_validation_pending": false,
+    "normal_tests_expected_per_gpu": 86,
+    "normal_cpu_expected": 66,
+    "normal_gpu_expected": 20,
+    "normal_build_root": "/ssd/scxi253/sgi-flashinfer-official-build-d3d080ce-20261001",
+    "normal_validation_root": "/ssd/scxi253/sgi-official-wheel-validation-d3d080ce-20261001",
+    "finite_source_gate": "/ssd/scxi253/sgi-eager-rebind-source-prequalification",
+    "functional_gpu_gate_mocking_not_a_performance_certificate": true,
+    "actual_same_geometry_eager_cost_unqualified": false,
+    "graph_rebinding_supported": false,
+    "immutable_package_compiler_contract": true,
+    "qualified_release": false,
+    "qualified_http": false,
+    "default_promotion": false,
+    "fresh_cases_consumed": 0,
+    "normal_tests_passed_per_gpu": 86,
+    "normal_cpu_tests_passed": 66,
+    "normal_gpu_tests_passed": 20,
+    "normal_build_evidence": "evidence/v42-normal-eager-rebind-wheel-build/",
+    "normal_gpu_evidence": "evidence/v42-normal-eager-rebind-wheel-functional/",
+    "sass_evidence": "evidence/v42-normal-eager-rebind-wheel-sass/",
+    "native_resource_sass_pairs": 352,
+    "normal_gpu_jobs": {
+      "gpu_4090": "1646256",
+      "gpu_5090": "1646257"
+    },
+    "exposed_same_geometry_eager_cost_observed": true,
+    "new_tensor_control_fix_requires_own_source_qualification": true
+  },
+  "public_plan_rebind_cost_diagnostic": {
+    "harness_commit": "58da590d65abba94d3ffb9df89b40755779170ea",
+    "source_commit": "d3d080ce36bf074136d4b2093b775a8cb1d7dfc5",
+    "dispatch_pending_normal_dual86_and_sass": false,
+    "campaign": "/ssd/scxi253/sgi-public-plan-rebind-58da590-d3d080ce-20261001",
+    "observations_per_gpu": 32,
+    "blocks": 8,
+    "processes_per_gpu": 1,
+    "actual_native_plan_and_rebind_and_managed_run_included": true,
+    "native_managed_winner_uses_direct_native_path": true,
+    "managed_profiling_repeat_fixed": 256,
+    "initial_source_audit_jit_calibration_training_not_scored": true,
+    "qualification_authority": false,
+    "fresh_cases_consumed": 0,
+    "jobs": {
+      "gpu_4090": "1646459",
+      "gpu_5090": "1646460"
+    },
+    "complete": true,
+    "all32_observations_per_gpu_retained": true,
+    "all_output_exact": true,
+    "resource_rebound_calls_per_gpu": 16,
+    "evidence": "evidence/v42-public-plan-rebind-complete/",
+    "mean_native_ms": {
+      "gpu_4090": 2.367618625,
+      "gpu_5090": 1.9567138125
+    },
+    "mean_full_rebind_ms": {
+      "gpu_4090": 2.1632910625,
+      "gpu_5090": 1.7621609375
+    },
+    "mean_native_over_rebind": {
+      "gpu_4090": 1.094452182622097,
+      "gpu_5090": 1.1104058493522246
+    },
+    "independent_release_qualified": false
+  },
+  "self_review_tensor_control_hardening": {
+    "source_commit_pending_cpu_proof": false,
+    "scope": "Bind control Tensor address/version, reject untracked controls before cold source scan, preserve output/LSE scratch writes, reject changed control during rebind.",
+    "normal_new_source_qualified": true,
+    "private_cpu_expected_passes": 70,
+    "private_gpu_skips_expected": 20,
+    "private_cpu_root": "/ssd/scxi253/sgi-tensor-control-cpu-20261001T1315Z",
+    "qualified_release": false,
+    "qualified_http": false,
+    "source_commit": "75544a17ce0019ca877f50354d95451ee089f859",
+    "private_cpu_pass": true,
+    "cpu_tests_passed": 70,
+    "gpu_skipped": 20,
+    "evidence": "evidence/v42-tensor-control-cpu/",
+    "normal_build_root": "/ssd/scxi253/sgi-flashinfer-official-build-75544a17-20261001",
+    "normal_dual90_pending": false,
+    "build_pid": 858462,
+    "wheel_gate_pid": 858475,
+    "normal_build_pass": true,
+    "normal_wheel_sha256": "2044882df7413bff1946b5eb78d291c0f6fb715c55263d5e1dd5fa6b28dc94d1",
+    "normal_wheel_bytes": 65833543,
+    "normal_package_files_verified": 10126,
+    "normal_dual90_jobs": {
+      "gpu_4090": "1646876",
+      "gpu_5090": "1646877"
+    },
+    "source_gate_pid": 910001,
+    "normal_gpu_functional_pass": true,
+    "normal_native_resource_sass_pass": true,
+    "sass_pairs_total": 352,
+    "normal_build_evidence": "evidence/v42-normal-tensor-control-wheel-build/",
+    "normal_functional_evidence": "evidence/v42-normal-tensor-control-wheel-functional/",
+    "normal_sass_evidence": "evidence/v42-normal-tensor-control-wheel-sass/"
+  },
+  "independent_pristine_normal_package": {
+    "source_commit": "85744da1a397c0c4bea1a83b8345281750eb61a9",
+    "build_root": "/ssd/scxi253/sgi-flashinfer-official-build-85744da1-20261001",
+    "build_pass": true,
+    "wheel_sha256": "2f2daa468b0342cd4d9cd4d68b96c61a8c6a6b07928c78b66f5cf8d15d8c1adc",
+    "wheel_bytes": 65818279,
+    "package_files_verified": 10121,
+    "gpu_qualified": false,
+    "builder_pid": 909999,
+    "evidence": "evidence/v42-normal-independent-pristine-wheel-build/"
+  },
+  "cross_process_prepared_handoff": {
+    "harness_commit": "6aaa0b9f99d846380344b93df80a79ea919a7223",
+    "gate_pid": 1267945,
+    "gate_root": "/ssd/scxi253/sgi-tensor-control-process-handoff-strict-gate",
+    "expected_scope": "producer plus two fresh consumers per GPU, eager/Graph1/Graph16, real confidence and v2 disk hit, eager rebind and fixed-pointer Graph input updates",
+    "state": "DUAL_FUNCTIONAL_HANDOFF_PASS",
+    "performance_qualified": false,
+    "fresh_cases_consumed": 0,
+    "old_gate_cancelled_before_dispatch": 1196013,
+    "old_gate_reason": "Static cache-miss counter did not prove actual cache hit; strict replacement asserts search_cache hit and preserved actual winner.",
+    "jobs": {
+      "gpu_4090": "1647026",
+      "gpu_5090": "1647027"
+    },
+    "independent_processes_total": 6,
+    "consumers_total": 4,
+    "evidence": "evidence/v42-public-process-handoff-complete/",
+    "graph_metadata_updates_qualified": false
+  },
+  "public_path_prequalification": {
+    "harness_commit": "c6879fbd578a165327c0e9a59f883be671ce0e6f",
+    "cpu_contract_tests_passed": 7,
+    "cases": "Only two exposed dev descriptors; no new holdouts generated",
+    "processes_per_gpu_case": {
+      "pristine": 3,
+      "training": 3,
+      "scoring": 3
+    },
+    "execution_modes": [
+      "eager_full_call",
+      "graph1_replay",
+      "graph16_replay"
+    ],
+    "training": "other two training processes only; deterministic primary rotation; require real certificates and actual v2 resource winners plus full-call gates",
+    "blocks": 24,
+    "target_window_us": 384000,
+    "minimum_window_us": 120000,
+    "held_out_oracle_never_trains": true,
+    "all_started_rows_retained": true,
+    "state": "ORIGINAL_COMPLETENESS_HOLD_TIMEOUT",
+    "qualification_authority": false,
+    "fresh_cases_consumed": 0,
+    "scope": "EXPOSED_PUBLIC_PATH_PREQUAL_2",
+    "native_conditioning_seconds": 30,
+    "unconditioned_gate_cancelled_before_dispatch": 1943718,
+    "gate_pid": 2437314,
+    "helper_root": "/ssd/scxi253/public-path-helpers-c6879fb",
+    "helper_archive_sha256": "c8cc4ecb295a78767a5a8313061bc69122e2a17e73b1acb4229376d0bcc75c93",
+    "jobs": {
+      "gpu_4090": {
+        "0": "1647198",
+        "1": "1647199"
+      },
+      "gpu_5090": {
+        "0": "1647200",
+        "1": "1647201"
+      }
+    },
+    "completion_pid": 3033512,
+    "campaign": "/ssd/scxi253/sgi-public-path-prequal-c6879fb-75544a17-20261001",
+    "runtime_budget": {
+      "observed_pristine0_minutes_range": [
+        35.37,
+        39.91
+      ],
+      "observed_train0_minutes_range": [
+        58.39,
+        70.11
+      ],
+      "requested_time_limit_hours": 10,
+      "all_four_requests_denied_by_slurm": true,
+      "actual_time_limit_hours": 8,
+      "evidence": "evidence/v42-public-path-runtime-budget/",
+      "no_new_or_resampled_windows": true
+    },
+    "terminal": true,
+    "completed_cells": 853,
+    "expected_cells": 864,
+    "missing_cells": 11,
+    "original_campaign_immutable": true,
+    "actual_terminal_states": {
+      "1647198": "COMPLETED 0:0",
+      "1647199": "TIMEOUT 0:0",
+      "1647200": "COMPLETED 0:0",
+      "1647201": "COMPLETED 0:0"
+    },
+    "original_controller_state": "PUBLIC_PATH_DEVELOPMENT_COMPLETION_HOLD",
+    "timeout_zero_exit_not_success": true,
+    "all_four_original_independent_sass_pass": true,
+    "independent_sass_kernels_per_class_per_job": 176,
+    "full_archive_evidence": "evidence/v42-public-path-original-complete-hold/",
+    "full_archive_sha256": "0b1b695d0376611f4ecc8c9774c044673f8948fa4ea3e68f9e383f2abc9842e7",
+    "full_archive_bytes": 1317298697,
+    "full_archive_members": 4617,
+    "every_archive_member_sha_verified_locally": true
+  },
+  "predispatch_control_provenance": {
+    "evidence": "evidence/v42-predispatch-controls/",
+    "raw_members": 26,
+    "archive_sha256": "3cd6159705418ef3aba752d413f6ac8495ef8cbdef03c92143ab3b62fb1986af",
+    "both_superseded_controllers_cancelled_before_dispatch": true,
+    "fresh_cases_consumed": 0,
+    "qualification_authority": false
+  },
+  "reusable_serving_eager_lease": {
+    "state": "DUAL_FUNCTIONAL_EPOCH_AND_ACTUAL_DISPATCH_PASS_REGISTRY_DRAFT",
+    "evidence": "evidence/v42-reusable-lease-cpu/",
+    "cpu_pass": 6,
+    "gpu_skipped": 2,
+    "flashinfer_commit": "75544a17ce0019ca877f50354d95451ee089f859",
+    "explicit_release_before_native_plan_or_foreign_metadata_write": true,
+    "uses_actual_public_eager_rebind": true,
+    "per_transition_source_audit_compile_or_calibration": false,
+    "actual_resource_coverage_gpu_unverified": false,
+    "resource_graph_metadata_updates_supported": false,
+    "full_http_qualified": false,
+    "qualification_authority": false,
+    "fresh_cases_consumed": 0,
+    "initial_smoke_evidence": "evidence/v42-reusable-serving-epochs-smoke/",
+    "actual_dispatch_evidence": "evidence/v42-reusable-serving-epochs-managed/",
+    "actual_dispatch_jobs": {
+      "gpu_4090": "1647598",
+      "gpu_5090": "1647599"
+    },
+    "initial_smoke_jobs": {
+      "gpu_4090": "1647490",
+      "gpu_5090": "1647491"
+    },
+    "tests_passed_per_gpu": 8,
+    "actual_post_rebind_resource_calls": 9,
+    "all_actual_resource_calls_cache_hit": true,
+    "full_output_lse_exact": true,
+    "managed_raw_cache_artifacts_persisted": true,
+    "scope": "Exposed BF16 ragged projection-stride6144 and paged1 noncausal; numerical owned eager epochs and real dispatch only.4090ragged confidence rejected and keptnative in both diagnostics.",
+    "epoch_registry_state_tests_passed": 12,
+    "epoch_registry_gpu_or_real_server_qualified": false,
+    "registry_freezes_choices_before_scoring": true,
+    "registry_metadata_rebind_once_per_key_per_epoch": true
+  },
+  "actual_serving_operator_kernel_profile": {
+    "state": "DUAL_DIAGNOSTIC_PASS",
+    "evidence": "evidence/v42-serving-kernel-profile/",
+    "jobs": {
+      "gpu_4090": "1647801",
+      "gpu_5090": "1647802"
+    },
+    "actual_dynamic_shared_memory_bytes": {
+      "native": 49152,
+      "resource": 65536
+    },
+    "full_output_lse_exact": true,
+    "exposed_single_process_per_gpu": true,
+    "ragged_suffix_has_no_kernel_gain": true,
+    "paged1_cached_prefix_event_gain_range": [
+      1.3685758411867597,
+      1.3973809768918377
+    ],
+    "profile_timing_excluded_from_qualification": true,
+    "hardware_residency_counters_collected": false,
+    "kineto_zero_resource_occupancy_estimate_is_not_a_measurement": true,
+    "qualification_authority": false,
+    "fresh_cases_consumed": 0
+  },
+  "serving_epoch_registry": {
+    "state": "DUAL_REAL_GPU_EARLY_BIND_36_CALL_REUSE_PASS",
+    "harness_commit": "6f1c8bd0dfb25d0b86a403e27b59bd0ba8770757",
+    "flashinfer_commit": "75544a17ce0019ca877f50354d95451ee089f859",
+    "jobs": {
+      "gpu_4090": "1648188",
+      "gpu_5090": "1648189"
+    },
+    "tests_per_gpu": 16,
+    "archive_sha256": "e0e2e396fa06b24a5a054d2d1f4f84a8f71ca94ec1f6826559541812e2f47cd9",
+    "evidence": "evidence/v42-epoch-registry-gpu/",
+    "actual_resource_invocations": {
+      "gpu_4090": 216,
+      "gpu_5090": 216
+    },
+    "sglang_hook_installed": false,
+    "full_http_qualified": false,
+    "graph_metadata_resource_supported": false,
+    "qualification_authority": false
+  },
+  "serving_metadata_boundary_adapter": {
+    "state": "NATIVE_FULL_MODEL_NOTIFICATION_ORDER_PASS",
+    "harness_commit": "8739e376f1a3bf7755e1f4568d34b995ce925338",
+    "job": "1648281",
+    "cpu_tests_passed": 32,
+    "full_model_layers": 36,
+    "http_tokens": 112,
+    "native_repeat_tokens_exact": true,
+    "actual_prefill_update_calls": 50,
+    "metadata_updates": 139,
+    "graph_metadata_updates": 89,
+    "evidence": "evidence/v42-native-http-metadata-boundaries/",
+    "resource_registered_geometries": 0,
+    "full_http_resource_qualified": false,
+    "qualification_authority": false
+  },
+  "full_http_preparation": {
+    "state": "PROSPECTIVE_CONTROLLER_CPU_PASS_NOT_MODEL_QUALIFIED",
+    "harness_commit": "d14c22b2f2fd8702e80fba2f0001ec12101f45bf",
+    "paracloud_cpu_passed": 180,
+    "gpu_skipped": 10,
+    "evidence": "evidence/v42-http-preparation-cpu-d14c22b",
+    "archive_sha256": "fc33604a4c1edf1bf3fd36d4629798884b46d08c60535a2e1c8205b8e0f1f9cf",
+    "complete_model_bindings": "evidence/v42-complete-model-byte-bindings/",
+    "prospective_paired_allocations": 72,
+    "models": 4,
+    "gpu_families": 2,
+    "stages": [
+      "functional",
+      "performance",
+      "parity"
+    ],
+    "maximum_inflight_allocations": 4,
+    "formal_kernel_pass_required": true,
+    "actual_http_campaign_created": false,
+    "actual_resource_full_http_run": false,
+    "full_http_qualified": false,
+    "historical_token_divergence_resolved": false,
+    "default_promotion": false
+  },
+  "public_path_5090_supplement": {
+    "state": "SUPPLEMENTAL_METRIC_PASS_NO_DUAL_QUALIFICATION_AUTHORITY",
+    "evidence": "evidence/v42-public-path-5090-supplement/",
+    "original_raw_data_unchanged": true,
+    "requirements_passed": 16,
+    "selected": 108,
+    "records": 144,
+    "selected_geomean": 1.3317373667500265,
+    "selected_worst": 1.105506540980384,
+    "native_pristine_joint_min_lcb95": 0.9927107281730666,
+    "actual_policy_pristine_joint_min_lcb95": 0.9925850923801468,
+    "float_reconstruction_differences": 36,
+    "maximum_observed_float64_ulps": 1,
+    "original_serialized_checksum_exact": true,
+    "derived_float64_max_ulps": 4,
+    "decision_gate_and_source_fields_exact": true,
+    "clock_column_fix": "clocks.current.sm [MHz]",
+    "whole_job_active_clock_population_unchanged": true,
+    "fresh_cases_consumed": 0,
+    "qualification_authority": false,
+    "default_promotion": false
+  },
+  "public_path_complete_repetition": {
+    "state": "ALL_FOUR_NEW_EXPOSED_ALLOCATION_JOBS_RUNNING",
+    "scope": "EXPOSED_PUBLIC_PATH_PREQUAL_2",
+    "only_same_two_original_exposed_cases": true,
+    "measurement_bytes_unchanged": true,
+    "contract_bytes_unchanged": true,
+    "initial_allocation_hours": 12,
+    "finite_controller_hours": 18,
+    "all_nine_phases_and_24_cells_required": true,
+    "no_missing_cell_continuation": true,
+    "no_retries": true,
+    "fresh_cases_consumed": 0,
+    "release_consumed": 0,
+    "stress_consumed": 0,
+    "qualification_authority": false,
+    "default_promotion": false,
+    "harness_commit": "0a5c735fd3b70edb9b8ec46d520a6dedb6d90c04",
+    "harness_archive_sha256": "a8d795cb41f8010df41f31fd4b764cbeaa43b4fb33187190058f5fa020ac1a99",
+    "campaign": "/ssd/scxi253/sgi-public-complete-r2-0a5c735-20261002",
+    "actual_paracloud_cpu_tests_passed": 209,
+    "gpu_skips": 10,
+    "all_original_archive_members_verified_before_initialization": true,
+    "jobs": {
+      "gpu_4090": {
+        "0": "1648991",
+        "1": "1648992"
+      },
+      "gpu_5090": {
+        "0": "1648993",
+        "1": "1649001"
+      }
+    },
+    "initial_actual_time_limit_hours": 12,
+    "dispatch_snapshot_evidence": "evidence/v42-complete-workflow-cpu-c34d5d9/dispatch-snapshot.json",
+    "updated_utc": "2026-10-02T00:12:44.724473+00:00"
+  },
+  "finite_complete_workflow": {
+    "state": "RUNNING_EXPOSED_COMPLETE_REPETITION",
+    "source": "research/selector_v4/complete_campaign.py",
+    "finite_days": 30,
+    "strict_order": [
+      "complete_same_two_exposed_public_cases",
+      "complete_archive_dual_pass",
+      "new_source_manifest_binding",
+      "dual90_smoke",
+      "dev2",
+      "new10_canary",
+      "original48_release",
+      "original12_stress",
+      "complete_kernel_archive_pass",
+      "four_full_Qwen_models_two_cards_three_HTTP_stages_72_allocations",
+      "full_HTTP_archive"
+    ],
+    "stop_all_successors_on_hold": true,
+    "no_retries_or_resampling": true,
+    "fresh_cases_generated": 0,
+    "default_promotion": false,
+    "historical_token_divergence_resolved": false,
+    "no_upstream_publication": true,
+    "workflow": "/ssd/scxi253/sgi-complete-qualification-c34d5d9-20261002",
+    "pid": 1725873,
+    "source_commit": "c34d5d902ca065e7d012180aeb9ec056b3495ea0",
+    "source_archive_sha256": "f2775523f47298eee28c6221953d9fd73704eec0b4557df8d7c3c31349ab0c61",
+    "actual_cpu_tests_passed": 214,
+    "gpu_skips": 10,
+    "source_evidence": "evidence/v42-complete-workflow-cpu-c34d5d9/",
+    "last_verified_utc": "2026-10-02T00:12:44.724473+00:00"
+  }
+}
