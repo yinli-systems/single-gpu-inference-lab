@@ -52,7 +52,7 @@ async def run(a):
             "gpu_uuid": str(torch.cuda.get_device_properties(0).uuid),
             "job": os.environ["SLURM_JOB_ID"],
             "model_binding_sha256": sha(a.model_binding),
-            "modes": list(MODES),
+            "modes": list(a.modes),
             "original_natural_failure_retained": True,
             "qualification_authority": False,
             "full_http_qualified": False,
@@ -60,7 +60,7 @@ async def run(a):
             "serving_promotion": False,
         },
     )
-    for mode in MODES:
+    for mode in a.modes:
         a.out = original_out / mode
         a.out.mkdir()
         right = "native_repeat" if mode == "ordinary_native_repeat" else "graph_diagnostic"
@@ -91,4 +91,5 @@ if __name__ == "__main__":
     parser.add_argument("--model-binding", type=Path, required=True)
     parser.add_argument("--model-id", required=True)
     parser.add_argument("--memory", type=float, required=True)
+    parser.add_argument("--modes", nargs="+", choices=MODES, default=list(MODES))
     asyncio.run(run(parser.parse_args()))

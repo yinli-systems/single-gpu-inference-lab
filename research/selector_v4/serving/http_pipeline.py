@@ -22,6 +22,7 @@ from research.selector_v4.public_qualification.pipeline import (
     save_new,
     terminal,
 )
+from research.selector_v4.serving.cccl_namespace import prepare as prepare_cccl
 from research.selector_v4.serving.http_analysis import analyze
 from research.selector_v4.serving.model_binding import verify_model
 from research.selector_v4.serving.training_session import authorize_http_training
@@ -80,6 +81,7 @@ def initialize(root, kernel, archive, model_evidence, sglang_source):
         }
     for source in (kernel / "sdk-libraries").iterdir():
         shutil.copyfile(source, root / "sdk-libraries" / source.name)
+    cccl = prepare_cccl(root / "sdk-cccl")
     binding = {
         "scope": "FULL_QWEN_PAIRED_HTTP_PROSPECTIVE",
         "kernel_campaign": str(kernel),
@@ -91,6 +93,8 @@ def initialize(root, kernel, archive, model_evidence, sglang_source):
         "helper_files": metadata["git_blob_files_sha256"],
         "sglang_source": str(sglang_source),
         "sglang_files": sglang_files,
+        "cuda13_cccl_namespace_sha256": sha(root / "sdk-cccl/binding.json"),
+        "cuda13_cccl_header_files": cccl["headers"],
         "models": models,
         "stages": list(STAGES),
         "gpus": list(GPUS),
@@ -108,6 +112,7 @@ def initialize(root, kernel, archive, model_evidence, sglang_source):
     files += [root / "harness" / n for n in binding["helper_files"]]
     files += [sglang_source / n for n in sglang_files]
     files += list((root / "models").iterdir()) + list((root / "sdk-libraries").iterdir())
+    files += [p for p in (root / "sdk-cccl").rglob("*") if p.is_file()]
     (root / "validation.sha256").write_text("".join(f"{sha(p)}  {p}\n" for p in files))
     save_new(root / "receipts/frozen-ledger.json", {"sha256": sha(root / "validation.sha256")})
     return binding

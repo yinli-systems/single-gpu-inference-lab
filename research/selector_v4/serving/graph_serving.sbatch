@@ -15,6 +15,11 @@ case "$TASK_MODULE" in
  research.selector_v4.serving.graph_serving_probe|research.selector_v4.serving.graph_parity_controls) ;;
  *) exit 64 ;;
 esac
+TASK_MODE_FLAGS=()
+if [ -n "${5:-}" ]; then
+ if [ "$TASK_MODULE" != research.selector_v4.serving.graph_parity_controls ] || [ "$5" != deterministic_observer ]; then exit 64; fi
+ TASK_MODE_FLAGS=(--modes deterministic_observer)
+fi
 TASK_ENV=/ssd/scxi253/q7b-engines-20260925T1247Z/envs/sglang312
 TASK_SOURCE=/ssd/scxi253/sgi-official-wheel-validation-75544a17-20261001/wheel-overlay
 TASK_SGLANG=/ssd/scxi253/sgi-http-ownership-current-main-3825c5a-post1/candidate
@@ -25,13 +30,17 @@ export PYTHONPATH=$TASK_ROOT/harness:$TASK_SGLANG/python:$TASK_SOURCE
 export XDG_CACHE_HOME=$TASK_ROOT/cache/xdg-$SLURM_JOB_ID
 export CPATH=/ssd/scxi253/sgi-public-complete-r2-0a5c735-20261002/sdk-libraries:$TASK_SOURCE/flashinfer/data/cccl/libcudacxx/include:$TASK_SOURCE/flashinfer/data/cccl/cub:$TASK_SOURCE/flashinfer/data/cccl/thrust
 export NVCC_PREPEND_FLAGS="-I/ssd/scxi253/sgi-public-complete-r2-0a5c735-20261002/sdk-libraries -I$TASK_SOURCE/flashinfer/data/cccl/libcudacxx/include -I$TASK_SOURCE/flashinfer/data/cccl/cub -I$TASK_SOURCE/flashinfer/data/cccl/thrust"
+if [ -d "$TASK_ROOT/sdk-cccl/cccl" ]; then
+ export CPATH=$TASK_ROOT/sdk-cccl:$CPATH
+ export NVCC_PREPEND_FLAGS="-I$TASK_ROOT/sdk-cccl $NVCC_PREPEND_FLAGS"
+fi
 finish(){ TASK_RC=$?;trap - EXIT;printf '%s\n' "$TASK_RC" > "$TASK_ROOT/receipts/exit-$SLURM_JOB_ID.txt";exit "$TASK_RC"; };trap finish EXIT
 cd "$TASK_ROOT"
 sha256sum -c validation.sha256 > "$TASK_ROOT/receipts/source-pre-$SLURM_JOB_ID.txt"
 cd "$TASK_SOURCE"
 sha256sum -c source.sha256 > "$TASK_ROOT/receipts/native-pre-$SLURM_JOB_ID.txt"
 cd "$TASK_ROOT/harness"
-srun --cpu-bind=cores "$TASK_ENV/bin/python" -m "$TASK_MODULE" --out "$TASK_ROOT/runs/$SLURM_JOB_PARTITION-$SLURM_JOB_ID" --model-binding "$TASK_ROOT/models/$TASK_MODEL.json" --model-id "$TASK_MODEL" --memory "$TASK_MEMORY"
+srun --cpu-bind=cores "$TASK_ENV/bin/python" -m "$TASK_MODULE" --out "$TASK_ROOT/runs/$SLURM_JOB_PARTITION-$SLURM_JOB_ID" --model-binding "$TASK_ROOT/models/$TASK_MODEL.json" --model-id "$TASK_MODEL" --memory "$TASK_MEMORY" "${TASK_MODE_FLAGS[@]}"
 cd "$TASK_ROOT"
 sha256sum -c validation.sha256 > "$TASK_ROOT/receipts/source-post-$SLURM_JOB_ID.txt"
 cd "$TASK_SOURCE"

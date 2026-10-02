@@ -47,13 +47,13 @@ def run(root, kernel_campaign, model_id, stage, allocation):
             sdk = root / "sdk-libraries"
             env = dict(
                 os.environ,
-                PYTHONPATH=":".join(map(str, (root / "harness", source))),
+                PYTHONPATH=":".join(map(str, (root / "harness", Path(binding["sglang_source"]) / "python", source))),
                 FLASHINFER_WORKSPACE_BASE=str(cache),
                 XDG_CACHE_HOME=str(root / "cache" / ("xdg-" + job) / phase),
                 CPATH=":".join(
-                    map(str, (sdk, cccl / "libcudacxx/include", cccl / "cub", cccl / "thrust"))
+                    map(str, (sdk, root / "sdk-cccl", cccl / "libcudacxx/include", cccl / "cub", cccl / "thrust"))
                 ),
-                NVCC_PREPEND_FLAGS=f"-I{sdk} -I{cccl / 'libcudacxx/include'} -I{cccl / 'cub'} -I{cccl / 'thrust'}",
+                NVCC_PREPEND_FLAGS=f"-I{sdk} -I{root / 'sdk-cccl'} -I{cccl / 'libcudacxx/include'} -I{cccl / 'cub'} -I{cccl / 'thrust'}",
             )
             command = [
                 sys.executable,
