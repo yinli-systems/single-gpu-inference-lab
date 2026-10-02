@@ -49,6 +49,41 @@ def native_jobs(native):
         intent = read(native / f"receipts/submit-intent-{gpu}.json")
         need(confirmed["job"] == job, "Actual confirmed Native allocation")
         need(intent["command"][-1] == "fixed_schedule_observer", "Exactly the new fixed mode")
+        successor = native / f"receipts/unscored-startup-successor-{gpu}.json"
+        if successor.exists():
+            correction = read(successor)
+            need(correction["original_job"] == job, "Original failed submission stays bound")
+            need(
+                correction["failure_before_batch_script"] is True
+                and correction["scored_requests_started"] == 0
+                and correction["gpu_measurements_started"] == 0,
+                "Only an entirely unstarted allocation has a successor",
+            )
+            _raw, fields = native_status(job)
+            need(fields[:3] == [job, "FAILED", "0:53"], "Actual unstarted Slurm signal failure")
+            for path in (
+                native / f"runs/{gpu}-{job}",
+                native / f"receipts/source-pre-{job}.txt",
+                native / f"receipts/exit-{job}.txt",
+            ):
+                need(not path.exists(), "A started measurement may never be replaced")
+            new_job = correction["successor_job"]
+            need(
+                new_job.isdigit() and new_job not in jobs.values(),
+                "One distinct confirmed successor",
+            )
+            need(
+                read(native / f"receipts/submit-confirmed-unscored-{gpu}.json")["job"] == new_job,
+                "Unambiguous unscored successor confirmation",
+            )
+            command = read(native / f"receipts/submit-intent-unscored-{gpu}.json")["command"]
+            excluded = [v for v in command if v.startswith("--exclude=")]
+            need(
+                excluded == ["--exclude=" + correction["failed_node_excluded"]]
+                and [v for v in command if not v.startswith("--exclude=")] == intent["command"],
+                "Exactly the same frozen protocol with only the failed node excluded",
+            )
+            jobs[gpu] = new_job
     return jobs
 
 
@@ -85,6 +120,12 @@ def initialize(root, source, archive, kernel, native, models, sglang):
         "native": str(native),
         "native_binding_sha256": sha(native / "binding.json"),
         "native_jobs": native_jobs(native),
+        "original_native_jobs": read(native / "receipts/jobs.json"),
+        "native_submission_files": {
+            str(p.relative_to(native)): sha(p)
+            for p in (native / "receipts").glob("*.json")
+            if p.name.startswith(("submit-", "unscored-startup-")) or p.name == "jobs.json"
+        },
         "model_evidence": str(models),
         "sglang_source": str(sglang),
         "finite_days": 30,
@@ -112,6 +153,8 @@ def verify(binding):
             sha(Path(binding[field]) / filename) == binding[field + "_binding_sha256"],
             "Binding changed",
         )
+    for name, digest in binding["native_submission_files"].items():
+        need(sha(Path(binding["native"]) / name) == digest, "Frozen real Native submission changed")
 
 
 def native_status(job):
@@ -197,7 +240,11 @@ def run(root):
             need(time.monotonic() < deadline, "Finite Native preflight wait")
             if len(statuses) != 2:
                 time.sleep(15)
-        state["native_archive"] = archive_native(native, root / "native-archive", statuses)[
+        all_statuses = dict(statuses)
+        for gpu, job in binding["original_native_jobs"].items():
+            if job != binding["native_jobs"][gpu]:
+                all_statuses["unstarted-original-" + gpu] = native_status(job)[0]
+        state["native_archive"] = archive_native(native, root / "native-archive", all_statuses)[
             "archive_sha256"
         ]
         need(

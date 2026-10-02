@@ -45,6 +45,7 @@ def test_partial_or_relabelled_preflight_cannot_unlock_http(fault):
 @pytest.mark.parametrize("failure", ["native-parity", "kernel-hold"])
 def test_failed_stage_stops_every_resource_http_successor(tmp_path, monkeypatch, failure):
     import json
+
     from research.selector_v4 import continue_graph_http as c
 
     root, native, kernel = (tmp_path / name for name in ("continuation", "native", "kernel"))
@@ -58,6 +59,7 @@ def test_failed_stage_stops_every_resource_http_successor(tmp_path, monkeypatch,
                 "native": str(native),
                 "kernel": str(kernel),
                 "native_jobs": {"gpu_4090": "11", "gpu_5090": "12"},
+                "original_native_jobs": {"gpu_4090": "11", "gpu_5090": "12"},
             }
         )
     )
@@ -97,3 +99,59 @@ def test_failed_stage_stops_every_resource_http_successor(tmp_path, monkeypatch,
     assert not state["historical_token_divergence_resolved"]
     assert state["error"]["type"] == "ValueError"
     assert (root / "controller-start.json").is_file()
+
+
+@pytest.mark.parametrize("fault", [None, "started", "changed-protocol", "scored"])
+def test_only_proven_unstarted_submission_may_have_one_successor(tmp_path, monkeypatch, fault):
+    import json
+
+    from research.selector_v4 import continue_graph_http as c
+
+    native = tmp_path / "native"
+    receipts = native / "receipts"
+    receipts.mkdir(parents=True)
+
+    def write(name, obj):
+        (receipts / name).write_text(json.dumps(obj))
+
+    write("jobs.json", {"gpu_4090": "11", "gpu_5090": "12"})
+    old = [
+        "sbatch",
+        "--partition=gpu_4090",
+        "script",
+        "native",
+        "model",
+        "0.76",
+        "module",
+        "fixed_schedule_observer",
+    ]
+    for gpu, job in (("gpu_4090", "11"), ("gpu_5090", "12")):
+        write(f"submit-confirmed-{gpu}.json", {"job": job})
+        write(f"submit-intent-{gpu}.json", {"command": old})
+    correction = {
+        "original_job": "11",
+        "successor_job": "13",
+        "failure_before_batch_script": True,
+        "scored_requests_started": 0,
+        "gpu_measurements_started": 0,
+        "failed_node_excluded": "badnode",
+    }
+    if fault == "scored":
+        correction["scored_requests_started"] = 1
+    write("unscored-startup-successor-gpu_4090.json", correction)
+    write("submit-confirmed-unscored-gpu_4090.json", {"job": "13"})
+    new = [old[0], "--exclude=badnode", *old[1:]]
+    if fault == "changed-protocol":
+        new[-3] = "0.50"
+    write("submit-intent-unscored-gpu_4090.json", {"command": new})
+    if fault == "started":
+        (receipts / "source-pre-11.txt").write_text("even an empty precheck is a started script")
+    monkeypatch.setattr(
+        c, "native_status", lambda job: ("failure", [job, "FAILED", "0:53", "00:00"])
+    )
+    if fault is None:
+        assert c.native_jobs(native) == {"gpu_4090": "13", "gpu_5090": "12"}
+        assert json.loads((receipts / "jobs.json").read_text())["gpu_4090"] == "11"
+    else:
+        with pytest.raises(ValueError):
+            c.native_jobs(native)
