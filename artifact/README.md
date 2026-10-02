@@ -51,3 +51,26 @@ artifact/.venv/bin/python artifact/verify_reproduction.py
 ```
 
 Two local builds are byte-identical. Across macOS Python 3.9.6 and Linux Python 3.12.13, all six SVGs are byte-identical and all six PNGs have identical decoded pixels. Of 1,604 floating values, 40 differ by at most 2.220446049250313e-16; discrete values match exactly. PNG compressed bytes may differ across platform encoders. The remote receipt counts 18 hashed outputs; the manifest itself is the nineteenth generated file.
+
+## Separate real Native Graph HTTP artifact, 2026-10-02
+
+The earlier six-figure reproduction remains bound to its historical inputs. A
+new separately measured Native HTTP/Graph dataset is now available:
+[`native-graph-http-20261002-r2/index.html`](native-graph-http-20261002-r2/index.html).
+Run `make reproduce-graph-http GRAPH_HTTP_OUT=artifact/graph-http-repeat` to verify
+all499 raw archive members and reproduce its CSV, full JSON, 30-point SLO grids
+and HTML page. It uses the existing isolated artifact environment; bootstrap that
+environment with `make reproduce-v42-paper` if needed. Outputs are never overwritten.
+
+These are complete Qwen2.5-Coder-1.5B BF16 fixed-workload Native observations from
+one allocation per RTX4090/RTX5090, with a separate instrumented Graph observer.
+They supply no Resource gain or independent-process confidence interval. Actual
+Graph launches and changed GPU payloads were independently verified on both cards;
+RTX5090's first Native/observer natural token comparison remains HOLD (9/128
+requests,900/7,936 token positions differed). Instrumented timings are invalid.
+Ordinary Native restart controls subsequently passed both cards. The full
+four-model Resource HTTP/SLO qualification is still pending its formal prerequisites.
+
+Detailed current scope and source-bound advancement rules:
+[`GRAPH_SERVING_PROTOCOL.md`](../research/selector_v4/serving/GRAPH_SERVING_PROTOCOL.md).
+Historical2/432 divergence and both disabled promotion switches remain unchanged.
