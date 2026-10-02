@@ -13,8 +13,11 @@ from pathlib import Path
 
 
 def sha(path):
+    value = hashlib.sha256()
     with path.open('rb') as stream:
-        return hashlib.file_digest(stream, 'sha256').hexdigest()
+        for block in iter(lambda:stream.read(1 << 20),b''):
+            value.update(block)
+    return value.hexdigest()
 
 
 def save(path, value):
@@ -33,19 +36,24 @@ def validate(root, job, gpu):
         testcases = ET.parse(tests).findall('.//testcase')
         if len(testcases) != 24 or any(c.find(tag) is not None for c in testcases for tag in ('failure','error','skipped')):
             failures.append('incomplete_or_failed_24_case_population')
-    if len(cells) != 16:
+    expected = {f'{dtype}-{layout}-{packing}-graph{count}' for dtype in ('float16','bfloat16')
+                for layout in ('NHD','HND') for packing in ('packed','tuple') for count in (1,16)}
+    if {p.parent.name for p in cells} != expected:
         failures.append('incomplete_16_gpu_cells')
     for path in cells:
         result = json.loads(path.read_text())
+        if result.get('cell') != path.parent.name or gpu[4:] not in result.get('gpu_name',''):
+            failures.append(path.parent.name+':population_or_gpu_binding')
         if not all(result.get(k) is True for k in ('pass_functional','stale_graph_never_replayed',
                    'unchanged_capture_across_three_metadata_epochs','unannounced_inference_tensor_write_detected',
                    'changed_ordered_geometry_native')):
             failures.append(path.parent.name+':functional_contract')
         if len(result.get('epochs', [])) != 3:
             failures.append(path.parent.name+':incomplete_epochs')
-        count = result.get('probe',{}).get('graph_replays_per_call')
+        count = result.get('graph_replays_per_call')
         if count not in (1,16):
             failures.append(path.parent.name+':graph_count')
+            continue
         for index,row in enumerate(result.get('epochs', []),1):
             trace_path = path.parent/f'epoch{index}-trace.json'
             if not trace_path.exists() or sha(trace_path) != row['trace_sha256']:
@@ -114,10 +122,14 @@ def run(root, source):
                 records[job] = {'state':rows[0][1],'exit':rows[0][2]}
         if len(records)==2 and all(r['state'].split()[0] not in ('PENDING','RUNNING','CONFIGURING','COMPLETING','SUSPENDED') for r in records.values()):
             break
-        if time.monotonic()>deadline:
+        if time.monotonic()>deadline and not state.get('deadline_owned_jobs_cancelled'):
             for job in state['jobs'].values():
                 subprocess.run(['scancel',job],capture_output=True,text=True,check=False)
             state['deadline_owned_jobs_cancelled'] = True
+        if time.monotonic()>deadline+1200:
+            state.update(state='TERMINAL_STATE_UNKNOWN_ARCHIVE_BLOCKED',terminal=True,slurm=records)
+            save(receipt_path,state)
+            return
         state['slurm'] = records
         save(receipt_path,state)
         time.sleep(30)

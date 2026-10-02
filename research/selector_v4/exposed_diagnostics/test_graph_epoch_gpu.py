@@ -46,7 +46,7 @@ def test_physical_page_epochs_preserve_one_capture(dtype_name, layout, packed, r
     name = f'{dtype_name}-{layout}-{"packed" if packed else "tuple"}-graph{replays}'
     cell = root / name
     cell.mkdir()
-    record = {"cell": name, "epochs": [], "diagnostic_only": True,
+    record = {"cell": name, "epochs": [], "graph_replays_per_call": replays, "diagnostic_only": True,
               "qualification_authority": False, "default_promotion": False,
               "serving_promotion": False, "historical_token_divergence_resolved": False}
 
