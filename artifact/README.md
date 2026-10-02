@@ -41,3 +41,13 @@ The structural-feature logistic prior is a training-only advisory prototype, bou
 The already dispatched immutable complete qualification keeps its original three-process protocol. A new five-process, 250–500 ms, 24–32-block protocol would be a separately declared experiment, and cannot be substituted into that run. GraphStep/GraphServing, Blackwell 32/128 connections, datacenter GPUs, real serving trace coverage, constrained-policy baselines and SLO Pareto comparisons require new measured evidence. The original token divergence requires the original failing histories/states or a faithful reproduction; new passing histories cannot close it.
 
 Method references: [FlashInfer Autotuner v2](https://flashinfer.ai/2026/09/22/autotuner-v2.html) describes fresh timing against frozen candidate choices; [NVIDIA Graph performance guidance](https://docs.nvidia.com/dl-cuda-graph/troubleshooting/performance-issues.html) describes device-connection tuning. These motivate future comparisons and are not substituted for this project's measurements.
+
+## Retained independent audit
+
+The local persisted reproduction and complete Paracloud CPU archive are included in `persisted-reproduction/`. Verify all remote archive members, extracted bytes, source hashes, output hashes, strict discrete results, float comparisons and decoded figure pixels:
+
+```sh
+artifact/.venv/bin/python artifact/verify_reproduction.py
+```
+
+Two local builds are byte-identical. Across macOS Python 3.9.6 and Linux Python 3.12.13, all six SVGs are byte-identical and all six PNGs have identical decoded pixels. Of 1,604 floating values, 40 differ by at most 2.220446049250313e-16; discrete values match exactly. PNG compressed bytes may differ across platform encoders. The remote receipt counts 18 hashed outputs; the manifest itself is the nineteenth generated file.
