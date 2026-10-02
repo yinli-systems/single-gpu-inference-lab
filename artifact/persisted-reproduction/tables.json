@@ -1,0 +1,447 @@
+{
+  "table1_correctness": {
+    "graph_metadata_diagnostic": {
+      "pass_fixed_capture_metadata_minimal_driver": true,
+      "scope": "Diagnostic only; fixed exposed geometry and private captured metadata/workspaces",
+      "harness_commit": "c3f5a8cba2b382b151a9908477bf3728f60ffea7",
+      "verified_archive_members": 1994,
+      "archive_sha256": "16e72deb189876f23f0a0d992e132c50c945334c91e84fc06776cd97b0cb070b",
+      "archive_bytes": 87570053,
+      "cards": {
+        "gpu_4090": {
+          "job": "1649088",
+          "gpu_cells": 16,
+          "metadata_epochs": 48,
+          "pytest_passed": 24,
+          "independent_sass_pairs": 176,
+          "actual_resource_attention_launches": 1632,
+          "copied_bytes_per_epoch_observed": [
+            151245084
+          ]
+        },
+        "gpu_5090": {
+          "job": "1649089",
+          "gpu_cells": 16,
+          "metadata_epochs": 48,
+          "pytest_passed": 24,
+          "independent_sass_pairs": 176,
+          "actual_resource_attention_launches": 1632,
+          "copied_bytes_per_epoch_observed": [
+            151245084
+          ]
+        }
+      },
+      "total_gpu_cells": 32,
+      "total_metadata_epochs": 96,
+      "actual_traced_resource_attention_launches": 3264,
+      "actual_shared_memory_bytes": 65536,
+      "full_http_qualified": false,
+      "resource_graph_serving_qualified": false,
+      "fresh_cases_consumed": 0,
+      "qualification_authority": false,
+      "default_promotion": false,
+      "serving_promotion": false,
+      "original_canary_verdict": "HOLD",
+      "historical_token_divergence_resolved": false
+    },
+    "historical_parity": {
+      "complete": true,
+      "job": 1640986,
+      "cases_sha256": "1b90c1171c8f2d0a3762c00cace4875103ee3bcad969ba2296a182b4ed564b06",
+      "diagnostic_only": true,
+      "performance_claim": false,
+      "targets": [
+        {
+          "id": "decode-11",
+          "output_index_zero_based": 74,
+          "historical_tokens": [
+            315,
+            304
+          ],
+          "natural_tokens": {
+            "pristine-0": 304,
+            "cap-0": 304,
+            "cap-1": 304,
+            "pristine-1": 304
+          },
+          "historical_divergence_reproduced": false,
+          "matched_pair_count": 4,
+          "first_state_attributed": false,
+          "pairs": [
+            {
+              "matched_execution": true,
+              "logical_histories_equal": true,
+              "physical_page_tables_equal": true,
+              "logical_kv_equal": true,
+              "shadow_tensors_equal": true,
+              "raw_logits": {
+                "shape_equal": true,
+                "dtype_equal": true,
+                "equal": true,
+                "max_abs": 0.0,
+                "different_elements": 0
+              },
+              "first_observed_difference": null,
+              "cache_difference_count": 0,
+              "shadow_difference_count": 0,
+              "pristine": "pristine-0",
+              "cap": "cap-0",
+              "pristine_token": 304,
+              "cap_token": 304
+            },
+            {
+              "matched_execution": true,
+              "logical_histories_equal": true,
+              "physical_page_tables_equal": true,
+              "logical_kv_equal": true,
+              "shadow_tensors_equal": true,
+              "raw_logits": {
+                "shape_equal": true,
+                "dtype_equal": true,
+                "equal": true,
+                "max_abs": 0.0,
+                "different_elements": 0
+              },
+              "first_observed_difference": null,
+              "cache_difference_count": 0,
+              "shadow_difference_count": 0,
+              "pristine": "pristine-0",
+              "cap": "cap-1",
+              "pristine_token": 304,
+              "cap_token": 304
+            },
+            {
+              "matched_execution": true,
+              "logical_histories_equal": true,
+              "physical_page_tables_equal": true,
+              "logical_kv_equal": true,
+              "shadow_tensors_equal": true,
+              "raw_logits": {
+                "shape_equal": true,
+                "dtype_equal": true,
+                "equal": true,
+                "max_abs": 0.0,
+                "different_elements": 0
+              },
+              "first_observed_difference": null,
+              "cache_difference_count": 0,
+              "shadow_difference_count": 0,
+              "pristine": "pristine-1",
+              "cap": "cap-0",
+              "pristine_token": 304,
+              "cap_token": 304
+            },
+            {
+              "matched_execution": true,
+              "logical_histories_equal": true,
+              "physical_page_tables_equal": true,
+              "logical_kv_equal": true,
+              "shadow_tensors_equal": true,
+              "raw_logits": {
+                "shape_equal": true,
+                "dtype_equal": true,
+                "equal": true,
+                "max_abs": 0.0,
+                "different_elements": 0
+              },
+              "first_observed_difference": null,
+              "cache_difference_count": 0,
+              "shadow_difference_count": 0,
+              "pristine": "pristine-1",
+              "cap": "cap-1",
+              "pristine_token": 304,
+              "cap_token": 304
+            }
+          ]
+        },
+        {
+          "id": "decode-13",
+          "output_index_zero_based": 114,
+          "historical_tokens": [
+            30280,
+            785
+          ],
+          "natural_tokens": {
+            "pristine-0": 785,
+            "cap-0": 785,
+            "cap-1": 785,
+            "pristine-1": 785
+          },
+          "historical_divergence_reproduced": false,
+          "matched_pair_count": 4,
+          "first_state_attributed": false,
+          "pairs": [
+            {
+              "matched_execution": true,
+              "logical_histories_equal": true,
+              "physical_page_tables_equal": true,
+              "logical_kv_equal": true,
+              "shadow_tensors_equal": true,
+              "raw_logits": {
+                "shape_equal": true,
+                "dtype_equal": true,
+                "equal": true,
+                "max_abs": 0.0,
+                "different_elements": 0
+              },
+              "first_observed_difference": null,
+              "cache_difference_count": 0,
+              "shadow_difference_count": 0,
+              "pristine": "pristine-0",
+              "cap": "cap-0",
+              "pristine_token": 785,
+              "cap_token": 785
+            },
+            {
+              "matched_execution": true,
+              "logical_histories_equal": true,
+              "physical_page_tables_equal": true,
+              "logical_kv_equal": true,
+              "shadow_tensors_equal": true,
+              "raw_logits": {
+                "shape_equal": true,
+                "dtype_equal": true,
+                "equal": true,
+                "max_abs": 0.0,
+                "different_elements": 0
+              },
+              "first_observed_difference": null,
+              "cache_difference_count": 0,
+              "shadow_difference_count": 0,
+              "pristine": "pristine-0",
+              "cap": "cap-1",
+              "pristine_token": 785,
+              "cap_token": 785
+            },
+            {
+              "matched_execution": true,
+              "logical_histories_equal": true,
+              "physical_page_tables_equal": true,
+              "logical_kv_equal": true,
+              "shadow_tensors_equal": true,
+              "raw_logits": {
+                "shape_equal": true,
+                "dtype_equal": true,
+                "equal": true,
+                "max_abs": 0.0,
+                "different_elements": 0
+              },
+              "first_observed_difference": null,
+              "cache_difference_count": 0,
+              "shadow_difference_count": 0,
+              "pristine": "pristine-1",
+              "cap": "cap-0",
+              "pristine_token": 785,
+              "cap_token": 785
+            },
+            {
+              "matched_execution": true,
+              "logical_histories_equal": true,
+              "physical_page_tables_equal": true,
+              "logical_kv_equal": true,
+              "shadow_tensors_equal": true,
+              "raw_logits": {
+                "shape_equal": true,
+                "dtype_equal": true,
+                "equal": true,
+                "max_abs": 0.0,
+                "different_elements": 0
+              },
+              "first_observed_difference": null,
+              "cache_difference_count": 0,
+              "shadow_difference_count": 0,
+              "pristine": "pristine-1",
+              "cap": "cap-1",
+              "pristine_token": 785,
+              "cap_token": 785
+            }
+          ]
+        }
+      ],
+      "original_failure_reproduced": false,
+      "first_state_attributed": false,
+      "serving_promoted": false,
+      "default_promoted": false
+    }
+  },
+  "table2_kernel": {
+    "v411_4090": {
+      "fold_records": 144,
+      "selected_records": 131,
+      "coverage": 0.9097222222222222,
+      "selected_geomean": 1.387584906839721,
+      "selected_worst": 1.3201906121938196,
+      "selected_block_worst": 1.286006612290989,
+      "selected_joint_min_lcb95": 1.3153403759764133,
+      "policy_geomean": 1.3471522774553404,
+      "policy_worst": 1.0,
+      "by_execution_mode": {
+        "eager_full_call": {
+          "count": 39,
+          "geomean": 1.3560537291138581,
+          "worst": 1.3201906121938196
+        },
+        "graph1_replay": {
+          "count": 44,
+          "geomean": 1.400134561008727,
+          "worst": 1.3742903892604825
+        },
+        "graph16_replay": {
+          "count": 48,
+          "geomean": 1.402123049159815,
+          "worst": 1.3743503512037996
+        }
+      },
+      "selected_layouts": [
+        "paged",
+        "ragged"
+      ],
+      "selected_dtypes": [
+        "bfloat16",
+        "float16"
+      ],
+      "native_overlay_geomean": 0.9987211625800273,
+      "native_overlay_worst": 0.9958785433620769,
+      "native_overlay_block_worst": 0.9599264046412852,
+      "native_overlay_joint_min_lcb95": 0.9927031583818556
+    },
+    "v411_5090": {
+      "fold_records": 144,
+      "selected_records": 108,
+      "coverage": 0.75,
+      "selected_geomean": 1.4000256057401848,
+      "selected_worst": 1.307094037984549,
+      "selected_block_worst": 1.2951027183539618,
+      "selected_joint_min_lcb95": 1.3052025342028248,
+      "policy_geomean": 1.287069456228467,
+      "policy_worst": 1.0,
+      "by_execution_mode": {
+        "eager_full_call": {
+          "count": 36,
+          "geomean": 1.3781584823280393,
+          "worst": 1.307094037984549
+        },
+        "graph1_replay": {
+          "count": 36,
+          "geomean": 1.410855513425514,
+          "worst": 1.3439980378523468
+        },
+        "graph16_replay": {
+          "count": 36,
+          "geomean": 1.4113223988336172,
+          "worst": 1.344422302642488
+        }
+      },
+      "selected_layouts": [
+        "paged",
+        "ragged"
+      ],
+      "selected_dtypes": [
+        "bfloat16",
+        "float16"
+      ],
+      "native_overlay_geomean": 0.999169612760455,
+      "native_overlay_worst": 0.9949109377110048,
+      "native_overlay_block_worst": 0.9783673415913128,
+      "native_overlay_joint_min_lcb95": 0.9889796871742721
+    },
+    "public5090_supplement": {
+      "records": 144,
+      "selected": 108,
+      "coverage": 0.75,
+      "selected_geomean": 1.3317373667500265,
+      "selected_worst": 1.105506540980384,
+      "selected_block_worst": 1.0987988322308504,
+      "selected_joint_min_lcb95": 1.1042798776353413,
+      "whole_policy_worst": 0.9996260262913025,
+      "native_pristine_worst": 0.992640205697556,
+      "native_pristine_joint_min_lcb95": 0.9927107281730666,
+      "actual_policy_pristine_worst": 0.9924836128613628,
+      "actual_policy_pristine_joint_min_lcb95": 0.9925850923801468,
+      "regret": {
+        "definition": "chosen latency / available held-out oracle latency - 1; oracle never trains",
+        "p50": 0.0,
+        "p90": 0.00014073623236126058,
+        "p99": 0.00042468246096653167,
+        "worst": 0.0005731607183139253,
+        "above_one_percent_count": 0
+      }
+    },
+    "regret_extensions": {
+      "available_arm_excess": {
+        "definition": "Independent policy latency / minimum of measured Native, managed-oracle and policy arm means - 1; includes policy duplicate to reproduce the existing nonnegative excess definition",
+        "units": "fraction; percent = fraction * 100",
+        "count": 144,
+        "median": 0.0,
+        "mean": 4.009037767342066e-05,
+        "p90": 0.00014073623236126058,
+        "p95": 0.0002456291699287736,
+        "p99": 0.00042468246096653167,
+        "worst": 0.0005731607183139253,
+        "negative_observation_count": 0,
+        "above_0_5_percent_count": 0,
+        "above_1_percent_count": 0,
+        "above_5_percent_count": 0,
+        "population_scope": "Descriptive fixed workload/fold population, not IID independent trials"
+      },
+      "signed_independent_measurement_regret": {
+        "definition": "Independent policy latency / minimum of Native and managed-oracle arm means - 1; negative differences retained as measurement noise",
+        "units": "fraction; percent = fraction * 100",
+        "count": 144,
+        "median": -1.6164781154182073e-06,
+        "mean": 4.641583392113611e-06,
+        "p90": 0.00014073623236126058,
+        "p95": 0.0002456291699287736,
+        "p99": 0.00042468246096653167,
+        "worst": 0.0005731607183139253,
+        "negative_observation_count": 76,
+        "above_0_5_percent_count": 0,
+        "above_1_percent_count": 0,
+        "above_5_percent_count": 0,
+        "population_scope": "Descriptive fixed workload/fold population, not IID independent trials"
+      },
+      "chosen_label_oracle_lookup_regret": {
+        "definition": "Choose the Native/oracle label frozen before scoring; score using the same independent oracle table, excludes policy dispatch cost",
+        "units": "fraction; percent = fraction * 100",
+        "count": 144,
+        "median": 0.0,
+        "mean": 2.936780088491939e-06,
+        "p90": 0.0,
+        "p95": 3.886255753526847e-06,
+        "p99": 7.838543939657101e-05,
+        "worst": 0.00021626634804827738,
+        "negative_observation_count": 0,
+        "above_0_5_percent_count": 0,
+        "above_1_percent_count": 0,
+        "above_5_percent_count": 0,
+        "population_scope": "Descriptive fixed workload/fold population, not IID independent trials"
+      },
+      "measured_native_cap_lookup_regret": {
+        "definition": "Same independent label lookup but restricted to certified measured Native+Resource candidate pools",
+        "units": "fraction; percent = fraction * 100",
+        "count": 108,
+        "median": 0.0,
+        "mean": 0.0,
+        "p90": 0.0,
+        "p95": 0.0,
+        "p99": 0.0,
+        "worst": 0.0,
+        "negative_observation_count": 0,
+        "above_0_5_percent_count": 0,
+        "above_1_percent_count": 0,
+        "above_5_percent_count": 0,
+        "population_scope": "Descriptive fixed workload/fold population, not IID independent trials"
+      }
+    }
+  },
+  "table3_slo": {
+    "status": "NOT_QUALIFIED_NOT_IMPUTED",
+    "request_per_s": null,
+    "input_tok_per_s": null,
+    "output_tok_per_s": null,
+    "ttft_percentiles": null,
+    "tpot_percentiles": null,
+    "itl": null,
+    "strict_slo_goodput": null
+  }
+}
