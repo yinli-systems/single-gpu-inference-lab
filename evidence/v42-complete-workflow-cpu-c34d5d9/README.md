@@ -1,0 +1,3 @@
+# Actual finite qualification workflow CPU preparation
+
+Immutablec34d5d9 source:214PASS/10GPUskip,16.90s on actual Paracloud CPU/PyTorch/normal candidate FlashInfer environment with CUDA invisible. All852 committed source blobs, complete source archive, original XML/log/exit, workflow frozen binding and PID are retained and locally SHA-verified. Includes real reviewed SGLang backend AST checks and strict stage-HOLD/no-successor/uncertain-submission regressions. No GPU/model qualification follows from these CPU checks. Workflow1725873 has started the independently frozen0a5c735 complete exposed repetition; only later actual archiveddualPASS may generate the newcanary and start formal stages. DefaultsOFF/historyunresolved.
