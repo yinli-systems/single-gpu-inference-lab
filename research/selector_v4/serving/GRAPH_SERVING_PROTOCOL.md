@@ -94,6 +94,15 @@ and retains raw logs, every response/error, decisions, profiles and disassembly.
 Even an experimental HTTP PASS leaves default/serving promotion OFF and the
 original2/432 divergence unresolved.
 
+The 72-allocation HTTP protocol permits Resource only in eager execution;
+`graph_serving_audit.correlated_decode` rejects a Resource kernel with a nonzero
+graph ID. Passing this protocol therefore does not qualify Resource inside a
+captured SGLang graph. That integration needs its own frozen source, actual
+metadata-load boundary, changing GPU input epochs, unchanged graph/buffer
+identities, exact outputs, correlated Resource graph launches and stale-epoch
+rejection. Fixed-driver Resource evidence and Native serving evidence cannot
+jointly substitute for those missing measurements.
+
 The canonical descriptive first-run page is
 [`artifact/native-graph-http-20261002-r2/index.html`](../../../artifact/native-graph-http-20261002-r2/index.html).
 Its generator independently verifies all499 original archive members and

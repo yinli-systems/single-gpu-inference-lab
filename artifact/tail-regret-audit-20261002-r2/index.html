@@ -1,0 +1,13 @@
+<!doctype html><meta charset="utf-8"><title>4090 tail regret evidence audit</title>
+<style>body{font:17px/1.6 system-ui;max-width:1100px;margin:48px auto;padding:0 24px;color:#162532}table{border-collapse:collapse;width:100%}td,th{padding:12px;border-bottom:1px solid #ccd6dd;text-align:left}code{background:#eef2f5}a{color:#145ea8}</style>
+<h1>4090 tail regret：原始证据归因</h1>
+<p>288条双卡记录全部纳入；原始归档与所用文件SHA256核验。没有新GPU测量、重试、删窗口或更改冻结策略。</p>
+<p>三个超过1%的记录全部为eager_full_call。直接触发链为：训练证书Native重复控制区间超出1.005 → 证书拒绝 → managed Resource资格缺失 → 两进程选择规则回退Native。收益检查本身通过。</p>
+<table><tr><th>Case</th><th>Dtype</th><th>Rep</th><th>Available-arm regret</th><th>Choice</th><th>Failed gates</th></tr><tr><td>0</td><td>bfloat16</td><td>1</td><td>15.6792%</td><td>native</td><td>real_prepared_certificates, actual_managed_resource_winners</td></tr><tr><td>0</td><td>float16</td><td>0</td><td>15.5764%</td><td>native</td><td>real_prepared_certificates, actual_managed_resource_winners</td></tr><tr><td>1</td><td>bfloat16</td><td>1</td><td>13.7750%</td><td>native</td><td>real_prepared_certificates, actual_managed_resource_winners</td></tr></table>
+<p>这些来自两个已暴露case，是三个评分进程记录，并非三个独立新case。Native回退满足本轮既定安全门槛；不能据此声称生产安全已证明。</p>
+<p>全部候选并非每次都可用。Resource未获得证书时，oracle臂也可能执行Native；低available-arm regret不能证明全候选最优。</p>
+<h2>后续独立开发协议</h2><p>先研究证书测量的稳定性：在证书采样之前执行固定、预声明的Native条件化，并记录逐窗口控制漂移与遥测。所有32个证书块保留，控制区间门槛仍为[1/1.005, 1.005]，每次只有一次证书判决，失败保持失败。该方向只是待测假设；既有30秒条件化发生在后续评分前，不能替代证书前条件化。新协议应单独冻结，不能改写当前v4.3测量。</p>
+<p>更强P99目标必须先明确候选覆盖与统计单位；缺失Resource候选应标记证据不足，不能记为零遗憾。当前报告不产生可执行证书，不降低门槛，不利用held-out oracle重选。</p>
+<p>物理原因仍未确定；没有证明冷启动、时钟、温度或调度中的任何一个是根因。完整Resource SGLang GraphServing及HTTP资格仍待完成；历史2/432与首次普通并发差异仍未闭合。</p>
+<p>现有72次HTTP协议只允许eager Resource与Native捕获图共存，明确拒绝captured Resource kernel。该流程即使通过，也不能关闭真实Resource GraphServing缺口；后者需要独立集成、冻结和逐次图重放证明。</p>
+<p><a href="report.json">完整逐记录数据、原始路径和输入哈希</a></p>
