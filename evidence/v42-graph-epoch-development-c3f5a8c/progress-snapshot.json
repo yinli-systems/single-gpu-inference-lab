@@ -1,0 +1,68 @@
+{
+  "utc": "2026-10-02T01:36:36.809114+00:00",
+  "controllers": {
+    "/ssd/scxi253/sgi-complete-qualification-c34d5d9-20261002/controller.json": {
+      "state": "EXPOSED_COMPLETE_REPETITION",
+      "terminal": false,
+      "stages": {},
+      "default_promotion": false,
+      "serving_promotion": false,
+      "historical_token_divergence_resolved": false,
+      "full_http_qualified": false,
+      "updated_utc": "2026-10-02T00:07:51.940074+00:00"
+    },
+    "/ssd/scxi253/sgi-public-complete-r2-0a5c735-20261002/receipts/controller.json": {
+      "state": "WAIT_ALL_FOUR_COMPLETE_EXPOSED_JOBS",
+      "terminal": false,
+      "fresh_cases_consumed": 0,
+      "qualification_authority": false,
+      "default_promotion": false,
+      "serving_promotion": false,
+      "full_http_qualified": false,
+      "original_campaign_remains_hold": true,
+      "jobs": {
+        "gpu_4090": {
+          "0": "1648991",
+          "1": "1648992"
+        },
+        "gpu_5090": {
+          "0": "1648993",
+          "1": "1649001"
+        }
+      },
+      "analyses": {},
+      "updated_utc": "2026-10-02T00:10:55.427723+00:00"
+    },
+    "/ssd/scxi253/sgi-graph-epochs-c3f5a8c-20261002/receipts/controller.json": {
+      "state": "WAIT_ALL_TWO_JOBS_TERMINAL",
+      "terminal": false,
+      "jobs": {
+        "gpu_4090": "1649088",
+        "gpu_5090": "1649089"
+      },
+      "qualification_authority": false,
+      "default_promotion": false,
+      "serving_promotion": false,
+      "historical_token_divergence_resolved": false,
+      "slurm": {
+        "1649088": {
+          "state": "RUNNING",
+          "exit": "0:0"
+        },
+        "1649089": {
+          "state": "RUNNING",
+          "exit": "0:0"
+        }
+      }
+    }
+  },
+  "diagnostic_run_directories": [],
+  "diagnostic_logs": {
+    "tests-1649088.log": "",
+    "tests-1649089.log": ""
+  },
+  "controller_process_checks": {
+    "/ssd/scxi253/sgi-complete-qualification-c34d5d9-20261002": "1725873    01:28:47 /ssd/scxi253/q7b-engines-20260925T1247Z/envs/sglang312/bin/python -m research.selector_v4.complete_campaign /ssd/scxi253/sgi-complete-qualification-c34d5d9-20261002\n",
+    "/ssd/scxi253/sgi-graph-epochs-c3f5a8c-20261002": "3514328       01:24 /ssd/scxi253/q7b-engines-20260925T1247Z/envs/sglang312/bin/python /ssd/scxi253/sgi-graph-epochs-c3f5a8c-20261002/harness/research/selector_v4/exposed_diagnostics/graph_epoch_controller.py /ssd/scxi253/sgi-graph-epochs-c3f5a8c-20261002 /ssd/scxi253/sgi-official-wheel-validation-75544a17-20261001/wheel-overlay\n"
+  }
+}

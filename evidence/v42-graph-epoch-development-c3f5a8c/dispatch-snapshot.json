@@ -1,0 +1,35 @@
+{
+  "utc": "2026-10-02T01:35:45.706897+00:00",
+  "diagnostic_controller": {
+    "state": "WAIT_ALL_TWO_JOBS_TERMINAL",
+    "terminal": false,
+    "jobs": {
+      "gpu_4090": "1649088",
+      "gpu_5090": "1649089"
+    },
+    "qualification_authority": false,
+    "default_promotion": false,
+    "serving_promotion": false,
+    "historical_token_divergence_resolved": false,
+    "slurm": {
+      "1649088": {
+        "state": "RUNNING",
+        "exit": "0:0"
+      },
+      "1649089": {
+        "state": "RUNNING",
+        "exit": "0:0"
+      }
+    }
+  },
+  "diagnostic_controller_pid": "3514328",
+  "squeue": "1649088|RUNNING|0:27|1:00:00|wqd10nba07g8\n1648992|RUNNING|1:25:57|12:00:00|wqd10naf06g1\n1648991|RUNNING|1:26:27|12:00:00|wqd10naf05g5\n1649089|RUNNING|0:32|1:00:00|wqd10nah09g3\n1649001|RUNNING|1:24:50|12:00:00|wqd10nbj04g3\n1648993|RUNNING|1:25:25|12:00:00|wqd10nbj03g1\n",
+  "diagnostic_slurm_details": {
+    "1649088": "JobId=1649088 JobName=sgi-ge-c3f5a8c-4090\n   UserId=scxi253(1256) GroupId=scxi253(1256) MCS_label=N/A\n   Priority=1 Nice=0 Account=scxi253 QOS=gpugpu WCKey=*\n   JobState=RUNNING Reason=None Dependency=(null)\n   Requeue=0 Restarts=0 BatchFlag=1 Reboot=0 ExitCode=0:0\n   RunTime=00:00:27 TimeLimit=01:00:00 TimeMin=N/A\n   SubmitTime=2026-10-02T09:35:12 EligibleTime=2026-10-02T09:35:12\n   AccrueTime=2026-10-02T09:35:12\n   StartTime=2026-10-02T09:35:18 EndTime=2026-10-02T10:35:18 Deadline=N/A\n   SuspendTime=None SecsPreSuspend=0 LastSchedEval=2026-10-02T09:35:18 Scheduler=Backfill\n   Partition=gpu_4090 AllocNode:Sid=wqd10nbf05c05:3514328\n   ReqNodeList=(null) ExcNodeList=(null)\n   NodeList=wqd10nba07g8\n   BatchHost=wqd10nba07g8\n   NumNodes=1 NumCPUs=6 NumTasks=1 CPUs/Task=6 ReqB:S:C:T=0:0:*:*\n   ReqTRES=cpu=6,mem=60000M,node=1,billing=6,gres/gpu=1\n   AllocTRES=cpu=6,mem=60000M,node=1,billing=6,gres/gpu=1\n   Socks/Node=* NtasksPerN:B:S:C=0:0:*:* CoreSpec=*\n   MinCPUsNode=6 MinMemoryCPU=10000M MinTmpDiskNode=0\n   Features=(null) DelayBoot=00:00:00\n   OverSubscribe=OK Contiguous=0 Licenses=(null) Network=(null)\n   Command=/ssd/scxi253/sgi-graph-epochs-c3f5a8c-20261002/harness/research/selector_v4/exposed_diagnostics/graph_epoch.sbatch\n   WorkDir=/ssd/scxi253/sgi-graph-epochs-c3f5a8c-20261002\n   StdErr=/ssd/scxi253/sgi-graph-epochs-c3f5a8c-20261002/logs/slurm-1649088.log\n   StdIn=/dev/null\n   StdOut=/ssd/scxi253/sgi-graph-epochs-c3f5a8c-20261002/logs/slurm-1649088.log\n   TresPerNode=gres/gpu:1\n   TresPerTask=cpu=6\n   \n\n",
+    "1649089": "JobId=1649089 JobName=sgi-ge-c3f5a8c-5090\n   UserId=scxi253(1256) GroupId=scxi253(1256) MCS_label=N/A\n   Priority=1 Nice=0 Account=scxi253 QOS=gpugpu WCKey=*\n   JobState=RUNNING Reason=None Dependency=(null)\n   Requeue=0 Restarts=0 BatchFlag=1 Reboot=0 ExitCode=0:0\n   RunTime=00:00:32 TimeLimit=01:00:00 TimeMin=N/A\n   SubmitTime=2026-10-02T09:35:12 EligibleTime=2026-10-02T09:35:12\n   AccrueTime=2026-10-02T09:35:12\n   StartTime=2026-10-02T09:35:13 EndTime=2026-10-02T10:35:13 Deadline=N/A\n   SuspendTime=None SecsPreSuspend=0 LastSchedEval=2026-10-02T09:35:13 Scheduler=Main\n   Partition=gpu_5090 AllocNode:Sid=wqd10nbf05c05:3514328\n   ReqNodeList=(null) ExcNodeList=(null)\n   NodeList=wqd10nah09g3\n   BatchHost=wqd10nah09g3\n   NumNodes=1 NumCPUs=6 NumTasks=1 CPUs/Task=6 ReqB:S:C:T=0:0:*:*\n   ReqTRES=cpu=6,mem=94500M,node=1,billing=6,gres/gpu=1\n   AllocTRES=cpu=6,mem=94500M,node=1,billing=6,gres/gpu=1\n   Socks/Node=* NtasksPerN:B:S:C=0:0:*:* CoreSpec=*\n   MinCPUsNode=6 MinMemoryCPU=15750M MinTmpDiskNode=0\n   Features=(null) DelayBoot=00:00:00\n   OverSubscribe=OK Contiguous=0 Licenses=(null) Network=(null)\n   Command=/ssd/scxi253/sgi-graph-epochs-c3f5a8c-20261002/harness/research/selector_v4/exposed_diagnostics/graph_epoch.sbatch\n   WorkDir=/ssd/scxi253/sgi-graph-epochs-c3f5a8c-20261002\n   StdErr=/ssd/scxi253/sgi-graph-epochs-c3f5a8c-20261002/logs/slurm-1649089.log\n   StdIn=/dev/null\n   StdOut=/ssd/scxi253/sgi-graph-epochs-c3f5a8c-20261002/logs/slurm-1649089.log\n   TresPerNode=gres/gpu:1\n   TresPerTask=cpu=6\n   \n\n"
+  },
+  "default_promotion": false,
+  "serving_promotion": false,
+  "historical_token_divergence_resolved": false,
+  "fresh_cases_consumed_by_diagnostic": 0
+}
