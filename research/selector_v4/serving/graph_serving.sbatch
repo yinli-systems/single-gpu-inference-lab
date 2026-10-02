@@ -10,6 +10,11 @@ set -euo pipefail
 TASK_ROOT=${1:?owned diagnostic root}
 TASK_MODEL=${2:?model}
 TASK_MEMORY=${3:?memory fraction}
+TASK_MODULE=${4:-research.selector_v4.serving.graph_serving_probe}
+case "$TASK_MODULE" in
+ research.selector_v4.serving.graph_serving_probe|research.selector_v4.serving.graph_parity_controls) ;;
+ *) exit 64 ;;
+esac
 TASK_ENV=/ssd/scxi253/q7b-engines-20260925T1247Z/envs/sglang312
 TASK_SOURCE=/ssd/scxi253/sgi-official-wheel-validation-75544a17-20261001/wheel-overlay
 TASK_SGLANG=/ssd/scxi253/sgi-http-ownership-current-main-3825c5a-post1/candidate
@@ -26,7 +31,7 @@ sha256sum -c validation.sha256 > "$TASK_ROOT/receipts/source-pre-$SLURM_JOB_ID.t
 cd "$TASK_SOURCE"
 sha256sum -c source.sha256 > "$TASK_ROOT/receipts/native-pre-$SLURM_JOB_ID.txt"
 cd "$TASK_ROOT/harness"
-srun --cpu-bind=cores "$TASK_ENV/bin/python" -m research.selector_v4.serving.graph_serving_probe --out "$TASK_ROOT/runs/$SLURM_JOB_PARTITION-$SLURM_JOB_ID" --model-binding "$TASK_ROOT/models/$TASK_MODEL.json" --model-id "$TASK_MODEL" --memory "$TASK_MEMORY"
+srun --cpu-bind=cores "$TASK_ENV/bin/python" -m "$TASK_MODULE" --out "$TASK_ROOT/runs/$SLURM_JOB_PARTITION-$SLURM_JOB_ID" --model-binding "$TASK_ROOT/models/$TASK_MODEL.json" --model-id "$TASK_MODEL" --memory "$TASK_MEMORY"
 cd "$TASK_ROOT"
 sha256sum -c validation.sha256 > "$TASK_ROOT/receipts/source-post-$SLURM_JOB_ID.txt"
 cd "$TASK_SOURCE"

@@ -28,7 +28,7 @@ from research.selector_v4.serving.parity_gate import compare_blocks
 from research.selector_v4.serving.slo_report import summarize
 
 
-async def arm(arguments, role, model, memory):
+async def arm(arguments, role, model, memory, *, stage="functional", logprobs=False):
     import aiohttp
 
     out = arguments.out / role
@@ -36,7 +36,7 @@ async def arm(arguments, role, model, memory):
     with socket.socket() as listener:
         listener.bind(("127.0.0.1", 0))
         port = listener.getsockname()[1]
-    command = server_command(model["model_path"], port, memory, "pristine", "functional")
+    command = server_command(model["model_path"], port, memory, "pristine", stage)
     env = dict(os.environ, HF_HUB_OFFLINE="1", TRANSFORMERS_OFFLINE="1")
     env.pop("SGI_FORMAL_KERNEL_CAMPAIGN", None)
     env.pop("SGI_GRAPH_SERVING_DIAGNOSTIC", None)
@@ -51,6 +51,8 @@ async def arm(arguments, role, model, memory):
             "instrumented": role == "graph_diagnostic",
             "timing_valid": role == "native_baseline",
             "resource_enabled": False,
+            "deterministic_trial": stage == "parity",
+            "complete_output_and_top5_logprobs": logprobs,
         },
     )
     log = (out / "server.log").open("x")
@@ -71,18 +73,22 @@ async def arm(arguments, role, model, memory):
                 "Ordinary Graph/overlap serving required",
             )
             need(
+                bool(info["enable_deterministic_inference"]) == (stage == "parity"),
+                "Actual separately declared deterministic mode",
+            )
+            need(
                 info["attention_backend"] == "flashinfer" and info["dtype"] == "bfloat16",
                 "Actual backend and dtype",
             )
             warm = out / "warmup"
             warm.mkdir()
             await workloads(
-                session, url, warm, arguments.model_id + "-warm-" + role, logprobs=False
+                session, url, warm, arguments.model_id + "-warm-" + role, logprobs=logprobs
             )
             observations = out / "observations"
             observations.mkdir()
             await workloads(
-                session, url, observations, arguments.model_id + "-" + role, logprobs=False
+                session, url, observations, arguments.model_id + "-" + role, logprobs=logprobs
             )
             await profile(
                 session,
