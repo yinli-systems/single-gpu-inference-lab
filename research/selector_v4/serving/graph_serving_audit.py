@@ -13,7 +13,7 @@ from research.selector_v4.serving.parity_gate import compare_blocks
 from research.selector_v4.serving.slo_report import summarize
 
 
-def correlated_decode(events):
+def correlated_decode(events, *, allow_eager_resource=False):
     markers = [
         e
         for e in events
@@ -31,8 +31,11 @@ def correlated_decode(events):
     kernels = [e for e in events if e.get("cat") == "kernel"]
     need(markers and launches and kernels, "Actual serving CPU/API/GPU events required")
     need(
-        not any("ResourceKernel" in e.get("name", "") for e in kernels),
-        "Native diagnostic must not launch Resource",
+        all(
+            allow_eager_resource and e.get("args", {}).get("graph id") == 0
+            for e in kernels if "ResourceKernel" in e.get("name", "")
+        ),
+        "Native diagnostic forbids Resource; qualified serving allows only eager Resource",
     )
     correlated = 0
     attention = 0
@@ -51,6 +54,7 @@ def correlated_decode(events):
             e
             for e in kernels
             if e.get("args", {}).get("correlation") in ids
+            and "ResourceKernel" not in e.get("name", "")
             and any(
                 name in e.get("name", "")
                 for name in ("BatchDecodeWithPagedKV", "BatchPrefillWithPagedKV")

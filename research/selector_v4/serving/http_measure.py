@@ -33,7 +33,7 @@ def save_new(path, value):
 def server_command(model, port, memory, role, stage):
     command = [sys.executable, "-m", "research.selector_v4.serving.prefix_training_server"]
     if role == "pristine":
-        command = [sys.executable, "-m", "sglang.launch_server"]
+        command = [sys.executable, "-m", "research.selector_v4.serving.graph_profile_server"]
     command += [
         "--model-path",
         str(model),

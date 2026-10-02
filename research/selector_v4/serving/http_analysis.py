@@ -152,9 +152,12 @@ def load_arm(root, *, role, stage, allocation, model_id, binding_sha, model_sha)
 
 
 def profile_evidence(root, role):
+    from research.selector_v4.serving.graph_serving_audit import correlated_decode
+
     proof = json.loads((root / "observations/profile-timing-scope.json").read_text())
     need(proof["timing_excluded"] and proof["trace_files"], "Independent raw profiling required")
     kernels = []
+    graph_proofs = []
     for name, digest in proof["trace_files"].items():
         path = root / name
         need(sha(path) == digest, "Profile bytes changed")
@@ -165,6 +168,13 @@ def profile_evidence(root, role):
             else:
                 text = path.read_text()
             data = json.loads(text)
+            events = data.get("traceEvents", [])
+            if any(
+                e.get("cat") == "user_annotation"
+                and e.get("name") == "sgi_actual_decode_graph_step"
+                for e in events
+            ):
+                graph_proofs.append(correlated_decode(events, allow_eager_resource=role == "candidate"))
             kernels.extend(
                 e
                 for e in data.get("traceEvents", [])
@@ -172,6 +182,7 @@ def profile_evidence(root, role):
             )
     need(kernels, "Actual prefill kernel trace required")
     resource = [e for e in kernels if "ResourceKernel" in e["name"]]
+    need(graph_proofs, "Actual correlated ordinary serving decode Graph proof required")
     need(
         all(e["args"].get("shared memory") == 65536 for e in resource),
         "Actual Resource launch allocation required",
@@ -180,10 +191,17 @@ def profile_evidence(root, role):
         bool(resource) if role == "candidate" else not resource,
         "Actual candidate Resource/control Native launch required",
     )
+    need(
+        all(e["args"].get("graph id") == 0 for e in resource),
+        "Current certificates qualify only eager Resource prefix attention",
+    )
     return {
         "prefill_launches": len(kernels),
         "actual_resource_launches": len(resource),
         "timing_excluded": True,
+        "decode_graph_proofs": graph_proofs,
+        "execution_scope": "Native decode CUDA Graph plus eager Resource cached-prefix attention",
+        "resource_attention_inside_captured_graph_qualified": False,
     }
 
 
@@ -344,6 +362,10 @@ def analyze(root, output, *, jobs, gpu, model_id, stage):
             need(
                 snapshot["metadata_boundaries"]["graph_updates"] > 0,
                 "Actual Native Graph metadata/input updates required",
+            )
+            need(
+                all(snapshot["graph_load_boundaries"][kind] > 0 for kind in ("decode", "prefill")),
+                "Both actual source-bound Graph input-write boundaries required",
             )
         allocations.append(arms)
         source.append(
