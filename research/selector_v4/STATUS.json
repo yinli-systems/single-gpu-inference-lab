@@ -1332,7 +1332,7 @@
     "default_promotion": false
   },
   "public_path_complete_repetition": {
-    "state": "SOURCE_PROTOCOL_PREPARATION_NOT_DISPATCHED",
+    "state": "INITIALIZED_AFTER_209_ACTUAL_PARACLOUD_CPU_CHECKS_NOT_DISPATCHED",
     "scope": "EXPOSED_PUBLIC_PATH_PREQUAL_2",
     "only_same_two_original_exposed_cases": true,
     "measurement_bytes_unchanged": true,
@@ -1346,6 +1346,36 @@
     "release_consumed": 0,
     "stress_consumed": 0,
     "qualification_authority": false,
-    "default_promotion": false
+    "default_promotion": false,
+    "harness_commit": "0a5c735fd3b70edb9b8ec46d520a6dedb6d90c04",
+    "harness_archive_sha256": "a8d795cb41f8010df41f31fd4b764cbeaa43b4fb33187190058f5fa020ac1a99",
+    "campaign": "/ssd/scxi253/sgi-public-complete-r2-0a5c735-20261002",
+    "actual_paracloud_cpu_tests_passed": 209,
+    "gpu_skips": 10,
+    "all_original_archive_members_verified_before_initialization": true
+  },
+  "finite_complete_workflow": {
+    "state": "SOURCE_PREPARATION_NOT_RUNNING",
+    "source": "research/selector_v4/complete_campaign.py",
+    "finite_days": 30,
+    "strict_order": [
+      "complete_same_two_exposed_public_cases",
+      "complete_archive_dual_pass",
+      "new_source_manifest_binding",
+      "dual90_smoke",
+      "dev2",
+      "new10_canary",
+      "original48_release",
+      "original12_stress",
+      "complete_kernel_archive_pass",
+      "four_full_Qwen_models_two_cards_three_HTTP_stages_72_allocations",
+      "full_HTTP_archive"
+    ],
+    "stop_all_successors_on_hold": true,
+    "no_retries_or_resampling": true,
+    "fresh_cases_generated": 0,
+    "default_promotion": false,
+    "historical_token_divergence_resolved": false,
+    "no_upstream_publication": true
   }
 }

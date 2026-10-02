@@ -36,6 +36,13 @@ def archive(campaign, output, *, status_reader=None):
     need(not output.exists(), "Never replace an existing campaign archive")
     terminal = json.loads((campaign / "receipts/controller-terminal.json").read_text())
     need(terminal.get("terminal") is True, "Finite controller must terminate before archive")
+    receipt_roots = [campaign / "smoke/receipts"] + sorted((campaign / "stages").glob("*/receipts"))
+    for root in receipt_roots:
+        intents = {p.name.removeprefix("submit-intent-") for p in root.glob("submit-intent-*.json")}
+        confirmed = {
+            p.name.removeprefix("submit-confirmed-") for p in root.glob("submit-confirmed-*.json")
+        }
+        need(intents == confirmed, "Reconcile uncertain formal Slurm submission before archive")
     jobs = job_records(campaign)
     if status_reader is None:
         status_reader = lambda job: subprocess.check_output(
@@ -89,14 +96,18 @@ def archive(campaign, output, *, status_reader=None):
     with tarfile.open(target, "w:gz") as bundle:
         for name, path in sorted(paths.items()):
             bundle.add(path, arcname=name, recursive=False)
-    with tarfile.open(target) as bundle:
-        need(set(bundle.getnames()) == set(hashes), "Complete archive member set")
-        for name, expected in hashes.items():
+    seen = set()
+    with tarfile.open(target, "r|gz") as bundle:
+        for member in bundle:
+            name = member.name
+            need(name in hashes and name not in seen and member.isfile(), "Exact archive member")
             digest = hashlib.sha256()
-            with bundle.extractfile(name) as stream:
+            with bundle.extractfile(member) as stream:
                 while chunk := stream.read(8 << 20):
                     digest.update(chunk)
-            need(digest.hexdigest() == expected, "Archived member changed: " + name)
+            need(digest.hexdigest() == hashes[name], "Archived member changed: " + name)
+            seen.add(name)
+    need(seen == set(hashes), "Complete archive member set")
     receipt = {
         "pass_formal_kernel_qualification": passed,
         "controller": terminal,

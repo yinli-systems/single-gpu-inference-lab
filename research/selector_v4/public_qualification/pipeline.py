@@ -192,7 +192,12 @@ def initialize(repo, campaign, prerequisite, harness_archive, harness_commit):
 
 
 def submit(root, script, arguments):
-    return (
+    label = str(arguments[0]) + "-" + (str(arguments[3]) if len(arguments) > 3 else "smoke")
+    intent = root / f"receipts/submit-intent-{label}.json"
+    save_new(
+        intent, {"arguments": list(map(str, arguments)), "script_sha256": sha(script), "utc": now()}
+    )
+    job = (
         subprocess.check_output(
             [
                 "sbatch",
@@ -212,6 +217,12 @@ def submit(root, script, arguments):
         .strip()
         .split(";")[0]
     )
+    need(job.isdigit(), "Actual Slurm job ID")
+    save_new(
+        root / f"receipts/submit-confirmed-{label}.json",
+        {"job": job, "intent_sha256": sha(intent), "utc": now()},
+    )
+    return job
 
 
 def terminal(root, job):

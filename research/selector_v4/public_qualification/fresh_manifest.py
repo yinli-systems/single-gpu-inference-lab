@@ -119,14 +119,21 @@ def freeze_manifest(repo, prerequisite_receipt, output):
     )
     archive = prerequisite_receipt.parent / "raw-public-path-development.tar.gz"
     need(sha(archive) == receipt["archive_sha256"], "Prerequisite archive changed")
-    with tarfile.open(archive) as bundle:
-        need(set(bundle.getnames()) == set(receipt["files"]), "Incomplete prerequisite archive")
-        for name, expected in receipt["files"].items():
+    seen = set()
+    with tarfile.open(archive, "r|gz") as bundle:
+        for member in bundle:
+            name = member.name
+            need(
+                name in receipt["files"] and name not in seen and member.isfile(),
+                "Exact prerequisite archive member",
+            )
             h = hashlib.sha256()
-            with bundle.extractfile(name) as stream:
+            with bundle.extractfile(member) as stream:
                 while chunk := stream.read(8 << 20):
                     h.update(chunk)
-            need(h.hexdigest() == expected, "Prerequisite member changed: " + name)
+            need(h.hexdigest() == receipt["files"][name], "Prerequisite member changed: " + name)
+            seen.add(name)
+    need(seen == set(receipt["files"]), "Incomplete prerequisite archive")
     base = load(repo / "research/selector_v4/manifest.json")
     need(base["case_hash"] == OLD_CASE_HASH, "Original manifest identity changed")
     state = json.loads((repo / "research/selector_v4/STATUS.json").read_text())
