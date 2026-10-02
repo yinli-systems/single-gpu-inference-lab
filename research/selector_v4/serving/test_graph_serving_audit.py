@@ -13,6 +13,7 @@ def events():
         {
             "name": "sgi_actual_decode_graph_step",
             "ph": "X",
+            "cat": "user_annotation",
             "pid": 123,
             "tid": 456,
             "ts": 100,
@@ -44,6 +45,16 @@ def events():
 def test_async_gpu_attention_can_finish_after_the_cpu_marker():
     r = correlated_decode(events())
     assert r["traced_decode_steps"] == 1 and r["actual_correlated_native_attention_kernels"] == 1
+
+
+def test_profiler_gpu_annotation_copy_is_not_a_second_cpu_api_launch():
+    e = events()
+    gpu = copy.deepcopy(e[0])
+    gpu.update(cat="gpu_user_annotation", pid=0, tid=7, ts=140)
+    e.append(gpu)
+    assert correlated_decode(e)["traced_decode_steps"] == 1
+    with pytest.raises(ValueError):
+        correlated_decode(e[1:])
 
 
 @pytest.mark.parametrize(

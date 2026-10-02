@@ -50,6 +50,7 @@ def install():
     from sglang.srt.managers.io_struct import SetInternalStateReqOutput
     from sglang.srt.managers.scheduler import Scheduler
 
+    from research.selector_v4.serving.graph_load_boundary import install as install_graph_boundaries
     from research.selector_v4.serving.metadata_adapter import MetadataEpochAdapter
     from research.selector_v4.serving.prefix_backend_hook import (
         REVIEWED_BACKEND_SHA256,
@@ -72,6 +73,7 @@ def install():
     original_control = Scheduler.set_internal_state
     if getattr(original_init, "_sgi_prefix_training", False):
         raise RuntimeError("Training bootstrap already installed")
+    install_graph_boundaries(include_prefill=True)
 
     @functools.wraps(original_init)
     def initialize(self, *args, **kwargs):

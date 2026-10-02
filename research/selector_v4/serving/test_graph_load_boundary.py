@@ -73,3 +73,32 @@ def test_unknown_native_backend_unchanged_and_double_install_rejected():
     assert wrapped(runner, "native") == "native"
     with pytest.raises(RuntimeError):
         wrap_load(wrapped)
+
+
+def test_prefill_static_buffer_writes_follow_lease_release():
+    events, lease, _, runner = fixture()
+
+    def load(self):
+        assert lease.state == "PLANNING"
+        events.extend(["prefill-fill-from", "prefill-metadata-refresh"])
+
+    wrap_load(load, kind="prefill")(runner)
+    assert events == ["lease-released", "prefill-fill-from", "prefill-metadata-refresh"]
+    assert runner.model_runner.attn_backend._sgi_prefill_load_notifications == 1
+
+
+def test_sealed_router_current_adapter_wins_over_stale_diagnostic_attribute():
+    events, lease, original, runner = fixture()
+    backend = runner.model_runner.attn_backend
+    current = MetadataEpochAdapter(backend)
+    current.bindings = original.bindings
+    original.bindings = []
+    backend._sgi_training_router = SimpleNamespace(adapter=current)
+
+    def load(self):
+        assert lease.state == "PLANNING"
+
+    wrap_load(load)(runner)
+    assert events == ["lease-released"]
+    assert current.counters["graph_updates"] == 1
+    assert original.counters["graph_updates"] == 0

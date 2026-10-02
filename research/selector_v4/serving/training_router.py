@@ -101,4 +101,8 @@ class TrainingPrefixRouter:
             "router": self.frozen_router.evidence() if self.frozen_router is not None else None,
             "metadata_boundaries": dict(self.adapter.counters),
             "metadata_depth": self.adapter.depth,
+            "graph_load_boundaries": {
+                kind: getattr(self.adapter.backend, "_sgi_" + kind + "_load_notifications", 0)
+                for kind in ("decode", "prefill")
+            },
         }

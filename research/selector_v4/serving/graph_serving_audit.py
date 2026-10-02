@@ -15,7 +15,11 @@ from research.selector_v4.serving.slo_report import summarize
 
 def correlated_decode(events):
     markers = [
-        e for e in events if e.get("name") == "sgi_actual_decode_graph_step" and e.get("ph") == "X"
+        e
+        for e in events
+        if e.get("name") == "sgi_actual_decode_graph_step"
+        and e.get("ph") == "X"
+        and e.get("cat") == "user_annotation"
     ]
     launches = [
         e
