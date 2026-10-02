@@ -26,7 +26,7 @@ def save(path, value):
     target.replace(path)
 
 
-def validate(root, job, gpu):
+def _validate(root, job, gpu):
     failures = []
     tests = root/'receipts'/f'tests-{job}.xml'
     cells = sorted((root/'runs'/f'{gpu}-{job}').glob('*/result.json'))
@@ -69,7 +69,7 @@ def validate(root, job, gpu):
     sass = root/f'sass-{job}'/'receipt.json'
     if not sass.exists() or json.loads(sass.read_text()).get('pass') is not True:
         failures.append('independent_sass_missing_or_failed')
-    for stage in ('helper','native','sdk'):
+    for stage in ('helper','native','sdk','tooling'):
         for phase in ('pre','post'):
             p = root/'receipts'/f'{stage}-{phase}-{job}.txt'
             if not p.exists() or not p.read_text().strip() or any(not line.endswith(': OK') for line in p.read_text().splitlines()):
@@ -78,6 +78,19 @@ def validate(root, job, gpu):
             'scope':'Uncertified fixed-geometry Graph metadata minimal driver only',
             'qualification_authority':False, 'default_promotion':False, 'serving_promotion':False,
             'historical_token_divergence_resolved':False}
+
+
+def validate(root, job, gpu):
+    # Corrupt/partial raw evidence must still receive HOLD and be archived.
+    # Preserve the exception in the verdict instead of abandoning archival.
+    try:
+        return _validate(root, job, gpu)
+    except (OSError, ValueError, TypeError, KeyError, ET.ParseError) as error:
+        return {'pass':False, 'job':job, 'gpu':gpu,
+                'cells':len(list((root/'runs'/f'{gpu}-{job}').glob('*/result.json'))),
+                'failures':['unreadable_evidence:'+type(error).__name__+':'+str(error)],
+                'qualification_authority':False, 'default_promotion':False,
+                'serving_promotion':False, 'historical_token_divergence_resolved':False}
 
 
 def run(root, source):
@@ -98,7 +111,7 @@ def run(root, source):
         save(intent,{'argv':command,'utc':datetime.datetime.now(datetime.timezone.utc).isoformat(),
                      'harness_commit':binding['harness_commit']})
         try:
-            result = subprocess.run(command,capture_output=True,text=True,timeout=90)
+            result = subprocess.run(command,capture_output=True,text=True,timeout=90,check=False)
             job = result.stdout.strip().split(';')[0]
             if result.returncode or not job.isdigit():
                 raise RuntimeError('Unknown submission outcome: '+result.stdout+result.stderr)

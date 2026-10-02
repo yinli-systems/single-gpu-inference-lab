@@ -48,6 +48,10 @@ Each job requires Slurm COMPLETED0:0, shell exit0, exactly24 pytest cases
 result files with three epochs each, actual Resource launch traces, immutable
 helper/package/SDK pre/post checks, and an independent full-instruction SASS
 comparison of the actual Native and Resource libraries compiled in that job.
+Pytest8.4.2 and its existing dependencies are copied into a diagnostic-private
+directory from the already hash-bound normal wheel validation test support.
+Their own complete file ledger is checked before and after each allocation;
+the shared Python environment and validation source are never installed into.
 
 Every submission has a durable pre-submission intent and confirmed receipt;
 unknown outcomes block duplicate submission. A finite controller archives only

@@ -60,7 +60,10 @@ class GraphEpochProbe:
         if not allow_uncertified_diagnostic:
             raise RuntimeError("Explicit uncertified diagnostic opt-in required")
         import torch
-        from flashinfer.prefill import BatchPrefillWithPagedKVCacheWrapper, make_prefill_resource_runner
+        from flashinfer.prefill import (
+            BatchPrefillWithPagedKVCacheWrapper,
+            make_prefill_resource_runner,
+        )
 
         if replays not in (1, 16) or not isinstance(owner, BatchPrefillWithPagedKVCacheWrapper):
             raise ValueError("Only fixed paged Graph1/16 diagnostics are supported")
