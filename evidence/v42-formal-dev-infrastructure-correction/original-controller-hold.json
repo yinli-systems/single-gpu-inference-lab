@@ -1,0 +1,9 @@
+{
+  "state": "FORMAL_QUALIFICATION_HOLD",
+  "scope": "PUBLIC_NATIVE_RESOURCE_4_3",
+  "terminal": true,
+  "default_promotion": false,
+  "serving_promotion": false,
+  "traceback": "Traceback (most recent call last):\n  File \"/ssd/scxi253/sgi-formal-kernel-after-correction-250d98c-20261002/harness/research/selector_v4/public_qualification/pipeline.py\", line 470, in run\n    dispatch_stage(campaign, stage, binding, deadline)\n  File \"/ssd/scxi253/sgi-formal-kernel-after-correction-250d98c-20261002/harness/research/selector_v4/public_qualification/pipeline.py\", line 405, in dispatch_stage\n    active = [(g, j) for g, j in active if not terminal(root, j)]\n                                               ^^^^^^^^^^^^^^^^^\n  File \"/ssd/scxi253/sgi-formal-kernel-after-correction-250d98c-20261002/harness/research/selector_v4/public_qualification/pipeline.py\", line 237, in terminal\n    need(\"COMPLETED\" in states and \"0:0\" in states, \"Failed allocation: \" + job + \" \" + states)\n  File \"/ssd/scxi253/sgi-formal-kernel-after-correction-250d98c-20261002/harness/research/selector_v4/public_qualification/gates.py\", line 46, in need\n    raise ValueError(message)\nValueError: Failed allocation: 1651665 FAILED     0:53\n",
+  "finished_utc": "2026-10-02T10:52:59.523586+00:00"
+}

@@ -1,3 +1,28 @@
+# GraphServing／HTTP 最新进展：2026-10-02
+
+本次更新独立于下方历史快照。**完整 Resource HTTP/SLO 资格尚未完成**；原 v4.2 双卡 canary 仍 HOLD，`default_promotion=false`、`serving_promotion=false`，原2/432 token divergence 未闭合。
+
+已经实际完成完整 Qwen2.5-Coder-1.5B BF16 的双卡 Native HTTP 基线和独立 Graph 观察器。每张卡保留全部五工作负载×四评分块、128请求、7,936输出token；每张卡的第一次独立图证据包含2,395次真实GPU输入载入、34次实际图启动及952个Native attention kernel。RTX4090自然输出完全一致；RTX5090第一次有9/128请求、900/7,936 token位置不同，保持 `HOLD_NATURAL_TOKEN_PARITY`。只有未插桩的基线可报告描述性计时，每卡一次分配不支持独立进程置信区间或Resource收益。入口：[可复现 HTTP/SLO 页面](native-graph-http-20261002-r2/index.html)。两次重建的七个输出及manifest逐字节一致，499个原归档成员均核验。
+
+随后两张卡的普通 Native／Native 重启对照分别通过20块、128请求、7,936 token。全局确定性对照没有评分块：4090关闭了radix cache并在缓存warmup失败，5090在DeepGEMM启动编译失败。所有首次失败及762成员原归档保留，未覆盖。这些对照不能归因或闭合首次自然差异。
+
+**新声明的固定单请求缓存图校验已经双卡通过。** 冻结测量源码为 `f4113d9732d44ab1d6f62e29ddfaf0119876cdc6`，实际作业1651560／1651498。两臂保留radix cache、CUDA Graph、普通overlap，关闭全局确定性模式，客户端与实际服务器并发上限均为1。每卡20块、128请求、7,936输出token以及完整top-5 logprobs精确一致；独立CPU/API/GPU关联分别验证194次图启动、5,432个Native attention kernel、16,123次真实输入载入和一个保持图对象／缓冲地址不变而GPU载荷至少变化三次的捕获组。这个结论只适用于该固定调度范围；它不证明普通并发batch invariance，也不闭合原自然差异或原2/432。Resource在这些诊断中完全禁用。证明：[4090](../evidence/v42-graph-http-gated-continuation-ffcbb71/native-verdict-gpu_4090.json)、[5090](../evidence/v42-graph-http-gated-continuation-ffcbb71/native-verdict-gpu_5090.json)。
+
+正式kernel双卡smoke各通过90项真实GPU测试及独立SASS检查，作业1651384／1651385。进入dev后，两张4090分配1651665／1651667在故障节点 `wqd10nba06g6` 以0:53终止；源验证、日志和测量均未开始。原controller保持terminal HOLD。单独补正分支保留原manifest、测量helper、analyzer、阈值、评分窗口和已开始的5090作业1651666／1651668，只补发完全未启动的4090分配1651795／1651796。原消费记录保持，未重新生成fresh cases，未重跑任何已开始的测量。调度初版使用的环境变量没有生效；后来独立审查的5c09ae6补正controller改为显式 `--exclude` 并验证实际Slurm配置，从同一四个作业继续，保留原controller源码／记录且不重置14天预算。其13项CPU约束测试在两端通过；四个真实dev分配仍在运行，尚未有dev资格结论。原HOLD及补正记录：[证据目录](../evidence/v42-formal-dev-infrastructure-correction/)。
+
+完整HTTP推进源码 `ffcbb71e94b4ee7b8a5bbf68fafd7df1aeccee24` 在Paracloud通过192项CPU测试、1项跳过，并已实际启动有限controller。它已独立确认双卡固定调度图校验，正在等待补正正式kernel的dev/canary/release/stress八个独立verdict。只有全部通过，才允许四个完整模型×两卡×三个阶段×三次独立配对分配，共72次HTTP分配、24个阶段结论。普通并发的完整自然token一致性仍是硬门槛，另加固定调度完整token/top-5 logprob校验；吞吐、严格SLO goodput、TTFT／TPOT的p50／p95／p99全部重算，40个metric点及原joint LCB门槛不放宽。原始错误、超时、缓存命中、资源决策、CUPTI、SASS和遥测均保留。任一失败停止后继实验。当前 `full_http_qualified=false`，没有宣称Resource serving／captured Resource Graph收益。
+
+实际服务端根目录：
+
+- 完整第一轮Native基线：`/ssd/scxi253/sgi-native-graph-serving-51be73c-r1-20261002`
+- 新固定调度图校验：`/ssd/scxi253/sgi-cached-graph-parity-f4113d9-20261002`
+- 正式dev基础设施补正：`/ssd/scxi253/sgi-formal-dev-unstarted-correction-fd8d3e9-20261002`
+- 从补正kernel到完整HTTP的有限流程：`/ssd/scxi253/sgi-graph-http-after-dev-infrastructure-correction-ffcbb71-fd8d3e9-20261002`
+
+以下为早期冻结快照，原文保留；它不代表上述实验后的最新状态。
+
+---
+
 # 本轮系统研究产物与证据边界
 
 本轮源代码提交：`8ef76bbc7354f1ae7f14de76648c8fabcfbbf597`。Paracloud 独立重建目录：`/ssd/scxi253/sgi-system-artifact-b9cfd557-20261002`。
